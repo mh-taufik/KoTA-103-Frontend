@@ -1,0 +1,177 @@
+// Here you can add other styles
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.header.header-sticky.mb-4 {
+  z-index: 3;
+}
+
+.sidebar.sidebar-fixed {
+  z-index: 99999999999999999;
+}
+
+.wrapper.d-flex.flex-column.min-vh-100.bg-light {
+  z-index: -2;
+}
+
+.sidebar-backdrop.fade.show{
+  z-index: 999;
+}
+
+.ant-table-cell-fix-left {
+  z-index: 2 !important;
+}
+
+
+Button#button-lock.ant-btn.ant-btn-circle:hover {
+  background-color: #D18E24 !important
+}
+
+Button#button-eye.ant-btn.ant-btn-circle:hover {
+  background-color: #D18E24 !important
+}
+
+Button#download.ant-btn.ant-btn-circle:hover {
+  background-color: #294F75 !important
+}
+
+Button#button-pencil.ant-btn.ant-btn-circle:hover {
+  background-color: #BBB11A !important
+}
+
+Button#notifikasi.ant-btn.ant-btn-circle:hover {
+  background-color: #D18E24 !important
+}
+
+Button#button-trash.ant-btn.ant-btn-circle:hover {
+  background-color: #900427 !important
+}
+
+Button#button-download.ant-btn.ant-btn-circle:hover {
+  background-color: #294F75 !important
+}
+
+Button#create-akun.ant-btn.ant-btn-round:hover {
+  background-color: #236A00 !important
+}
+
+Button#create-kriteria.ant-btn.ant-btn-round:hover {
+  background-color: #236A00 !important
+}
+
+Button#create-aspek.ant-btn.ant-btn-round:hover {
+  background-color: #236A00 !important
+}
+
+Button#create-evaluasi.ant-btn.ant-btn-round:hover {
+  background-color: #236A00 !important
+}
+
+Button#generate.ant-btn.ant-btn-primary:hover {
+  background-color: #236A00 !important
+}
+
+Button#selesai.ant-btn.ant-btn-round.ant-btn-default.ant-btn-sm:hover {
+  background-color: #236A00 !important
+}
+
+Button#batal.ant-btn.ant-btn-round.ant-btn-default.ant-btn-sm:hover {
+  background-color: #900427 !important
+}
+
+Button#accept.ant-btn.ant-btn-round.ant-btn-default:hover {
+  background-color: #236A00 !important
+}
+
+Button#decline.ant-btn.ant-btn-round.ant-btn-default:hover {
+  background-color: #900427 !important
+}
+
+Button#detail.ant-btn.ant-btn-round.ant-btn-default.ant-btn-sm:hover {
+  background-color: #D18E24 !important
+}
+
+Button#update.ant-btn.ant-btn-round.ant-btn-default.ant-btn-sm:hover {
+  background-color: #BBB11A !important
+}
+
+Button#download.ant-btn.ant-btn-round.ant-btn-default.ant-btn-sm:hover {
+  background-color: #294F75 !important
+}
+
+Button#finalisasi.ant-btn.ant-btn-primary:hover {
+  background-color: #005B4B !important
+}
+
+Button#publish.ant-btn.ant-btn-primary:hover {
+  background-color: #BBB11A !important
+}
+
+Button#batalFinalisasi.ant-btn.ant-btn-primary:hover {
+  background-color: #900427 !important
+}
+
+div#card-filter.card.mb-4:hover {
+  background-color: #C8C8C8 !important;
+  cursor: pointer;
+}
+
+Button#button-submit.ant-btn.ant-btn-round.ant-btn-default:hover {
+  background-color: #294F75 !important
+}
+
+.ant-picker-dropdown {
+  z-index: 999999999 !important;
+}
+
+.ant-select-dropdown {
+  z-index: 999999999 !important;
+}
+
+/* table */
+.ant-table {
+  font-size: 12px !important;
+}
+
+/* row data */
+.ant-table-tbody>tr>td {
+  height: 5px;
+  padding: 4px !important;
+}
+
+.ant-table-thead>tr>th {
+  height: 5px;
+  padding: 4px;
+}
+
+#chart {
+  width: 1500px !important;
+  height: 700px !important;
+}
+
+span.ant-select-selection-item {
+  color: black !important;
+}
+
+.wrapper-class {
+  padding: 1rem;
+  border: 1px solid #ccc;
+}
+.editor-class {
+  background-color:rgb(238, 235, 235);
+  padding: 1rem;
+  border: 1px solid #eee;
+}
+.toolbar-class {
+  border: 1px solid #ccc;
+}
+
+.anticon.anticon-check.ant-steps-finish-icon,
+svg {
+  vertical-align: -1px !important;
+}

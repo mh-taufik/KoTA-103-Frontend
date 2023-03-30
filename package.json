@@ -1,0 +1,70 @@
+{
+  "name": "frontend-app-jtk",
+  "version": "4.0.0",
+  "description": "Frontend App JTK",
+  "homepage": "http://kp-pkl.jtk.polban.ac.id/",
+  "license": "MIT",
+  "author": "KoTA 111",
+  "scripts": {
+    "build": "react-scripts build",
+    "changelog": "auto-changelog --starting-version 3.0.0 --commit-limit false --hide-credit",
+    "eject": "react-scripts eject",
+    "lint": "eslint \"src/**/*.js\"",
+    "start": "react-scripts start",
+    "test": "react-scripts test",
+    "test:cov": "npm test -- --coverage --watchAll=false",
+    "test:debug": "react-scripts --inspect-brk test --runInBand"
+  },
+  "config": {
+    "coreui_library_short_version": "4.0"
+  },
+  "dependencies": {
+    "@coreui/chartjs": "^3.0.0",
+    "@coreui/coreui": "^4.0.5",
+    "@coreui/icons": "^2.1.0",
+    "@coreui/icons-react": "2.0.0",
+    "@coreui/react": "4.0.0",
+    "@coreui/react-chartjs": "2.0.0",
+    "@coreui/utils": "^1.3.1",
+    "@fortawesome/fontawesome-svg-core": "^6.1.1",
+    "@fortawesome/free-solid-svg-icons": "^6.1.1",
+    "@fortawesome/react-fontawesome": "^0.1.18",
+    "@wojtekmaj/enzyme-adapter-react-17": "^0.6.3",
+    "antd": "^4.19.5",
+    "axios": "^0.26.1",
+    "chart.js": "^3.5.1",
+    "classnames": "^2.3.1",
+    "core-js": "^3.18.3",
+    "devextreme-react": "^21.2.6",
+    "dompurify": "^2.3.6",
+    "dotenv": "^16.0.0",
+    "draft-convert": "^2.1.12",
+    "draft-js": "^0.11.7",
+    "enzyme": "^3.11.0",
+    "js-cookie": "^3.0.1",
+    "js-file-download": "^0.4.12",
+    "prop-types": "^15.7.2",
+    "react": "^17.0.2",
+    "react-app-polyfill": "^2.0.0",
+    "react-dom": "^17.0.2",
+    "react-draft-wysiwyg": "^1.14.7",
+    "react-highlight-words": "^0.17.0",
+    "react-redux": "^7.2.5",
+    "react-router-dom": "^5.3.0",
+    "redux": "4.1.1",
+    "simplebar-react": "^2.3.6"
+  },
+  "devDependencies": {
+    "auto-changelog": "~2.3.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "2.4.1",
+    "react-scripts": "^4.0.3",
+    "sass": "^1.43.2"
+  },
+  "engines": {
+    "node": ">=10",
+    "npm": ">=6"
+  }
+}
