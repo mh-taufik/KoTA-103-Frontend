@@ -27,7 +27,6 @@ const AppSidebar = () => {
       visible={sidebarShow}
       style={{fontSize: '10pt'}}
       onVisibleChange={(visible) => {
-        dispatch({ type: 'set', sidebarShow: visible })
       }}
     >
       <CSidebarBrand className="d-none d-md-flex" to="/">

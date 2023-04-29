@@ -291,14 +291,14 @@ const _nav = [
     role: '2',
     index: 34,
   },
-  // {
-  //   component: CNavItem,
-  //   name: 'Formulir Feedback Pelaksanaan KP/PKL',
-  //   to: '/dataFeedbackPerusahaan',
-  //   icon: <FontAwesomeIcon icon={faBuildingCircleArrowRight} />,
-  //   role: '2',
-  //   index: 35,
-  // },
+  {
+    component: CNavItem,
+    name: 'Formulir Feedback Pelaksanaan KP/PKL',
+    to: '/dataFeedbackPerusahaan',
+    icon: <FontAwesomeIcon icon={faBuildingCircleArrowRight} />,
+    role: '2',
+    index: 35,
+  },
   {
     component: CNavTitle,
     name: 'Lain - lain',
@@ -404,7 +404,122 @@ const _nav = [
     icon: <FontAwesomeIcon icon={faGears} size="lg" />,
     role: '3',
     index: 44,
-  }
+  },
+  {
+    component: CNavTitle,
+    name: 'Monitoring Pelaksanaan',
+    role: '0',
+    index: 50,
+  },
+  {
+    component: CNavItem,
+    name: 'Monitoring Dashboard',
+    to: '/monitoringPelaksanaan',
+    icon: <FontAwesomeIcon icon={faScaleUnbalancedFlip} size="lg" />,
+    role: '0',
+    index: 51,
+  },
+  {
+    component: CNavTitle,
+    name: 'Pelaksanaan KP/PKL',
+    role: '1',
+    index: 52,
+  },
+  {
+    component: CNavItem,
+    name: 'Pemetaan Pembimbing Jurusan',
+    to: '/pemetaanPembimbingJurusan',
+    icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
+    role: '0',
+    index: 53,
+  },
+  {
+    component: CNavItem,
+    name: 'Daftar Mahasiswa',
+    to: '/daftarMahasiswa',
+    icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
+    role: '0',
+    index: 54,
+  },
+  {
+    component: CNavItem,
+    name: 'Rekap Monitoring',
+    to: '/rekapMonitoring',
+    icon: <FontAwesomeIcon icon={faClipboard} size="lg" />,
+    role: '0',
+    index: 55,
+  },
+  {
+    component: CNavItem,
+    name: 'Rekap Penilaian Pembimbing Jurusan',
+    to: '/rekapPenilaianPembimbingJurusan',
+    icon: <FontAwesomeIcon icon={faClipboard}  size="lg" />,
+    role: '0',
+    index: 56,
+  },
+  //PESERTA
+  {
+    component: CNavItem,
+    name: 'Dashboard Peserta',
+    to: '/dashboardPeserta',
+    icon: <FontAwesomeIcon icon={faScaleUnbalancedFlip} size="lg" />,
+    role: '1',
+    index: 57,
+  },
+  {
+    component: CNavGroup,
+    name: 'Dokumen Peserta',
+    icon: <FontAwesomeIcon icon={faSitemap} size="lg" />,
+    role: '1',
+    index: 59,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Dokumen RPP',
+        to: '/rencanaPenyelesaianProyek',
+        index: 59.1
+      },
+      {
+        component: CNavItem,
+        name: 'Dokumen Logbook',
+        to: '/logbook',
+        index: 59.2
+      },
+      {
+        component: CNavItem,
+        name: 'Dokumen Self Assessment',
+        to: '/formSelfAssessment',
+        index: 59.3
+      },
+      {
+        component: CNavItem,
+        name: 'Dokumen Laporan',
+        to: '/uploadLaporan',
+        index: 59.4
+      }
+    ],
+  },{
+    component: CNavGroup,
+    name: 'Pembobotan Penilaian',
+    icon: <FontAwesomeIcon icon={faSitemap} size="lg" />,
+    role: '0',
+    index: 60,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Poin Penilaian Self Assessment',
+        to: '/pembobotanSelfAssessment',
+        index: 59.1
+      },
+      {
+        component: CNavItem,
+        name: 'Dokumen Logbook',
+        to: '/logbook',
+        index: 59.2
+      },
+    
+    ],
+  },
 ]
 
 export default _nav

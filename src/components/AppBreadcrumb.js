@@ -13,7 +13,7 @@ const AppBreadcrumb = () => {
     const currentRoute = routes.find((route) => route.path === pathname)
     return currentRoute ? currentRoute.name : pathname.split('/')[length - 1]
   }
-
+     
   const getBreadcrumbs = (location) => {
     const breadcrumbs = []
     location.split('/').reduce((prev, curr, index, array) => {

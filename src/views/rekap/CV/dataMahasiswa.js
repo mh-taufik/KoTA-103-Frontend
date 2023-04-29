@@ -12,6 +12,7 @@ import axios from 'axios';
 import { LoadingOutlined } from '@ant-design/icons';
 
 const FileDownload = require('js-file-download');
+
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />;
 const DataMahasiswa = () => {
   const history = useHistory();

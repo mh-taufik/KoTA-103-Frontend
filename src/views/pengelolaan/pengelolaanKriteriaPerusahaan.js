@@ -280,6 +280,7 @@ const PengelolaanKriteriaPerusahaan = () => {
                 style={{ backgroundColor: "#FCEE21", borderColor: "#FCEE21" }}
                 onClick={() => {
                   showModalEdit(record);
+                  console.log(record)
                 }}>
                 <FontAwesomeIcon icon={faPencil} style={{ color: "black" }} />
               </Button>
