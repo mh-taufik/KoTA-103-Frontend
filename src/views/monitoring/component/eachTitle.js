@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 
 const EachTitle = (props) => {
   return (
-    <Box my={2} sx={{width:'112%'}} ml={-8}>
+    <Box my={2}  sx={{width:'107.5%'}} ml={-5}>
     <AppBar position="static">
       <Toolbar variant="dense">
         <Typography className="title" variant="h6" color="inherit" component="div">

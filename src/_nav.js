@@ -435,28 +435,21 @@ const _nav = [
   },
   {
     component: CNavItem,
-    name: 'Daftar Mahasiswa',
-    to: '/daftarMahasiswa',
+    name: 'Daftar Peserta',
+    to: '/daftarPeserta',
     icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
     role: '0',
     index: 54,
   },
-  {
-    component: CNavItem,
-    name: 'Rekap Monitoring',
-    to: '/rekapMonitoring',
-    icon: <FontAwesomeIcon icon={faClipboard} size="lg" />,
-    role: '0',
-    index: 55,
-  },
-  {
-    component: CNavItem,
-    name: 'Rekap Penilaian Pembimbing Jurusan',
-    to: '/rekapPenilaianPembimbingJurusan',
-    icon: <FontAwesomeIcon icon={faClipboard}  size="lg" />,
-    role: '0',
-    index: 56,
-  },
+  // {
+  //   component: CNavItem,
+  //   name: 'Rekap Monitoring',
+  //   to: '/rekapMonitoring',
+  //   icon: <FontAwesomeIcon icon={faClipboard} size="lg" />,
+  //   role: '0',
+  //   index: 55,
+  // },
+ 
   //PESERTA
   {
     component: CNavItem,
@@ -475,20 +468,20 @@ const _nav = [
     items: [
       {
         component: CNavItem,
-        name: 'Dokumen RPP',
+        name: 'Rencana Penyelesaian Proyek',
         to: '/rencanaPenyelesaianProyek',
         index: 59.1
       },
       {
         component: CNavItem,
-        name: 'Dokumen Logbook',
+        name: 'Logbook',
         to: '/logbook',
         index: 59.2
       },
       {
         component: CNavItem,
-        name: 'Dokumen Self Assessment',
-        to: '/formSelfAssessment',
+        name: 'Self Assessment',
+        to: '/selfAssessment',
         index: 59.3
       },
       {
@@ -500,25 +493,92 @@ const _nav = [
     ],
   },{
     component: CNavGroup,
-    name: 'Pembobotan Penilaian',
+    name: 'Pengaturan Monitoring',
     icon: <FontAwesomeIcon icon={faSitemap} size="lg" />,
     role: '0',
-    index: 60,
+    index: 56,
     items: [
       {
         component: CNavItem,
         name: 'Poin Penilaian Self Assessment',
         to: '/pembobotanSelfAssessment',
-        index: 59.1
+        index: 56.1
       },
       {
         component: CNavItem,
-        name: 'Dokumen Logbook',
-        to: '/logbook',
-        index: 59.2
+        name: 'Poin Penilaian Pembimbing Jurusan',
+        to: '/poinPenilaianPembimbingJurusan',
+        index: 56.2
       },
     
     ],
+  },
+  //PEMBIMBING JURUSAN
+  {
+    component: CNavItem,
+    name: 'Dashboard',
+    to: '/dashboard',
+    icon: <FontAwesomeIcon icon={faHouse} size="lg" />,
+    role: '5',
+    index: 60,
+  },
+
+  // {
+  //   component: CNavGroup,
+  //   name: 'FITUR PEMBIMBING JURUSAN',
+  //   icon: <FontAwesomeIcon icon={faSitemap} size="lg" />,
+  //   role: '0',
+  //   index: 61,
+  //   items: [
+  //     {
+  //       component: CNavItem,
+  //       name: 'Daftar Peserta',
+  //       to: '/daftarPeserta',
+  //       index: 61.1
+  //     },
+  //     {
+  //       component: CNavItem,
+  //       name: 'Penilaian Pembimbing Jurusan',
+  //       to: '/logbook',
+  //       index: 61.2
+  //     },
+  //     {
+  //       component: CNavItem,
+  //       name: 'Dokumen Self Assessment',
+  //       to: '/formSelfAssessment',
+  //       index: 61.3
+  //     },
+  //     {
+  //       component: CNavItem,
+  //       name: 'Dokumen Laporan',
+  //       to: '/uploadLaporan',
+  //       index: 61.4
+  //     }
+  //   ],
+  // },
+  {
+    component: CNavItem,
+    name: 'Rekap Dokumen Peserta',
+    to: '/rekapDokumenPeserta',
+    icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
+    role: '0',
+    index: 60,
+  },
+  {
+    component: CNavItem,
+    name: 'Rekap Penilaian Peserta',
+    to: '/rekapPenilaianPeserta',
+    icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
+    role: '0',
+    index: 62,
+  },
+  {
+    component: CNavItem,
+    name: 'Form Penilaian Pembimbing Jurusan',
+    to: '/rekapFormPenilaianPembimbingJurusan',
+    icon: <FontAwesomeIcon icon={faClipboard}  size="lg" />,
+    role: '0',
+    index: 63,
   },
 ]
 
