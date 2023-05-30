@@ -7,8 +7,17 @@ body {
     padding : 120px;
 }
 
+.container2 {
+  background-color: white;
+  padding : 60px;
+}
+
+.left{
+  text-align: left;
+}
+
 .justify {
- 
+ text-align: center;
 }
 .container2 {
   background-color: white;
@@ -111,3 +120,6 @@ body {
     height: 440px;
   }
   
+  .indexing{
+    z-index: 2000000000;
+  }

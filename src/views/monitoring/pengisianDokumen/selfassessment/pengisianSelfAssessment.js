@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import 'antd/dist/antd.css'
-import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
+import 'antd/dist/reset.css'
 import {
   Steps,
   Form,
@@ -9,12 +8,12 @@ import {
   Row,
   Col,
   DatePicker,
-  Select,
-  notification,
-  Modal,
-  Typography,
-  Divider,
   Spin,
+  Table,
+  InputNumber,
+  notification,
+  Popover,
+  Popconfirm,
 } from 'antd'
 import { MinusCircleOutlined } from '@ant-design/icons'
 import { PlusOutlined } from '@ant-design/icons'
@@ -25,31 +24,36 @@ import { useParams } from 'react-router-dom'
 import { LoadingOutlined } from '@ant-design/icons'
 import '../rpp/rpp.css'
 import { Button, Dropdown, Space } from 'antd'
-import { Table } from 'react-bootstrap'
 import Text from 'antd/lib/typography/Text'
-import { array } from 'prop-types'
-import { ConnectingAirportsOutlined } from '@mui/icons-material'
-import _ from 'lodash';
-
+import _ from 'lodash'
+import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+import { Box } from '@mui/material'
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const { TextArea } = Input
-
 const { Step } = Steps
 const { RangePicker } = DatePicker
 
 const FormPengisianSelfAssessment = () => {
-  const [form1] = Form.useForm()
-  const [form] = Form.useForm()
-  const [current, setCurrent] = useState(0)
+  dayjs.extend(customParseFormat)
+  const NIM_PESERTA = localStorage.username
+  const [idPeserta, setIdPeserta] = useState()
+  const params = useParams()
   const [loadings, setLoadings] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const [selfAssessment, setSelfAssessment] = useState([])
   let history = useHistory()
-  const [formTitleContent, setFormTitleContent] = useState([])
-  const [selfAssessmentPerPoin, setSelfAssessmentPerPoin] = useState([])
-  const [selfAssessmentPerPoinNilai, setSelfAssessmentPerPoinNilai] = useState([])
-  const [selfAssessmentPerPoinCopy, setSelfAssessmentPerPoinCopy] = useState()
-  const temp = selfAssessmentPerPoin
+  const [komponenPenilaianSelfAssessment, setKomponenPenilaianSelfAssessment] = useState([])
+  const [dataPengisianSelfAssessmentPeserta, setDataPengisianSelfAssessmentPeserta] = useState([])
+  const [indexUpdate, setIndexUpdate] = useState()
+  const [tanggalMulaiSelfAssessment, setTanggalMulaiSelfAssessment] = useState()
+  const [tanggalBerakhirSelfAssessment, setTanggalBerakhirSelfAssessment] = useState()
+  const [newIdSelfAssessment, setNewIdSelfAssessment] = useState()
+  const [isSuccessSubmit, setIsSuccessSubmit] = useState()
+  const defaultType = '-'
+  const defaultNum = 0
+  /** JIKA TRUE BERARTI TANGGAL NYA GAADA DI DATA */
+  const [isDateAvailable, setIsDateAvailable] = useState(false)
+
   const enterLoading = (index) => {
     setLoadings((prevLoadings) => {
       const newLoadings = [...prevLoadings]
@@ -58,172 +62,289 @@ const FormPengisianSelfAssessment = () => {
     })
   }
 
-
-  const handleInputSelfAssessmentNilai = (indeks, ids, valuew, field) => {
-    console.log('field nya : ;', field)
-    var exist = selfAssessmentPerPoin.length
-    console.log('data saat ini = ', exist)
-    console.log(
-      'index => ',
-      indeks,
-      '|   id=> ',
-      ids,
-      '|    value=>  ',
-      valuew,
-      '|     field=>   ',
-      field,
-    )
-    var datakosong = false
-    var idn = [ids]
-
-    var tempt = selfAssessmentPerPoinNilai
-    console.log('tempt', tempt)
-    console.log('sa', selfAssessmentPerPoinNilai)
-
-    if (selfAssessmentPerPoinNilai.length === 0) {
-      setSelfAssessmentPerPoinNilai([
-        ...selfAssessmentPerPoinNilai,
-        {
-          id: ids,
-          nilai: valuew,
-          keterangan:''
-        },
-      ])
-    }
-
-    var tempVar = selfAssessmentPerPoinNilai
-    console.log('tempVar', tempVar)
-
-    if (selfAssessmentPerPoinNilai.length > 0) {
-      selfAssessmentPerPoinNilai.forEach((c, index) => {
-        // let indexn = c.indexOf({id:ids});
-        // console.log('index', indexn)
-        console.log('data', c)
-        if (idn.includes(c.id)) {
-          console.log('yes')
-          selfAssessmentPerPoinNilai[index].nilai = valuew
-          setSelfAssessmentPerPoinNilai(selfAssessmentPerPoinNilai)
-        } else {
-          console.log('no')
-
-          setSelfAssessmentPerPoinNilai([
-            ...selfAssessmentPerPoinNilai,
-            {
-              id: ids,
-              nilai: valuew,
-              keterangan : ''
-            },
-          ])
-          return
-        }
-      })
-    }
-    console.log('self assessment nilai', selfAssessmentPerPoinNilai)
+  /** HANDLE RANGE DATE SAAT MEMILIH  */
+  const disabledDate = (current) => {
+    // Can not select days before today and today
+    return current && current < dayjs().endOf('day')
   }
 
-  const handleInputSelfAssessmentKeterangan = (indeks, ids, valuew, field) => {
-    console.log('field nya : ;', field)
-    var exist = selfAssessmentPerPoin.length
-    console.log('data saat ini = ', exist)
-    var statusData = false
-    console.log(
-      'index => ',
-      indeks,
-      '|   id=> ',
-      ids,
-      '|    value=>  ',
-      valuew,
-      '|     field=>   ',
-      field,
-    )
-    var datakosong = false
-    var idn = [ids]
-
-    var tempt = selfAssessmentPerPoin
-    console.log('tempt', tempt)
-    console.log('sa', selfAssessmentPerPoin)
-
-    if (selfAssessmentPerPoin.length === 0) {
-      setSelfAssessmentPerPoin([
-        ...selfAssessmentPerPoin,
-        {
-          id: ids,
-          keterangan: valuew,
-          nilai: ' '
-        },
-      ])
-    }
-
-    var tempVar = selfAssessmentPerPoin
-    console.log('tempVar', tempVar)
-
-    if (selfAssessmentPerPoin.length > 0) {
-      selfAssessmentPerPoin.forEach((c, index) => {
-        // let indexn = c.indexOf({id:ids});
-        // console.log('index', indexn)
-        console.log('data', c)
-        if (idn.includes(c.id)) {
-          console.log('yes')
-          selfAssessmentPerPoin[index].keterangan = valuew
-          setSelfAssessmentPerPoin(selfAssessmentPerPoin)
-        } else {
-          console.log('no')
-
-          setSelfAssessmentPerPoin([
-            ...selfAssessmentPerPoin,
-            {
-              id: ids,
-              keterangan: valuew,
-               nilai:''
-            },
-          ])
-          return
-        }
-      })
-    }
-  }
-
-  const submit = () => {
-    var SetDataSA = function (temp) {
-      for (var i in temp) {
-        console.log('[', i, '] : ', temp[i])
+  /** HANDLE INPUT NILAI DAN KETERANGAN */
+  const handlePengisianNilaiDanKeteranganSelfAssessment = (
+    index,
+    value,
+    idSelfAssessment,
+    keyData,
+  ) => {
+    if (dataPengisianSelfAssessmentPeserta[index]) {
+      dataPengisianSelfAssessmentPeserta[index][keyData] = value
+    } else {
+      dataPengisianSelfAssessmentPeserta[index] = {
+        [keyData]: value,
+        id: idSelfAssessment,
       }
     }
-
-    SetDataSA(selfAssessmentPerPoin)
-
-    const unique = () => [...new Map(selfAssessmentPerPoin.map((m) => [m.id, m])).values()]
-    var a = unique()
-
-    
-    const uniques = () => [...new Map(selfAssessmentPerPoinNilai.map((m) => [m.id, m])).values()]
-    var b = uniques()
-
-    var mergedList = _.map(selfAssessmentPerPoin, function(item){
-      return _.extend(item, _.find(selfAssessmentPerPoinNilai, { id: item.id }));
-  });
-
-      //console.log('merged', mergedList)
-
-    //pakai nilai a yak
-   console.log('hasil submit Keterangan ', a)
-   //console.log('hasil submit Nilai', b)
+    setDataPengisianSelfAssessmentPeserta(dataPengisianSelfAssessmentPeserta)
   }
 
-  const tes = (d) => {
-    console.log('this tes', d)
+  useEffect(() => {
+    console.log('hasil pengisian SA', dataPengisianSelfAssessmentPeserta)
+  }, [dataPengisianSelfAssessmentPeserta])
+
+  /** API */
+
+  const getInformasiDataPeserta = async () => {
+    await axios
+      .get(`http://localhost:1337/api/pesertas?filters[username][$eq]=${NIM_PESERTA}`)
+      .then((response) => {
+        // setIdPeserta(response.data.data)
+        console.log('data peserta', response.data.data[0])
+        setIdPeserta(response.data.data[0].id)
+      })
   }
-  const getPoinPenilaianSelfAssessment = async (record, index) => {
-    enterLoading(index)
+
+  const submitData = async () => {
+  
+   
+    console.log(dataPengisianSelfAssessmentPeserta)
+    if (isDateAvailable) {
+      if(dataPengisianSelfAssessmentPeserta.length < 1){
+        notification.error({message:'Penambahan self assessment ditolak, karena tidak ada satupun poin yang terisi'})
+      }else{
+        
+      let dateToday = new Date()
+      function formatDate(date) {
+        var d = new Date(date),
+          month = '' + (d.getMonth() + 1),
+          day = '' + d.getDate(),
+          year = d.getFullYear()
+
+        if (month.length < 2) month = '0' + month
+        if (day.length < 2) day = '0' + day
+
+        return [year, month, day].join('-')
+      }
+      await axios
+        .post(`http://localhost:1337/api/selfassessments`, {
+          data: {
+            tanggalmulai: tanggalMulaiSelfAssessment,
+            tanggalselesai: tanggalBerakhirSelfAssessment,
+            tanggal_pengumpulan: formatDate(dateToday),
+            peserta: {
+              connect: [idPeserta],
+            },
+          },
+        })
+        .then((response) => {
+          console.log('response new self assessment', response.data.data)
+          console.log('response new self assessment ID', response.data.data.id)
+          setNewIdSelfAssessment(response.data.data.id)
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+            history.push('/500')
+          }
+        })
+      }
+    } else {
+      notification.error({
+        message:
+          'Silahkan ubah minggu self assessment terlebih dahulu, untuk bisa melakukan submit !!!',
+      })
+    }
+  }
+
+const handleSuccessSubmit = (idSelfAssessment) =>{
+  notification.success({
+    message: 'Data self assessment berhasil ditambahkan',
+  })
+  history.push(`/selfAssessment/formSelfAssessment/detail/${idSelfAssessment}`)
+}
+
+  useEffect(() => {
+    console.log('ID BARU', newIdSelfAssessment)
+
+    const inputNilaiDanKeteranganSelfAssessment = async (data, idSelfAssessment) => {
+
+      let a = 0
+      let stop = data.length - 1
+
+      for (var i in data) {
+        let res = true
+       
+      
+        await axios
+          .post('http://localhost:1337/api/selfasspoins', {
+            data: {
+              nilai: data[i].nilai,
+              keterangan: data[i].keterangan,
+              selfassessment: {
+                connect: [idSelfAssessment],
+              },
+              poinpenilaianselfassessment: {
+                connect: [data[i].id],
+              },
+            },
+          })
+          .then((response) => {
+            console.log('HASIL ISI SA POIN', response.data.data)
+            res = true
+         
+           
+          })
+          .catch(function (error) {
+            setIsSuccessSubmit(false)
+            if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+              history.push({
+                pathname: '/login',
+                state: {
+                  session: true,
+                },
+              })
+            } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+              history.push('/404')
+            } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+              history.push('/500')
+            }
+          })
+          
+          console.log('i ', i, ' dan ', 'a ', a,  ' ','type', typeof(a), typeof(i), a === parseInt(i), res,  '--', a === parseInt(i) && res)
+          if(stop === parseInt(i) && res ){
+            handleSuccessSubmit(idSelfAssessment)
+          }
+
+          a++
+      }
+
+     
+     
+    }
+
+    inputNilaiDanKeteranganSelfAssessment(dataPengisianSelfAssessmentPeserta, newIdSelfAssessment)
+  }, [newIdSelfAssessment])
+
+  useEffect(() => {
+    console.log('tanggal berakhir', tanggalBerakhirSelfAssessment)
+  }, [tanggalBerakhirSelfAssessment])
+
+  const onChange = (date, dateString) => {
+    console.log(date, dateString)
+    alert(date, dateString)
+  }
+
+  useEffect(() => {
+    const getPoinPenilaianSelfAssessment = async (record, index) => {
+      enterLoading(index)
+      await axios
+        .get(
+          'http://localhost:1337/api/poinpenilaianselfassessments?filters[$or][0][status][$eq]=non active&filters[$or][1][status][$eq]=active',
+        )
+        .then((response) => {
+          setIsLoading(false)
+          let temp = []
+          let temp1 = response.data.data
+          let getTempPoinPenilaianSelfAssessment = function (obj) {
+            for (var i in obj) {
+              temp.push({
+                id: obj[i].id,
+                poinpenilaian: obj[i].attributes.poinpenilaian,
+                status: obj[i].attributes.status,
+                tanggalmulaipengisian: obj[i].attributes.tanggalmulaipengisian,
+              })
+            }
+          }
+          getTempPoinPenilaianSelfAssessment(temp1)
+          setKomponenPenilaianSelfAssessment(temp)
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+            history.push('/500')
+          }
+        })
+    }
+
+    getPoinPenilaianSelfAssessment()
+    getInformasiDataPeserta()
+  }, [history])
+
+  function formatDate(date) {
+    var d = new Date(date),
+      month = '' + (d.getMonth() + 1),
+      day = '' + d.getDate(),
+      year = d.getFullYear()
+
+    if (month.length < 2) month = '0' + month
+    if (day.length < 2) day = '0' + day
+
+    return [year, month, day].join('-')
+  }
+
+  function getDateOfISOWeek(w, y) {
+    var simple = new Date(y, 0, 1 + (w - 1) * 7)
+    var dow = simple.getDay()
+    var ISOweekStart = simple
+    if (dow <= 4) {
+      ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1)
+    } else {
+      ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay())
+    }
+
+    ISOweekStart = new Date(ISOweekStart)
+    return formatDate(ISOweekStart.toDateString())
+  }
+
+  function getDateOfEndWeek(w, y) {
+    var simple = new Date(y, 0, 1 + (w - 1) * 7)
+    var dow = simple.getDay()
+    console.log('dow =>', dow)
+    var ISOweekStart = simple
+    console.log('dow =>', ISOweekStart)
+    if (dow <= 4) {
+      ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1)
+    } else {
+      ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay())
+    }
+
+    ISOweekStart.setDate(ISOweekStart.getDate() + 4)
+    return formatDate(ISOweekStart.toDateString())
+  }
+
+  const handleDateIsAvailable = async (tanggalmulai) => {
     await axios
       .get(
-        'http://localhost:1337/api/poinpenilaianselfassessments?filters[$or][0][status][$eq]=non active&filters[$or][1][status][$eq]=active',
+        `http://localhost:1337/api/selfassessments?populate=*&filters[peserta][username]=${NIM_PESERTA}&filters[tanggalmulai]=${tanggalmulai}`,
       )
-      .then((response) => {
-        setIsLoading(false)
-        setFormTitleContent(response.data.data)
-        console.log('getPoinPenilaianSelfAssessment', response.data.data)
-        console.log(response.data.data)
+      .then((res) => {
+        console.log('IS DATA AVAILABLE', res.data.data)
+
+        let result = res.data.data
+        if (result.length > 0) {
+          setIsDateAvailable(false)
+          notification.warning({
+            message: 'Silahkan pilih minggu lain, minggu yang anda pilih telah tersedia !!!',
+          })
+          return false
+        } else {
+          setIsDateAvailable(true)
+          return true
+        }
       })
       .catch(function (error) {
         if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -235,164 +356,163 @@ const FormPengisianSelfAssessment = () => {
           })
         } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
           history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
           history.push('/500')
         }
       })
   }
 
-  const readNWriteSelfAssessment = (event) => {
-    setSelfAssessment(...selfAssessment, event.target[0].value)
-    event.target[0].value = ''
-    console.log(selfAssessment)
-    event.preventDefault()
+
+  const handleKembaliKeRekapSelfAssessment = () => {
+    history.push(`/selfAssessment`)
   }
-
-  const handleTes = (e) => {
-    console.log(e)
-  }
-
-  const columnsSelfAssessment = [
-    {
-      title: 'No',
-      dataIndex: 'no',
-      width: '5%',
-      align: 'center',
-      render: (value, item, index) => {
-        return index + 1
-      },
-    },
-    {
-      title: 'POIN PENILAIAN',
-      dataIndex: ['attributes', 'name'],
-    },
-  ]
-
-  const onChange = (date, dateString) => {
-    console.log(date, dateString)
-    alert(date, dateString)
-  }
-
-  const tesAjah = () => {
-    console.log()
-  }
-
-  useEffect(() => {
-    getPoinPenilaianSelfAssessment()
-  }, [history])
-
   return isLoading ? (
     <Spin indicator={antIcon} />
   ) : (
     <>
+      {/* <Button onClick={tes}>tes</Button> */}
       <Form>
         {' '}
         <div className="container">
-          <h1 className="title-s">Form Self Assessment</h1>
+          <Popover content={<div>Kembali ke rekap self assessment</div>}>
+            <Button type="primary" onClick={handleKembaliKeRekapSelfAssessment}>
+              Kembali
+            </Button>
+          </Popover>
+          <div className="spacetop"></div>
+          <Box sx={{ color: 'warning.main' }}>
+            <ul>
+              <li>Pastikan minggu yang dipilih belum pernah diisi sebelumnya</li>
+              <li>Pengisian hanya satu kali, anda tidak dapat melakukan edit self assesment</li>
+              <li>
+                Pastikan semua keterangan terisi dan terdeskripsi dengan baik, agar nilai yang
+                diberikan juga baik
+              </li>
+            </ul>
+          </Box>
+          <h3 className="title-s spacetop">PENGISIAN SELF ASSESSMENT</h3>
 
-          <b>Tanggal Self Assessment</b>
+          <b>PILIH MINGGU SELF ASSESSMENT &nbsp;&nbsp;&nbsp; : &nbsp;</b>
           <Space direction="vertical" size={12}>
-            <RangePicker onChange={onChange} renderExtraFooter={() => 'extra footer'} />
+            <DatePicker
+              picker="week"
+              disabledDate={disabledDate}
+              onChange={(date, datestring) => {
+                let tanggalmulai = getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4))
+                let handling = handleDateIsAvailable(tanggalmulai)
+                setTanggalMulaiSelfAssessment(
+                  getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
+                )
+                setTanggalBerakhirSelfAssessment(
+                  getDateOfEndWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
+                )
+              }}
+              renderExtraFooter={() => 'extra footer'}
+            />
           </Space>
-          {/* <Space direction="vertical">
-            <DatePicker onChange={onChange} picker="week" />
-          </Space> */}
-          <hr />
-          <Table striped bordered hover>
-            <Row color="blue" gutter={16}>
-              <Col className="gutter-row" span={8}>
-                <h6>Aspek Penilaian</h6>
-              </Col>
-              <Col className="gutter-row" span={8}>
-                <h6>Nilai</h6>
-              </Col>
-              <Col className="gutter-row" span={8}>
-                <h6>Keterangan</h6>
-              </Col>
-            </Row>
-            {/* 
-            {[...formTitleContent].map((element, index) => {
-              return (
-                <div key={index}>
-                  <form>
-                    <input name=''></input>
-                  </form>
-                </div>
-              )
-            })} */}
-            {formTitleContent.map((formTitle, index) => {
-              if (formTitle.attributes.status === 'non active') {
-                return (
-                  <>
-                    <Row gutter={16} className="row-self-assessment">
-                      <Col className="gutter-row" span={8}>
-                        <Text strong>{formTitle.attributes.poinpenilaian}</Text>
-                      </Col>
-                      <Col className="gutter-row" span={4}>
-                        <Input
-                          type="number"
-                          name="nilai"
-                          placeholder="belum diizinkan untuk mengisi"
-                          disabled
-                          onChange={(e) => handleTes(e.target.value)}
-                        />
-                      </Col>
-                      <Col className="gutter-row" span={11}>
-                        <TextArea
-                          placeholder="belum diizinkan untuk mengisi"
-                          disabled
-                          maxLength={1000}
-                          name="keterangan"
-                        />
-                      </Col>
-                    </Row>
-                  </>
-                )
-              } else {
-                return (
-                  <>
-                    <Row gutter={16} className="row-self-assessment">
-                      <Col className="gutter-row" span={8}>
-                        <Text strong>{formTitle.attributes.poinpenilaian}</Text>
-                      </Col>
-                      <Col className="gutter-row" span={4}>
-                        <Input
-                          type="number"
-                       
-                          name={`${formTitle.id}-nilai`}
-                          placeholder="angka"
-                          onChange={(e) =>
-                             handleInputSelfAssessmentNilai(index, formTitle.id, e.target.value, 'nilai')
-                       
-                          }
-                        />
-                      </Col>
-                      <Col className="gutter-row" span={11}>
-                        <TextArea
-                          placeholder="maksimal 1000 karakter"
-                          name={`${formTitle.id}-keterangan`}
-                     
-                          onChange={(e) =>
-                            handleInputSelfAssessmentKeterangan(
-                              index,
-                              formTitle.id,
-                              e.target.value,
-                              'keterangan',
-                            )
-                          }
-                          maxLength={1000}
-                        />
-                      </Col>
-                    </Row>
-                  </>
-                )
-              }
-            })}
 
-            <Button type="primary" onClick={submit}>
+          <hr className="spacetop" />
+
+          <Row>
+            {/* <Col span={2}><h6>NO</h6></Col> */}
+            <Col span={8} style={{ padding: 2 }}>
+              <h6>ASPEK PENILAIAN</h6>
+            </Col>
+            <Col span={4} style={{ padding: 2 }}>
+              <h6>NILAI</h6>
+            </Col>
+            <Col span={12} style={{ padding: 2 }}>
+              <h6>KETERANGAN</h6>
+            </Col>
+          </Row>
+          <hr />
+
+          {komponenPenilaianSelfAssessment.map((poinSelfAssessment, index) => {
+            if (poinSelfAssessment.status === 'non active') {
+              return (
+                <>
+                  <Row key={poinSelfAssessment.id}>
+                    <Col span={8} style={{ padding: 8 }}>
+                      <Text strong>{poinSelfAssessment.poinpenilaian}</Text>
+                    </Col>
+
+                    <Col span={4} style={{ padding: 8 }}>
+                      <Input
+                        type="number"
+                        name={`nilai` + index}
+                        placeholder="belum diizinkan untuk mengisi"
+                        disabled
+                      />
+                    </Col>
+
+                    <Col span={12} style={{ padding: 8 }}>
+                      <TextArea
+                        placeholder="belum diizinkan untuk mengisi"
+                        disabled
+                        maxLength={1000}
+                        name={`keterangan` + index}
+                      />
+                    </Col>
+                  </Row>
+                </>
+              )
+            } else {
+              return (
+                <>
+                  <Row key={poinSelfAssessment.id}>
+                    <Col span={8} style={{ padding: 8 }}>
+                      <Text strong>{poinSelfAssessment.poinpenilaian}</Text>
+                    </Col>
+                    <Col span={4} style={{ padding: 8 }}>
+                      <InputNumber
+                        name={`nilai` + index}
+                        placeholder="nilai"
+                        onChange={(e) =>
+                          handlePengisianNilaiDanKeteranganSelfAssessment(
+                            index,
+                            e,
+                            poinSelfAssessment.id,
+                            'nilai',
+                          )
+                        }
+                      />
+                    </Col>
+                    <Col span={12} style={{ padding: 8 }}>
+                      <TextArea
+                        placeholder="maksimal 1000 karakter"
+                        name={`keterangan` + index}
+                        maxLength={1000}
+                        onChange={(e) =>
+                          handlePengisianNilaiDanKeteranganSelfAssessment(
+                            index,
+                            e.target.value,
+                            poinSelfAssessment.id,
+                            'keterangan',
+                          )
+                        }
+                      />
+                    </Col>
+                  </Row>
+                </>
+              )
+            }
+          })}
+
+          {/* <Button type="primary" onClick={submitData} htmlType="submit">
+            Submit
+          </Button> */}
+          <Popconfirm
+            placement="topLeft"
+            title={'Anda yakin akan submit ? pastikan sudah terisi dengan baik, karena tidak dapat edit kembali '}
+            description={''}
+            onConfirm={submitData}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button type="primary" htmlType="submit">
               Submit
             </Button>
-          </Table>
+          </Popconfirm>
         </div>
       </Form>
     </>

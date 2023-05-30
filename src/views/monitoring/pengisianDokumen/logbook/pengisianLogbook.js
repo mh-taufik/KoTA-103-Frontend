@@ -1,34 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
-import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
 import Container from 'react-bootstrap/Container'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../rpp/rpp.css'
+import { Document, Page } from 'react-pdf/dist/esm/entry.webpack'
 import { Col, Row } from 'react-bootstrap'
 import Table from 'react-bootstrap/Table'
 import { Refresh } from '@mui/icons-material'
+import { Button, Space } from 'antd'
 import axios from 'axios'
 import { Route, Router, useHistory, useParams } from 'react-router-dom'
-import { message, notification } from 'antd'
+import { FloatButton, Popover, message, notification } from 'antd'
+import { Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap'
 
-const show = () => {
-  //   setLogbookData({
-  //     'tanggallogbook' : tanggalProyek,
-  //   'namaProyek' : namaProyek,
-  //   'keterangan' : keterangan,
-  //   'tools' : tools,
-  //   'hasilkerja' : hasilKerja,
-  //   'projectmanager' : projectManager,
-  //   'technicalleader' : technicalLeader,
-  //   'tugas' : tugasPeserta,
-  //   'waktudankegiatan': waktuDanKegiatanPeserta,
-  //   'statuspengecekan' : statusPengecekanPembimbing
 
-  // })
-  console.log('kambing')
-}
 
 const FormPengisianLogbook = (props) => {
   const params = useParams()
@@ -49,22 +36,58 @@ const FormPengisianLogbook = (props) => {
   const [statusPengecekanPembimbing, setStatusPengecekanPembimbing] = useState(0)
   const [submitAccepted, setSubmitAccepted] = useState(1)
   const [usernamePeserta, setUsernamePeserta] = useState()
-  const [logbookData, setLogbookData] = useState({
-    namaproyek: '',
-    tools: '',
-    hasilkerja: '',
-    nilai: '',
-    projectmanager: '',
-    keterangan: '',
-    technicalleader: '',
-    tugas: '',
-    waktudankegiatan: '',
-    statuspengecekan: '',
-    tanggallogbook: '',
-  })
+  const [isSesuaiRpp, setIsSesuaiRpp] = useState('')
+  const [kendala, setKendala] = useState('')
   axios.defaults.withCredentials = true
   let history = useHistory()
+  const [modal, setModal] = useState(false);
+  const [nestedModal, setNestedModal] = useState(false);
+  const [closeAll, setCloseAll] = useState(false);
+  const [modalExL, setModalExL] = useState(false);
+  const [numPages, setNumPages] = useState(null)
+  const [pageNumber, setPageNumber] = useState(1)
 
+  const toggleExL = () => setModalExL(!modalExL);
+  
+  function onDocumentLoadSuccess({ numPages }) {
+    setNumPages(numPages)
+    setPageNumber(1)
+  }
+
+  function changePage(offSet) {
+    setPageNumber((prevPageNumber) => prevPageNumber + offSet)
+  }
+
+  function changePageBack() {
+    changePage(-1)
+  }
+
+  function changePageNext() {
+    changePage(+1)
+  }
+
+  const HandleButtonKembaliKeHalamanSelanjutnya = () => {
+    history.push('/rencanaPenyelesaianProyek/peserta/formPengisianRPP/')
+  }
+
+
+  const toggle = () =>{ setModal(!modal)};
+  const toggleNested = () => {
+    setNestedModal(!nestedModal);
+    setIsSesuaiRpp(false)
+    setCloseAll(false);
+  };
+  const toggleYes = () =>{
+    setIsSesuaiRpp(true)
+    submitLogbook(true,'')
+    console.log('daa', isSesuaiRpp)
+  }
+  const toggleAll = () => {
+    setNestedModal(!nestedModal);
+    console.log('ISI SESUAI RPP', isSesuaiRpp, ' dan ', kendala)
+    submitLogbook(false, kendala)
+    setCloseAll(true);
+  };
   const enterLoading = (index) => {
     setLoadings((prevLoadings) => {
       const newLoadings = [...prevLoadings]
@@ -90,6 +113,7 @@ const FormPengisianLogbook = (props) => {
             message: 'Pilih tanggal lain, logbook sudah tersedia',
           })
           setSubmitAccepted(0)
+          window.location.reload(false);
           
         }else{
           setTanggalLogbook(date)
@@ -102,19 +126,20 @@ const FormPengisianLogbook = (props) => {
     getIdPeserta()
   }, [history])
 
-  const submitLogbook = () => {
+  const submitLogbook = (sesuai, kendala) => {
     if(submitAccepted===0){
       console.log('tidak bisa')
       notification.info({message:'Silahkan ganti tanggal logbook'})
+      window.location.reload(false);
     }else{
       console.log('bisa')
      
       var idParticipant = idPeserta
-     saveDataLogbook(idParticipant)
+     saveDataLogbook(idParticipant, sesuai, kendala)
       //var a = typeof(idPeserta)
-      setTimeout(function () {
-        history.push(`/rekapDokumenPeserta/logbookPeserta/${NIM_PESERTA}`)
-      },2000)
+      // setTimeout(function () {
+      //   history.push(`/rekapDokumenPeserta/logbookPeserta/${NIM_PESERTA}`)
+      // },2000)
      
       // console.log("idgina", idParticipant)
 
@@ -147,8 +172,8 @@ const FormPengisianLogbook = (props) => {
         }
       })
   }
-  const saveDataLogbook = async (data, index) => {
-    enterLoading(index)
+  const saveDataLogbook = async (data, kesesuaian, kendala) => {
+    // enterLoading(index)
     await axios
       .post('http://localhost:1337/api/logbooks', {
         'data': {
@@ -163,6 +188,8 @@ const FormPengisianLogbook = (props) => {
           'waktudankegiatan': waktuDanKegiatanPeserta,
           'statuspengecekan': statusPengecekanPembimbing,
           'statuspengumpulan' : '-',
+          'sesuaiperencanaan' : kesesuaian,
+          'kendala' : kendala,
           'peserta': {
             'connect' : [data]
             },
@@ -173,7 +200,8 @@ const FormPengisianLogbook = (props) => {
         notification.success({
           message:'Logbook berhasil ditambahkan'
         });
-        console.log(response)
+        console.log('ID', response.data.data)
+        history.push(`/logbook`)
       })
       .catch(function (error) {
         if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -190,14 +218,30 @@ const FormPengisianLogbook = (props) => {
         }
       })
   }
+
+  const handleKembaliKeListPeserta = () =>{
+    history.push(`/logbook`)
+  }
   return (
     <>
       <React.Fragment>
         <div className=" container">
+        <Popover content={<div>Klik tombol untuk kembali ke rekap logbook</div>}>
+              <Button className='spacebottom' type="primary"  size="middle" onClick={handleKembaliKeListPeserta}>
+                Kembali
+              </Button>
+            </Popover>
           <h3 align="center" className="title-s">
             FORM PENGISIAN LOGBOOK
           </h3>
-          <Form>
+          <Box sx={{ color: 'warning.main' }} className='spacebottom'>
+          <ul>
+            <li>Setiap logbook akan dinilai</li>
+            <li>Isi sesuai dengan kegiatan yang anda lakukan saat KP / PKL</li>
+            <li>Anda dapat melihat contoh pengisian Logbook dengan menekan float button</li>
+          </ul>
+        </Box>
+           <Form>
             <Row>
               <Col>
                 <Form.Group controlId="tanggalLogbook">
@@ -324,11 +368,96 @@ const FormPengisianLogbook = (props) => {
               </Col>
             </Row>
 
-            <Button className="form-control btn btn-primary" onClick={submitLogbook}>
+            <Button className="form-control btn btn-primary" onClick={toggle}>
               Submit Logbook
             </Button>
+
+            <Modal isOpen={modal} toggle={toggle}>
+        <ModalHeader toggle={toggle}>Modal title</ModalHeader>
+        <ModalBody>
+          <b>PASTIKAN TANGGAL LOGBOOK SESUAI !!!</b><br/>
+          Apakah isi logbook Anda sesuai dengan perencanaan yang tertulis di RPP?, klik ya jika benar
+      
+          <br />
+          <Modal
+            isOpen={nestedModal}
+            toggle={toggleNested}
+            onClosed={closeAll ? toggle : undefined}
+          >
+            <ModalHeader>Kendala yang dihadapi</ModalHeader>
+            <ModalBody>
+              <Form>
+              <Row>
+              <Col>
+                <Form.Group className="mb-3" controlId="kendala">
+                  <Form.Label>Kendala</Form.Label>
+                  <Form.Control
+                  required
+                    as="textarea"
+                    placeholder="Kendala yang dihadapi"
+                    name="kendala"
+                    value={kendala}
+                    onChange={(e) => setKendala(e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+              </Form>
+            </ModalBody>
+            <ModalFooter>
+              <Button color="secondary" onClick={toggleAll}>
+                Submit
+              </Button>
+            </ModalFooter>
+          </Modal>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="primary" onClick={toggleYes}>
+            Ya
+          </Button>{' '}
+          <Button color="secondary" htmlType="submit"  onClick={toggleNested}>
+            Tidak
+          </Button>
+        </ModalFooter>
+      </Modal>
           </Form>
         </div>
+        <FloatButton onClick={toggleExL} tooltip={<div>Contoh Pengisian Logbook</div>} />;
+        <Modal isOpen={modalExL} style={{width:800}} toggle={toggleExL} >
+        <ModalHeader toggle={toggleExL}>Contoh Pengisian Logbook</ModalHeader>
+        <ModalBody>
+        <header className="App-header spacetop">
+        <Document file="/contohlogbook.pdf" onLoadSuccess={onDocumentLoadSuccess}>
+          <Page height="520" pageNumber={pageNumber} />
+        </Document>
+        <p>
+          {' '}
+          Page {pageNumber} of {numPages}
+        </p>
+
+        <Space wrap>
+          {pageNumber > 1 && (
+            <Button className="btn-pdf" type="primary" onClick={changePageBack}>
+              Halaman Sebelumnya
+            </Button>
+          )}
+          {pageNumber < numPages && (
+            <Button className="btn-pdf" onClick={changePageNext} type="primary">
+              Halaman Selanjutnya
+            </Button>
+          )}
+        </Space>
+      </header>
+        </ModalBody>
+        {/* <ModalFooter> */}
+          {/* <Button color="primary" onClick={toggleExL}>
+           Lihat Detail
+          </Button>{' '} */}
+          {/* <Button color="secondary" onClick={toggleExL}>
+            Cancel
+          </Button> */}
+        {/* </ModalFooter> */}
+      </Modal>
       </React.Fragment>
     </>
   )

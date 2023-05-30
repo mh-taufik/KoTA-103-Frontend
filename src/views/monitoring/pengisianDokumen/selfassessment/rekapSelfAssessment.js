@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import 'antd/dist/antd.css'
+import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPencil, faTrashCan } from '@fortawesome/free-solid-svg-icons'
+import { faEye, faPencil, faTrashCan } from '@fortawesome/free-solid-svg-icons'
 import {
   Table,
   Button,
@@ -17,6 +17,7 @@ import {
   Select,
   Popconfirm,
   Popover,
+  Card,
 } from 'antd'
 import axios from 'axios'
 import { SearchOutlined } from '@ant-design/icons'
@@ -41,8 +42,9 @@ const RekapSelfAssessment = () => {
   let history = useHistory()
   const { id } = useParams()
   const [loadings, setLoadings] = useState([])
-  const [statusTerlambat, isStatusTerlambat] = useState(false)
-  const [statusBelumDiNilai, isStatusBelumDinilai] = useState(false)
+  const [selfAssessmentPeserta, setSelfAssessmentPeserta] = useState([])
+  const [jumlahSelfAssessmentTidakDikumpulkan, setJumlahSelfAssessmentTidakDikumpulkan] = useState()
+  const [jumlahSelfAssessmentDikumpulkan, setJumlahSelfAssessmentDikumpulkan] = useState()
   const desc = '*edit logbook yang dipilih'
   axios.defaults.withCredentials = true
 
@@ -59,21 +61,15 @@ const RekapSelfAssessment = () => {
     return new Date(string).toLocaleDateString([], options)
   }
 
-  const refreshData = (index) => {
-    axios.get('http://localhost:1337/api/logbooks').then((result) => {
-      setLogbookPeserta(result.data.data)
-      setLoadings((prevLoadings) => {
-        const newLoadings = [...prevLoadings]
-        newLoadings[index] = false
-        return newLoadings
-      })
-    })
-  }
-
+ 
   useEffect(() => {
     console.log('idpeserta ==> ', idPeserta.id)
-    async function getLogbookPeserta(record, index) {
-      var PESERTA
+
+  
+
+    
+    async function getSelfAssessment(record, index) {
+      let PESERTA
       if (rolePengguna === '1') {
         PESERTA = idPengguna
       } else {
@@ -81,11 +77,33 @@ const RekapSelfAssessment = () => {
       }
       enterLoading(index)
       await axios
-        .get(`http://localhost:1337/api/logbooks?populate=*&filters[peserta][username]=${PESERTA}`)
-        .then((result) => {
-          setLogbookPeserta(result.data.data)
-          console.log(result.data.data)
-          setIsLoading(false)
+        .get(`http://localhost:1337/api/selfassessments?populate=*&filters[peserta][username]=${PESERTA}`)
+        .then((response) => {
+         var temp = []
+         var temp1 = response.data.data
+         const convertDate = (date) => {
+          let temp_date_split = date.split("-")
+          const month = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+          let date_month = temp_date_split[1]
+          let month_of_date = month[parseInt(date_month)-1]
+          // console.log(month_of_date,'isi date monts', month_of_date)
+          return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`  : null
+        }
+
+         var getTempSelfAssessment = function(obj){
+          for(var i in obj){
+            temp.push({
+              tanggal_mulai : convertDate(obj[i].attributes.tanggalmulai),
+              tanggal_selesai : convertDate(obj[i].attributes.tanggalselesai),
+              tanggal_pengumpulan : convertDate(obj[i].attributes.tanggal_pengumpulan),
+              id : obj[i].id
+            })
+          }
+         }
+        console.log("SA", response.data.data)
+        getTempSelfAssessment(temp1)
+        setSelfAssessmentPeserta(temp)
+        setIsLoading(false)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -102,7 +120,8 @@ const RekapSelfAssessment = () => {
           }
         })
     }
-    getLogbookPeserta()
+
+    getSelfAssessment()
   }, [history])
 
   const getColumnSearchProps = (dataIndex, name) => ({
@@ -180,19 +199,6 @@ const RekapSelfAssessment = () => {
     })
   }
 
-  //EDIT LOGBOOK
-  const confirmToEdit = () => {
-    history.push(`/logbook/formEditLogbook/${wannaEdit.id}`)
-  }
-
-  //CREATE
-  const handleCreateSelfAssessment = () => {
-    // alert(idPengguna)
-
-    history.push(`/rekapSelfAssessment/formSelfAssessment`)
-  }
-
-  //RESET PENCARIAN
   const handleReset = (clearFilters, selectedKeys, confirm, dataIndex, index) => {
     enterLoading(index)
     clearFilters()
@@ -201,15 +207,73 @@ const RekapSelfAssessment = () => {
     handleSearch(selectedKeys, confirm, dataIndex, index)
   }
 
-  //HOVER BUTTON
-  const hoverButtonLihatDetail = <div>Klik tombol, untuk melihat isi logbook peserta</div>
+  const refreshData = (index) => {
+    var PESERTA
+    if (rolePengguna === '1') {
+      PESERTA = idPengguna
+    } else {
+      PESERTA = idPeserta.id
+    }
+    axios.get(`http://localhost:1337/api/selfassessments?populate=*&filters[peserta][username]=${PESERTA}`).then((response) => {
+      var temp = []
+      var temp1 = response.data.data
+      const convertDate = (date) => {
+       let temp_date_split = date.split("-")
+       const month = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+       let date_month = temp_date_split[1]
+       let month_of_date = month[parseInt(date_month)-1]
+       // console.log(month_of_date,'isi date monts', month_of_date)
+       return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`  : null
+     }
 
-  //AKSI BUTTON LIHAT DETAIL
-  const actionLihatDetailPenilaianLogbook = () =>{
-    history.push(`/rekapLogbook/penilaianLogbook`)
+
+      var getTempSelfAssessment = function(obj){
+       for(var i in obj){
+         temp.push({
+           tanggal_mulai : convertDate(obj[i].attributes.tanggalmulai),
+           tanggal_selesai : convertDate(obj[i].attributes.tanggalselesai),
+           tanggal_pengumpulan : convertDate(obj[i].attributes.tanggal_pengumpulan),
+           id : obj[i].id
+         })
+       }
+      }
+     console.log("SA", response.data.data)
+     getTempSelfAssessment(temp1)
+     setSelfAssessmentPeserta(temp)
+      setLogbookPeserta(response.data.data)
+      setLoadings((prevLoadings) => {
+        const newLoadings = [...prevLoadings]
+        newLoadings[index] = false
+        return newLoadings
+      })
+    })
   }
 
-  //KOLOM
+
+  //EDIT LOGBOOK
+  const confirmToEdit = () => {
+    history.push(`/logbook/formEditLogbook/${wannaEdit.id}`)
+  }
+
+  //CREATE
+  const handleCreateSelfAssessment = () => {
+    history.push(`/selfAssessment/formSelfAssessment`)
+  }
+  /** RESET SEARCH */
+
+
+ const lihatRekapNilaiSelfAssessment = () => {
+  history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${idPeserta.id}/rekapPenilaianSelfAssessment`)
+ }
+
+  const lihatDetailSelfAssessment = (idsa) => {
+   (rolePengguna !== '1')? history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${idPeserta.id}/detail/${idsa}`) : history.push(`/selfAssessment/formSelfAssessment/detail/${idsa}`)
+  }
+
+  const lakukanPenilaianSelfAssessment = (idsa) =>{
+    history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${idPeserta.id}/penilaian/${idsa}`)
+  }
+
   const columnsPanitiaPembimbing = [
     {
       title: 'No',
@@ -221,71 +285,66 @@ const RekapSelfAssessment = () => {
       },
     },
     {
-      title: 'Tanggal Logbook',
-      dataIndex: ['attributes', 'tanggallogbook'],
-      ...getColumnSearchProps('tanggallogbook', 'Poin Penilaian'),
+      title: 'Tanggal Mulai',
+      dataIndex: 'tanggal_mulai',
+      key:'tanggal_mulai',
+      ...getColumnSearchProps('tanggal_mulai', 'Tanggal Mulai'),
     },
     {
-      title: 'Status Pengumpulan',
-      dataIndex: ['attributes', 'statuspengumpulan'],
-      ...getColumnSearchProps('statuspengumpulan', 'Status Poin Penilaian'),
+      title: 'Tanggal Selesai',
+      dataIndex: 'tanggal_selesai',
+      key:'tanggal_selesai',
+      ...getColumnSearchProps('tanggal_selesai', 'Tanggal Selesai'),
     },
     {
-      title: 'Penilaian',
-      dataIndex: '',
+      title: 'Tanggal Pengumpulan',
+      dataIndex: 'tanggal_pengumpulan',
+      ...getColumnSearchProps('tanggal_pengumpulan', 'Status Poin Penilaian'),
+      
     },
     {
       title: 'Aksi',
-      width: '5%',
+      width: '10%',
       align: 'center',
       dataIndex: 'action',
       render: (text, record) => (
         <>
-          {rolePengguna === '0' && (
-            <Row>
-              <Col span={6} style={{ textAlign: 'center' }}>
-                <Popover content={hoverButtonLihatDetail}>
-                  <Button
-                    type="primary"
-                    style={{ borderColor: 'grey', backgroundColor: '#bae0ff', color: 'black' }}
-                    shape="round"
-                    size="small"
-                    onClick={actionLihatDetailPenilaianLogbook}
-                  >
-                    Lihat Detail
-                  </Button>
-                </Popover>
-              </Col>
-            </Row>
-          )}
-
-          {rolePengguna === '4' && (
-            <Row>
-              <Col span={6} style={{ textAlign: 'center' }}>
-                <Popconfirm
-                  placement="topRight"
-                  title="Yakin akan melakukan edit logbook?"
-                  description={desc}
-                  onConfirm={confirmToEdit}
-                  okText="Yes"
-                  cancelText="No"
+          <Row>
+            <Col span={12} style={{ textAlign: 'center' }}>
+            
+            <Popover content={<div>Lihat isi detail self assessment</div>}>
+                <Button
+                  id="button-pencil"
+                  htmlType="submit"
+                  shape="circle"
+                  style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
+                  onClick={() => {
+                    lihatDetailSelfAssessment(record.id)
+                  }}
                 >
-                  {/* <Button
-              id="button-pencil"
-              htmlType="submit"
-              shape="circle"
-              style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
-              onClick={() => {
-                setWannaEdit(record)
-              }}
-            >
-              <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
-            </Button> */}
-                  <Button>akyam</Button>
-                </Popconfirm>
-              </Col>
-            </Row>
-          )}
+                  <FontAwesomeIcon icon={faEye} style={{ color: 'black' }} />
+                </Button>
+                </Popover>
+                </Col>
+
+                <Col span={12} style={{ textAlign: 'center' }}>
+            
+            <Popover content={<div>Lakukan penilaian self assessment</div>}>
+                <Button
+                  id="button-pencil"
+                  htmlType="submit"
+                  shape="circle"
+                  style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
+                  onClick={() => {
+                    lakukanPenilaianSelfAssessment(record.id)
+                  }}
+                >
+                  <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+                </Button>
+                </Popover>
+            </Col>
+           
+          </Row>
         </>
       ),
     },
@@ -303,14 +362,22 @@ const RekapSelfAssessment = () => {
       },
     },
     {
-      title: 'Tanggal Logbook',
-      dataIndex: ['attributes', 'tanggallogbook'],
-      ...getColumnSearchProps('tanggallogbook', 'Poin Penilaian'),
+      title: 'Tanggal Mulai',
+      dataIndex: 'tanggal_mulai',
+      key:'tanggal_mulai',
+      ...getColumnSearchProps('tanggal_mulai', 'Tanggal Mulai'),
     },
     {
-      title: 'Status Pengumpulan',
-      dataIndex: ['attributes', 'statuspengumpulan'],
-      ...getColumnSearchProps('statuspengumpulan', 'Status Poin Penilaian'),
+      title: 'Tanggal Selesai',
+      dataIndex: 'tanggal_selesai',
+      key:'tanggal_selesai',
+      ...getColumnSearchProps('tanggal_selesai', 'Tanggal Selesai'),
+    },
+    {
+      title: 'Tanggal Pengumpulan',
+      dataIndex: 'tanggal_pengumpulan',
+      ...getColumnSearchProps('tanggal_pengumpulan', 'Status Poin Penilaian'),
+      
     },
 
     {
@@ -322,44 +389,85 @@ const RekapSelfAssessment = () => {
         <>
           <Row>
             <Col span={6} style={{ textAlign: 'center' }}>
-              <Popconfirm
-                placement="topRight"
-                title="Yakin akan melakukan edit self assessment?"
-                description={desc}
-                onConfirm={confirmToEdit}
-                okText="Yes"
-                cancelText="No"
-              >
+            
+            <Popover content={<div>Lihat isi detail self assessment</div>}>
                 <Button
                   id="button-pencil"
                   htmlType="submit"
                   shape="circle"
                   style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
                   onClick={() => {
-                    setWannaEdit(record)
+                    lihatDetailSelfAssessment(record.id)
                   }}
                 >
-                  <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+                  <FontAwesomeIcon icon={faEye} style={{ color: 'black' }} />
                 </Button>
-              </Popconfirm>
+                </Popover>
             </Col>
           </Row>
         </>
       ),
     },
   ]
+  const buttonKembaliKeListHandling= () => {
+    history.push(`/rekapDokumenPeserta`)
+  }
 
+  const title = (judul) => {
+    return (
+      <>
+        <div>
+          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius:2 }}>
+            <Col span={24}>
+              <b>
+                <h4 style={{color:'#f6ffed', marginLeft:30, marginTop:6}}>{judul}</h4>
+              </b>
+            </Col>
+          </Row>
+        </div>
+        <div className="spacebottom"></div>
+      </>
+    )
+  }
   return isLoading ? (
     <Spin indicator={antIcon} />
   ) : (
     <>
-      <div>
-        {rolePengguna === '1' && <h1>[Hi Data Peserta]</h1>}
+      {rolePengguna !== '1' && (
+        <Space
+         className='spacebottom'
+          direction="vertical"
+          size="middle"
+          style={{
+            display: 'flex',
+          
+          }}
+        >
+          <Card title="Informasi Peserta" size="small" style={{  padding:30}}>
+            <Row style={{fontSize:16}}>
+              <Col span={4}>Nama Lengkap</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>Gina Anifah Choirunnisa</Col>
+            </Row>
+            <Row style={{fontSize:16}}>
+              <Col span={4}>NIM</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>201511009</Col>
+            </Row>
+          </Card>
+        </Space>
+      )}
 
-        {rolePengguna !== '1' && <h1>[Data Peserta KP/PKL]</h1>}
-      </div>
       <CCard className="mb-4">
+        {title('REKAP SELF ASSESSMENT PESERTA')}
         <CCardBody>
+        {rolePengguna !== '1' && (
+            <Popover content={<div>ke list dokumen peserta</div>}>
+              <Button type="primary" size="medium" onClick={buttonKembaliKeListHandling}>
+                Kembali
+              </Button>
+            </Popover>
+          )}
           {rolePengguna === '1' && (
             <Row>
               <Col span={24} style={{ textAlign: 'right' }}>
@@ -376,14 +484,39 @@ const RekapSelfAssessment = () => {
             </Row>
           )}
 
+          {rolePengguna !== '1' && (
+            <>
+             <h4 className='justify'>REKAP DOKUMEN SELF ASSESSMENT PESERTA</h4>
+             <Row>
+              <Col span={24} style={{ textAlign: 'right' }}>
+              <Popover content={<div>Lihat Rekap Nilai Self Assesment Peserta</div>}>
+                <Button
+                  id="lihat-rekap"
+                  size="sm"
+                  shape="round"
+                  style={{ color: 'white', background: '#339900', marginBottom: 16 }}
+                  type='primary'
+                  onClick={lihatRekapNilaiSelfAssessment}
+                >
+                  Rekap Nilai
+                </Button>
+                </Popover>
+
+              </Col>
+            </Row>
+             
+            </>
+           
+          )}
+
           {rolePengguna === '1' && (
             <CRow>
               <CCol sm={12}>
-                <h4>Tabel Self Assessment Peserta</h4>
+                <hr/>
                 <Table
                   scroll={{ x: 'max-content' }}
                   columns={columns}
-                  dataSource={logbookPeserta}
+                  dataSource={selfAssessmentPeserta}
                   rowKey="id"
                   bordered
                 />
@@ -394,11 +527,12 @@ const RekapSelfAssessment = () => {
           {rolePengguna !== '1' && (
             <CRow>
               <CCol sm={12}>
-                <h4>Tabel Logbook Peserta</h4>
+              
+                <div className="spacebottom"></div>
                 <Table
                   scroll={{ x: 'max-content' }}
                   columns={columnsPanitiaPembimbing}
-                  dataSource={logbookPeserta}
+                  dataSource={selfAssessmentPeserta}
                   rowKey="id"
                   bordered
                 />

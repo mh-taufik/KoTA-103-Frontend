@@ -7,6 +7,7 @@ import {
   Col,
   DatePicker,
   Input,
+  Popover,
   Row,
   Select,
   Space,
@@ -24,7 +25,7 @@ import { SpaceContext } from 'antd/lib/space'
 import { Box } from '@mui/material'
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min'
 import axios from 'axios'
-import moment from 'moment'
+
 
 const { TextArea } = Input
 const EditRPP = () => {
@@ -59,6 +60,7 @@ const EditRPP = () => {
   const [dataMilestones, setDataMilestones] = useState([])
   const [dataCapaianMingguan, setDataCapaianMingguan] = useState([])
   const [dataDeliverables, setDataDeliverables] = useState([])
+  const [dataJadwalPenyelesaianKeseluruhan, setDataJadwalPenyelesaianKeseluruhan] = useState([])
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages)
@@ -370,6 +372,26 @@ const EditRPP = () => {
           temp_rencanaCapaianMingguan(temp_rcm)
           setDataCapaianMingguan(temp_rcm1)
           console.log('capaian mingguan', temp_rcm1)
+
+             /** JADWAL PENYELESAIAN KESELURUHAN */
+             let temp_jadwalKeseluruhan = []
+             let temp_jadwalKeseluruhan1 = []
+             temp_jadwalKeseluruhan = response.data.data[0].attributes.jadwalpenyelesaiankeseluruhans.data
+             let temp_jadwalKeseluruhans = function (obj) {
+               for (var i in obj) {
+                 temp_jadwalKeseluruhan1.push({
+                   id: obj[i].id,
+                   jenispekerjaan: obj[i].attributes.jenispekerjaan,
+                   butirpekerjaan: obj[i].attributes.butirpekerjaan,
+                   tanggalmulai: obj[i].attributes.tanggalmulai,
+                   tanggalselesai: obj[i].attributes.selesai,
+                 })
+               }
+             }
+   
+             temp_jadwalKeseluruhans(temp_jadwalKeseluruhan)
+             setDataJadwalPenyelesaianKeseluruhan(temp_jadwalKeseluruhan1)
+             console.log('capaian mingguan', temp_jadwalKeseluruhan1)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -470,7 +492,7 @@ const EditRPP = () => {
   
 
   
-  const column= [
+  const columnJadwalPenyelesaianKeseluruhan= [
     {
       title: 'No',
       dataIndex: 'no',
@@ -484,18 +506,24 @@ const EditRPP = () => {
       title: 'TANGGAL MULAI',
       dataIndex: 'tanggalmulai',
       key: 'tanggalmulai',
+      width: '10%',
+    },
+    {
+        title: 'TANGGAL SELESAI',
+        dataIndex: 'tanggalselesai',
+        key: 'tanggalselesai',
+        width: '10%',
+      },
+    {
+      title: 'JENISPEKERJAAN',
+      dataIndex: 'jenispekerjaan',
+      key: 'jenispekerjaan',
       width: '20%',
     },
     {
-        title: 'TANGGAL BERAKHIR',
-        dataIndex: 'tanggalberakhir',
-        key: 'tanggalberakhir',
-        width: '20%',
-      },
-    {
-      title: 'RENCANA CAPAIAN',
-      dataIndex: 'rencanacapaian',
-      key: 'rencanacapaian',
+      title: 'BUTIRPEKERJAAN',
+      dataIndex: 'butirpekerjaan',
+      key: 'butirpekerjaan',
       width: '30%',
     },
   ]
@@ -505,9 +533,12 @@ const EditRPP = () => {
     <>
       <div className="container">
         <Space>
-          <Button type="primary" onClick={showModal}>
-            Lihat Contoh RPP
+         <Popover content={<div>Kembali ke list RPP</div>}>
+         <Button type="primary" onClick={()=>history.push(`/rencanaPenyelesaianProyek`)}>
+           Kembali
           </Button>
+
+         </Popover>
           <Modal
             title="Format Pengisian Dokumen RPP"
             visible={isModalOpen}
@@ -660,21 +691,17 @@ const EditRPP = () => {
               )
             })}
             <Col>
-              <button
-                type="button"
-                className="btn btn-primary me-6 btn-sm"
+              <Button type="primary"
                 onClick={() => handleAddRowDeliverables()}
               >
                 Tambah Data
-              </button>
+              </Button>
               {noOfRowsDeliverables !== 0 && (
-                <button
-                  type="button"
-                  className="btn btn-sm btn-danger"
+                <Button type="primary" danger
                   onClick={() => handleDropRowDeliverables()}
                 >
                   Hapus Baris Terakhir
-                </button>
+                </Button>
               )}
             </Col>
           </div>
@@ -743,21 +770,17 @@ const EditRPP = () => {
               )
             })}
             <Col>
-              <button
-                type="button"
-                className="btn btn-primary me-6 btn-sm"
+              <Button type="primary" 
                 onClick={() => handleAddRowMilestones()}
               >
                 Tambah Data
-              </button>
+              </Button>
               {noOfRowsMilestones !== 0 && (
-                <button
-                  type="button"
-                  className="btn btn-sm btn-danger"
+                <Button type="primary" danger
                   onClick={() => handleDropRowMilestones()}
                 >
                   Hapus Baris Terakhir
-                </button>
+                </Button>
               )}
             </Col>
           </div>
@@ -821,21 +844,17 @@ const EditRPP = () => {
               )
             })}
             <Col>
-              <button
-                type="button"
-                className="btn btn-primary me-6 btn-sm"
+              <Button type="primary" 
                 onClick={() => handleAddRowRencanaCapaianPerminggu()}
               >
                 Tambah Data
-              </button>
+              </Button>
               {noOfRowsCapaianPerminggu !== 0 && (
-                <button
-                  type="button"
-                  className="btn btn-sm btn-danger"
+                <Button type="primary" danger
                   onClick={() => handleDropRowRencanaCapaianPerminggu()}
                 >
                   Hapus Baris Terakhir
-                </button>
+                </Button>
               )}
             </Col>
           </div>
@@ -846,8 +865,10 @@ const EditRPP = () => {
           <div>
             <br />
             <div className="spacebottom"></div>
-            <hr />
-            <h4>JADWAL PENEYELESAIAN PEKERJAAN KESELURUHAN</h4>
+           
+            <h4>JADWAL PENYELESAIAN PEKERJAAN KESELURUHAN</h4>
+            <hr/>
+            <Table columns={columnJadwalPenyelesaianKeseluruhan} dataSource={dataJadwalPenyelesaianKeseluruhan} />
             {[...Array(noOfRowsJadwalPenyelesaianPekerjaanKeseluruhan)].map(
               (elementInArray, index) => {
                 return (
@@ -929,21 +950,17 @@ const EditRPP = () => {
               },
             )}
             <Col>
-              <button
-                type="button"
-                className="btn btn-primary me-6 btn-sm"
+              <Button type="primary" 
                 onClick={() => handleAddRowJadwalPenyelesaianKeseluruhan()}
               >
                 Tambah Data
-              </button>
+              </Button>
               {noOfRowsJadwalPenyelesaianPekerjaanKeseluruhan !== 0 && (
-                <button
-                  type="button"
-                  className="btn btn-sm btn-danger"
+                <Button type="primary" danger
                   onClick={() => handleDropRowJadwalPenyelesaianKeseluruhan()}
                 >
                   Hapus Baris Terakhir
-                </button>
+                </Button>
               )}
             </Col>
           </div>

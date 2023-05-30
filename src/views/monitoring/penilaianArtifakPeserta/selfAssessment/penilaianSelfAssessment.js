@@ -38,11 +38,11 @@ import { Table } from 'react-bootstrap'
 
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 
-const PenilaianLogbook = () => {
+const PenilaianSelfAssessment = () => {
   let history = useHistory()
   var params = useParams()
   let NIM_PESERTA = params.nim //untuk pembimbing
-  let LOGBOOK_PESERTA = params.id //untuk pembimbing
+  let ID_SELFASSESSMENT = params.id //untuk pembimbing
 
   const [timeline, setTimeline] = useState([])
 
@@ -70,10 +70,10 @@ const PenilaianLogbook = () => {
   const [selfAssessmentPeserta, setSelfAssessmentPeserta] = useState([])
   const [logbookPeserta, setLogbookPeserta] = useState([])
   const [nilaiSelfAssessment, setNilaiSelfAssessment] = useState([])
-  const [pages, setPages] = useState()
-  const [currentLogbook, setCurrentLogbook] = useState()
-  const [pagesSelfAssessment, setPagesSelfAssessment] = useState(1)
-  const [currentSelfAssessment, setCurrentSelfAssessment] = useState(0)
+  const [pages, setPages] = useState(1)
+  const [currentLogbook, setCurrentLogbook] = useState(0)
+  const [pagesSelfAssessment, setPagesSelfAssessment] = useState()
+  const [currentSelfAssessment, setCurrentSelfAssessment] = useState()
   const [allIdSelfAssessmentPeserta, setAllIdSelfAssessmentPeserta] = useState([])
 
   /** PAGINATION LOGBOOK */
@@ -91,6 +91,7 @@ const PenilaianLogbook = () => {
     setPagesSelfAssessment(value)
   }
 
+  /** HANDLE SAAT NILAI SA DI UBAH */
   const handleChangeNilaiSelfAssessment = (idS, index, nilaiS, keyData) => {
     if (nilaiSelfAssessment[index]) {
       console.log('ya')
@@ -114,6 +115,7 @@ const PenilaianLogbook = () => {
     console.log('nilai self assessment', nilaiSelfAssessment)
   }
 
+  /** HANDLE CANCEL EDIT MODAL */
   const handleCancelEdit = () => {
     setIsModalEditVisible(false)
   }
@@ -159,6 +161,7 @@ const PenilaianLogbook = () => {
   }
 
 
+  /** SHOW EDIT PENILAIAN LOGBOOK */
   const showModalEdit = (record) => {
     setIsModalEditVisible(true)
     setChoose(record)
@@ -171,6 +174,7 @@ const PenilaianLogbook = () => {
     }
   }
 
+  /** MENGAMBIL DATA TIMELINE */
   const getTimeline = async () => {
     var obj = []
     var content = []
@@ -220,28 +224,17 @@ const PenilaianLogbook = () => {
     setTimeline(content)
   }
 
+  /** MENGAMBIL DATA LOGBOOK PESERTA */
   const getLogbook = async () => {
     await axios
       .get('http://localhost:1337/api/logbooks')
       .then((response) => {
         console.log(response)
-
         console.log('data logbook', response.data.data)
         var temp = []
         var temp1 = response.data.data
-        var pgs
-        var curr
-        var a = 0
-        var nimPeserta = parseInt(LOGBOOK_PESERTA)
         var getDataTemp = function (obj) {
           for (var i in obj) {
-            console.log('if', typeof obj[i].id, 'dan', typeof LOGBOOK_PESERTA)
-            if (obj[i].id === nimPeserta) {
-              //pages dimulai dari 1
-              pgs = a + 1
-              curr = a
-            }
-
             temp.push({
               id: obj[i].id,
               waktudankegiatan: obj[i].attributes.waktudankegiatan,
@@ -257,14 +250,9 @@ const PenilaianLogbook = () => {
               tools: obj[i].attributes.tools,
               tugas: obj[i].attributes.tugas,
             })
-            a++
           }
         }
-
         getDataTemp(temp1)
-        console.log('pages ==> ', pgs)
-        setPages(pgs)
-        setCurrentLogbook(curr)
         setLogbookPeserta(temp)
         console.log('temp1', temp)
       })
@@ -284,7 +272,7 @@ const PenilaianLogbook = () => {
       })
   }
 
-  //AKSI PENILAIAN LOGBOOK PESERTA
+ /** POST DATA PENILAIAN LOGBOOK PESERTA */
   const AksiPenilaianPeserta = async (idLogbook, index) => {
     await axios
       .put(`http://localhost:1337/api/logbooks/${idLogbook}`, {
@@ -344,7 +332,8 @@ const PenilaianLogbook = () => {
     // console.log('data SA', allIdSelfAssessmentPeserta)
   }
 
-  const putNilaiSelfAssessment = async () => {
+  /** HANDLING PERUBAHAN NILAI SELF ASSESSMENT */
+  const putNilaiSelfAssessment = async (idx) => {
     let data = nilaiSelfAssessment
     for (var i in data){
      console.log(i, ' ', data[i])
@@ -359,30 +348,22 @@ const PenilaianLogbook = () => {
         message:'Penilaian self assessment berhasil diubah'
       })
 
-      refreshDataSelfAssessment()
+      refreshDataSelfAssessment(allIdSelfAssessmentPeserta,idx)
      })
     }
   }
 
-  const refreshDataSelfAssessment = () =>{
-    getDataSelfAssessmentTerkait()
-  }
 
-  useEffect(() => {
-    console.log('data SA', allIdSelfAssessmentPeserta)
-    getNilaiKeteranganPoinPenilaianSelfAssessment(allIdSelfAssessmentPeserta)
-  }, [allIdSelfAssessmentPeserta])
-
-  const getNilaiKeteranganPoinPenilaianSelfAssessment = async (data) => {
+/**REFRESH SELF ASSESSMENT AFTER CHANGE NILAI */
+  const refreshDataSelfAssessment = async(data,idx) =>{
     // console.log('idnyak',data)
     let tempDataSelfAssessmentDetail = []
 
+ 
     for (let i in data) {
-      console.log('id', data[i].id)
-      await axios
-        .get(
-          `http://localhost:1337/api/selfasspoins?populate=*&filters[selfassessment][id]=${data[i].id}`,
-        )
+      console.log('id NYA', typeof(data[i].id), typeof(parseInt(ID_SELFASSESSMENT)))
+
+      await axios.get(`http://localhost:1337/api/selfasspoins?populate=*&filters[selfassessment][id]=${data[i].id}`)
         .then((res) => {
           console.log('[', data[i].id, ']', res.data.data)
 
@@ -391,20 +372,67 @@ const PenilaianLogbook = () => {
             data: res.data.data,
           })
         })
+       
     }
 
+   let tempPage = idx+1
+    setPagesSelfAssessment(tempPage)
+    setCurrentSelfAssessment(idx)
     console.log('resultssssss', tempDataSelfAssessmentDetail)
+ 
     setSelfAssessmentPeserta(tempDataSelfAssessmentDetail)
   }
 
   useEffect(() => {
+    console.log('data SA', allIdSelfAssessmentPeserta)
+    getNilaiKeteranganPoinPenilaianSelfAssessment(allIdSelfAssessmentPeserta)
+  }, [allIdSelfAssessmentPeserta])
+
+  /** GET NILAI DAN KETERANGAN DARI PENILAIAN SELF ASSESSMENT */
+  const getNilaiKeteranganPoinPenilaianSelfAssessment = async (data) => {
+    // console.log('idnyak',data)
+    let tempDataSelfAssessmentDetail = []
+
+    let a = 0
+    let b = 1
+    let curr 
+    let pgs
+    for (let i in data) {
+      console.log('id NYA', typeof(data[i].id), typeof(parseInt(ID_SELFASSESSMENT)))
+      if(data[i].id === (parseInt(ID_SELFASSESSMENT))){
+        curr = a
+        pgs = b
+      }
+      await axios.get(`http://localhost:1337/api/selfasspoins?populate=*&filters[selfassessment][id]=${data[i].id}`)
+        .then((res) => {
+          console.log('[', data[i].id, ']', res.data.data)
+
+          tempDataSelfAssessmentDetail.push({
+            id_self_assessment: data[i].id,
+            data: res.data.data,
+          })
+        })
+        a++
+        b++
+    }
+
+    console.log('PGS',pgs)
+    console.log('CURR',curr)
+    setPagesSelfAssessment(pgs)
+    setCurrentSelfAssessment(curr)
+    console.log('resultssssss', tempDataSelfAssessmentDetail)
+ 
+    setSelfAssessmentPeserta(tempDataSelfAssessmentDetail)
+  }
+
+  /** USE EFFECT */
+  useEffect(() => {
     getTimeline()
     getLogbook()
     getDataSelfAssessmentTerkait()
-
-    // console.log('LOGBOOK PESERTA', LOGBOOK_PESERTA)
   }, [history])
 
+  /** HANDLING TIMELINE */
   const customizeTooltip = (arg) => {
     var options = { year: 'numeric', month: 'long', day: 'numeric' }
     var start_date = new Date(arg.point.data.start_date)
@@ -417,6 +445,7 @@ const PenilaianLogbook = () => {
     }
   }
 
+  /** JUDUL  */
   const title = (judul) => {
     return (
       <>
@@ -436,7 +465,7 @@ const PenilaianLogbook = () => {
 
 
 
-  //PENYESUAIAN WARNA TEKS SESUAI DENGAN STATUS PENGUMPULAN
+ /** PENYESUAIAN WARNA TEKS PADA STATUS PENGUMPULAN */
   const colorTextStatusPengumpulan = (teks) => {
     if (teks === 'terlambat') {
       return <text style={{ color: '#a8071a' }}>{teks}</text>
@@ -445,7 +474,7 @@ const PenilaianLogbook = () => {
     }
   }
 
-  /**OPTION PENILAIAN */
+  /** HOVER STATUS PENILAIAN DAN DETAIL PENILAIAN DARI LOGBOOK */
   const textSangatBaik = <text>Deskripsi Penilaian</text>
 
   const contentPenilaianSangatBaik = (
@@ -501,6 +530,7 @@ const PenilaianLogbook = () => {
     return showArrow
   }, [showArrow, arrowAtCenter])
 
+  /** REFRESH DATA LOGBOOK SETELAH DI UPDATE PENILAIAN */
   const refreshDataLogbook = async(id, index) => {
     await axios
     .get('http://localhost:1337/api/logbooks')
@@ -552,16 +582,18 @@ const PenilaianLogbook = () => {
 
   /** HANDLE BUTTON */
   const btnKembali = () => {
-    history.push(`/rekapDokumenPeserta/logbookPeserta/${NIM_PESERTA}`)
+    history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${NIM_PESERTA}`)
   }
 
   return (
     <>
       <>
         <div className="container2">
-          <Button type="primary" shape="round" className="spacebottom" onClick={btnKembali}>
-            Kembali ke list logbook
+        <Popover content={<div>Kembali ke rekap Self Assessment</div>}>
+        <Button type="primary" size='medium' className="spacebottom" onClick={btnKembali}>
+            Kembali
           </Button>
+        </Popover>
 
           {title('RENCANA PENGERJAAN PROYEK ( RPP )')}
           <div style={{ padding: 10 }}>
@@ -807,7 +839,7 @@ const PenilaianLogbook = () => {
                             </tbody>
                           </Table>
                         </div>
-                        <Button type="primary" onClick={putNilaiSelfAssessment} variant="contained">
+                        <Button type="primary" onClick={()=>putNilaiSelfAssessment(index)} variant="contained">
                           Simpan Nilai
                         </Button>
                       </div>
@@ -918,4 +950,4 @@ const PenilaianLogbook = () => {
   )
 }
 
-export default PenilaianLogbook
+export default PenilaianSelfAssessment

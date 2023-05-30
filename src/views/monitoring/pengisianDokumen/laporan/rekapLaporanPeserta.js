@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import 'antd/dist/antd.css'
+import 'antd/dist/reset.css'
 import '../rpp/rpp.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -20,6 +20,7 @@ import {
   Popover,
   Card,
   Tag,
+  Alert,
 } from 'antd'
 import axios from 'axios'
 import { SearchOutlined } from '@ant-design/icons'
@@ -28,6 +29,9 @@ import { useHistory, useParams, Router } from 'react-router-dom'
 import { LoadingOutlined } from '@ant-design/icons'
 import { Box } from '@mui/material'
 import moment from 'moment'
+import get from 'lodash.get'
+import isequal from 'lodash.isequal'
+import { message } from 'antd';
 
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const RekapLaporanPeserta = () => {
@@ -39,6 +43,7 @@ const RekapLaporanPeserta = () => {
   const [wannaCreate, setWannaCreate] = useState(false)
   const [wannaEdit, setWannaEdit] = useState(false)
   const [idPengguna, setIdPengguna] = useState(localStorage.username)
+  const [dataLaporanPeserta, setDataLaporanPeserta] = useState([])
   let rolePengguna = localStorage.id_role
   let history = useHistory()
   const { id } = useParams()
@@ -47,6 +52,11 @@ const RekapLaporanPeserta = () => {
   const [statusBelumDiNilai, isStatusBelumDinilai] = useState(false)
   const desc = '*edit logbook yang dipilih'
   axios.defaults.withCredentials = true
+  const [messageApi, contextHolder] = message.useMessage();
+  const info = (link) => {
+    navigator.clipboard.writeText(link)
+    messageApi.info('Link disalin');
+  };
 
   const getColumnSearchProps = (dataIndex, name) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -55,25 +65,23 @@ const RekapLaporanPeserta = () => {
           ref={(node) => {
             searchInput = node
           }}
-          placeholder={`Cari berdasarkan ${name}`}
+          placeholder={`Search ${name}`}
           value={selectedKeys[0]}
           onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex, `cari`)}
-          style={{ marginBottom: 8, display: 'block' }}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{ width: 188, marginBottom: 8, display: 'block' }}
         />
         <Space>
           <Button
             type="primary"
-            onClick={() => handleSearch(selectedKeys, confirm, dataIndex, `cari`)}
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
             icon={<SearchOutlined />}
             size="small"
-            loading={loadings[`cari`]}
             style={{ width: 90 }}
           >
-            Cari
+            Search
           </Button>
           <Button
-            loading={loadings[99]}
             onClick={() => handleReset(clearFilters, '', confirm, dataIndex, 99)}
             size="small"
             style={{ width: 90 }}
@@ -86,29 +94,28 @@ const RekapLaporanPeserta = () => {
     filterIcon: (filtered) => (
       <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
     ),
-    onFilter: (value, record) =>
-      record[dataIndex]
-        ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase())
-        : '',
+    onFilter: (value, record) => {
+      return get(record, dataIndex).toString().toLowerCase().includes(value.toLowerCase())
+    },
     onFilterDropdownVisibleChange: (visible) => {
       if (visible) {
-        setTimeout(() => searchInput.select(), 100)
+        setTimeout(() => searchInput.select())
       }
     },
-    render: (text) =>
-      state.searchedColumn === dataIndex ? (
+    render: (text) => {
+      return isequal(state.searchedColumn, dataIndex) ? (
         <Highlighter
           highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
           searchWords={[state.searchText]}
           autoEscape
-          textToHighlight={text ? text.toString() : ''}
+          textToHighlight={text.toString()}
         />
       ) : (
         text
-      ),
+      )
+    },
   })
 
-  //PENCARIAN
   const handleSearch = (selectedKeys, confirm, dataIndex, index) => {
     enterLoading(index)
     confirm()
@@ -123,7 +130,6 @@ const RekapLaporanPeserta = () => {
     })
   }
 
-  //RESET PENCARIAN
   const handleReset = (clearFilters, selectedKeys, confirm, dataIndex, index) => {
     enterLoading(index)
     clearFilters()
@@ -138,44 +144,18 @@ const RekapLaporanPeserta = () => {
       return newLoadings
     })
   }
-  const refreshData = (index) => {
+  const refreshData = async (index) => {
     var PESERTA
     if (rolePengguna === '1') {
       PESERTA = idPengguna
     } else {
       PESERTA = idPeserta.id
     }
-
-    axios
-      .get(`http://localhost:1337/api/logbooks?populate=*&filters[peserta][username]=${PESERTA}`)
-      .then((result) => {
-        //setLogbookPeserta(result.data.data)
-        var temp = []
-        var temp1 = result.data.data
-        const convertDate = (date) => {
-          return date ? moment(date).format('DD - MM - YYYY') : null
-        }
-        var getTempLogbook = function (obj) {
-          for (var i in obj) {
-            temp.push({
-              id: obj[i].id,
-              tools: obj[i].attributes.tools,
-              statuspengecekan: obj[i].attributes.statuspengecekan,
-              hasilkerja: obj[i].attributes.hasilkerja,
-              nilai: obj[i].attributes.nilai,
-              projectmanager: obj[i].attributes.projectmanager,
-              keterangan: obj[i].attributes.keterangan,
-              namaproyek: obj[i].attributes.namaproyek,
-              technicalleader: obj[i].attributes.technicalleader,
-              tugas: obj[i].attributes.tugas,
-              waktudankegiatan: obj[i].attributes.waktudankegiatan,
-              tanggallogbook: convertDate(obj[i].attributes.tanggallogbook),
-              statuspengumpulan: obj[i].attributes.statuspengumpulan,
-            })
-          }
-        }
-        getTempLogbook(temp1)
-        setLogbookPeserta(temp)
+    await axios
+      .get(`http://localhost:1337/api/laporans?populate=*&filters[peserta][username]=${PESERTA}`)
+      .then((res) => {
+        console.log(res.data.data)
+        setDataLaporanPeserta(res.data.data)
         // console.log(result.data.data)
         setIsLoading(false)
         setLoadings((prevLoadings) => {
@@ -187,8 +167,10 @@ const RekapLaporanPeserta = () => {
   }
 
   useEffect(() => {
-    console.log('idpeserta ==> ', idPeserta.id)
-    async function getLogbookPeserta(record, index) {
+    // console.log('idpeserta ==> ', idPeserta.id)
+
+
+    async function getLaporanPeserta(record, index) {
       var PESERTA
       if (rolePengguna === '1') {
         PESERTA = idPengguna
@@ -196,38 +178,12 @@ const RekapLaporanPeserta = () => {
         PESERTA = idPeserta.id
       }
       enterLoading(index)
+
       await axios
-        .get(`http://localhost:1337/api/logbooks?populate=*&filters[peserta][username]=${PESERTA}`)
-        .then((result) => {
-          //setLogbookPeserta(result.data.data)
-          var temp = []
-          var temp1 = result.data.data
-          const convertDate = (date) => {
-            return date ? moment(date).format('DD - MM - YYYY') : null
-          }
-          var getTempLogbook = function (obj) {
-            for (var i in obj) {
-              temp.push({
-                id: obj[i].id,
-                tools: obj[i].attributes.tools,
-                statuspengecekan: obj[i].attributes.statuspengecekan,
-                hasilkerja: obj[i].attributes.hasilkerja,
-                nilai: obj[i].attributes.nilai,
-                projectmanager: obj[i].attributes.projectmanager,
-                keterangan: obj[i].attributes.keterangan,
-                namaproyek: obj[i].attributes.namaproyek,
-                technicalleader: obj[i].attributes.technicalleader,
-                tugas: obj[i].attributes.tugas,
-                waktudankegiatan: obj[i].attributes.waktudankegiatan,
-                tanggallogbook: convertDate(obj[i].attributes.tanggallogbook),
-                statuspengumpulan: obj[i].attributes.statuspengumpulan,
-              })
-            }
-          }
-          getTempLogbook(temp1)
-          setLogbookPeserta(temp)
-          // console.log(result.data.data)
-          setIsLoading(false)
+        .get(`http://localhost:1337/api/laporans?populate=*&filters[peserta][username]=${PESERTA}`)
+        .then((res) => {
+          console.log(res.data.data)
+          setDataLaporanPeserta(res.data.data)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -239,27 +195,15 @@ const RekapLaporanPeserta = () => {
             })
           } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
             history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
             history.push('/500')
           }
         })
     }
-    getLogbookPeserta()
+
+    getLaporanPeserta()
   }, [history])
 
-  //EDIT LOGBOOK
-  const confirmToEdit = () => {
-    history.push(`/logbook/formEditLogbook/${wannaEdit.id}`)
-  }
-
-  const handleCreateLogbook = () => {
-    history.push(`/logbook/formlogbook/${idPengguna}`)
-  }
-
-  //HOVER BUTTON
-  const hoverButtonLihatDetail = <div>Klik tombol, untuk melihat isi logbook peserta</div>
-
-  //AKSI BUTTON LIHAT DETAIL
   const actionLihatDetailLaporanPeserta = (idLogbook) => {
     history.push(`/rekapDokumenPeserta/logbookPeserta/${idPeserta.id}/detail/${idLogbook}`)
   }
@@ -268,107 +212,98 @@ const RekapLaporanPeserta = () => {
     history.push(`/rekapDokumenPeserta/laporan/${idPeserta.id}/nilai/${idLogbook}`)
   }
 
-  const hoverKembaliKeListDokumenPeserta = <div>Ke list dokumen peserta</div>
-  //AKSI PANITIA KEMBALI
   const AksiKembaliPanitia = () => {
     history.push(`/rekapDokumenPeserta`)
   }
 
-  //KOLOM
   const columnsPanitiaPembimbing = [
     {
       title: 'No',
       dataIndex: 'no',
-      width: '5%',
+      width: '2%',
       align: 'center',
       render: (value, item, index) => {
         return index + 1
       },
     },
     {
-      title: 'Tanggal Logbook',
-      dataIndex: 'tanggallogbook',
-      key: 'tanggallogbook',
-      ...getColumnSearchProps('tanggallogbook', 'Poin Penilaian'),
+      title: 'Tanggal Pengumpulan',
+      width: '7%',
+      dataIndex: ['attributes', 'tanggalpengumpulan'],
+      ...getColumnSearchProps(['attributes', 'tanggalpengumpulan'], 'Tanggal Pengumpulan'),
     },
     {
-      title: 'Status Pengumpulan',
-      dataIndex: 'statuspengumpulan',
-      key: 'statuspengumpulan',
-      ...getColumnSearchProps('statuspengumpulan', 'Status Poin Penilaian'),
+      title: 'Deadline Pengumpulan',
+      dataIndex: ['attributes', 'deadlinen'],
+      width: '7%',
+      ...getColumnSearchProps(['attributes', 'deadlinen'], 'Deadline'),
+    },
+    {
+      title: 'Status',
+      dataIndex: ['attributes', 'status'],
+      width: '7%',
+      ...getColumnSearchProps(['attributes', 'status'], 'Status'),
       render: (text, record) => {
         var color = ''
-        if (record.statuspengumpulan === 'terlambat') {
+        if (record.attributes.status === 'terlambat') {
           color = 'volcano'
-        } else if (record.statuspengumpulan === 'tepat waktu') {
+        } else if (record.attributes.status === 'tepat waktu') {
           color = 'green'
         }
 
-        return <Tag color={color}>{record.statuspengumpulan}</Tag>
+        return <Tag color={color}>{record.attributes.status}</Tag>
       },
     },
     {
-      title: 'Penilaian',
-      dataIndex: 'nilai',
+      title: 'Link Drive',
+      dataIndex: ['attributes', 'link_drive'],
+      width: '20%',
+      ...getColumnSearchProps(['attributes', 'link_drive'], 'Link Drive'),
     },
     {
       title: 'Aksi',
-      width: '20%',
+      width: '15%',
       align: 'center',
       dataIndex: 'action',
       render: (text, record) => (
         <>
           {rolePengguna === '0' && (
             <Row>
-              <Col span={12} style={{ textAlign: 'center' }}>
+              {/* <Col span={8} style={{ textAlign: 'center' }}>
                 <Popover content={<div>Lihat isi detail dokumen laporan peserta</div>}>
                   <Button
-                    size="small"
+                    size="medium"
                     onClick={() => actionLihatDetailLaporanPeserta(record.id)}
-                    style={{ backgroundColor: '#91caff' }}
+                    style={{ backgroundColor: '#4096ff', color:'white' }}
                   >
-                    Lihat Detail
+                    &nbsp;Detail&nbsp;
+                  </Button>
+                </Popover>
+              </Col> */}
+              <Col span={12} style={{ textAlign: 'center' }}>
+                <Popover
+                  content={
+                    <>
+                      <div>Lihat penilaian laporan</div>
+                      <div>(Form Penilaian Pembimbing)</div>
+                    </>
+                  }
+                >
+                  <Button
+                    size="medium"
+                    onClick={() => actionPenilaianFormPembimbingJurusan(record.id)}
+                     style={{ backgroundColor: '#fa8c16', color:'white' }}
+                  >
+                    &nbsp;&nbsp;Nilai&nbsp;&nbsp;
                   </Button>
                 </Popover>
               </Col>
               <Col span={12} style={{ textAlign: 'center' }}>
-                <Popover content={<><div>Lihat penilaian laporan</div><div>(Form Penilaian Pembimbing)</div></>}>
-                  <Button
-                    size="small"
-                    onClick={() => actionPenilaianFormPembimbingJurusan(record.id)}
-                    style={{ backgroundColor: '#ffd666' }}
-                  >
-                    &nbsp;&nbsp; &nbsp;&nbsp; Nilai &nbsp;&nbsp;&nbsp;&nbsp;
-                  </Button>
-                </Popover>
-              </Col>
-            </Row>
-          )}
-
-          {rolePengguna === '4' && (
-            <Row>
-              <Col span={6} style={{ textAlign: 'center' }}>
-                <Popconfirm
-                  placement="topRight"
-                  title="Yakin akan melakukan edit logbook?"
-                  description={desc}
-                  onConfirm={confirmToEdit}
-                  okText="Yes"
-                  cancelText="No"
-                >
-                  {/* <Button
-              id="button-pencil"
-              htmlType="submit"
-              shape="circle"
-              style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
-              onClick={() => {
-                setWannaEdit(record)
-              }}
-            >
-              <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
-            </Button> */}
-                  <Button>akyam</Button>
-                </Popconfirm>
+              <Popover content={<div>Salin Link Gdrive</div>}>
+                 <Button type="primary" onClick={()=>info(record.attributes.link_drive)}>
+                  Copy
+                </Button>
+              </Popover>
               </Col>
             </Row>
           )}
@@ -377,7 +312,11 @@ const RekapLaporanPeserta = () => {
     },
   ]
 
-  //KOLOM
+  const pengumpulanLaporan = (id) => {
+    history.push(`/laporan/submissionLaporan/${id}`)
+  }
+
+ 
   const columns = [
     {
       title: 'No',
@@ -389,55 +328,62 @@ const RekapLaporanPeserta = () => {
       },
     },
     {
-      title: 'Tanggal Logbook',
-      dataIndex: ['attributes', 'tanggallogbook'],
-      ...getColumnSearchProps('tanggallogbook', 'Poin Penilaian'),
+      title: 'Tanggal Pengumpulan',
+      dataIndex: ['attributes', 'tanggalpengumpulan'],
+      width: '10%',
+      ...getColumnSearchProps(['attributes', 'tanggalpengumpulan'], 'Tanggal Pengumpulan'),
     },
     {
-      title: 'Status Pengumpulan',
-      dataIndex: ['attributes', 'statuspengumpulan'],
-      ...getColumnSearchProps('statuspengumpulan', 'Status Poin Penilaian'),
+      title: 'Deadline Pengumpulan',
+      dataIndex: ['attributes', 'deadlinen'],
+      width: '10%',
+      ...getColumnSearchProps(['attributes', 'deadlinen'], 'Deadline'),
+    },
+    {
+      title: 'Status',
+      width: '10%',
+      dataIndex: ['attributes', 'status'],
+      ...getColumnSearchProps(['attributes', 'status'], 'Status'),
       render: (text, record) => {
         var color = ''
-        if (record.attributes.statuspengumpulan === 'terlambat') {
-          color = 'error.main'
-        } else if (record.attributes.statuspengumpulan === 'tepat waktu') {
-          color = 'success.main'
+        if (record.attributes.status === 'terlambat') {
+          color = 'volcano'
+        } else if (record.attributes.status === 'tepat waktu') {
+          color = 'green'
         }
 
-        return <Box sx={{ color: { color } }}>{record.attributes.statuspengumpulan}</Box>
+        return <Tag color={color}>{record.attributes.status}</Tag>
       },
+    },
+    {
+      title: 'Link Drive',
+      dataIndex: ['attributes', 'link_drive'],
+      width: '10%',
+      ...getColumnSearchProps(['attributes', 'link_drive'], 'Link Drive'),
     },
 
     {
       title: 'Aksi',
-      width: '5%',
+      width: '15%',
       align: 'center',
       dataIndex: 'action',
       render: (text, record) => (
         <>
           <Row>
-            <Col span={6} style={{ textAlign: 'center' }}>
-              <Popconfirm
-                placement="topRight"
-                title="Yakin akan melakukan edit logbook?"
-                description={desc}
-                onConfirm={confirmToEdit}
-                okText="Yes"
-                cancelText="No"
-              >
-                <Button
-                  id="button-pencil"
-                  htmlType="submit"
-                  shape="circle"
-                  style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
-                  onClick={() => {
-                    setWannaEdit(record)
-                  }}
-                >
-                  <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+            <Col span={12} style={{ textAlign: 'center' }}>
+              <Popover content={<div>Lakukan pengumpulan Laporan KP / PKL</div>}>
+                <Button type="primary" onClick={() => pengumpulanLaporan(record.id)}>
+                  Pengumpulan
                 </Button>
-              </Popconfirm>
+              </Popover>
+            </Col>
+            <Col span={12} style={{ textAlign: 'center' }}>
+           
+              <Popover content={<div>Salin Link Gdrive</div>}>
+                 <Button type="primary" onClick={()=>info(record.attributes.link_drive)}>
+                  Copy
+                </Button>
+              </Popover>
             </Col>
           </Row>
         </>
@@ -445,13 +391,32 @@ const RekapLaporanPeserta = () => {
     },
   ]
 
-  return isLoading ? (
-    <Spin indicator={antIcon} />
-  ) : (
+  const title = (judul) => {
+    return (
+      <>
+        <div>
+          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius: 2 }}>
+            <Col span={24}>
+              <b>
+                <h4 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h4>
+              </b>
+            </Col>
+          </Row>
+        </div>
+        <div className="spacebottom"></div>
+      </>
+    )
+  }
+
+  // isLoading ? (
+  //   <Spin indicator={antIcon} />
+  // ) :
+
+  return (
     <>
       <div>
         {/* {rolePengguna === '1' && <h1>[Hi Data Peserta]</h1>} */}
-
+        {contextHolder}
         {rolePengguna !== '1' && (
           <Space
             direction="vertical"
@@ -460,7 +425,7 @@ const RekapLaporanPeserta = () => {
               display: 'flex',
             }}
           >
-            <Card title="Informasi Peserta" size="small">
+            <Card title="Informasi Peserta" size="small" style={{padding:25}}>
               <Row>
                 <Col span={4}>Nama Lengkap</Col>
                 <Col span={2}>:</Col>
@@ -476,26 +441,12 @@ const RekapLaporanPeserta = () => {
         )}
       </div>
       <CCard className="mb-4">
+        {title('REKAP LAPORAN PESERTA')}
         <CCardBody>
-          {rolePengguna === '1' && (
-            <Row>
-              <Col span={24} style={{ textAlign: 'right' }}>
-                <Button
-                  id="create-logbook"
-                  size="sm"
-                  shape="round"
-                  style={{ color: 'white', background: '#339900', marginBottom: 16 }}
-                  onClick={handleCreateLogbook}
-                >
-                  Tambahkan Logbook Baru
-                </Button>
-              </Col>
-            </Row>
-          )}
 
           {rolePengguna !== '1' && rolePengguna !== '5' && (
-            <Popover content={hoverKembaliKeListDokumenPeserta}>
-              <Button type="primary" shape="round" size="small" onClick={AksiKembaliPanitia}>
+            <Popover content={<div>Kembali ke list dokumen peserta</div>}>
+              <Button type="primary"  size="medium" onClick={AksiKembaliPanitia}>
                 Kembali
               </Button>
             </Popover>
@@ -504,11 +455,10 @@ const RekapLaporanPeserta = () => {
           {rolePengguna === '1' && (
             <CRow>
               <CCol sm={12}>
-                <h4 className="justify">LAPORAN PESERTA</h4>
                 <Table
                   scroll={{ x: 'max-content' }}
                   columns={columns}
-                  dataSource={logbookPeserta}
+                  dataSource={dataLaporanPeserta}
                   rowKey="id"
                   bordered
                 />
@@ -525,7 +475,7 @@ const RekapLaporanPeserta = () => {
                 <Table
                   scroll={{ x: 'max-content' }}
                   columns={columnsPanitiaPembimbing}
-                  dataSource={logbookPeserta}
+                  dataSource={dataLaporanPeserta}
                   rowKey="id"
                   bordered
                 />

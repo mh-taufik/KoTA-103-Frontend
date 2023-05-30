@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import 'antd/dist/antd.css'
+import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -27,7 +27,7 @@ import {
 } from 'antd'
 import axios from 'axios'
 import { useHistory } from 'react-router-dom'
-import './rpp/rpp.css'
+import '../pengisianDokumen/rpp/rpp.css'
 import { SearchOutlined } from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
 import { LoadingOutlined } from '@ant-design/icons'
@@ -163,19 +163,19 @@ const RekapPenilaianPeserta = () => {
   }
 
   const actionSeeListLogbookParticipant = (idPeserta) => {
-    history.push(`/rekapDokumenPeserta/logbookPeserta/${idPeserta}`)
+    history.push(`/rekapPenilaianPeserta/logbook/${idPeserta}`)
   }
 
-  const actionSeeListRPPParticipant = (idPeserta) => {
-    history.push(`/rekapDokumenPeserta/rppPeserta/${idPeserta}`)
+  const actionSeeListRPPParticipant = (nimPeserta) => {
+    history.push(`/rekapDokumenPeserta/rppPeserta/${nimPeserta}`)
   }
 
-  const actionSeeListSelfAssessmentPeserta = (idPeserta) => {
-    history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${idPeserta}`)
+  const actionSeeListSelfAssessmentPeserta = (nimPeserta) => {
+    history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${nimPeserta}`)
   }
 
-  const actionSeeListLaporan = (idPeserta) => {
-    history.push(`/rekapDokumenPeserta/laporan/${idPeserta}`)
+  const actionSeeListLaporan = (nimPeserta) => {
+    history.push(`/rekapDokumenPeserta/laporan/${nimPeserta}`)
   }
 
   useEffect(() => {
@@ -512,87 +512,8 @@ const RekapPenilaianPeserta = () => {
                     <TabPane tab="Prodi D3" key="1">
                     <CCard className="mb-4" style={{ padding: '20px' }}>
                         <Tabs type="card">
-                          <TabPane tab="RPP" key="2.1">
-                          <CCard className="mb-4" style={{ padding: '20px' }}>
-                              <CRow>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#339900',
-                                              borderColor: '#339900',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            <FontAwesomeIcon
-                                              style={{ paddingTop: '10px' }}
-                                              icon={faCheck}
-                                            />
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Sudah Mengumpulkan RPP</h6>
-                                          <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#CC0033',
-                                              borderColor: '#CC0033',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            !
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Belum memiliki RPP</h6>
-                                          <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                              </CRow>
-                              <CCard className="mb-4">
-                                <CCardBody>
-                                  <CRow>
-                                    <CCol sm={12}>
-                                      <Table
-                                        scroll={{ x: 'max-content' }}
-                                        columns={columnsRpp}
-                                        dataSource={pesertaD3}
-                                        rowKey="id"
-                                        bordered
-                                      />
-                                    </CCol>
-                                  </CRow>
-                                </CCardBody>
-                              </CCard>
-                            </CCard>
-                          </TabPane>
-                          <TabPane tab="Logbook" key="2.2">
+                          
+                          <TabPane tab="Logbook" key="1.1">
                             <CCard className="mb-4" style={{ padding: '20px' }}>
                               <CRow>
                                 <CCol sm={6}>
@@ -619,7 +540,7 @@ const RekapPenilaianPeserta = () => {
                                           </Button>
                                         </Col>
                                         <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Sudah Mengumpulkan Semua Logbook</h6>
+                                          <h6>Mahasiswa semua logbook sudah dinilai</h6>
                                           <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
                                         </Col>
                                       </Row>
@@ -647,7 +568,7 @@ const RekapPenilaianPeserta = () => {
                                           </Button>
                                         </Col>
                                         <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Logbook Masih Belum Lengkap</h6>
+                                          <h6>Mahasiswa belum dinilai semua logbook</h6>
                                           <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
                                         </Col>
                                       </Row>
@@ -672,7 +593,7 @@ const RekapPenilaianPeserta = () => {
                               </CCard>
                             </CCard>
                           </TabPane>
-                          <TabPane tab="Self Assessment" key="2.3">
+                          <TabPane tab="Self Assessment" key="1.2">
                           <CCard className="mb-4" style={{ padding: '20px' }}>
                               <CRow>
                                 <CCol sm={6}>
@@ -727,7 +648,7 @@ const RekapPenilaianPeserta = () => {
                                           </Button>
                                         </Col>
                                         <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Self Assessment Tidak Lengkap</h6>
+                                          <h6>Self assessment peserta sudah dicek</h6>
                                           <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
                                         </Col>
                                       </Row>
@@ -752,7 +673,7 @@ const RekapPenilaianPeserta = () => {
                               </CCard>
                             </CCard>
                           </TabPane>
-                          <TabPane tab="Laporan" key="2.4">
+                          <TabPane tab="Form Penilaian Pembimbing Jurusan" key="1.3">
                           <CCard className="mb-4" style={{ padding: '20px' }}>
                               <CRow>
                                 <CCol sm={6}>
@@ -779,7 +700,7 @@ const RekapPenilaianPeserta = () => {
                                           </Button>
                                         </Col>
                                         <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Laporan Lengkap</h6>
+                                          <h6>Seluruh penilaian sudah dilakukan</h6>
                                           <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
                                         </Col>
                                       </Row>
@@ -807,7 +728,7 @@ const RekapPenilaianPeserta = () => {
                                           </Button>
                                         </Col>
                                         <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Laporan Tidak Lengkap</h6>
+                                          <h6>Masih ada yang belum dilakukan penilaian</h6>
                                           <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
                                         </Col>
                                       </Row>
@@ -855,87 +776,8 @@ const RekapPenilaianPeserta = () => {
                     <TabPane tab="Prodi D4" key="2">
                       <CCard className="mb-4" style={{ padding: '20px' }}>
                         <Tabs type="card">
-                          <TabPane tab="RPP" key="2.1">
-                          <CCard className="mb-4" style={{ padding: '20px' }}>
-                              <CRow>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#339900',
-                                              borderColor: '#339900',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            <FontAwesomeIcon
-                                              style={{ paddingTop: '10px' }}
-                                              icon={faCheck}
-                                            />
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Sudah Mengumpulkan RPP</h6>
-                                          <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#CC0033',
-                                              borderColor: '#CC0033',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            !
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Belum memiliki RPP</h6>
-                                          <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                              </CRow>
-                              <CCard className="mb-4">
-                                <CCardBody>
-                                  <CRow>
-                                    <CCol sm={12}>
-                                      <Table
-                                        scroll={{ x: 'max-content' }}
-                                        columns={columnsRpp}
-                                        dataSource={pesertaD4}
-                                        rowKey="id"
-                                        bordered
-                                      />
-                                    </CCol>
-                                  </CRow>
-                                </CCardBody>
-                              </CCard>
-                            </CCard>
-                          </TabPane>
-                          <TabPane tab="Logbook" key="2.2">
+                          
+                          <TabPane tab="Logbook" key="2.1">
                             <CCard className="mb-4" style={{ padding: '20px' }}>
                               <CRow>
                                 <CCol sm={6}>
@@ -962,7 +804,7 @@ const RekapPenilaianPeserta = () => {
                                           </Button>
                                         </Col>
                                         <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Sudah Mengumpulkan Semua Logbook</h6>
+                                          <h6>Mahasiswa semua logbook sudah dinilai</h6>
                                           <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
                                         </Col>
                                       </Row>
@@ -990,7 +832,7 @@ const RekapPenilaianPeserta = () => {
                                           </Button>
                                         </Col>
                                         <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Logbook Masih Belum Lengkap</h6>
+                                          <h6>Mahasiswa belum dinilai semua logbook</h6>
                                           <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
                                         </Col>
                                       </Row>
@@ -1015,7 +857,7 @@ const RekapPenilaianPeserta = () => {
                               </CCard>
                             </CCard>
                           </TabPane>
-                          <TabPane tab="Self Assessment" key="2.3">
+                          <TabPane tab="Self Assessment" key="2.2">
                           <CCard className="mb-4" style={{ padding: '20px' }}>
                               <CRow>
                                 <CCol sm={6}>
@@ -1070,7 +912,7 @@ const RekapPenilaianPeserta = () => {
                                           </Button>
                                         </Col>
                                         <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Self Assessment Tidak Lengkap</h6>
+                                          <h6>Self assessment peserta sudah dicek</h6>
                                           <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
                                         </Col>
                                       </Row>
@@ -1095,7 +937,7 @@ const RekapPenilaianPeserta = () => {
                               </CCard>
                             </CCard>
                           </TabPane>
-                          <TabPane tab="Laporan" key="2.4">
+                          <TabPane tab="Form Penilaian Pembimbing Jurusan" key="2.3">
                           <CCard className="mb-4" style={{ padding: '20px' }}>
                               <CRow>
                                 <CCol sm={6}>
@@ -1122,7 +964,7 @@ const RekapPenilaianPeserta = () => {
                                           </Button>
                                         </Col>
                                         <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Laporan Lengkap</h6>
+                                          <h6>Seluruh penilaian sudah dilakukan</h6>
                                           <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
                                         </Col>
                                       </Row>
@@ -1150,7 +992,7 @@ const RekapPenilaianPeserta = () => {
                                           </Button>
                                         </Col>
                                         <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Laporan Tidak Lengkap</h6>
+                                          <h6>Masih ada yang belum dilakukan penilaian</h6>
                                           <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
                                         </Col>
                                       </Row>

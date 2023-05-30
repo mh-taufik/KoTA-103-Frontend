@@ -11,7 +11,7 @@ import Table from 'react-bootstrap/Table'
 import { Refresh } from '@mui/icons-material'
 import axios from 'axios'
 import { Route, Router, useHistory, useParams } from 'react-router-dom'
-import { notification } from 'antd'
+import { Popover, notification } from 'antd'
 import routes from 'src/routes'
 
 const FormEditLogbook = (props) => {
@@ -169,6 +169,9 @@ const FormEditLogbook = (props) => {
     <>
       <React.Fragment>
         <div className="container">
+        <Popover content={<div>Kembali ke list logbook</div>}>
+        <Button type="primary" onClick={()=>history.push(`/logbook`)}>Kembali</Button>
+        </Popover>
           <h3 align="center" className="title-s">
             FORM PENGISIAN LOGBOOK
           </h3>

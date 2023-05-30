@@ -104,3 +104,21 @@ body {
   .custom-file-input:active::before {
     background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9); 
   }
+
+  .btn {
+    border: none;
+    outline: none;
+    padding: 10px 16px;
+    background-color: grey;
+    cursor: pointer;
+    font-size: 18px;
+  }
+  
+  /* Style the active class, and buttons on mouse-over */
+  .actives, .btn:hover {
+    background-color: #666;
+    color: white;
+  }
+
+  .actives{
+    background-color:rgb(123, 162, 198)}

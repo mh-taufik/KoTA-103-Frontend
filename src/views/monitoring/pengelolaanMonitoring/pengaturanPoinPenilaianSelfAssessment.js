@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import 'antd/dist/antd.css'
+import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPencil, faTrashCan } from '@fortawesome/free-solid-svg-icons'
@@ -21,7 +21,9 @@ import { SearchOutlined } from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
 import { useHistory } from 'react-router-dom'
 import { LoadingOutlined } from '@ant-design/icons'
+import '../pengisianDokumen/rpp/rpp.css'
 import { Option } from 'antd/lib/mentions'
+import { Box, Typography } from '@mui/material'
 
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const PengelolaanPoinPenilaianSelfAssessment = () => {
@@ -367,7 +369,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
     },
     {
       title: 'Aksi',
-      width: '10%',
+      width: '5%',
       align: 'center',
       dataIndex: 'action',
       render: (text, record) => (
@@ -389,7 +391,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
                 <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
               </Button>
             </Col>
-            <Col span={12} style={{ textAlign: 'center' }}>
+            {/* <Col span={12} style={{ textAlign: 'center' }}>
               <Button
                 id="button-trash"
                 htmlType="submit"
@@ -402,7 +404,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
               >
                 <FontAwesomeIcon icon={faTrashCan} style={{ color: 'black' }} />
               </Button>
-            </Col>
+            </Col> */}
           </Row>
         </>
       ),
@@ -430,8 +432,19 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
     <>
       <CCard className="mb-4">
         <CCardBody>
+        <h4 className='justify spacebottom'>PENGELOLAAN POIN PENILAIAN SELF ASSESSMENT</h4>
+        <Typography component="div" variant="body1">
+        <Box sx={{ color: 'warning.main' }}>
+          <ul style={{fontSize:14}}>
+            <li>Poin penilaian akan dipergunakan pada form pengisian self assessment peserta</li>
+            <li>Diberikan status active : apabila poin tersebut diizinkan untuk diisi oleh peserta</li>
+            <li>Diberikan status non active : apabila poin tersebut belum waktunya untuk diisi oleh peserta</li>
+            <li>Diberikan status disabled : apabila poin tersebut tidak akan dilakukan pengisian sama sekali oleh peserta</li>
+          </ul>
+        </Box>
+        </Typography>
           <Row>
-            <Col span={24} style={{ textAlign: 'right' }}>
+            <Col span={24} style={{ textAlign: 'right'}}>
               <Button
                 id="create-kriteria"
                 size="sm"
@@ -445,7 +458,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
           </Row>
           <CRow>
             <CCol sm={12}>
-              <h4>Tabel Poin Penilaian Self Assessment</h4>
+             
               <Table
                 scroll={{ x: 'max-content' }}
                 columns={columns}

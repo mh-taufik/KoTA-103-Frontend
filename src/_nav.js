@@ -487,7 +487,7 @@ const _nav = [
       {
         component: CNavItem,
         name: 'Dokumen Laporan',
-        to: '/uploadLaporan',
+        to: '/laporan',
         index: 59.4
       }
     ],
@@ -572,14 +572,14 @@ const _nav = [
     role: '0',
     index: 62,
   },
-  {
-    component: CNavItem,
-    name: 'Form Penilaian Pembimbing Jurusan',
-    to: '/rekapFormPenilaianPembimbingJurusan',
-    icon: <FontAwesomeIcon icon={faClipboard}  size="lg" />,
-    role: '0',
-    index: 63,
-  },
+  // {
+  //   component: CNavItem,
+  //   name: 'Form Penilaian Pembimbing Jurusan',
+  //   to: '/rekapFormPenilaianPembimbingJurusan',
+  //   icon: <FontAwesomeIcon icon={faClipboard}  size="lg" />,
+  //   role: '0',
+  //   index: 63,
+  // },
 ]
 
 export default _nav

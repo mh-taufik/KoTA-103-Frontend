@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import 'antd/dist/antd.css'
+import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPencil, faLock, faTrashCan, faEdit, faPen } from '@fortawesome/free-solid-svg-icons'
@@ -17,6 +17,7 @@ import {
   Space,
   Spin,
   Select,
+  Dropdown,
 } from 'antd'
 import axios from 'axios'
 import { useHistory } from 'react-router-dom'
@@ -113,12 +114,6 @@ const PemetaanPembimbingJurusan = () => {
         })
         setIsModalEditVisible(false)
         form1.resetFields()
-        // console.log(res)
-
-        // setTimeout(function() {
-
-        // }, 1000);
-        // window.location.reload(false);
       })
       .catch(function (error) {
         if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -184,6 +179,52 @@ const PemetaanPembimbingJurusan = () => {
     getDataPemetaanPerusahaan()
   }, [history])
 
+  const detailPeserta = (data) => {
+    let items
+    for (var i in data) {
+      items.push({
+        key: i,
+        label: data[i].attributes.nama,
+      })
+    }
+    return(
+      <>
+      <ul>
+        {items.map((data,idx)=>{
+          <li>{data.label}</li>
+        })}
+      </ul>
+      </>
+    )
+  }
+
+  const items = [
+    {
+      key: '1',
+      label: (
+        <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
+          1st menu item
+        </a>
+      ),
+    },
+    {
+      key: '2',
+      label: (
+        <a target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
+          2nd menu item
+        </a>
+      ),
+    },
+    {
+      key: '3',
+      label: (
+        <a target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
+          3rd menu item
+        </a>
+      ),
+    },
+  ]
+
   const columns = [
     {
       title: 'Nama Perusahaan',
@@ -196,10 +237,12 @@ const PemetaanPembimbingJurusan = () => {
       width: '30%',
     },
     {
-      title: 'id',
-      dataIndex: 'id',
-      width: '30%',
+      title :'Peserta',
+      render: (text,record,index) =>
+        record.hasExpandData ? <div>{text}</div> : null
+      
     },
+
     {
       title: 'Aksi',
       dataIndex: 'action',
@@ -225,6 +268,9 @@ const PemetaanPembimbingJurusan = () => {
                 <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
               </Button>
             </Col>
+            <Col span={12}>
+              <Button type='primary'>Lihat Peserta</Button>
+            </Col>
           </Row>
         </>
       ),
@@ -239,9 +285,27 @@ const PemetaanPembimbingJurusan = () => {
     setIsModalEditVisible(false)
   }
 
+  const title = (judul) => {
+    return (
+      <>
+        <div>
+          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius: 2 }}>
+            <Col span={24}>
+              <b>
+                <h4 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h4>
+              </b>
+            </Col>
+          </Row>
+        </div>
+        <div className="spacebottom"></div>
+      </>
+    )
+  }
+
   // isLoading ? (<Spin indicator={antIcon} />) : (
   return (
     <>
+      {title('PEMETAAN PEMBIMBING JURUSAN')}
       <CCard className="mb-4">
         <CCardBody>
           {localStorage.getItem('id_role') === '3' && key === '1' && <></>}
@@ -254,6 +318,15 @@ const PemetaanPembimbingJurusan = () => {
                       <h6>Tabel Pemetaan Perusahaan Prodi D3 </h6>
                       <Table
                         scroll={{ x: 'max-content' }}
+                        expandable={{expandedRowRender :(rec)=>(
+                          <ul>
+                            {rec.attributes.pesertas.data.map((data,idx)=>{
+                              return(
+                                <li key={data.id}>{data.attributes.nama}</li>
+                              )
+                            })}
+                          </ul>
+                        )}}
                         columns={columns}
                         dataSource={perusahaan}
                         rowKey="id"
@@ -270,6 +343,15 @@ const PemetaanPembimbingJurusan = () => {
                       <Table
                         scroll={{ x: 'max-content' }}
                         columns={columns}
+                        // expandable={{expandedRowRender :(rec)=>(
+                        //   <ul>
+                        //     {rec.attributes.pesertas.data.map((data,idx)=>{
+                        //       return(
+                        //         <li key={data.id}>{data.attributes.nama}</li>
+                        //       )
+                        //     })}
+                        //   </ul>
+                        // )}}
                         dataSource={perusahaan}
                         rowKey="perusahaan."
                         bordered

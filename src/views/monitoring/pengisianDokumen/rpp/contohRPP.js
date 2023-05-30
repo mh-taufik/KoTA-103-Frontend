@@ -26,7 +26,7 @@ function ContohRPP() {
   }
 
   const HandleButtonKembaliKeHalamanSelanjutnya = () => {
-    history.push('/rencanaPenyelesaianProyek')
+    history.push('/rencanaPenyelesaianProyek/peserta/formPengisianRPP/')
   }
 
   return (
@@ -38,7 +38,7 @@ function ContohRPP() {
  
 
       <header className="App-header spacetop">
-        <Document file="/contohrpp.pdf" onLoadSuccess={onDocumentLoadSuccess}>
+        <Document file="/contohlogbook.pdf" onLoadSuccess={onDocumentLoadSuccess}>
           <Page height="600" pageNumber={pageNumber} />
         </Document>
         <p>
