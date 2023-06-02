@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import 'antd/dist/reset.css'
+import 'antd/dist/antd.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faPencil, faTrashCan } from '@fortawesome/free-solid-svg-icons'
@@ -270,10 +270,6 @@ const RekapSelfAssessment = () => {
    (rolePengguna !== '1')? history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${idPeserta.id}/detail/${idsa}`) : history.push(`/selfAssessment/formSelfAssessment/detail/${idsa}`)
   }
 
-  const lakukanPenilaianSelfAssessment = (idsa) =>{
-    history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${idPeserta.id}/penilaian/${idsa}`)
-  }
-
   const columnsPanitiaPembimbing = [
     {
       title: 'No',
@@ -336,7 +332,7 @@ const RekapSelfAssessment = () => {
                   shape="circle"
                   style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
                   onClick={() => {
-                    lakukanPenilaianSelfAssessment(record.id)
+                    lihatDetailSelfAssessment(record.id)
                   }}
                 >
                   <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />

@@ -6,10 +6,8 @@ import {
   Cascader,
   Col,
   DatePicker,
-  FloatButton,
   Input,
   InputNumber,
-  Popover,
   Row,
   Select,
   Space,
@@ -65,7 +63,6 @@ const PengisianRpp = () => {
   const [pageNumber, setPageNumber] = useState(1)
   const [idNewRpp, setIdNewRpp] = useState()
   const [isSuccessInput, setIsSuccessInput] = useState(true)
-
 
   const tesh = () =>{
     console.log('==', milestones)
@@ -562,20 +559,13 @@ const PengisianRpp = () => {
     history.push(`/rencanaPenyelesaianProyek/peserta/formPengisianRPP/contohPengisianRPP`)
   }
 
-  const handleKembali = () =>{
-    history.push(`/rencanaPenyelesaianProyek`)
-  }
-
   return (
     <>
       <div className="container">
         <Space>
-        <Popover content={<div>Kembali ke rekap RPP</div>}>
-        <Button type="primary" onClick={handleKembali}>
-            Kembali
+          <Button type="primary" onClick={showModal}>
+            Lihat Contoh RPP
           </Button>
-        </Popover>
-           <FloatButton onClick={showModal} tooltip={<div>Contoh Pengisian RPP</div>} />
           <Modal
             title="Format Pengisian Dokumen RPP"
             visible={isModalOpen}
@@ -622,7 +612,6 @@ const PengisianRpp = () => {
           <ul>
             <li>Pastikan semua RPP terisi</li>
             <li>Isi sesuai dengan perencanaan proyek yang diberikan</li>
-            <li>Anda dapat melihat contoh pengisian RPP dengan menekan float button</li>
           </ul>
         </Box>
         <div className="spacebottom"></div>
@@ -931,7 +920,7 @@ const PengisianRpp = () => {
             <br />
             <div className="spacebottom"></div>
             <hr />
-            <h4>JADWAL PENYELESAIAN PEKERJAAN KESELURUHAN</h4>
+            <h4>JADWAL PENEYELESAIAN PEKERJAAN KESELURUHAN</h4>
             {[...Array(noOfRowsJadwalPenyelesaianPekerjaanKeseluruhan)].map(
               (elementInArray, index) => {
                 return (
@@ -974,7 +963,6 @@ const PengisianRpp = () => {
                           }
                           options={[
                             { value: 'exploration', label: 'Exploration' },
-                            { value: 'analysis', label: 'Analysis' },
                             { value: 'design', label: 'Design' },
                             { value: 'implementasi', label: 'Implementation' },
                             { value: 'testing', label: 'Testing' },

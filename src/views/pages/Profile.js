@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import 'antd/dist/reset.css';
+import 'antd/dist/antd.css';
 import { Modal, Form, Input, Button, notification } from 'antd';
 import {
   CButton,

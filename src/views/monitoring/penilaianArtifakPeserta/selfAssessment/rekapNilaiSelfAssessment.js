@@ -6,7 +6,7 @@ import '../../pengisianDokumen/rpp/rpp.css'
 import { Table } from 'react-bootstrap'
 import Popover from '@mui/material/Popover'
 import Typography from '@mui/material/Typography'
-import { Card, Col, Row, Space } from 'antd'
+import { Card, Col, Row } from 'antd'
 
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const RekapSelfAssessment = () => {
@@ -337,29 +337,6 @@ const RekapSelfAssessment = () => {
   const title = (judul) => {
     return (
       <>
-      {rolePengguna !== '1' && (
-          <Space className='spacebottom'
-            direction="vertical"
-            size="middle"
-            style={{
-              display: 'flex'
-            }}
-          >
-            <Card title="Informasi Peserta" size="small" style={{padding:30}}>
-              <Row>
-                <Col span={4}>Nama Lengkap</Col>
-                <Col span={2}>:</Col>
-                <Col span={8}>Gina Anifah Choirunnisa</Col>
-              </Row>
-              <Row>
-                <Col span={4}>NIM</Col>
-                <Col span={2}>:</Col>
-                <Col span={8}>201511009</Col>
-              </Row>
-            </Card>
-          </Space>
-        )}
-    
         <div className="spacetop">
           <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius: 2 }}>
             <Col span={24}>

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import 'antd/dist/reset.css'
+import 'antd/dist/antd.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faPencil, faTrashCan } from '@fortawesome/free-solid-svg-icons'
-import { QuestionCircleOutlined } from '@ant-design/icons';
-import { FloatButton } from 'antd';
 import {
   Table,
   Button,
@@ -47,7 +45,6 @@ const RekapRPP = () => {
   const [infoDataPeserta, setInfoDataPeserta] = useState([])
 
   const desc = '*edit RPP yang dipilih'
-  const descdetail = '*detail RPP yang dipilih'
   axios.defaults.withCredentials = true
 
   const enterLoading = (index) => {
@@ -505,7 +502,7 @@ const RekapRPP = () => {
               <Popconfirm
                 placement="topRight"
                 title="Yakin akan melihat detail RPP?"
-                description={descdetail}
+                description={desc}
                 onConfirm={() => confirmToDetail()}
                 okText="Yes"
                 cancelText="No"
@@ -643,16 +640,7 @@ const RekapRPP = () => {
           </CCardBody>
         </CCard>
       </div>
-     
-    {/* <Popover content={<div>Klik untuk mengetahui petunjuk</div>}>
-    <FloatButton
-      icon={<QuestionCircleOutlined />}
-      type="primary"
-      style={{
-        right: 24,
-      }}
-    />
-    </Popover> */}
+      
     </>
   )
 }

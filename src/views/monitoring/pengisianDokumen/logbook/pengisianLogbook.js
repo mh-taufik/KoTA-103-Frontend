@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
+import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
 import Container from 'react-bootstrap/Container'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../rpp/rpp.css'
-import { Document, Page } from 'react-pdf/dist/esm/entry.webpack'
 import { Col, Row } from 'react-bootstrap'
 import Table from 'react-bootstrap/Table'
 import { Refresh } from '@mui/icons-material'
-import { Button, Space } from 'antd'
 import axios from 'axios'
 import { Route, Router, useHistory, useParams } from 'react-router-dom'
-import { FloatButton, Popover, message, notification } from 'antd'
+import { Popover, message, notification } from 'antd'
 import { Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap'
 
 
@@ -43,33 +42,6 @@ const FormPengisianLogbook = (props) => {
   const [modal, setModal] = useState(false);
   const [nestedModal, setNestedModal] = useState(false);
   const [closeAll, setCloseAll] = useState(false);
-  const [modalExL, setModalExL] = useState(false);
-  const [numPages, setNumPages] = useState(null)
-  const [pageNumber, setPageNumber] = useState(1)
-
-  const toggleExL = () => setModalExL(!modalExL);
-  
-  function onDocumentLoadSuccess({ numPages }) {
-    setNumPages(numPages)
-    setPageNumber(1)
-  }
-
-  function changePage(offSet) {
-    setPageNumber((prevPageNumber) => prevPageNumber + offSet)
-  }
-
-  function changePageBack() {
-    changePage(-1)
-  }
-
-  function changePageNext() {
-    changePage(+1)
-  }
-
-  const HandleButtonKembaliKeHalamanSelanjutnya = () => {
-    history.push('/rencanaPenyelesaianProyek/peserta/formPengisianRPP/')
-  }
-
 
   const toggle = () =>{ setModal(!modal)};
   const toggleNested = () => {
@@ -227,21 +199,14 @@ const FormPengisianLogbook = (props) => {
       <React.Fragment>
         <div className=" container">
         <Popover content={<div>Klik tombol untuk kembali ke rekap logbook</div>}>
-              <Button className='spacebottom' type="primary"  size="middle" onClick={handleKembaliKeListPeserta}>
+              <Button type="primary" shape="round" size="medium" onClick={handleKembaliKeListPeserta}>
                 Kembali
               </Button>
             </Popover>
           <h3 align="center" className="title-s">
             FORM PENGISIAN LOGBOOK
           </h3>
-          <Box sx={{ color: 'warning.main' }} className='spacebottom'>
-          <ul>
-            <li>Setiap logbook akan dinilai</li>
-            <li>Isi sesuai dengan kegiatan yang anda lakukan saat KP / PKL</li>
-            <li>Anda dapat melihat contoh pengisian Logbook dengan menekan float button</li>
-          </ul>
-        </Box>
-           <Form>
+          <Form>
             <Row>
               <Col>
                 <Form.Group controlId="tanggalLogbook">
@@ -392,7 +357,6 @@ const FormPengisianLogbook = (props) => {
                 <Form.Group className="mb-3" controlId="kendala">
                   <Form.Label>Kendala</Form.Label>
                   <Form.Control
-                  required
                     as="textarea"
                     placeholder="Kendala yang dihadapi"
                     name="kendala"
@@ -415,49 +379,13 @@ const FormPengisianLogbook = (props) => {
           <Button color="primary" onClick={toggleYes}>
             Ya
           </Button>{' '}
-          <Button color="secondary" htmlType="submit"  onClick={toggleNested}>
+          <Button color="secondary" onClick={toggleNested}>
             Tidak
           </Button>
         </ModalFooter>
       </Modal>
           </Form>
         </div>
-        <FloatButton onClick={toggleExL} tooltip={<div>Contoh Pengisian Logbook</div>} />;
-        <Modal isOpen={modalExL} style={{width:800}} toggle={toggleExL} >
-        <ModalHeader toggle={toggleExL}>Contoh Pengisian Logbook</ModalHeader>
-        <ModalBody>
-        <header className="App-header spacetop">
-        <Document file="/contohlogbook.pdf" onLoadSuccess={onDocumentLoadSuccess}>
-          <Page height="520" pageNumber={pageNumber} />
-        </Document>
-        <p>
-          {' '}
-          Page {pageNumber} of {numPages}
-        </p>
-
-        <Space wrap>
-          {pageNumber > 1 && (
-            <Button className="btn-pdf" type="primary" onClick={changePageBack}>
-              Halaman Sebelumnya
-            </Button>
-          )}
-          {pageNumber < numPages && (
-            <Button className="btn-pdf" onClick={changePageNext} type="primary">
-              Halaman Selanjutnya
-            </Button>
-          )}
-        </Space>
-      </header>
-        </ModalBody>
-        {/* <ModalFooter> */}
-          {/* <Button color="primary" onClick={toggleExL}>
-           Lihat Detail
-          </Button>{' '} */}
-          {/* <Button color="secondary" onClick={toggleExL}>
-            Cancel
-          </Button> */}
-        {/* </ModalFooter> */}
-      </Modal>
       </React.Fragment>
     </>
   )

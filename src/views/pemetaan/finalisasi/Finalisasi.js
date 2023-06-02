@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import 'antd/dist/reset.css';
+import 'antd/dist/antd.css';
 import { Table, Button, Form, Select, Input, Space, Row, Col, Tooltip, notification, Alert, Spin, Modal } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck, faX } from '@fortawesome/free-solid-svg-icons';

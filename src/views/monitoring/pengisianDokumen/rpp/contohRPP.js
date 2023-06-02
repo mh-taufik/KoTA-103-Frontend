@@ -38,7 +38,7 @@ function ContohRPP() {
  
 
       <header className="App-header spacetop">
-        <Document file="/contohlogbook.pdf" onLoadSuccess={onDocumentLoadSuccess}>
+        <Document file="/contohrpp.pdf" onLoadSuccess={onDocumentLoadSuccess}>
           <Page height="600" pageNumber={pageNumber} />
         </Document>
         <p>

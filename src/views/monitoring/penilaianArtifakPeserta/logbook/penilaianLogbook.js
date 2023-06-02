@@ -178,13 +178,11 @@ const PenilaianLogbook = () => {
     await axios
       .get(`http://localhost:1337/api/jadwalpenyelesaiankeseluruhans`)
       .then((result) => {
-        console.log('HASIL PENYELESAIAN KESELURUHAN', result.data.data)
+        console.log('hasil', result.data.data)
         obj = result.data.data
 
         var findObjectByLabel = function (obj) {
-  
           for (var i in obj) {
-         
             console.log(obj[i])
             content.push({
               id: obj[i].id,

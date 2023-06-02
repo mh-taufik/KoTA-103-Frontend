@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import 'antd/dist/reset.css'
+import 'antd/dist/antd.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPencil, faLock, faTrashCan, faEdit, faPen } from '@fortawesome/free-solid-svg-icons'

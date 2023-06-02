@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import 'antd/dist/reset.css'
+import 'antd/dist/antd.css'
 import '../rpp/rpp.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -20,7 +20,6 @@ import {
   Popover,
   Card,
   Tag,
-  Alert,
 } from 'antd'
 import axios from 'axios'
 import { SearchOutlined } from '@ant-design/icons'
@@ -31,7 +30,6 @@ import { Box } from '@mui/material'
 import moment from 'moment'
 import get from 'lodash.get'
 import isequal from 'lodash.isequal'
-import { message } from 'antd';
 
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const RekapLaporanPeserta = () => {
@@ -52,11 +50,6 @@ const RekapLaporanPeserta = () => {
   const [statusBelumDiNilai, isStatusBelumDinilai] = useState(false)
   const desc = '*edit logbook yang dipilih'
   axios.defaults.withCredentials = true
-  const [messageApi, contextHolder] = message.useMessage();
-  const info = (link) => {
-    navigator.clipboard.writeText(link)
-    messageApi.info('Link disalin');
-  };
 
   const getColumnSearchProps = (dataIndex, name) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -167,9 +160,7 @@ const RekapLaporanPeserta = () => {
   }
 
   useEffect(() => {
-    // console.log('idpeserta ==> ', idPeserta.id)
-
-
+    console.log('idpeserta ==> ', idPeserta.id)
     async function getLaporanPeserta(record, index) {
       var PESERTA
       if (rolePengguna === '1') {
@@ -269,17 +260,17 @@ const RekapLaporanPeserta = () => {
         <>
           {rolePengguna === '0' && (
             <Row>
-              {/* <Col span={8} style={{ textAlign: 'center' }}>
+              <Col span={12} style={{ textAlign: 'center' }}>
                 <Popover content={<div>Lihat isi detail dokumen laporan peserta</div>}>
                   <Button
                     size="medium"
                     onClick={() => actionLihatDetailLaporanPeserta(record.id)}
-                    style={{ backgroundColor: '#4096ff', color:'white' }}
+                    style={{ backgroundColor: '#adc6ff' }}
                   >
-                    &nbsp;Detail&nbsp;
+                   <b>&nbsp;Detail&nbsp;</b> 
                   </Button>
                 </Popover>
-              </Col> */}
+              </Col>
               <Col span={12} style={{ textAlign: 'center' }}>
                 <Popover
                   content={
@@ -292,18 +283,11 @@ const RekapLaporanPeserta = () => {
                   <Button
                     size="medium"
                     onClick={() => actionPenilaianFormPembimbingJurusan(record.id)}
-                     style={{ backgroundColor: '#fa8c16', color:'white' }}
+                    style={{ backgroundColor: '#ffec3d' }}
                   >
-                    &nbsp;&nbsp;Nilai&nbsp;&nbsp;
+                    &nbsp;&nbsp;  <b color='white'>Nilai</b>&nbsp;&nbsp;
                   </Button>
                 </Popover>
-              </Col>
-              <Col span={12} style={{ textAlign: 'center' }}>
-              <Popover content={<div>Salin Link Gdrive</div>}>
-                 <Button type="primary" onClick={()=>info(record.attributes.link_drive)}>
-                  Copy
-                </Button>
-              </Popover>
               </Col>
             </Row>
           )}
@@ -315,8 +299,6 @@ const RekapLaporanPeserta = () => {
   const pengumpulanLaporan = (id) => {
     history.push(`/laporan/submissionLaporan/${id}`)
   }
-
- 
   const columns = [
     {
       title: 'No',
@@ -330,18 +312,15 @@ const RekapLaporanPeserta = () => {
     {
       title: 'Tanggal Pengumpulan',
       dataIndex: ['attributes', 'tanggalpengumpulan'],
-      width: '10%',
       ...getColumnSearchProps(['attributes', 'tanggalpengumpulan'], 'Tanggal Pengumpulan'),
     },
     {
       title: 'Deadline Pengumpulan',
       dataIndex: ['attributes', 'deadlinen'],
-      width: '10%',
       ...getColumnSearchProps(['attributes', 'deadlinen'], 'Deadline'),
     },
     {
       title: 'Status',
-      width: '10%',
       dataIndex: ['attributes', 'status'],
       ...getColumnSearchProps(['attributes', 'status'], 'Status'),
       render: (text, record) => {
@@ -364,26 +343,27 @@ const RekapLaporanPeserta = () => {
 
     {
       title: 'Aksi',
-      width: '15%',
+      width: '5%',
       align: 'center',
       dataIndex: 'action',
       render: (text, record) => (
         <>
           <Row>
-            <Col span={12} style={{ textAlign: 'center' }}>
-              <Popover content={<div>Lakukan pengumpulan Laporan KP / PKL</div>}>
-                <Button type="primary" onClick={() => pengumpulanLaporan(record.id)}>
-                  Pengumpulan
-                </Button>
-              </Popover>
-            </Col>
-            <Col span={12} style={{ textAlign: 'center' }}>
-           
-              <Popover content={<div>Salin Link Gdrive</div>}>
-                 <Button type="primary" onClick={()=>info(record.attributes.link_drive)}>
-                  Copy
-                </Button>
-              </Popover>
+            <Col span={6} style={{ textAlign: 'center' }}>
+              <Popconfirm
+                placement="topRight"
+                title="Yakin akan melakukan edit logbook?"
+                description={desc}
+                // onConfirm={confirmToEdit}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Popover content={<div>Lakukan pengumpulan Laporan KP / PKL</div>}>
+                  <Button type="primary" onClick={() => pengumpulanLaporan(record.id)}>
+                    Pengumpulan
+                  </Button>
+                </Popover>
+              </Popconfirm>
             </Col>
           </Row>
         </>
@@ -395,10 +375,10 @@ const RekapLaporanPeserta = () => {
     return (
       <>
         <div>
-          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius: 2 }}>
+          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius:2 }}>
             <Col span={24}>
               <b>
-                <h4 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h4>
+                <h4 style={{color:'#f6ffed', marginLeft:30, marginTop:6}}>{judul}</h4>
               </b>
             </Col>
           </Row>
@@ -416,7 +396,7 @@ const RekapLaporanPeserta = () => {
     <>
       <div>
         {/* {rolePengguna === '1' && <h1>[Hi Data Peserta]</h1>} */}
-        {contextHolder}
+
         {rolePengguna !== '1' && (
           <Space
             direction="vertical"
@@ -425,7 +405,7 @@ const RekapLaporanPeserta = () => {
               display: 'flex',
             }}
           >
-            <Card title="Informasi Peserta" size="small" style={{padding:25}}>
+            <Card title="Informasi Peserta" size="small">
               <Row>
                 <Col span={4}>Nama Lengkap</Col>
                 <Col span={2}>:</Col>
@@ -441,12 +421,11 @@ const RekapLaporanPeserta = () => {
         )}
       </div>
       <CCard className="mb-4">
-        {title('REKAP LAPORAN PESERTA')}
+{title('REKAP LAPORAN PESERTA')}
         <CCardBody>
-
           {rolePengguna !== '1' && rolePengguna !== '5' && (
             <Popover content={<div>Kembali ke list dokumen peserta</div>}>
-              <Button type="primary"  size="medium" onClick={AksiKembaliPanitia}>
+              <Button type="primary" shape="round" size="small" onClick={AksiKembaliPanitia}>
                 Kembali
               </Button>
             </Popover>
