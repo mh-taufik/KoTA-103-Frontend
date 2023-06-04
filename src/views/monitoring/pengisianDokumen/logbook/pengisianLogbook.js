@@ -34,7 +34,8 @@ const FormPengisianLogbook = (props) => {
   const params = useParams()
   const [form] = Form.useForm()
 
-  const NIM_PESERTA = params.id
+  const NIM_PESERTA_BY_PARAMS = params.id
+  const NIM_PESERTA_BY_PESERTA_AS_USER = localStorage.username
   const [idPeserta, setIdPeserta] = useState()
   const [isLoading, setIsLoading] = useState(true)
   const [isSpinner, setIsSpinner] = useState(true)
@@ -68,11 +69,7 @@ const FormPengisianLogbook = (props) => {
   const onFinishFailed = () => {
     message.error('Submit Gagal, Pastikan Semua Data Sudah Terisi !!!')
   }
-  const onFill = () => {
-    form.setFieldsValue({
-      url: 'https://taobao.com/',
-    })
-  }
+
 
   const toggleExL = () => setModalExL(!modalExL)
 
@@ -105,11 +102,11 @@ const FormPengisianLogbook = (props) => {
   const toggleYes = () => {
     setIsSesuaiRpp(true)
     submitLogbook(true, '')
-    console.log('daa', isSesuaiRpp)
+    // console.log('daa', isSesuaiRpp)
   }
   const toggleAll = () => {
     setNestedModal(!nestedModal)
-    console.log('ISI SESUAI RPP', isSesuaiRpp, ' dan ', kendala)
+    // console.log('ISI SESUAI RPP', isSesuaiRpp, ' dan ', kendala)
     submitLogbook(false, kendala)
     setCloseAll(true)
   }
@@ -121,23 +118,26 @@ const FormPengisianLogbook = (props) => {
     })
   }
 
-  useEffect(() => {
-    console.log('usernamePeserta', params.id)
-  }, [])
+  // useEffect(() => {
+  //   console.log('usernamePeserta', params.id)
+  // }, [])
 
   const handleInputLogbookDate = async (date) => {
     await axios
-      .get(`http://localhost:1337/api/logbooks?filters[tanggallogbook][$eq]=${date}`)
+      .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/check`,{
+        'date' : date
+      })
       .then((result) => {
-        const ress = result.data.data.length
-        if (ress > 0) {
+       
+        const response_data = result.data.data
+        if (response_data) {
           notification.warning({
             message: 'Pilih tanggal lain, logbook sudah tersedia',
           })
           setSubmitAccepted(false)
-          console.log('tidak bisa')
+          // console.log('tidak bisa')
         } else {
-          console.log('bisa')
+          // console.log('bisa')
           setSubmitAccepted(true)
           setTanggalLogbook(date)
         }
@@ -146,7 +146,6 @@ const FormPengisianLogbook = (props) => {
 
   useEffect(() => {
     setUsernamePeserta(params.id)
-    getIdPeserta()
   }, [history])
 
   const submitLogbook = (sesuai, kendala) => {
@@ -160,61 +159,31 @@ const FormPengisianLogbook = (props) => {
     }
   }
 
-  const getIdPeserta = async (data, index) => {
-    enterLoading(index)
-    await axios
-      .get(`http://localhost:1337/api/pesertas?filters[username][$eq]=${NIM_PESERTA}`)
-      .then((response) => {
-        console.log(response)
-        console.log('id Peserta', response.data.data[0].id)
-        setIdPeserta(response.data.data[0].id)
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-          history.push('/500')
-        }
-      })
-  }
+
   const saveDataLogbook = async (data, kesesuaian, kendala) => {
-    // enterLoading(index)
-    const cekStatusPengumpulan = (date) => {
-      return new Date(date) > new Date() ? 'tepat waktu' : 'terlambat'
-    }
+    // const cekStatusPengumpulan = (date) => {
+    //   return new Date(date) > new Date() ? 5 : 4
+    // }
     await axios
-      .post('http://localhost:1337/api/logbooks', {
-        data: {
-          tanggallogbook: tanggalLogbook,
-          namaproyek: namaProyek,
-          tools: tools,
-          hasilkerja: hasilKerja,
-          projectmanager: projectManager,
-          keterangan: keterangan,
-          technicalleader: technicalLeader,
-          tugas: tugasPeserta,
-          waktudankegiatan: waktuDanKegiatanPeserta,
-          statuspengecekan: statusPengecekanPembimbing,
-          statuspengumpulan: cekStatusPengumpulan(),
-          sesuaiperencanaan: kesesuaian,
-          kendala: kendala,
-          peserta: {
-            connect: [data],
-          },
-        },
+      .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/create`, {
+      
+          'date': tanggalLogbook,
+          'project_name': namaProyek,
+          'tools': tools,
+          'work_result': hasilKerja,
+          'project_manager': projectManager,
+          'description': keterangan,
+          'technical_leader': technicalLeader,
+          'task': tugasPeserta,
+          'time_and_activity': waktuDanKegiatanPeserta,
+          'encountered_problem': kendala,
+          'participant_id' : parseInt(NIM_PESERTA_BY_PESERTA_AS_USER)
+         
       })
       .then((response) => {
         notification.success({
           message: 'Logbook berhasil ditambahkan',
         })
-        console.log('ID', response.data.data)
         history.push(`/logbook`)
       })
       .catch(function (error) {
@@ -279,7 +248,6 @@ const FormPengisianLogbook = (props) => {
                   onChange={(date, dateString) => {
                     handleInputLogbookDate(dateString)
                     console.log('a', dateString)
-                    // console.log(new Date(dateString)>new Date())
                   }}
                 />
               </Form.Item>
@@ -300,7 +268,7 @@ const FormPengisianLogbook = (props) => {
                   },
                   {
                     type: 'string',
-                    min: 6,
+                    min: 2,
                   },
                 ]}
                 onChange={(e) => setNamaProyek(e.target.value)}
@@ -371,7 +339,7 @@ const FormPengisianLogbook = (props) => {
                 ]}
                 onChange={(e) => setTugasPeserta(e.target.value)}
               >
-                <Input placeholder="Tugas" />
+                <TextArea rows={4}  placeholder="Tugas" />
               </Form.Item>
             </Col>
           </Row>
@@ -395,7 +363,7 @@ const FormPengisianLogbook = (props) => {
                 ]}
                 onChange={(e) => setWaktuDanKegiatanPeserta(e.target.value)}
               >
-                <Input placeholder="Waktu dan Kegiatan" />
+                <TextArea rows={4}  placeholder="Waktu dan Kegiatan" />
               </Form.Item>
             </Col>
           </Row>
@@ -419,7 +387,7 @@ const FormPengisianLogbook = (props) => {
                 ]}
                 onChange={(e) => setTools(e.target.value)}
               >
-                <Input placeholder="Tugas" />
+                <Input placeholder="Tools" />
               </Form.Item>
             </Col>
           </Row>
@@ -443,7 +411,7 @@ const FormPengisianLogbook = (props) => {
                 ]}
                 onChange={(e) => setHasilKerja(e.target.value)}
               >
-                <Input placeholder="Hasil Kerja" />
+                <TextArea rows={4} placeholder="Hasil Kerja" />
               </Form.Item>
             </Col>
           </Row>
@@ -476,14 +444,6 @@ const FormPengisianLogbook = (props) => {
               <Button type="primary" htmlType="submit">
                 Submit Logbook
               </Button>
-              {/* <Button
-                htmlType="button"
-                onClick={() => {
-                  console.log(keterangan)
-                }}
-              >
-                Fill
-              </Button> */}
             </Space>
           </Form.Item>
 
