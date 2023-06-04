@@ -54,8 +54,8 @@ const Login = () => {
       localStorage.setItem("id_role", response.data.data.id_role)
       localStorage.setItem("username", response.data.data.username)
       
-      console.log(response.data)
-      prompt("ya")
+      // console.log(response.data)
+      // prompt("ya")
       setUsername("")
       setPassword("")
       setLoadings(prevLoadings => {
