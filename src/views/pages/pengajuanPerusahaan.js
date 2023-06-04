@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Form, Input, Button, Row, Col, DatePicker, Checkbox, Select, Modal, notification, Alert, Spin } from 'antd';
-import 'antd/dist/antd.css';
+import 'antd/dist/reset.css';
 import {
     CCard,
     CCardBody,

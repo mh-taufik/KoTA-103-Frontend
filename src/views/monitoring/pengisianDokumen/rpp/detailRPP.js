@@ -4,7 +4,7 @@ import '../rpp/rpp.css'
 import { Col, Row } from 'react-bootstrap'
 import axios from 'axios'
 import { Route, Router, useHistory, useParams } from 'react-router-dom'
-
+import {ArrowLeftOutlined } from '@ant-design/icons';
 import routes from 'src/routes'
 import {
   Box,
@@ -16,7 +16,7 @@ import {
   TableRow,
 } from '@mui/material'
 import Paper from '@mui/material/Paper'
-import { Button, Popover, Space } from 'antd'
+import { Button, FloatButton, Popover, Space } from 'antd'
 
 const DetailRPP = (props) => {
   var params = useParams()
@@ -161,38 +161,20 @@ const DetailRPP = (props) => {
    (rolePengguna === 1)?  history.push(`/rencanaPenyelesaianProyek`): history.push(`/rekapDokumenPeserta/rppPeserta/${params.nim}`)
   }
 
-  const hoverButtonKembali = <div>Klik tombol, untuk kembali ke list RPP</div>
 
-  const hoverButtonEdit = <div>Klik tombol, untuk mengedit RPP</div>
   return (
     <>
       <div className="container2">
       <React.Fragment>
       <Space wrap className="title-s">
-         
-            <Popover content={hoverButtonKembali}>
-            <Button type="primary" shape="round" onClick={HandleKembali}>
-              Kembali
-            </Button>
-          </Popover>
        
-        {/* {rolePengguna === '1' && (
-              <Popover content={hoverButtonEdit}>
-              <Button
-                type="primary"
-                shape="round"
-                style={{ background: '#d48806',  borderColor:"#d48806" }}
-              >
-                Edit
-              </Button>
-            </Popover>
-        )} */}
+     
         </Space>
         </React.Fragment>
         <h1 className="justify">RENCANA PENYELESAIAN PROYEK</h1>
         <div className="spacebottom"></div>
         <Box sx={{ color: 'primary.main' }}>
-          Tanggal RPP : 12 Januari 2023 - 19 Januari 2023
+          Tanggal RPP : {dataRPP.tanggal_mulai} &nbsp;s/d&nbsp; {dataRPP.tanggal_selesai}
         </Box>
         <Box sx={{ color: 'primary.main' }}>Dikumpulkan Pada : 15 Januari 2023</Box>
         <div className="spacebottom"></div>
@@ -328,6 +310,14 @@ const DetailRPP = (props) => {
           </Table>
         </TableContainer>
       </div>
+           
+                 <FloatButton type='primary' onClick={HandleKembali} icon={<ArrowLeftOutlined />} tooltip={<div>Kembali ke Rekap RPP</div>} />
+                 
+        
+
+
+
+
     </>
   )
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import 'antd/dist/antd.css'
+import 'antd/dist/reset.css'
 import '../rpp/rpp.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -20,16 +20,20 @@ import {
   Popover,
   Card,
   Tag,
+  Alert,
+  FloatButton,
 } from 'antd'
 import axios from 'axios'
 import { SearchOutlined } from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useHistory, useParams, Router } from 'react-router-dom'
 import { LoadingOutlined } from '@ant-design/icons'
 import { Box } from '@mui/material'
 import moment from 'moment'
 import get from 'lodash.get'
 import isequal from 'lodash.isequal'
+import { message } from 'antd'
 
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const RekapLaporanPeserta = () => {
@@ -50,6 +54,11 @@ const RekapLaporanPeserta = () => {
   const [statusBelumDiNilai, isStatusBelumDinilai] = useState(false)
   const desc = '*edit logbook yang dipilih'
   axios.defaults.withCredentials = true
+  const [messageApi, contextHolder] = message.useMessage()
+  const info = (link) => {
+    navigator.clipboard.writeText(link)
+    messageApi.info('Link disalin')
+  }
 
   const getColumnSearchProps = (dataIndex, name) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -139,11 +148,7 @@ const RekapLaporanPeserta = () => {
   }
   const refreshData = async (index) => {
     var PESERTA
-    if (rolePengguna === '1') {
-      PESERTA = idPengguna
-    } else {
-      PESERTA = idPeserta.id
-    }
+    rolePengguna !== '1' ? (PESERTA = idPeserta.id) : (PESERTA = idPengguna)
     await axios
       .get(`http://localhost:1337/api/laporans?populate=*&filters[peserta][username]=${PESERTA}`)
       .then((res) => {
@@ -160,14 +165,11 @@ const RekapLaporanPeserta = () => {
   }
 
   useEffect(() => {
-    console.log('idpeserta ==> ', idPeserta.id)
+    // console.log('idpeserta ==> ', idPeserta.id)
+
     async function getLaporanPeserta(record, index) {
       var PESERTA
-      if (rolePengguna === '1') {
-        PESERTA = idPengguna
-      } else {
-        PESERTA = idPeserta.id
-      }
+      rolePengguna !== '1' ? (PESERTA = idPeserta.id) : (PESERTA = idPengguna)
       enterLoading(index)
 
       await axios
@@ -258,19 +260,8 @@ const RekapLaporanPeserta = () => {
       dataIndex: 'action',
       render: (text, record) => (
         <>
-          {rolePengguna === '0' && (
+          {rolePengguna !== '1' && (
             <Row>
-              <Col span={12} style={{ textAlign: 'center' }}>
-                <Popover content={<div>Lihat isi detail dokumen laporan peserta</div>}>
-                  <Button
-                    size="medium"
-                    onClick={() => actionLihatDetailLaporanPeserta(record.id)}
-                    style={{ backgroundColor: '#adc6ff' }}
-                  >
-                   <b>&nbsp;Detail&nbsp;</b> 
-                  </Button>
-                </Popover>
-              </Col>
               <Col span={12} style={{ textAlign: 'center' }}>
                 <Popover
                   content={
@@ -283,9 +274,16 @@ const RekapLaporanPeserta = () => {
                   <Button
                     size="medium"
                     onClick={() => actionPenilaianFormPembimbingJurusan(record.id)}
-                    style={{ backgroundColor: '#ffec3d' }}
+                    style={{ backgroundColor: '#fa8c16', color: 'white' }}
                   >
-                    &nbsp;&nbsp;  <b color='white'>Nilai</b>&nbsp;&nbsp;
+                    &nbsp;&nbsp;Penilaian&nbsp;&nbsp;
+                  </Button>
+                </Popover>
+              </Col>
+              <Col span={12} style={{ textAlign: 'center' }}>
+                <Popover content={<div>Salin Link Gdrive</div>}>
+                  <Button type="primary" onClick={() => info(record.attributes.link_drive)}>
+                    Copy
                   </Button>
                 </Popover>
               </Col>
@@ -299,6 +297,7 @@ const RekapLaporanPeserta = () => {
   const pengumpulanLaporan = (id) => {
     history.push(`/laporan/submissionLaporan/${id}`)
   }
+
   const columns = [
     {
       title: 'No',
@@ -312,15 +311,18 @@ const RekapLaporanPeserta = () => {
     {
       title: 'Tanggal Pengumpulan',
       dataIndex: ['attributes', 'tanggalpengumpulan'],
+      width: '10%',
       ...getColumnSearchProps(['attributes', 'tanggalpengumpulan'], 'Tanggal Pengumpulan'),
     },
     {
       title: 'Deadline Pengumpulan',
       dataIndex: ['attributes', 'deadlinen'],
+      width: '10%',
       ...getColumnSearchProps(['attributes', 'deadlinen'], 'Deadline'),
     },
     {
       title: 'Status',
+      width: '10%',
       dataIndex: ['attributes', 'status'],
       ...getColumnSearchProps(['attributes', 'status'], 'Status'),
       render: (text, record) => {
@@ -343,27 +345,25 @@ const RekapLaporanPeserta = () => {
 
     {
       title: 'Aksi',
-      width: '5%',
+      width: '15%',
       align: 'center',
       dataIndex: 'action',
       render: (text, record) => (
         <>
           <Row>
-            <Col span={6} style={{ textAlign: 'center' }}>
-              <Popconfirm
-                placement="topRight"
-                title="Yakin akan melakukan edit logbook?"
-                description={desc}
-                // onConfirm={confirmToEdit}
-                okText="Yes"
-                cancelText="No"
-              >
-                <Popover content={<div>Lakukan pengumpulan Laporan KP / PKL</div>}>
-                  <Button type="primary" onClick={() => pengumpulanLaporan(record.id)}>
-                    Pengumpulan
-                  </Button>
-                </Popover>
-              </Popconfirm>
+            <Col span={12} style={{ textAlign: 'center' }}>
+              <Popover content={<div>Lakukan pengumpulan Laporan KP / PKL</div>}>
+                <Button type="primary" onClick={() => pengumpulanLaporan(record.id)}>
+                  Pengumpulan
+                </Button>
+              </Popover>
+            </Col>
+            <Col span={12} style={{ textAlign: 'center' }}>
+              <Popover content={<div>Salin Link Gdrive</div>}>
+                <Button type="primary" onClick={() => info(record.attributes.link_drive)}>
+                  Copy
+                </Button>
+              </Popover>
             </Col>
           </Row>
         </>
@@ -375,10 +375,10 @@ const RekapLaporanPeserta = () => {
     return (
       <>
         <div>
-          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius:2 }}>
+          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius: 2 }}>
             <Col span={24}>
               <b>
-                <h4 style={{color:'#f6ffed', marginLeft:30, marginTop:6}}>{judul}</h4>
+                <h4 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h4>
               </b>
             </Col>
           </Row>
@@ -396,7 +396,7 @@ const RekapLaporanPeserta = () => {
     <>
       <div>
         {/* {rolePengguna === '1' && <h1>[Hi Data Peserta]</h1>} */}
-
+        {contextHolder}
         {rolePengguna !== '1' && (
           <Space
             direction="vertical"
@@ -405,7 +405,7 @@ const RekapLaporanPeserta = () => {
               display: 'flex',
             }}
           >
-            <Card title="Informasi Peserta" size="small">
+            <Card title="Informasi Peserta" size="small" style={{ padding: 25 }}>
               <Row>
                 <Col span={4}>Nama Lengkap</Col>
                 <Col span={2}>:</Col>
@@ -414,21 +414,22 @@ const RekapLaporanPeserta = () => {
               <Row>
                 <Col span={4}>NIM</Col>
                 <Col span={2}>:</Col>
-                <Col span={8}>201511009</Col>
+                <Col span={8}>181524003</Col>
               </Row>
             </Card>
           </Space>
         )}
       </div>
       <CCard className="mb-4">
-{title('REKAP LAPORAN PESERTA')}
+        {title('REKAP LAPORAN PESERTA')}
         <CCardBody>
-          {rolePengguna !== '1' && rolePengguna !== '5' && (
-            <Popover content={<div>Kembali ke list dokumen peserta</div>}>
-              <Button type="primary" shape="round" size="small" onClick={AksiKembaliPanitia}>
-                Kembali
-              </Button>
-            </Popover>
+          {rolePengguna !== '1' && (
+            <FloatButton
+              type="primary"
+              onClick={AksiKembaliPanitia}
+              icon={<ArrowLeftOutlined />}
+              tooltip={<div>Kembali ke Rekap Dokumen Peserta</div>}
+            />
           )}
 
           {rolePengguna === '1' && (

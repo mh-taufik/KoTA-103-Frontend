@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import 'antd/dist/antd.css';
+import 'antd/dist/reset.css';
 import { Form, Input, Row, Col, Table, Image, Tabs, Alert, Spin, Button } from 'antd';
 import {
     CCard,

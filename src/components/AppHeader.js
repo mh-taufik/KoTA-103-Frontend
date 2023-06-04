@@ -41,7 +41,13 @@ const AppHeader = () => {
       }else{
         nameRole="Ketua Program Studi D4"
       } 
-    } 
+    }else if(role === "4"){
+      if(localStorage.getItem('id_prodi') === "0"){
+        nameRole="Pembimbing Jurusan D3" 
+      }else{
+        nameRole="Pembimbing Jurusan D4" 
+      }
+    }
     return nameRole
   }
   return (

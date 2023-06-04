@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import 'antd/dist/antd.css'
+import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faPencil, faTrashCan } from '@fortawesome/free-solid-svg-icons'
+import {ArrowLeftOutlined } from '@ant-design/icons';
+import { FloatButton } from 'antd';
 import {
   Table,
   Button,
@@ -45,6 +47,7 @@ const RekapRPP = () => {
   const [infoDataPeserta, setInfoDataPeserta] = useState([])
 
   const desc = '*edit RPP yang dipilih'
+  const descdetail = '*detail RPP yang dipilih'
   axios.defaults.withCredentials = true
 
   const enterLoading = (index) => {
@@ -383,7 +386,8 @@ const RekapRPP = () => {
       dataIndex: 'action',
       render: (text, record) => (
         <>
-          {rolePengguna === '0' && (
+         {/* ROLE PANITIA */}
+          {rolePengguna !=='1' && rolePengguna !=='4' && (
             <Row>
               <Col span={6} style={{ textAlign: 'center' }}>
                 <Popover content={hoverButtonLihatDetail}>
@@ -400,32 +404,22 @@ const RekapRPP = () => {
             </Row>
           )}
 
+          {/* ROLE PEMBIMBING JURUSAN */}
           {rolePengguna === '4' && (
             <Row>
-              <Col span={6} style={{ textAlign: 'center' }}>
-                <Popconfirm
-                  placement="topRight"
-                  title="Yakin akan melakukan edit RPP?"
-                  description={desc}
-                  onConfirm={confirmToEdit}
-                  okText="Yes"
-                  cancelText="No"
+            <Col span={6} style={{ textAlign: 'center' }}>
+              <Popover content={hoverButtonLihatDetail}>
+                <Button
+                  type="primary"
+                  shape="round"
+                  size="small"
+                  onClick={() => actionLihatRPPPeserta(record.id)}
                 >
-                  {/* <Button
-              id="button-pencil"
-              htmlType="submit"
-              shape="circle"
-              style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
-              onClick={() => {
-                setWannaEdit(record)
-              }}
-            >
-              <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
-            </Button> */}
-                  <Button>akyam</Button>
-                </Popconfirm>
-              </Col>
-            </Row>
+                  Lihat Detail
+                </Button>
+              </Popover>
+            </Col>
+          </Row>
           )}
         </>
       ),
@@ -462,7 +456,7 @@ const RekapRPP = () => {
       ...getColumnSearchProps('tanggal_selesai', 'Tanggal Selesai Pengerjaan'),
     },
     {
-      title: 'Status Pengumpulan',
+      title: 'Status RPP',
       dataIndex: 'status',
       key: 'status',
       ...getColumnSearchProps('status', 'Status'),
@@ -502,7 +496,7 @@ const RekapRPP = () => {
               <Popconfirm
                 placement="topRight"
                 title="Yakin akan melihat detail RPP?"
-                description={desc}
+                description={descdetail}
                 onConfirm={() => confirmToDetail()}
                 okText="Yes"
                 cancelText="No"
@@ -564,7 +558,7 @@ const RekapRPP = () => {
               display: 'flex',
             }}
           >
-            <Card title="Informasi Peserta" size="small">
+            <Card title="Informasi Peserta" size="small" style={{padding:25}}>
               <Row>
                 <Col span={4}>Nama Lengkap</Col>
                 <Col span={2}>:</Col>
@@ -573,7 +567,7 @@ const RekapRPP = () => {
               <Row>
                 <Col span={4}>NIM</Col>
                 <Col span={2}>:</Col>
-                <Col span={8}>201511009</Col>
+                <Col span={8}>181524003</Col>
               </Row>
             </Card>
           </Space>
@@ -584,13 +578,13 @@ const RekapRPP = () => {
         <CCard className="mb-4">
           {title('REKAP RENCANA PENYELESAIAN PROYEK PESERTA')}
           <CCardBody>
-          {rolePengguna !== '1' && (
+          {/* {rolePengguna !== '1' && (
             <Popover content={<div>ke list dokumen peserta</div>}>
-              <Button type="primary" shape="round" size="small" onClick={buttonKembaliKeListHandling}>
+              <Button type="primary"  size="small" onClick={buttonKembaliKeListHandling}>
                 Kembali
               </Button>
             </Popover>
-          )}
+          )} */}
             {rolePengguna === '1' && (
               <Row>
                 <Col span={24} style={{ textAlign: 'right' }}>
@@ -640,7 +634,9 @@ const RekapRPP = () => {
           </CCardBody>
         </CCard>
       </div>
-      
+       {rolePengguna !== '1' && (
+            <FloatButton type='primary' onClick={buttonKembaliKeListHandling} icon={<ArrowLeftOutlined />} tooltip={<div>Kembali ke Rekap Dokumen Peserta</div>} />
+      )}
     </>
   )
 }

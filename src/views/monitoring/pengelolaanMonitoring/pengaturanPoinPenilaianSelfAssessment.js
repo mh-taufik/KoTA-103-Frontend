@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import 'antd/dist/antd.css'
+import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPencil, faTrashCan } from '@fortawesome/free-solid-svg-icons'
@@ -427,7 +427,9 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
   ]
 
   return isLoading ? (
-    <Spin indicator={antIcon} />
+    <Spin tip="Loading" size="large">
+    <div className="content" />
+  </Spin>
   ) : (
     <>
       <CCard className="mb-4">
@@ -438,7 +440,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
           <ul style={{fontSize:14}}>
             <li>Poin penilaian akan dipergunakan pada form pengisian self assessment peserta</li>
             <li>Diberikan status active : apabila poin tersebut diizinkan untuk diisi oleh peserta</li>
-            <li>Diberikan status non active : apabila poin tersebut belum waktunya untuk diisi oleh peserta</li>
+            <li>Diberikan status inactive : apabila poin tersebut belum waktunya untuk diisi oleh peserta</li>
             <li>Diberikan status disabled : apabila poin tersebut tidak akan dilakukan pengisian sama sekali oleh peserta</li>
           </ul>
         </Box>

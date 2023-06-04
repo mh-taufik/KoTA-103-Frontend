@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import 'antd/dist/antd.css'
+import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import AddIcon from '@mui/icons-material/Add'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import { faEye, faPencil, faTrashCan } from '@fortawesome/free-solid-svg-icons'
 import {
   Table,
@@ -18,6 +20,7 @@ import {
   Popconfirm,
   Popover,
   Card,
+  FloatButton,
 } from 'antd'
 import axios from 'axios'
 import { SearchOutlined } from '@ant-design/icons'
@@ -27,6 +30,7 @@ import { LoadingOutlined } from '@ant-design/icons'
 import { Option } from 'antd/lib/mentions'
 import { HoverStyle } from 'devextreme-react/chart'
 import App from '../../penilaianArtifakPeserta/logbook/penilaianLogbook'
+import { Fab } from '@mui/material'
 
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const RekapSelfAssessment = () => {
@@ -61,13 +65,9 @@ const RekapSelfAssessment = () => {
     return new Date(string).toLocaleDateString([], options)
   }
 
- 
   useEffect(() => {
     console.log('idpeserta ==> ', idPeserta.id)
 
-  
-
-    
     async function getSelfAssessment(record, index) {
       let PESERTA
       if (rolePengguna === '1') {
@@ -77,33 +77,48 @@ const RekapSelfAssessment = () => {
       }
       enterLoading(index)
       await axios
-        .get(`http://localhost:1337/api/selfassessments?populate=*&filters[peserta][username]=${PESERTA}`)
+        .get(
+          `http://localhost:1337/api/selfassessments?populate=*&filters[peserta][username]=${PESERTA}`,
+        )
         .then((response) => {
-         var temp = []
-         var temp1 = response.data.data
-         const convertDate = (date) => {
-          let temp_date_split = date.split("-")
-          const month = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
-          let date_month = temp_date_split[1]
-          let month_of_date = month[parseInt(date_month)-1]
-          // console.log(month_of_date,'isi date monts', month_of_date)
-          return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`  : null
-        }
-
-         var getTempSelfAssessment = function(obj){
-          for(var i in obj){
-            temp.push({
-              tanggal_mulai : convertDate(obj[i].attributes.tanggalmulai),
-              tanggal_selesai : convertDate(obj[i].attributes.tanggalselesai),
-              tanggal_pengumpulan : convertDate(obj[i].attributes.tanggal_pengumpulan),
-              id : obj[i].id
-            })
+          var temp = []
+          var temp1 = response.data.data
+          const convertDate = (date) => {
+            let temp_date_split = date.split('-')
+            const month = [
+              'Januari',
+              'Februari',
+              'Maret',
+              'April',
+              'Mei',
+              'Juni',
+              'Juli',
+              'Agustus',
+              'September',
+              'Oktober',
+              'November',
+              'Desember',
+            ]
+            let date_month = temp_date_split[1]
+            let month_of_date = month[parseInt(date_month) - 1]
+            // console.log(month_of_date,'isi date monts', month_of_date)
+            return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
           }
-         }
-        console.log("SA", response.data.data)
-        getTempSelfAssessment(temp1)
-        setSelfAssessmentPeserta(temp)
-        setIsLoading(false)
+
+          var getTempSelfAssessment = function (obj) {
+            for (var i in obj) {
+              temp.push({
+                tanggal_mulai: convertDate(obj[i].attributes.tanggalmulai),
+                tanggal_selesai: convertDate(obj[i].attributes.tanggalselesai),
+                tanggal_pengumpulan: convertDate(obj[i].attributes.tanggal_pengumpulan),
+                id: obj[i].id,
+              })
+            }
+          }
+          console.log('SA', response.data.data)
+          getTempSelfAssessment(temp1)
+          setSelfAssessmentPeserta(temp)
+          setIsLoading(false)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -214,41 +229,56 @@ const RekapSelfAssessment = () => {
     } else {
       PESERTA = idPeserta.id
     }
-    axios.get(`http://localhost:1337/api/selfassessments?populate=*&filters[peserta][username]=${PESERTA}`).then((response) => {
-      var temp = []
-      var temp1 = response.data.data
-      const convertDate = (date) => {
-       let temp_date_split = date.split("-")
-       const month = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
-       let date_month = temp_date_split[1]
-       let month_of_date = month[parseInt(date_month)-1]
-       // console.log(month_of_date,'isi date monts', month_of_date)
-       return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`  : null
-     }
+    axios
+      .get(
+        `http://localhost:1337/api/selfassessments?populate=*&filters[peserta][username]=${PESERTA}`,
+      )
+      .then((response) => {
+        var temp = []
+        var temp1 = response.data.data
+        const convertDate = (date) => {
+          let temp_date_split = date.split('-')
+          const month = [
+            'Januari',
+            'Februari',
+            'Maret',
+            'April',
+            'Mei',
+            'Juni',
+            'Juli',
+            'Agustus',
+            'September',
+            'Oktober',
+            'November',
+            'Desember',
+          ]
+          let date_month = temp_date_split[1]
+          let month_of_date = month[parseInt(date_month) - 1]
+          // console.log(month_of_date,'isi date monts', month_of_date)
+          return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
+        }
 
-
-      var getTempSelfAssessment = function(obj){
-       for(var i in obj){
-         temp.push({
-           tanggal_mulai : convertDate(obj[i].attributes.tanggalmulai),
-           tanggal_selesai : convertDate(obj[i].attributes.tanggalselesai),
-           tanggal_pengumpulan : convertDate(obj[i].attributes.tanggal_pengumpulan),
-           id : obj[i].id
-         })
-       }
-      }
-     console.log("SA", response.data.data)
-     getTempSelfAssessment(temp1)
-     setSelfAssessmentPeserta(temp)
-      setLogbookPeserta(response.data.data)
-      setLoadings((prevLoadings) => {
-        const newLoadings = [...prevLoadings]
-        newLoadings[index] = false
-        return newLoadings
+        var getTempSelfAssessment = function (obj) {
+          for (var i in obj) {
+            temp.push({
+              tanggal_mulai: convertDate(obj[i].attributes.tanggalmulai),
+              tanggal_selesai: convertDate(obj[i].attributes.tanggalselesai),
+              tanggal_pengumpulan: convertDate(obj[i].attributes.tanggal_pengumpulan),
+              id: obj[i].id,
+            })
+          }
+        }
+        console.log('SA', response.data.data)
+        getTempSelfAssessment(temp1)
+        setSelfAssessmentPeserta(temp)
+        setLogbookPeserta(response.data.data)
+        setLoadings((prevLoadings) => {
+          const newLoadings = [...prevLoadings]
+          newLoadings[index] = false
+          return newLoadings
+        })
       })
-    })
   }
-
 
   //EDIT LOGBOOK
   const confirmToEdit = () => {
@@ -261,13 +291,20 @@ const RekapSelfAssessment = () => {
   }
   /** RESET SEARCH */
 
-
- const lihatRekapNilaiSelfAssessment = () => {
-  history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${idPeserta.id}/rekapPenilaianSelfAssessment`)
- }
+  const lihatRekapNilaiSelfAssessment = () => {
+    history.push(
+      `/rekapDokumenPeserta/selfAssessmentPeserta/${idPeserta.id}/rekapPenilaianSelfAssessment`,
+    )
+  }
 
   const lihatDetailSelfAssessment = (idsa) => {
-   (rolePengguna !== '1')? history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${idPeserta.id}/detail/${idsa}`) : history.push(`/selfAssessment/formSelfAssessment/detail/${idsa}`)
+    rolePengguna !== '1'
+      ? history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${idPeserta.id}/detail/${idsa}`)
+      : history.push(`/selfAssessment/formSelfAssessment/detail/${idsa}`)
+  }
+
+  const lakukanPenilaianSelfAssessment = (idsa) => {
+    history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${idPeserta.id}/penilaian/${idsa}`)
   }
 
   const columnsPanitiaPembimbing = [
@@ -283,20 +320,19 @@ const RekapSelfAssessment = () => {
     {
       title: 'Tanggal Mulai',
       dataIndex: 'tanggal_mulai',
-      key:'tanggal_mulai',
+      key: 'tanggal_mulai',
       ...getColumnSearchProps('tanggal_mulai', 'Tanggal Mulai'),
     },
     {
       title: 'Tanggal Selesai',
       dataIndex: 'tanggal_selesai',
-      key:'tanggal_selesai',
+      key: 'tanggal_selesai',
       ...getColumnSearchProps('tanggal_selesai', 'Tanggal Selesai'),
     },
     {
       title: 'Tanggal Pengumpulan',
       dataIndex: 'tanggal_pengumpulan',
       ...getColumnSearchProps('tanggal_pengumpulan', 'Status Poin Penilaian'),
-      
     },
     {
       title: 'Aksi',
@@ -305,42 +341,61 @@ const RekapSelfAssessment = () => {
       dataIndex: 'action',
       render: (text, record) => (
         <>
-          <Row>
-            <Col span={12} style={{ textAlign: 'center' }}>
-            
-            <Popover content={<div>Lihat isi detail self assessment</div>}>
-                <Button
-                  id="button-pencil"
-                  htmlType="submit"
-                  shape="circle"
-                  style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
-                  onClick={() => {
-                    lihatDetailSelfAssessment(record.id)
-                  }}
-                >
-                  <FontAwesomeIcon icon={faEye} style={{ color: 'black' }} />
-                </Button>
+          {rolePengguna !== '1' && rolePengguna !== '4' && (
+            <Row>
+              <Col span={24} style={{ textAlign: 'center' }}>
+                <Popover content={<div>Lihat isi detail self assessment</div>}>
+                  <Button
+                    id="button-pencil"
+                    htmlType="submit"
+                    shape="circle"
+                    style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
+                    onClick={() => {
+                      lihatDetailSelfAssessment(record.id)
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faEye} style={{ color: 'black' }} />
+                  </Button>
                 </Popover>
-                </Col>
+              </Col>
+            </Row>
+          )}
 
-                <Col span={12} style={{ textAlign: 'center' }}>
-            
-            <Popover content={<div>Lakukan penilaian self assessment</div>}>
-                <Button
-                  id="button-pencil"
-                  htmlType="submit"
-                  shape="circle"
-                  style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
-                  onClick={() => {
-                    lihatDetailSelfAssessment(record.id)
-                  }}
-                >
-                  <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
-                </Button>
+          {rolePengguna === '4' && (
+            <Row>
+              <Col span={12} style={{ textAlign: 'center' }}>
+                <Popover content={<div>Lihat isi detail self assessment</div>}>
+                  <Button
+                    id="button-pencil"
+                    htmlType="submit"
+                    shape="circle"
+                    style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
+                    onClick={() => {
+                      lihatDetailSelfAssessment(record.id)
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faEye} style={{ color: 'black' }} />
+                  </Button>
                 </Popover>
-            </Col>
-           
-          </Row>
+              </Col>
+
+              <Col span={12} style={{ textAlign: 'center' }}>
+                <Popover content={<div>Lakukan penilaian self assessment</div>}>
+                  <Button
+                    id="button-pencil"
+                    htmlType="submit"
+                    shape="circle"
+                    style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
+                    onClick={() => {
+                      lakukanPenilaianSelfAssessment(record.id)
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+                  </Button>
+                </Popover>
+              </Col>
+            </Row>
+          )}
         </>
       ),
     },
@@ -360,20 +415,19 @@ const RekapSelfAssessment = () => {
     {
       title: 'Tanggal Mulai',
       dataIndex: 'tanggal_mulai',
-      key:'tanggal_mulai',
+      key: 'tanggal_mulai',
       ...getColumnSearchProps('tanggal_mulai', 'Tanggal Mulai'),
     },
     {
       title: 'Tanggal Selesai',
       dataIndex: 'tanggal_selesai',
-      key:'tanggal_selesai',
+      key: 'tanggal_selesai',
       ...getColumnSearchProps('tanggal_selesai', 'Tanggal Selesai'),
     },
     {
       title: 'Tanggal Pengumpulan',
       dataIndex: 'tanggal_pengumpulan',
       ...getColumnSearchProps('tanggal_pengumpulan', 'Status Poin Penilaian'),
-      
     },
 
     {
@@ -385,8 +439,7 @@ const RekapSelfAssessment = () => {
         <>
           <Row>
             <Col span={6} style={{ textAlign: 'center' }}>
-            
-            <Popover content={<div>Lihat isi detail self assessment</div>}>
+              <Popover content={<div>Lihat isi detail self assessment</div>}>
                 <Button
                   id="button-pencil"
                   htmlType="submit"
@@ -398,14 +451,14 @@ const RekapSelfAssessment = () => {
                 >
                   <FontAwesomeIcon icon={faEye} style={{ color: 'black' }} />
                 </Button>
-                </Popover>
+              </Popover>
             </Col>
           </Row>
         </>
       ),
     },
   ]
-  const buttonKembaliKeListHandling= () => {
+  const buttonKembaliKeListHandling = () => {
     history.push(`/rekapDokumenPeserta`)
   }
 
@@ -413,10 +466,10 @@ const RekapSelfAssessment = () => {
     return (
       <>
         <div>
-          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius:2 }}>
+          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius: 2 }}>
             <Col span={24}>
               <b>
-                <h4 style={{color:'#f6ffed', marginLeft:30, marginTop:6}}>{judul}</h4>
+                <h4 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h4>
               </b>
             </Col>
           </Row>
@@ -431,24 +484,23 @@ const RekapSelfAssessment = () => {
     <>
       {rolePengguna !== '1' && (
         <Space
-         className='spacebottom'
+          className="spacebottom"
           direction="vertical"
           size="middle"
           style={{
             display: 'flex',
-          
           }}
         >
-          <Card title="Informasi Peserta" size="small" style={{  padding:30}}>
-            <Row style={{fontSize:16}}>
+          <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
+            <Row style={{ fontSize: 16 }}>
               <Col span={4}>Nama Lengkap</Col>
               <Col span={2}>:</Col>
               <Col span={8}>Gina Anifah Choirunnisa</Col>
             </Row>
-            <Row style={{fontSize:16}}>
+            <Row style={{ fontSize: 16 }}>
               <Col span={4}>NIM</Col>
               <Col span={2}>:</Col>
-              <Col span={8}>201511009</Col>
+              <Col span={8}>181524003</Col>
             </Row>
           </Card>
         </Space>
@@ -457,13 +509,13 @@ const RekapSelfAssessment = () => {
       <CCard className="mb-4">
         {title('REKAP SELF ASSESSMENT PESERTA')}
         <CCardBody>
-        {rolePengguna !== '1' && (
+          {/* {rolePengguna !== '1' && (
             <Popover content={<div>ke list dokumen peserta</div>}>
               <Button type="primary" size="medium" onClick={buttonKembaliKeListHandling}>
                 Kembali
               </Button>
             </Popover>
-          )}
+          )} */}
           {rolePengguna === '1' && (
             <Row>
               <Col span={24} style={{ textAlign: 'right' }}>
@@ -482,33 +534,14 @@ const RekapSelfAssessment = () => {
 
           {rolePengguna !== '1' && (
             <>
-             <h4 className='justify'>REKAP DOKUMEN SELF ASSESSMENT PESERTA</h4>
-             <Row>
-              <Col span={24} style={{ textAlign: 'right' }}>
-              <Popover content={<div>Lihat Rekap Nilai Self Assesment Peserta</div>}>
-                <Button
-                  id="lihat-rekap"
-                  size="sm"
-                  shape="round"
-                  style={{ color: 'white', background: '#339900', marginBottom: 16 }}
-                  type='primary'
-                  onClick={lihatRekapNilaiSelfAssessment}
-                >
-                  Rekap Nilai
-                </Button>
-                </Popover>
-
-              </Col>
-            </Row>
-             
+              <h4 className="justify">REKAP DOKUMEN SELF ASSESSMENT PESERTA</h4>
             </>
-           
           )}
 
           {rolePengguna === '1' && (
             <CRow>
               <CCol sm={12}>
-                <hr/>
+                <hr />
                 <Table
                   scroll={{ x: 'max-content' }}
                   columns={columns}
@@ -523,7 +556,6 @@ const RekapSelfAssessment = () => {
           {rolePengguna !== '1' && (
             <CRow>
               <CCol sm={12}>
-              
                 <div className="spacebottom"></div>
                 <Table
                   scroll={{ x: 'max-content' }}
@@ -537,6 +569,14 @@ const RekapSelfAssessment = () => {
           )}
         </CCardBody>
       </CCard>
+      {rolePengguna !== '1' && (
+        <FloatButton
+          type="primary"
+          onClick={buttonKembaliKeListHandling}
+          icon={<ArrowLeftOutlined />}
+          tooltip={<div>Kembali ke Rekap Dokumen Peserta</div>}
+        />
+      )}
     </>
   )
 }

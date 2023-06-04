@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import axios from 'axios'
 import { useHistory, useParams, Router } from 'react-router-dom'
 import { LoadingOutlined } from '@ant-design/icons'
@@ -6,7 +7,7 @@ import '../../pengisianDokumen/rpp/rpp.css'
 import { Table } from 'react-bootstrap'
 import Popover from '@mui/material/Popover'
 import Typography from '@mui/material/Typography'
-import { Card, Col, Row } from 'antd'
+import { Card, Col, FloatButton, Progress, Row, Space, Tooltip } from 'antd'
 
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const RekapSelfAssessment = () => {
@@ -337,11 +338,11 @@ const RekapSelfAssessment = () => {
   const title = (judul) => {
     return (
       <>
-        <div className="spacetop">
-          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius: 2 }}>
+        <div>
+          <Row style={{ backgroundColor: '#00474f', padding: 3, borderRadius: 2 }}>
             <Col span={24}>
               <b>
-                <h4 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h4>
+                <h5 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h5>
               </b>
             </Col>
           </Row>
@@ -352,18 +353,95 @@ const RekapSelfAssessment = () => {
 
   return (
     <>
-      <Card
-        size="small"
-        title="Small size card"
-        extra={<a href="#">More</a>}
-        style={{
-          width: 300,
-        }}
-      >
-        <p>Card content</p>
-        <p>Card content</p>
-        <p>Card content</p>
-      </Card>
+      <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
+        <Card title="INFORMASI SELF ASSESSMENT " size="small">
+          <Row style={{ padding: 10 }}>
+            <Col span={8}>
+              <b>Hasil Penilaian Self Assessment</b>
+            </Col>
+          </Row>
+          <Row style={{ padding: 10 }}>
+            <Col>&nbsp;&nbsp;</Col>
+            <Col span={4}>Sangat Baik (84-100) </Col>
+            <Col span={8}>
+              {' '}
+              <Progress
+                percent={99.9}
+                strokeColor={{
+                  '0%': '#108ee9',
+                  '100%': '#87d068',
+                }}
+              />
+            </Col>
+          </Row>
+          <Row style={{ padding: 10 }}>
+            <Col>&nbsp;&nbsp;</Col>
+            <Col span={4}>Baik (74-83) </Col>
+            <Col span={8}>
+              {' '}
+              <Progress
+                percent={99.9}
+                strokeColor={{
+                  '0%': '#108ee9',
+                  '100%': '#87d068',
+                }}
+              />
+            </Col>
+          </Row>
+          <Row style={{ padding: 10 }}>
+            <Col>&nbsp;&nbsp;</Col>
+            <Col span={4}>Cukup (60-73) </Col>
+            <Col span={8}>
+              {' '}
+              <Progress
+                percent={99.9}
+                strokeColor={{
+                  '0%': '#108ee9',
+                  '100%': '#87d068',
+                }}
+              />
+            </Col>
+          </Row>
+          <Row style={{ padding: 10 }}>
+            <Col>&nbsp;&nbsp;</Col>
+            <Col span={4}>Kurang (0-59) </Col>
+            <Col span={8}>
+              {' '}
+              <Progress
+                percent={99.9}
+                strokeColor={{
+                  '0%': '#108ee9',
+                  '100%': '#87d068',
+                }}
+              />
+            </Col>
+          </Row>
+        </Card>
+      </Space>
+      {rolePengguna !== '1' && (
+        <Space
+          className="spacetop"
+          direction="vertical"
+          size="middle"
+          style={{
+            display: 'flex',
+          }}
+        >
+          <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
+            <Row>
+              <Col span={4}>Nama Lengkap</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>Gina Anifah Choirunnisa</Col>
+            </Row>
+            <Row>
+              <Col span={4}>NIM</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>201511009</Col>
+            </Row>
+          </Card>
+        </Space>
+      )}
+
       {title('REKAP PENILAIAN SELF ASSESSMENT PESERTA')}
 
       <div className="container2">
@@ -377,6 +455,7 @@ const RekapSelfAssessment = () => {
               {dataPoinPenilaian.map((data, index) => (
                 <th key={data.id}>{data.poinpenilaian}</th>
               ))}
+              <th>Total</th>
             </tr>
           </thead>
           <tbody>
@@ -387,19 +466,48 @@ const RekapSelfAssessment = () => {
                 {sa.data.map((nilaipoin, index) => (
                   <td key={nilaipoin.id}>
                     {' '}
-                    <Typography
-                      aria-owns={open ? 'mouse-over-popover' : undefined}
-                      aria-haspopup="true"
-                      onMouseEnter={(e) => handlePopoverOpen(e, nilaipoin.keterangan)}
-                      onMouseLeave={handlePopoverClose}
-                      textAlign={'center'}
-                    >
-                      {nilaipoin.nilai}
-                    </Typography>
+                    <Tooltip title={nilaipoin.keterangan}>{nilaipoin.nilai}</Tooltip>
                   </td>
                 ))}
+                <td>
+                  {' '}
+                  <Tooltip >89</Tooltip>
+                </td>
               </tr>
             ))}
+            <tr>
+              <td>#</td>
+              <td>Performansi Terbaik</td>
+              <td>
+              <Tooltip >89</Tooltip>
+              </td>
+              <td>
+                 <Tooltip >89</Tooltip>
+              </td>
+              <td>
+                 <Tooltip >89</Tooltip>
+              </td>
+              <td>
+                 <Tooltip >89</Tooltip>
+              </td>
+              <td>
+                 <Tooltip >89</Tooltip>
+              </td>
+              <td>
+                 <Tooltip >89</Tooltip>
+              </td>
+              <td>
+                 <Tooltip >89</Tooltip>
+              </td>
+            </tr>
+            <tr>
+              <td colSpan={6}>
+                <b>NILAI AKHIR SELF ASSESSMENT</b>
+              </td>
+              <td colSpan={3}>
+                <b>88</b>
+              </td>
+            </tr>
           </tbody>
         </Table>
         <Popover
@@ -423,6 +531,14 @@ const RekapSelfAssessment = () => {
           {handlePopOverData()}
         </Popover>
       </div>
+      <FloatButton
+        type="primary"
+        icon={<ArrowLeftOutlined />}
+        onClick={() => {
+          history.push(`/rekapPenilaianPeserta`)
+        }}
+        tooltip={<div>Kembali ke Rekap Penilaian Peserta</div>}
+      />
     </>
   )
 }

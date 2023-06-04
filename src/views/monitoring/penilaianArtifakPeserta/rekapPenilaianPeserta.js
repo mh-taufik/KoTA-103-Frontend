@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import 'antd/dist/antd.css'
+import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -171,11 +171,11 @@ const RekapPenilaianPeserta = () => {
   }
 
   const actionSeeListSelfAssessmentPeserta = (nimPeserta) => {
-    history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${nimPeserta}`)
+    history.push(`/rekapPenilaianPeserta/selfassessment/${nimPeserta}`)
   }
 
   const actionSeeListLaporan = (nimPeserta) => {
-    history.push(`/rekapDokumenPeserta/laporan/${nimPeserta}`)
+    history.push(`/rekapPenilaianPeserta/laporan/${nimPeserta}`)
   }
 
   useEffect(() => {
@@ -183,11 +183,12 @@ const RekapPenilaianPeserta = () => {
       var APIGETPESERTA
 
       //GET DATA PESERTA BASED ON ROLE, PANITIA OR PEMBIMBING (tes aja)
-      if (rolePengguna === '0') {
+      if (rolePengguna !== '1' && rolePengguna!=='4') {
         APIGETPESERTA = 'http://localhost:1337/api/pesertas?filters[prodi]=D3'
-      } else if (rolePengguna === '1') {
-        APIGETPESERTA = 'http://localhost:1337/api/pesertas?filters[prodi]=D4'
+      } else if (rolePengguna === '4') {
+        APIGETPESERTA = 'http://localhost:1337/api/pesertas?filters[prodi]=D3'
       }
+    
 
       await axios
         .get(`${APIGETPESERTA}`)
@@ -232,12 +233,14 @@ const RekapPenilaianPeserta = () => {
     const getAllListPesertaD4 = async (record, index) => {
       var APIGETPESERTAD4
 
-      if (rolePengguna === '0') {
+      if (rolePengguna !== '4') {
         //API NYA PERLU DISESUAIKAN
         APIGETPESERTAD4 = 'http://localhost:1337/api/pesertas?filters[prodi]=D4'
-      } else if (rolePengguna === '1') {
-        APIGETPESERTAD4 = 'http://localhost:1337/api/pesertas?filters[prodi]=D3'
+      } else if (rolePengguna === '4') {
+        APIGETPESERTAD4 = 'http://localhost:1337/api/pesertas?filters[prodi]=D4'
       }
+
+
 
       await axios
         .get(`${APIGETPESERTAD4}`)
@@ -496,20 +499,37 @@ const RekapPenilaianPeserta = () => {
     setKey(activeKey)
   }
 
-  /**HANDLE FILTERING */
+  const title = (judul) => {
+    return (
+      <>
+        <div>
+          <Row style={{ backgroundColor: '#00474f', padding: 3, borderRadius: 2 }}>
+            <Col span={24}>
+              <b>
+                <h5 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h5>
+              </b>
+            </Col>
+          </Row>
+        </div>
+      </>
+    )
+  }
 
   return isLoading ? (
-    <Spin indicator={antIcon} />
+    <Spin tip="Loading" size="large">
+        <div className="content" />
+      </Spin>
   ) : (
     <>
       <CCard className="mb-4">
+        {title('REKAP PENILAIAN PESERTA')}
         <CCardBody>
           <CRow>
             <CCol sm={12}>
               <Tabs type="card" onChange={onChange}>
-                {pesertaD3.length > 0 && (
+                {pesertaD4.length > 0 && (
                   <>
-                    <TabPane tab="Prodi D3" key="1">
+                    <TabPane tab="PESERTA" key="1">
                     <CCard className="mb-4" style={{ padding: '20px' }}>
                         <Tabs type="card">
                           
@@ -583,7 +603,7 @@ const RekapPenilaianPeserta = () => {
                                       <Table
                                         scroll={{ x: 'max-content' }}
                                         columns={columnsLogbook}
-                                        dataSource={pesertaD3}
+                                        dataSource={pesertaD4}
                                         rowKey="id"
                                         bordered
                                       />
@@ -663,7 +683,7 @@ const RekapPenilaianPeserta = () => {
                                       <Table
                                         scroll={{ x: 'max-content' }}
                                         columns={columnsSelfAssessment}
-                                        dataSource={pesertaD3}
+                                        dataSource={pesertaD4}
                                         rowKey="id"
                                         bordered
                                       />
@@ -743,7 +763,7 @@ const RekapPenilaianPeserta = () => {
                                       <Table
                                         scroll={{ x: 'max-content' }}
                                         columns={columnsLaporan}
-                                        dataSource={pesertaD3}
+                                        dataSource={pesertaD4}
                                         rowKey="id"
                                         bordered
                                       />
@@ -759,8 +779,8 @@ const RekapPenilaianPeserta = () => {
                   </>
                 )}
 
-                {pesertaD4.length > 0 && (
-                  <>
+                {/* {pesertaD4.length > 0 && (
+                  <> */}
                     {/* <TabPane tab="Prodi D4" key="2">
                     <h4 className="justify">DOKUMEN PESERTA D4 - PRAKTIK KERJA LAPANGAN (PKL)</h4>
                       <div className="spacebottom"></div>
@@ -773,7 +793,7 @@ const RekapPenilaianPeserta = () => {
                         bordered
                       />
                     </TabPane> */}
-                    <TabPane tab="Prodi D4" key="2">
+                    {/* <TabPane tab="Prodi D4" key="2">
                       <CCard className="mb-4" style={{ padding: '20px' }}>
                         <Tabs type="card">
                           
@@ -1019,9 +1039,9 @@ const RekapPenilaianPeserta = () => {
                           </TabPane>
                         </Tabs>
                       </CCard>
-                    </TabPane>
-                  </>
-                )}
+                    </TabPane> */}
+                  {/* </>
+                )} */}
               </Tabs>
             </CCol>
           </CRow>

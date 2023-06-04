@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react'
-
+import {ArrowLeftOutlined } from '@ant-design/icons';
 import {
   AutoComplete,
   Button,
   Cascader,
   Col,
   DatePicker,
+  FloatButton,
   Input,
   InputNumber,
+  Popover,
   Row,
   Select,
   Space,
@@ -63,6 +65,7 @@ const PengisianRpp = () => {
   const [pageNumber, setPageNumber] = useState(1)
   const [idNewRpp, setIdNewRpp] = useState()
   const [isSuccessInput, setIsSuccessInput] = useState(true)
+
 
   const tesh = () =>{
     console.log('==', milestones)
@@ -559,13 +562,15 @@ const PengisianRpp = () => {
     history.push(`/rencanaPenyelesaianProyek/peserta/formPengisianRPP/contohPengisianRPP`)
   }
 
+  const handleButtonKembali = () =>{
+    history.push(`/rencanaPenyelesaianProyek`)
+  }
+
   return (
     <>
       <div className="container">
         <Space>
-          <Button type="primary" onClick={showModal}>
-            Lihat Contoh RPP
-          </Button>
+       
           <Modal
             title="Format Pengisian Dokumen RPP"
             visible={isModalOpen}
@@ -610,8 +615,9 @@ const PengisianRpp = () => {
         </h3>
         <Box sx={{ color: 'warning.main' }}>
           <ul>
-            <li>Pastikan semua RPP terisi</li>
+            {/* <li>Pastikan semua RPP terisi</li> */}
             <li>Isi sesuai dengan perencanaan proyek yang diberikan</li>
+            <li>Anda dapat melihat contoh pengisian RPP dengan menekan float button</li>
           </ul>
         </Box>
         <div className="spacebottom"></div>
@@ -920,7 +926,7 @@ const PengisianRpp = () => {
             <br />
             <div className="spacebottom"></div>
             <hr />
-            <h4>JADWAL PENEYELESAIAN PEKERJAAN KESELURUHAN</h4>
+            <h4>JADWAL PENYELESAIAN PEKERJAAN KESELURUHAN</h4>
             {[...Array(noOfRowsJadwalPenyelesaianPekerjaanKeseluruhan)].map(
               (elementInArray, index) => {
                 return (
@@ -963,6 +969,7 @@ const PengisianRpp = () => {
                           }
                           options={[
                             { value: 'exploration', label: 'Exploration' },
+                            { value: 'analysis', label: 'Analysis' },
                             { value: 'design', label: 'Design' },
                             { value: 'implementasi', label: 'Implementation' },
                             { value: 'testing', label: 'Testing' },
@@ -1032,6 +1039,27 @@ const PengisianRpp = () => {
           </Button> */}
         </Form>
       </div>
+      <>
+    <FloatButton
+      shape="circle"
+      type="primary"
+      style={{
+        right: 94,
+      }}
+      onClick={()=>{history.push(`/rencanaPenyelesaianProyek`)}}
+      tooltip={<div>Kembali ke Rekap RPP</div>}
+      icon={<ArrowLeftOutlined />}
+    />
+    <FloatButton
+      shape="square"
+      type="primary"
+      style={{
+        right: 24,
+      }}
+      onClick={showModal} tooltip={<div>Contoh Pengisian RPP</div>} 
+     
+    />
+  </>
     </>
   )
 }

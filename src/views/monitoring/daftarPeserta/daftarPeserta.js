@@ -1,19 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import 'antd/dist/antd.css'
+import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPencil, faLock, faTrashCan, faEdit, faPen } from '@fortawesome/free-solid-svg-icons'
 import {
   Tabs,
   Table,
   Button,
   Row,
   Col,
-  Form,
   Input,
-  Modal,
-  notification,
-  Radio,
   Space,
   Spin,
   Popover,
@@ -24,23 +18,18 @@ import { SearchOutlined } from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
 import { LoadingOutlined } from '@ant-design/icons'
 
-const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
-const { TabPane } = Tabs
 
 const DaftarPeserta = () => {
   let searchInput
   const [state, setState] = useState({ searchText: '', searchedColumn: '' })
   const [isLoading, setIsLoading] = useState(true)
   const [key, setKey] = useState('1')
-  const [isModaleditVisible, setIsModalEditVisible] = useState(false)
-  const [choose, setChoose] = useState([])
   let history = useHistory()
   const [loadings, setLoadings] = useState([])
   axios.defaults.withCredentials = true
-  const [pesertaD3, setPesertaD3] = useState([])
-  const [pesertaD4, setPesertaD4] = useState([])
+  const [peserta, setPeserta] = useState([])
   var rolePengguna = localStorage.id_role
-  var usernamePengguna = localStorage.username
+  axios.defaults.withCredentials = true;
 
   const getColumnSearchProps = (dataIndex, name) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -84,7 +73,7 @@ const DaftarPeserta = () => {
       record[dataIndex]
         ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase())
         : '',
-    onFilterDropdownVisibleChange: (visible) => {
+    onFilterDropdownOpenChange: (visible) => {
       if (visible) {
         setTimeout(() => searchInput.select(), 100)
       }
@@ -132,75 +121,67 @@ const DaftarPeserta = () => {
   }
 
   const refreshData = async (index) => {
-    await axios.get(`http://localhost:1337/api/pesertas?filters[prodi]=D3`).then((res) => {
+    await axios
+    .get(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-all`)
+    .then((res) => {
+      console.log('response', res.data.data)
       let temp = res.data.data
       let temp1 = []
+      let setProdi = (prodi)=>{return (prodi===0)?'D3':'D4'}
       let getTemp = function (obj) {
         for (var i in obj) {
           temp1.push({
-            id: obj[i].id,
-            nama: obj[i].attributes.nama,
-            prodi: obj[i].attributes.prodi,
+            id_participant: obj[i].id_participant,
+            name: obj[i].name,
+            work_system: obj[i].work_system,
+            nim : obj[i].nim,
+            prodi : setProdi(obj[i].id_prodi),
+            id_prodi : obj[i].id_prodi
           })
         }
       }
 
       getTemp(temp)
-      setPesertaD3(temp1)
+      setPeserta(temp1)
+      setIsLoading(false)
 
-      axios.get(`http://localhost:1337/api/pesertas?filters[prodi]=D4`).then((res) => {
-        let temp = res.data.data
-        let temp1 = []
-        let getTemp = function (obj) {
-          for (var i in obj) {
-            temp1.push({
-              id: obj[i].id,
-              nama: obj[i].attributes.nama,
-              prodi: obj[i].attributes.prodi,
-            })
-          }
-        }
-
-        getTemp(temp)
-        setPesertaD4(temp1)
-        setIsLoading(false)
-        setLoadings((prevLoadings) => {
-          const newLoadings = [...prevLoadings]
-          newLoadings[index] = false
-          return newLoadings
-        })
+      setLoadings((prevLoadings) => {
+        const newLoadings = [...prevLoadings]
+        newLoadings[index] = false
+        return newLoadings
       })
     })
   }
 
   useEffect(() => {
-    const getAllListPesertaD3 = async (record, index) => {
-      var APIGETPESERTA
+    const getAllPeserta = async () => {
+      //var APIGETPESERTA
+      axios.defaults.withCredentials = true;
 
       //GET DATA PESERTA BASED ON ROLE, PANITIA OR PEMBIMBING
-      if (rolePengguna === '0') {
-        APIGETPESERTA = 'http://localhost:1337/api/pesertas?filters[prodi]=D3'
-      } else if (rolePengguna === '1') {
-        APIGETPESERTA = 'http://localhost:1337/api/pesertas?filters[prodi]=D4'
-      }
-
+      //(rolePengguna ==='1')?  APIGETPESERTA = `${process.env.REACT_APP_API_GATEWAY_URL}participant/get-all` :  APIGETPESERTA = 'localhost:8080/participant/get-all'
       await axios
-        .get(`${APIGETPESERTA}`)
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-all`)
         .then((res) => {
+          console.log('response', res.data.data)
           let temp = res.data.data
           let temp1 = []
+          let setProdi = (prodi)=>{return (prodi===0)?'D3':'D4'}
           let getTemp = function (obj) {
             for (var i in obj) {
               temp1.push({
-                id: obj[i].id,
-                nama: obj[i].attributes.nama,
-                prodi: obj[i].attributes.prodi,
+                id_participant: obj[i].id_participant,
+                name: obj[i].name,
+                work_system: obj[i].work_system,
+                nim : obj[i].nim,
+                prodi : setProdi(obj[i].id_prodi),
+                id_prodi : obj[i].id_prodi
               })
             }
           }
 
           getTemp(temp)
-          setPesertaD3(temp1)
+          setPeserta(temp1)
           setIsLoading(false)
         })
         .catch(function (error) {
@@ -219,62 +200,15 @@ const DaftarPeserta = () => {
         })
     }
 
-    const getAllListPesertaD4 = async (record, index) => {
-      var APIGETPESERTAD4
+    getAllPeserta()
 
-      if (rolePengguna === '0') {
-        APIGETPESERTAD4 = 'http://localhost:1337/api/pesertas?filters[prodi]=D4'
-      } else if (rolePengguna === '1') {
-        APIGETPESERTAD4 = 'http://localhost:1337/api/pesertas?filters[prodi]=D3'
-      }
-
-      await axios
-        .get(`${APIGETPESERTAD4}`)
-        .then((res) => {
-          console.log('d3 all == ', res.data.data)
-          setIsLoading(false)
-          // setPesertaD4(res.data.data)
-          let temp = res.data.data
-          let temp1 = []
-          let getTemp = function (obj) {
-            for (var i in obj) {
-              temp1.push({
-                id: obj[i].id,
-                nama: obj[i].attributes.nama,
-                prodi: obj[i].attributes.prodi,
-              })
-            }
-          }
-
-          getTemp(temp)
-          setPesertaD4(temp1)
-          setIsLoading(false)
-        })
-        .catch(function (error) {
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
-              },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-            history.push('/500')
-          }
-        })
-    }
-
-    getAllListPesertaD3()
-    getAllListPesertaD4()
   }, [history])
 
-  const hoverButton = <div>Klik tombol, untuk melihat detail dashboard peserta</div>
+  
 
   const columns = [
     {
-      title: 'No',
+      title: 'NO',
       dataIndex: 'no',
       width: '5%',
       align: 'center',
@@ -283,21 +217,39 @@ const DaftarPeserta = () => {
       },
     },
     {
-      title: 'Nama Peserta',
-      dataIndex: 'nama',
-      width: '40%',
-      ...getColumnSearchProps('nama', 'Nama'),
+      title: 'NIM',
+      dataIndex: 'nim',
+      width: '10%',
+      ...getColumnSearchProps('nim', 'NIM'),
     },
     {
-      title: 'Aksi',
+      title: 'PRODI',
+      dataIndex: 'prodi',
+      width: '5%',
+      ...getColumnSearchProps('prodi', 'NIM'),
+    },
+    {
+      title: 'NAMA PESERTA',
+      dataIndex: 'name',
+      width: '40%',
+      ...getColumnSearchProps('name', 'Nama'),
+    },
+    {
+      title: 'WORK SYSTEM',
+      dataIndex: 'work_system',
+      width: '15%',
+      ...getColumnSearchProps('work_system', 'Nama'),
+    },
+    {
+      title: 'AKSI',
       dataIndex: 'action',
       align: 'center',
       render: (text, record) => (
         <>
           <Row>
-            <Col span={12} style={{ textAlign: 'center' }}>
-              <Popover content={hoverButton}>
-                <Button type="primary" size="middle">
+            <Col span={24} style={{ textAlign: 'center' }}>
+              <Popover content={ <div>Klik tombol, untuk melihat detail dashboard peserta</div>}>
+                <Button type="primary" size="small" onClick={()=>history.push(`/daftarPeserta/dashboardPeserta/${record.id_participant}`)}>
                   Monitoring Peserta
                 </Button>
               </Popover>
@@ -311,48 +263,47 @@ const DaftarPeserta = () => {
   const onChange = (activeKey) => {
     setKey(activeKey)
   }
-  // isLoading ? (<Spin indicator={antIcon} />) : (
-  return (
+
+  const title = (judul) => {
+    return (
+      <>
+        <div>
+          <Row style={{ backgroundColor: '#00474f', padding: 3, borderRadius: 2 }}>
+            <Col span={24}>
+              <b>
+                <h5 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h5>
+              </b>
+            </Col>
+          </Row>
+        </div>
+      </>
+    )
+  }
+
+  const items = [{
+    key :'1',
+    label :'PESERTA',
+    children :  
+    <Table
+    scroll={{ x: 'max-content' }}
+    columns={columns}
+    dataSource={peserta}
+    rowKey={peserta.id} 
+    bordered
+    pagination={true}
+  />
+  }]
+  
+  return (isLoading)? <Spin tip="Loading" size="large">
+  <div className="content" />
+</Spin>:(
     <>
-      <CCard className="mb-4">
+      <CCard className="mb-4" key={1}>
+        {title('DAFTAR PESERTA - DASHBOARD PESERTA KP (D3) DAN PKL (D4)')}
         <CCardBody>
-          {/* {localStorage.getItem("id_role") === "0" && key === "1" && (
-              <>
-              
-              </>)} */}
           <CRow>
             <CCol sm={12}>
-              <Tabs type="card" onChange={onChange}>
-                {pesertaD3.length > 0 && (
-                  <>
-                    <TabPane tab="Prodi D3" key="1">
-                      <h6>Daftar Peserta Kerja Praktik (KP) </h6>
-                      <Table
-                        scroll={{ x: 'max-content' }}
-                        columns={columns}
-                        dataSource={pesertaD3}
-                        rowKey="id"
-                        bordered
-                      />
-                    </TabPane>
-                  </>
-                )}
-
-                {pesertaD4.length > 0 && (
-                  <>
-                    <TabPane tab="Prodi D4" key="2">
-                      <h6>Daftar Peserta Praktik Kerja Lapangan (PKL) </h6>
-                      <Table
-                        scroll={{ x: 'max-content' }}
-                        columns={columns}
-                        dataSource={pesertaD4}
-                        rowKey="id"
-                        bordered
-                      />
-                    </TabPane>
-                  </>
-                )}
-              </Tabs>
+              <Tabs type="card" defaultActiveKey='1' items={items} onChange={onChange}></Tabs>
             </CCol>
           </CRow>
         </CCardBody>

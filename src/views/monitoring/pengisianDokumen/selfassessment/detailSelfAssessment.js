@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../rpp/rpp.css'
+import {ArrowLeftOutlined } from '@ant-design/icons';
 import { Col, Row } from 'react-bootstrap'
 import axios from 'axios'
 import { Route, Router, useHistory, useParams } from 'react-router-dom'
@@ -17,6 +18,7 @@ import {
   TableRow,
 } from '@mui/material'
 import Paper from '@mui/material/Paper'
+import { FloatButton } from 'antd'
 
 const DetailSelfAssessment = (props) => {
   var params = useParams()
@@ -145,14 +147,12 @@ const DetailSelfAssessment = (props) => {
       ? history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${NIM}`)
       : history.push(`/selfAssessment`)
   }
-  const hoverButtonKembali = <div>Klik tombol, untuk kembali ke list logbook</div>
+
   return (
     <>
       <div className="container2">
-        <Button variant="contained" size="small" onClick={HandleKembali}>
-          Kembali
-        </Button>
-        <h1 className="justify">SELF ASSESSMENT</h1>
+      
+        <h1 className="justify" style={{fontFamily:'Candara'}}>SELF ASSESSMENT</h1>
         <div className="spacebottom"></div>
         <Box sx={{ color: 'primary.main' }}>
           Tanggal Self Assessment : {tanggalMulaiSelfAssessment} - {tanggalBerakhirSelfAssessment}
@@ -186,6 +186,11 @@ const DetailSelfAssessment = (props) => {
           </Table>
         </TableContainer>
       </div>
+      <FloatButton type='primary' icon={<ArrowLeftOutlined />} onClick={HandleKembali} tooltip={<div>Kembali ke Rekap Self Assessment</div>} />
+
+
+
+
     </>
   )
 }

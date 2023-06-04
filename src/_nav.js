@@ -30,6 +30,14 @@ const _nav = [
     index: 1,
   },
   {
+    component: CNavItem,
+    name: 'Dashboard',
+    to: '/dashboard',
+    icon: <FontAwesomeIcon icon={faHouse} size="lg" />,
+    role: '4',
+    index: 1,
+  },
+  {
     component: CNavTitle,
     name: 'Data Mahasiswa',
     role: '0',
@@ -405,6 +413,7 @@ const _nav = [
     role: '3',
     index: 44,
   },
+  // MONITORING PELAKSANAAN
   {
     component: CNavTitle,
     name: 'Monitoring Pelaksanaan',
@@ -491,7 +500,8 @@ const _nav = [
         index: 59.4
       }
     ],
-  },{
+  },
+  {
     component: CNavGroup,
     name: 'Pengaturan Monitoring',
     icon: <FontAwesomeIcon icon={faSitemap} size="lg" />,
@@ -509,6 +519,12 @@ const _nav = [
         name: 'Poin Penilaian Pembimbing Jurusan',
         to: '/poinPenilaianPembimbingJurusan',
         index: 56.2
+      },
+      {
+        component: CNavItem,
+        name: 'Pengelolaan Deadline',
+        to: '/pengelolaanDeadline',
+        index: 56.3
       },
     
     ],
@@ -572,14 +588,46 @@ const _nav = [
     role: '0',
     index: 62,
   },
-  // {
-  //   component: CNavItem,
-  //   name: 'Form Penilaian Pembimbing Jurusan',
-  //   to: '/rekapFormPenilaianPembimbingJurusan',
-  //   icon: <FontAwesomeIcon icon={faClipboard}  size="lg" />,
-  //   role: '0',
-  //   index: 63,
-  // },
+  {
+    component: CNavTitle,
+    name: 'Monitoring Pelaksanaan',
+    role: '4',
+    index: 63,
+  },
+  {
+    component: CNavItem,
+    name: 'Monitoring Dashboard',
+    to: '/monitoringPelaksanaan',
+    icon: <FontAwesomeIcon icon={faScaleUnbalancedFlip} size="lg" />,
+    role: '4',
+    index: 64,
+  },
+  {
+    component: CNavItem,
+    name: 'Daftar Peserta',
+    to: '/daftarPeserta',
+    icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
+    role: '4',
+    index: 65,
+  },
+  {
+    component: CNavItem,
+    name: 'Rekap Dokumen Peserta',
+    to: '/rekapDokumenPeserta',
+    icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
+    role: '4',
+    index: 66,
+  },
+  {
+    component: CNavItem,
+    name: 'Rekap Penilaian Peserta',
+    to: '/rekapPenilaianPeserta',
+    icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
+    role: '4',
+    index: 67,
+  },
+
+
 ]
 
 export default _nav

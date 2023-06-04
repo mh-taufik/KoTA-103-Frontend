@@ -5,12 +5,13 @@ import Form from 'react-bootstrap/Form'
 import Container from 'react-bootstrap/Container'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../rpp/rpp.css'
+import {ArrowLeftOutlined } from '@ant-design/icons';
 import { Col, Row } from 'react-bootstrap'
 import Table from 'react-bootstrap/Table'
 import { Refresh } from '@mui/icons-material'
 import axios from 'axios'
 import { Route, Router, useHistory, useParams } from 'react-router-dom'
-import { Button, Card, Popover, Space, notification } from 'antd'
+import { Button, Card, FloatButton, Popover, Space, notification } from 'antd'
 import routes from 'src/routes'
 
 const ReviewLogbook = (props) => {
@@ -103,139 +104,22 @@ const ReviewLogbook = (props) => {
     // console.log('nama proyek awal : ', logbookPeserta.attributes.namaproyek)
   }
 
-  const putLogbookParticipantChanged = async (index) => {
-    enterLoading(index)
-    await axios
-      .put(`http://localhost:1337/api/logbooks/${LOGBOOK}`, {
-        data: {
-          namaproyek: namaProyek,
-          tools: tools,
-          hasilkerja: hasilKerja,
-          projectmanager: projectManager,
-          keterangan: keterangan,
-          technicalleader: technicalLeader,
-          tugas: tugasPeserta,
-          waktudankegiatan: waktuDanKegiatanPeserta,
-          statuspengecekan: statusPengecekanPembimbing,
-        },
-      })
-      .then((response) => {
-        refreshData(index)
-        notification.success({
-          message: 'Logbook berhasil diubah',
-        })
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-          history.push('/500')
-        }
-      })
-  }
-
-  const refreshData = (index) => {
-    axios.get(`http://localhost:1337/api/logbooks/${LOGBOOK}`).then((result) => {
-      setLogbookPeserta(result.data.data)
-      setLogbookAttributesData(result.data.data.attributes)
-      setLoadings((prevLoadings) => {
-        const newLoadings = [...prevLoadings]
-        newLoadings[index] = false
-        return newLoadings
-      })
-    })
-  }
 
   useEffect(() => {
     getDataLogbookChosen()
   }, [history])
 
-  const submitLogbook = () => {
-    // if(submitAccepted===0){
-    //   console.log('tidak bisa')
-    //   notification.info({message:'Silahkan ganti tanggal logbook'})
-    // }else{
-    //   console.log('bisa')
-    // saveDataLogbook()
-    putLogbookParticipantChanged()
-
-    console.log('id logbook = ', LOGBOOK)
-    console.log('hasil edit : ', namaProyek)
-
-    // }
-  }
-  const saveDataLogbook = async (data, index) => {
-    enterLoading(index)
-    await axios
-      .put('http://localhost:1337/api/logbooks', {
-        data: {
-          namaproyek: namaProyek,
-          tools: tools,
-          hasilkerja: hasilKerja,
-          projectmanager: projectManager,
-          keterangan: keterangan,
-          technicalleader: technicalLeader,
-          tugas: tugasPeserta,
-          waktudankegiatan: waktuDanKegiatanPeserta,
-          statuspengecekan: statusPengecekanPembimbing,
-        },
-      })
-      .then((response) => {
-        notification.success({
-          message: 'Logbook berhasil diubah',
-        })
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-          history.push('/500')
-        }
-      })
-  }
-  const hoverButtonEdit = <div>Klik tombol, untuk melakukan pengeditan logbook kembali</div>
 
   const hoverButtonKembali = <div>Klik tombol, untuk kembali ke list logbook</div>
 
-  const Kembali = () => {
-    history.push(`/rekapDokumenPeserta/logbookPeserta/${nim_peserta}`)
+  const handlingButtonKembali = () => {
+    (rolePengguna !=='1')? history.push(`/rekapDokumenPeserta/logbookPeserta/${nim_peserta}`): history.push(`/logbook`)
   }
+
   return (
     <>
       <React.Fragment>
-        <Space wrap className="title-s">
-          <Popover content={hoverButtonKembali}>
-            <Button type="primary" shape="round" onClick={Kembali}>
-              Kembali ke List Logbook
-            </Button>
-          </Popover>
-
-          {rolePengguna === 1 && (
-            <Popover content={hoverButtonEdit}>
-              <Button
-                type="primary"
-                shape="round"
-                style={{ background: '#d48806', borderColor: '#d48806' }}
-              >
-                Edit
-              </Button>
-            </Popover>
-          )}
-        </Space>
+     
 
         <div className="container">
           <h3 align="center" className="title-s">
@@ -371,14 +255,11 @@ const ReviewLogbook = (props) => {
               </Col>
             </Row>
 
-            {rolePengguna === '1' && (
-              <Button className="form-control btn btn-primary" onClick={submitLogbook}>
-                Submit Logbook
-              </Button>
-            )}
+         
           </Form>
         </div>
       </React.Fragment>
+      <FloatButton type='primary' onClick={handlingButtonKembali} icon={<ArrowLeftOutlined />} tooltip={<div>Kembali ke Rekap Logbook</div>} />
     </>
   )
 }

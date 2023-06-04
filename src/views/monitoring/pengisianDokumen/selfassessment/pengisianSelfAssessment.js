@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import 'antd/dist/antd.css'
+import 'antd/dist/reset.css'
+import {ArrowLeftOutlined } from '@ant-design/icons';
 import {
   Steps,
   Form,
@@ -14,6 +15,7 @@ import {
   notification,
   Popover,
   Popconfirm,
+  FloatButton,
 } from 'antd'
 import { MinusCircleOutlined } from '@ant-design/icons'
 import { PlusOutlined } from '@ant-design/icons'
@@ -326,7 +328,7 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
     return formatDate(ISOweekStart.toDateString())
   }
 
-  const handleDateIsAvailable = async (tanggalmulai) => {
+  const handleDateIsAvailable = async (tanggalmulai,tanggalselesai) => {
     await axios
       .get(
         `http://localhost:1337/api/selfassessments?populate=*&filters[peserta][username]=${NIM_PESERTA}&filters[tanggalmulai]=${tanggalmulai}`,
@@ -342,8 +344,24 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
           })
           return false
         } else {
-          setIsDateAvailable(true)
-          return true
+          // setIsDateAvailable(true)
+          // return true
+          let end= new Date(tanggalselesai)
+          end.setDate(end.getDate()+1) //jika hari lebih dari hari ini
+          end = new Date(end)
+          let today = new Date()
+          // console.log('are', today <= end, today,end)
+          if(today < end){
+            setIsDateAvailable(true)
+            console.log('ses', today, end, today < end)
+          }else if(today > end){
+            console.log('ses', today, end, today > end)
+            notification.warning({
+              message:'Sudah melewati deadline!!!'
+            })
+            setIsDateAvailable(false)
+          }
+     
         }
       })
       .catch(function (error) {
@@ -374,11 +392,7 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
       <Form>
         {' '}
         <div className="container">
-          <Popover content={<div>Kembali ke rekap self assessment</div>}>
-            <Button type="primary" onClick={handleKembaliKeRekapSelfAssessment}>
-              Kembali
-            </Button>
-          </Popover>
+         
           <div className="spacetop"></div>
           <Box sx={{ color: 'warning.main' }}>
             <ul>
@@ -396,10 +410,13 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
           <Space direction="vertical" size={12}>
             <DatePicker
               picker="week"
-              disabledDate={disabledDate}
+              disabledDate={(current)=>{
+                return moment().add(-1, 'days')  >= current || current.isAfter(moment())
+              }}
               onChange={(date, datestring) => {
                 let tanggalmulai = getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4))
-                let handling = handleDateIsAvailable(tanggalmulai)
+                let tanggalselesai = getDateOfEndWeek(datestring.slice(5, 7), datestring.slice(0, 4))
+                let handling = handleDateIsAvailable(tanggalmulai,tanggalselesai)
                 setTanggalMulaiSelfAssessment(
                   getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
                 )
@@ -407,7 +424,7 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
                   getDateOfEndWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
                 )
               }}
-              renderExtraFooter={() => 'extra footer'}
+              renderExtraFooter={() => 'Pilih Minggu Self Assessment'}
             />
           </Space>
 
@@ -515,6 +532,11 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
           </Popconfirm>
         </div>
       </Form>
+      <FloatButton type='primary' onClick={handleKembaliKeRekapSelfAssessment} icon={<ArrowLeftOutlined />} tooltip={<div>Kembali ke Rekap Self Assessment</div>} />
+
+
+
+
     </>
   )
 }

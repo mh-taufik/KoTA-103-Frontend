@@ -1,5 +1,5 @@
   import React, { useEffect, useState } from 'react';
-  import 'antd/dist/antd.css';
+  import 'antd/dist/reset.css';
   import {
     CCard,
     CCardBody,
@@ -349,7 +349,7 @@
       render: (text, record) =>
         <>
           <Row>
-            {record.id_role === 0 || record.id_role === 3 ? (
+            {record.id_role === 0 || record.id_role === 3 || record.id_role === 4 ? (
               <>
                 <Col span={9} style={{ textAlign: "right" }}>
                   <Button

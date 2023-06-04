@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react'
-
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import {
   AutoComplete,
   Button,
   Cascader,
   Col,
   DatePicker,
+  FloatButton,
   Input,
   Popover,
   Row,
   Select,
   Space,
   Table,
+  notification,
 } from 'antd'
 import './rpp.css'
 import { Form, Modal, message } from 'antd'
@@ -25,16 +27,24 @@ import { SpaceContext } from 'antd/lib/space'
 import { Box } from '@mui/material'
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min'
 import axios from 'axios'
-
+import { render } from 'enzyme'
+import moment from 'moment'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faEye, faPencil } from '@fortawesome/free-solid-svg-icons'
 
 const { TextArea } = Input
 const EditRPP = () => {
+  const dateFormat = 'YYYY-MM-DD'
   let params = useParams()
   let PESERTA_ID_RPP_EDIT = params.id
   dayjs.extend(customParseFormat)
   let history = useHistory()
   const { RangePicker } = DatePicker
   const [form] = Form.useForm()
+  const [formDeliverables] = Form.useForm()
+  const [formMilestones] = Form.useForm()
+  const [formRencanaCapaianMingguan] = Form.useForm()
+  const [formJadwalPenyelesaian] = Form.useForm()
   const [loadings, setLoadings] = useState([])
   const [noOfRows, setNoOfRows] = useState(1)
   const [noOfRowsDeliverables, setNoOfRowsDeliverables] = useState(0)
@@ -62,6 +72,178 @@ const EditRPP = () => {
   const [dataDeliverables, setDataDeliverables] = useState([])
   const [dataJadwalPenyelesaianKeseluruhan, setDataJadwalPenyelesaianKeseluruhan] = useState([])
 
+  /**LIMIT PANGURANGAN HARI DALAM MINGGU */
+  const [limitMinusDay, setLimitMinusDay] = useState()
+
+  /** HANDLE EDIT DELIVEREBLES MODAL AND DATA */
+  const [isModalDeliverablesEditOpen, setIsModalDeliverablesEditOpen] = useState(false)
+  const [dataDeliverablesEdit, setDataDeliverablesEdit] = useState([])
+  const [dataDeliverablesEditChangeDeliverables, setDataDeliverablesEditChangeDeliverables] =
+    useState([])
+  const [dataDeliverablesEditChangeDueDate, setDataDeliverablesEditChangeDueDate] = useState([])
+
+  /** HANDLE MODAL EDIT DELIVERABLES*/
+  const showModalDeliverablesEdit = (data) => {
+    setDataDeliverablesEditChangeDeliverables(undefined)
+    setDataDeliverablesEditChangeDueDate(undefined)
+    setDataDeliverablesEdit({ duedate: data.duedate, deliverables: data.deliverables, id: data.id })
+    setIsModalDeliverablesEditOpen(true)
+  }
+
+  const handleCancelModalDeliverablesEdit = () => {
+    setIsModalDeliverablesEditOpen(false)
+  }
+
+  /** PUT EDIT DELIVERABLES */
+  const putDataDeliverablesEdit = async () => {
+    await axios
+      .put(`http://localhost:1337/api/deliverables/${dataDeliverablesEdit.id}`, {
+        data: {
+          deliverables: dataDeliverablesEditChangeDeliverables,
+          duedate: dataDeliverablesEditChangeDueDate,
+        },
+      })
+      .then((res) => {
+        console.log(res)
+        console.log(res.data.data)
+        setIsModalDeliverablesEditOpen(false)
+        notification.success({ message: 'Data deliverables berhasil diubah' })
+      })
+
+    refreshDataRPP()
+  }
+
+  /**HANDLE MODAL AND DATA EDIT MILESTONES */
+  const [isModalMilestonesEditOpen, setIsModalMilestonesEditOpen] = useState(false)
+  const [dataMilestonesEdit, setDataMilestonesEdit] = useState([])
+  const [popoverStartDate, setPopoverStartDate] = useState([])
+  const [dataMilestonesEditDeskripsi, setDataMilestonesEditDeskripsi] = useState()
+  const [dataMilestonesEditTanggalMulai, setDataMilestonesEditTanggalMulai] = useState()
+  const [dataMilestonesEditTanggalSelesai, setDataMilestonesEditTanggalSelesai] = useState()
+
+  /** HANDLE MODAL EDIT MILESTONES*/
+  const showModalMilestonesEdit = (data, popover) => {
+    setDataMilestonesEditDeskripsi(undefined)
+    setDataMilestonesEditTanggalMulai(undefined)
+    setDataMilestonesEditTanggalSelesai(undefined)
+    setDataMilestonesEdit(data)
+    setPopoverStartDate(popover)
+    setIsModalMilestonesEditOpen(true)
+  }
+
+  const handleCancelModalMilestonesEdit = () => {
+    setIsModalMilestonesEditOpen(false)
+  }
+
+  /** PUT DATA MILESTONES */
+  const putDataMilestonesEdit = async () => {
+    await axios
+      .put(`http://localhost:1337/api/milestones/${dataMilestonesEdit.id}`, {
+        data: {
+          deskripsi: dataMilestonesEditDeskripsi,
+          tanggalmulai: dataMilestonesEditTanggalMulai,
+          tanggalselesai: dataMilestonesEditTanggalSelesai,
+        },
+      })
+      .then((res) => {
+        console.log(res)
+        console.log(res.data.data)
+        setIsModalMilestonesEditOpen(false)
+        notification.success({ message: 'Data milestones berhasil diubah' })
+      })
+    refreshDataRPP()
+  }
+
+  /**HANDLE MODAL AND DATA EDIT RENCANA CAPAIAN MINGGUAN */
+  const [isModalRencanaCapaianMingguanEditOpen, setIsModalRencanaCapaianMingguanEditOpen] = useState(false)
+  const [dataRencanaCapaianMingguanEdit, setDataRencanaCapaianMingguanEdit] = useState([])
+  const [dataRencanaCapaianMingguanEditRencana, setDataRencanaCapaianMingguanEditRencana] = useState()
+  const [dataRencanaCapaianMingguanEditTanggalMulai, setDataRencanaCapaianMingguanEditTanggalMulai] = useState()
+  const [dataRencanaCapaianMingguanEditTanggalBerakhir, setDataRencanaCapaianMingguanEditTanggalBerakhir] = useState()
+
+  /** HANDLE MODAL EDIT RENCANA CAPAIAN MINGGUAN*/
+  const showModalRencanaCapaianMingguanEdit = (data) => {
+    setDataRencanaCapaianMingguanEditRencana(undefined)
+    setDataRencanaCapaianMingguanEditTanggalMulai(undefined)
+    setDataRencanaCapaianMingguanEditTanggalBerakhir(undefined)
+    setDataRencanaCapaianMingguanEdit(data)
+    setIsModalRencanaCapaianMingguanEditOpen(true)
+  }
+
+  const handleCancelModalRencanaCapaianMingguanEdit = () => {
+    setIsModalRencanaCapaianMingguanEditOpen(false)
+  }
+
+  /** PUT DATA RENCANA CAPAIAN MINGGUAN */
+  const putDataRencanaCapaianMingguanEdit = async()=>{
+    await axios.put(`http://localhost:1337/api/rencanacapaianmingguans/${dataRencanaCapaianMingguanEdit.id}`,{
+      'data':{
+        'rencanacapaian' : dataRencanaCapaianMingguanEditRencana,
+        'tanggalmulai' : dataRencanaCapaianMingguanEditTanggalMulai,
+        'tanggalberakhir' : dataRencanaCapaianMingguanEditTanggalBerakhir
+      }
+    }).then((res)=>{
+      console.log(res)
+      console.log(res.data.data)
+      setIsModalRencanaCapaianMingguanEditOpen(false)
+      notification.success({message:'Data Rencana Capaian Mingguan Berhasil Diubah'})
+      
+    })
+
+    refreshDataRPP()
+
+  }
+
+    /**HANDLE MODAL AND DATA EDIT JADWAL PENYELESAIAN */
+    const [isModalJadwalPenyelesaianEditOpen, setIsModalJadwalPenyelesaianEditOpen] = useState(false)
+    const [dataJadwalPenyelesaianEdit, setDataJadwalPenyelesaianEdit] = useState([])
+    const [handleStatusStartWeekDatePicker, setHandleStatusStartWeekDatePicker] = useState()
+    const [dataJadwalPenyelesaianEditButirPekerjaan, setDataJadwalPenyelesaianEditButirPekerjaan] = useState()
+    const [dataJadwalPenyelesaianEditJenisPekerjaan, setDataJadwalPenyelesaianEditJenisPekerjaan] = useState()
+    const [dataJadwalPenyelesaianEditTanggalMulai, setDataJadwalPenyelesaianEditTanggalMulai] = useState()
+    const [dataJadwalPenyelesaianEditTanggalSelesai, setDataJadwalPenyelesaianEditTanggalSelesai] = useState()
+    
+
+    /** HANDLE MODAL EDIT RENCANA CAPAIAN MINGGUAN*/
+  const showModalJadwalPenyelesaianEdit = (data, statusDatePickerStart) => {
+    setDataJadwalPenyelesaianEditButirPekerjaan(undefined)
+    setDataJadwalPenyelesaianEditJenisPekerjaan(undefined)
+    setDataJadwalPenyelesaianEditTanggalMulai(undefined)
+    setDataJadwalPenyelesaianEditTanggalSelesai(undefined)
+    setHandleStatusStartWeekDatePicker(statusDatePickerStart)
+    setDataJadwalPenyelesaianEdit(data)
+    setIsModalJadwalPenyelesaianEditOpen(true)
+  }
+
+  const handleCancelModalJadwalPenyelesaianEdit = () => {
+    setIsModalJadwalPenyelesaianEditOpen(false)
+  }
+
+    /** PUT DATA JADWAL PENYELESAIAN */
+    const putDataJadwalPenyelesaianEdit = async()=>{
+      await axios.put(`http://localhost:1337/api/jadwalpenyelesaiankeseluruhans/${dataJadwalPenyelesaianEdit.id}`,{
+        'data':{
+        'butirpekerjaan' : dataJadwalPenyelesaianEditButirPekerjaan,
+        'jenispekerjaan' : dataJadwalPenyelesaianEditJenisPekerjaan,
+        'tanggalmulai' : dataJadwalPenyelesaianEditTanggalMulai,
+        'tanggalselesai' : dataJadwalPenyelesaianEditTanggalSelesai
+        }
+      }).then((res)=>{
+        console.log(res)
+        console.log(res.data.data)
+        setIsModalJadwalPenyelesaianEditOpen(false)
+        notification.success({message:'Data Jadwal Penyelesaian Keseluruhan Berhasil Diubah'})
+        
+      })
+  
+      refreshDataRPP()
+  
+    }
+
+
+
+
+
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages)
     setPageNumber(1)
@@ -79,6 +261,115 @@ const EditRPP = () => {
     changePage(+1)
   }
 
+  /**REFRESH DATA */
+  const refreshDataRPP = async () => {
+    await axios
+      .get(`http://localhost:1337/api/rpps?populate=*&filters[id][$eq]=${PESERTA_ID_RPP_EDIT}`)
+      .then((response) => {
+        console.log(response.data.data)
+        setDataRPP({
+          tanggal_mulai: response.data.data[0].attributes.tanggal_mulai,
+          tanggal_selesai: response.data.data[0].attributes.tanggal_selesai,
+          perankelompok: response.data.data[0].attributes.perankelompok,
+          waktupengisian: response.data.data[0].attributes.waktupengisian,
+          judulpekerjaan: response.data.data[0].attributes.judulpekerjaan,
+          deskripsi_tugas: response.data.data[0].attributes.deskripsi_tugas,
+          status: response.data.data[0].status,
+        })
+
+        /** SET DATA MILESTONES */
+        var temp_mil = []
+        var temp_mil1 = []
+        temp_mil = response.data.data[0].attributes.milestones.data
+        var temp_milestone = function (obj) {
+          for (var i in obj) {
+            temp_mil1.push({
+              id: obj[i].id,
+              deskripsi: obj[i].attributes.deskripsi,
+              tanggalmulai: obj[i].attributes.tanggalmulai,
+              tanggalselesai: obj[i].attributes.tanggalselesai,
+            })
+          }
+        }
+
+        temp_milestone(temp_mil)
+        setDataMilestones(temp_mil1)
+        console.log('milestones', temp_mil1)
+
+        /**SET DATA DELIVERABLES */
+        var temp_del = []
+        var temp_del1 = []
+        temp_del = response.data.data[0].attributes.deliverables.data
+        var temp_deliverables = function (obj) {
+          for (var i in obj) {
+            temp_del1.push({
+              id: obj[i].id,
+              duedate: obj[i].attributes.duedate,
+              deliverables: obj[i].attributes.deliverables,
+            })
+          }
+        }
+
+        temp_deliverables(temp_del)
+        setDataDeliverables(temp_del1)
+        console.log('deliverables', temp_del1)
+
+        /**SET DATA RENCANA CAPAIAN MINGGUAN */
+        var temp_rcm = []
+        var temp_rcm1 = []
+        temp_rcm = response.data.data[0].attributes.rencanacapaianmingguans.data
+        var temp_rencanaCapaianMingguan = function (obj) {
+          for (var i in obj) {
+            temp_rcm1.push({
+              id: obj[i].id,
+              rencanacapaian: obj[i].attributes.rencanacapaian,
+              tanggalmulai: obj[i].attributes.tanggalmulai,
+              tanggalberakhir: obj[i].attributes.tanggalberakhir,
+            })
+          }
+        }
+
+        temp_rencanaCapaianMingguan(temp_rcm)
+        setDataCapaianMingguan(temp_rcm1)
+        console.log('capaian mingguan', temp_rcm1)
+
+        /** JADWAL PENYELESAIAN KESELURUHAN */
+        let temp_jadwalKeseluruhan = []
+        let temp_jadwalKeseluruhan1 = []
+        temp_jadwalKeseluruhan =
+          response.data.data[0].attributes.jadwalpenyelesaiankeseluruhans.data
+        let temp_jadwalKeseluruhans = function (obj) {
+          for (var i in obj) {
+            temp_jadwalKeseluruhan1.push({
+              id: obj[i].id,
+              jenispekerjaan: obj[i].attributes.jenispekerjaan,
+              butirpekerjaan: obj[i].attributes.butirpekerjaan,
+              tanggalmulai: obj[i].attributes.tanggalmulai,
+              tanggalselesai: obj[i].attributes.tanggalselesai,
+            })
+          }
+        }
+
+        temp_jadwalKeseluruhans(temp_jadwalKeseluruhan)
+        setDataJadwalPenyelesaianKeseluruhan(temp_jadwalKeseluruhan1)
+        console.log('capaian mingguan', temp_jadwalKeseluruhan1)
+      })
+      .catch(function (error) {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+          history.push('/500')
+        }
+      })
+  }
+
   /** LOADING HANDLING */
   const enterLoading = (index) => {
     setLoadings((prevLoadings) => {
@@ -88,7 +379,7 @@ const EditRPP = () => {
     })
   }
 
-  /** API POST DATA*/
+  /** HANDLE ADD DELIVERABLES DATA */
 
   /**HANDLE FAILED INPUT */
   const onFinishFailed = () => {
@@ -259,6 +550,22 @@ const EditRPP = () => {
 
   /** FUNCTIONAL */
   /**get data date berdasarkan minggu dalam tahun */
+
+    function formatDate(date) {
+      var d = new Date(date),
+          month = '' + (d.getMonth() + 1),
+          day = '' + d.getDate(),
+          year = d.getFullYear();
+
+      if (month.length < 2) 
+          month = '0' + month;
+      if (day.length < 2) 
+          day = '0' + day;
+
+      return [year, month, day].join('-');
+  }
+
+
   function getDateOfISOWeek(w, y) {
     var simple = new Date(y, 0, 1 + (w - 1) * 7)
     var dow = simple.getDay()
@@ -268,10 +575,29 @@ const EditRPP = () => {
     } else {
       ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay())
     }
-    return ISOweekStart
-
-    // console.log(ISOweekStart)
+    return formatDate(ISOweekStart.toDateString())
   }
+
+
+
+  function getEndDateOfWeek(w, y) {
+    var simple = new Date(y, 0, 1 + (w - 1) * 7)
+    var dow = simple.getDay()
+    console.log('dow =>', dow)
+    var ISOweekStart = simple
+    console.log('dow =>', ISOweekStart)
+    if (dow <= 4) {
+      ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1)
+    } else {
+      ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay())
+    }
+
+    ISOweekStart.setDate(ISOweekStart.getDate()+4)
+    return formatDate(ISOweekStart.toDateString())
+
+   
+  }
+
 
   /** HANDLE RANGE DATE SAAT MEMILIH  */
   const disabledDate = (current) => {
@@ -279,14 +605,14 @@ const EditRPP = () => {
     return current && current < dayjs().endOf('day')
   }
 
-  /** TEST */
-  const tesHandle = () => {
-    console.log('tes isi jadwal', jadwalPenyelesaianKeseluruhan)
-    // console.log('data copy==> ', deliverablesCopy)
-  }
+  const getWeekBasedOnDate = (date) => {
+    
+    var year = new Date(date.getFullYear(), 0, 1)
+    var days = Math.floor((date - year) / (24 * 60 * 60 * 1000))
+    var week = Math.ceil((date.getDay() + 1 + days) / 7)
 
-  /** */
-  const handleSubmitRPP = () => {}
+    return week
+  }
 
   const showModal = () => {
     setIsModalOpen(true)
@@ -327,7 +653,8 @@ const EditRPP = () => {
               temp_mil1.push({
                 id: obj[i].id,
                 deskripsi: obj[i].attributes.deskripsi,
-                tanggal: obj[i].attributes.tanggal,
+                tanggalmulai: obj[i].attributes.tanggalmulai,
+                tanggalselesai: obj[i].attributes.tanggalselesai,
               })
             }
           }
@@ -373,25 +700,26 @@ const EditRPP = () => {
           setDataCapaianMingguan(temp_rcm1)
           console.log('capaian mingguan', temp_rcm1)
 
-             /** JADWAL PENYELESAIAN KESELURUHAN */
-             let temp_jadwalKeseluruhan = []
-             let temp_jadwalKeseluruhan1 = []
-             temp_jadwalKeseluruhan = response.data.data[0].attributes.jadwalpenyelesaiankeseluruhans.data
-             let temp_jadwalKeseluruhans = function (obj) {
-               for (var i in obj) {
-                 temp_jadwalKeseluruhan1.push({
-                   id: obj[i].id,
-                   jenispekerjaan: obj[i].attributes.jenispekerjaan,
-                   butirpekerjaan: obj[i].attributes.butirpekerjaan,
-                   tanggalmulai: obj[i].attributes.tanggalmulai,
-                   tanggalselesai: obj[i].attributes.selesai,
-                 })
-               }
-             }
-   
-             temp_jadwalKeseluruhans(temp_jadwalKeseluruhan)
-             setDataJadwalPenyelesaianKeseluruhan(temp_jadwalKeseluruhan1)
-             console.log('capaian mingguan', temp_jadwalKeseluruhan1)
+          /** JADWAL PENYELESAIAN KESELURUHAN */
+          let temp_jadwalKeseluruhan = []
+          let temp_jadwalKeseluruhan1 = []
+          temp_jadwalKeseluruhan =
+            response.data.data[0].attributes.jadwalpenyelesaiankeseluruhans.data
+          let temp_jadwalKeseluruhans = function (obj) {
+            for (var i in obj) {
+              temp_jadwalKeseluruhan1.push({
+                id: obj[i].id,
+                jenispekerjaan: obj[i].attributes.jenispekerjaan,
+                butirpekerjaan: obj[i].attributes.butirpekerjaan,
+                tanggalmulai: obj[i].attributes.tanggalmulai,
+                tanggalselesai: obj[i].attributes.tanggalselesai,
+              })
+            }
+          }
+
+          temp_jadwalKeseluruhans(temp_jadwalKeseluruhan)
+          setDataJadwalPenyelesaianKeseluruhan(temp_jadwalKeseluruhan1)
+          console.log('capaian mingguan', temp_jadwalKeseluruhan1)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -410,6 +738,7 @@ const EditRPP = () => {
     }
 
     getRPP()
+    setHandleStatusStartWeekDatePicker(false)
   }, [history])
 
   const columnDeliverables = [
@@ -434,6 +763,51 @@ const EditRPP = () => {
       key: 'deliverables',
       width: '30%',
     },
+    {
+      title: 'AKSI',
+      dataIndex: 'action',
+      width: '5%',
+      render: (text, record) => {
+        let dateLimit = new Date()
+
+        /**MENGAMBIL TANGGAL HARI INI + SISA NYA(DALAM MINGGU) / MENGAMBIL TANGGAL AKHIR DIMINGGU INI */
+        dateLimit.setDate(dateLimit.getDate() + (7 - new Date().getDay()))
+        let recDueDate = new Date(record.duedate)
+        // console.log(recDueDate, dateLimit, '---', recDueDate > dateLimit)
+
+        if (recDueDate > dateLimit) {
+          return (
+            <Popover content={<div>Edit data</div>}>
+              <Button
+                id="button-edit-deliverables"
+                shape="circle"
+                onClick={() => {
+                  showModalDeliverablesEdit(record)
+                  // console.log(record)
+                  // console.log('CLICK EDIT DELIVERABLES')
+                }}
+                style={{ backgroundColor: '#fff566', borderColor: '#fff566' }}
+              >
+                <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+              </Button>
+            </Popover>
+          )
+        } else {
+          return (
+            <Popover content={<div>Pengeditan tidak diizinkan</div>}>
+              <Button
+                id="button-edit-deliverables"
+                disabled
+                shape="circle"
+                style={{ backgroundColor: '#fff566', borderColor: '#fff566' }}
+              >
+                <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+              </Button>
+            </Popover>
+          )
+        }
+      },
+    },
   ]
 
   const columnMiletones = [
@@ -447,16 +821,73 @@ const EditRPP = () => {
       },
     },
     {
-      title: 'TANGGAL',
-      dataIndex: 'tanggal',
-      key: 'tanggal',
-      width: '20%',
+      title: 'TANGGAL MULAI',
+      dataIndex: 'tanggalmulai',
+      key: 'tanggalmulai',
+      width: '10%',
+    },
+    {
+      title: 'TANGGAL SELESAI',
+      dataIndex: 'tanggalselesai',
+      key: 'tanggalselesai',
+      width: '10%',
     },
     {
       title: 'DESKRIPSI',
       dataIndex: 'deskripsi',
       key: 'deskripsi',
       width: '30%',
+    },
+    {
+      title: 'AKSI',
+      dataIndex: 'action',
+      width: '5%',
+      render: (text, record) => {
+        let dateLimit = new Date()
+
+        /**MENGAMBIL TANGGAL HARI INI + SISA NYA(DALAM MINGGU) / MENGAMBIL TANGGAL AKHIR DIMINGGU INI */
+        dateLimit.setDate(dateLimit.getDate() + (7 - new Date().getDay()))
+        let recStartDate = new Date(record.tanggalmulai)
+        let recFinishDate = new Date(record.tanggalselesai)
+        let popoverSD
+        // console.log(recDueDate, dateLimit, '---', recDueDate > dateLimit)
+
+        if (recFinishDate > dateLimit) {
+          if (recStartDate > dateLimit) {
+            popoverSD = 'Tanggal mulai masih dapat diedit'
+          } else {
+            popoverSD = 'Tanggal mulai tidak dapat diedit'
+          }
+          return (
+            <Popover content={<div>Edit data</div>}>
+              <Button
+                id="button-edit-milestones"
+                shape="circle"
+                onClick={() => {
+                  showModalMilestonesEdit(record, popoverSD)
+                  console.log(record)
+                }}
+                style={{ backgroundColor: '#fff566', borderColor: '#fff566' }}
+              >
+                <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+              </Button>
+            </Popover>
+          )
+        } else {
+          return (
+            <Popover content={<div>Pengeditan tidak diizinkan</div>}>
+              <Button
+                id="button-edit-milestones"
+                disabled
+                shape="circle"
+                style={{ backgroundColor: '#fff566', borderColor: '#fff566' }}
+              >
+                <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+              </Button>
+            </Popover>
+          )
+        }
+      },
     },
   ]
 
@@ -477,22 +908,67 @@ const EditRPP = () => {
       width: '20%',
     },
     {
-        title: 'TANGGAL BERAKHIR',
-        dataIndex: 'tanggalberakhir',
-        key: 'tanggalberakhir',
-        width: '20%',
-      },
+      title: 'TANGGAL BERAKHIR',
+      dataIndex: 'tanggalberakhir',
+      key: 'tanggalberakhir',
+      width: '20%',
+    },
     {
       title: 'RENCANA CAPAIAN',
       dataIndex: 'rencanacapaian',
       key: 'rencanacapaian',
       width: '30%',
     },
-  ]
-  
+    {
+      title: 'AKSI',
+      dataIndex: 'action',
+      width: '5%',
+      render: (text, record) => {
+        let dateLimit = new Date()
 
-  
-  const columnJadwalPenyelesaianKeseluruhan= [
+        /**MENGAMBIL TANGGAL HARI INI + SISA NYA(DALAM MINGGU) / MENGAMBIL TANGGAL AKHIR DIMINGGU INI */
+        dateLimit.setDate(dateLimit.getDate() + (7 - new Date().getDay()))
+        let recStartDate = new Date(record.tanggalmulai)
+        let recFinishDate = new Date(record.tanggalberakhir)
+
+        // console.log(recDueDate, dateLimit, '---', recDueDate > dateLimit)
+
+        if (recStartDate > dateLimit) {
+          return (
+            <Popover content={<div>Edit data</div>}>
+              <Button
+                id="button-edit-rencana-capaian-perminggu"
+                shape="circle"
+                onClick={() => {
+                  console.log(record)
+                  showModalRencanaCapaianMingguanEdit(record)
+                }}
+                style={{ backgroundColor: '#fff566', borderColor: '#fff566' }}
+              >
+                <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+              </Button>
+            </Popover>
+          )
+        } else {
+          return (
+            <Popover content={<div>Pengeditan tidak diizinkan</div>}>
+              <Button
+                id="button-edit-rencana-capaian-perminggu"
+                disabled
+                shape="circle"
+                style={{ backgroundColor: '#fff566', borderColor: '#fff566' }}
+              >
+                <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+              </Button>
+            </Popover>
+          )
+        }
+      },
+    },
+
+  ]
+
+  const columnJadwalPenyelesaianKeseluruhan = [
     {
       title: 'No',
       dataIndex: 'no',
@@ -509,11 +985,11 @@ const EditRPP = () => {
       width: '10%',
     },
     {
-        title: 'TANGGAL SELESAI',
-        dataIndex: 'tanggalselesai',
-        key: 'tanggalselesai',
-        width: '10%',
-      },
+      title: 'TANGGAL SELESAI',
+      dataIndex: 'tanggalselesai',
+      key: 'tanggalselesai',
+      width: '10%',
+    },
     {
       title: 'JENISPEKERJAAN',
       dataIndex: 'jenispekerjaan',
@@ -526,19 +1002,97 @@ const EditRPP = () => {
       key: 'butirpekerjaan',
       width: '30%',
     },
+    {
+      title: 'AKSI',
+      dataIndex: 'action',
+      width: '5%',
+      render: (text, record) => {
+        let dateLimit = new Date()
+        let minusToGetLimit = new Date().getDay()
+        if(minusToGetLimit === 0){
+          setLimitMinusDay(7)
+        }else{
+          setLimitMinusDay(minusToGetLimit)
+        }
+
+        /**MENGAMBIL TANGGAL HARI INI + SISA NYA(DALAM MINGGU) / MENGAMBIL TANGGAL AKHIR DIMINGGU INI */
+        dateLimit.setDate(dateLimit.getDate() + (7 - limitMinusDay))
+        let recStartDate = new Date(record.tanggalmulai)
+        let recFinishDate = new Date(record.tanggalselesai)
+        let weekOnDateFinish = getWeekBasedOnDate(recFinishDate)-1
+        let yearOnDateFinish = record.tanggalselesai.slice(0,4)
+        let limitDateGetMondayDateBasedOnFinishDate = getDateOfISOWeek(weekOnDateFinish,yearOnDateFinish) 
+        let monLimit = new Date(limitDateGetMondayDateBasedOnFinishDate)
+        let limitDateToEdit = formatDate(dateLimit.toDateString())
+        let statusDatePickerStart
+
+        // console.log(recDueDate, dateLimit, '---', recDueDate > dateLimit)
+ 
+
+        if (limitDateGetMondayDateBasedOnFinishDate > limitDateToEdit) {
+          if(record.tanggalmulai > limitDateToEdit){
+            statusDatePickerStart = false //jika belum limit , disable nya di false,(tidak di disable)
+          }else{
+            statusDatePickerStart = true
+          }
+          return (
+            <Popover content={<div>Edit data</div>}>
+              <Button
+                id="button-edit-jadwal-penyelesaian"
+                shape="circle"
+                onClick={() => {
+                  console.log(record)
+                  showModalJadwalPenyelesaianEdit(record, statusDatePickerStart)
+              
+                  console.log(dateLimit)
+                  console.log(weekOnDateFinish)
+                  console.log(yearOnDateFinish)
+                  console.log(limitDateGetMondayDateBasedOnFinishDate)
+                  console.log(monLimit)
+          
+                  // console.log(limitDateGetMondayDateBasedOnFinishDate>limitDateToEdit)
+           
+                }}
+                style={{ backgroundColor: '#fff566', borderColor: '#fff566' }}
+              >
+                <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+              </Button>
+            </Popover>
+          )
+        } else {
+          return (
+            <Popover content={<div>Pengeditan tidak diizinkan</div>}>
+              <Button
+                id="button-edit-jadwal-penyelesaian"
+                disabled
+                shape="circle"
+                style={{ backgroundColor: '#fff566', borderColor: '#fff566' }}
+              >
+                <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+              </Button>
+            </Popover>
+          )
+        }
+      },
+    },
+    
   ]
-  
 
   return (
     <>
       <div className="container">
+        {/* <button
+          onClick={() => {
+            // console.log(7-new Date().getDay())
+            console.log(dataJadwalPenyelesaianEditButirPekerjaan)
+            console.log(dataJadwalPenyelesaianEditJenisPekerjaan)
+            console.log(dataJadwalPenyelesaianEditTanggalMulai)
+            console.log(dataJadwalPenyelesaianEditTanggalSelesai)
+          }}
+        >
+          teeees
+        </button> */}
         <Space>
-         <Popover content={<div>Kembali ke list RPP</div>}>
-         <Button type="primary" onClick={()=>history.push(`/rencanaPenyelesaianProyek`)}>
-           Kembali
-          </Button>
-
-         </Popover>
           <Modal
             title="Format Pengisian Dokumen RPP"
             visible={isModalOpen}
@@ -579,17 +1133,18 @@ const EditRPP = () => {
 
         <div className="spacing"></div>
         <h3 align="center" className="title-s">
-          FORM PENGISIAN RPP
+          FORM PENGISIAN RPP - EDIT RPP
         </h3>
         <Box sx={{ color: 'warning.main' }}>
+          Catatan :
           <ul>
-            <li>Pastikan semua RPP terisi</li>
             <li>Isi sesuai dengan perencanaan proyek yang diberikan</li>
           </ul>
         </Box>
         <div className="spacebottom"></div>
         <Form
           name="basic"
+          form={form}
           className="left"
           labelCol={{
             span: 8,
@@ -607,16 +1162,32 @@ const EditRPP = () => {
           onFinishFailed={onFinishFailed}
         >
           <div>
-         
-              <Row>
-                <Col style={{ paddingBottom: 20 }} span={8}>Tanggal Mulai</Col>
-                <Col span={8}>{dataRPP.tanggal_mulai}</Col>
-              </Row>
-              <Row>
-                <Col style={{ paddingBottom: 20 }} span={8}>Tanggal Selesai</Col>
-                <Col span={8}>{dataRPP.tanggal_selesai}</Col>
-              </Row>
-          
+            <Row>
+              <Col style={{ paddingBottom: 20 }} span={8}>
+                Tanggal Mulai
+              </Col>
+              <Col span={8}>{dataRPP.tanggal_mulai}</Col>
+            </Row>
+            <Row>
+              <Col style={{ paddingBottom: 20 }} span={8}>
+                Tanggal Selesai
+              </Col>
+              <Col span={6}>{dataRPP.tanggal_selesai}</Col>
+              <Col span={4}>Ubah Tanggal :</Col>
+              <Col span={6}>
+                {' '}
+                <DatePicker
+                  picker="date"
+                  disabledDate={(current) => {
+                    // console.log( current.isAfter(moment()))
+                    return (
+                      moment().add(-1, 'days') >= current ||
+                      moment().add(7 - new Date().getDay(), 'days') >= current
+                    )
+                  }}
+                />
+              </Col>
+            </Row>
 
             <Row>
               <Col span={8} style={{ paddingBottom: 20 }}>
@@ -691,15 +1262,11 @@ const EditRPP = () => {
               )
             })}
             <Col>
-              <Button type="primary"
-                onClick={() => handleAddRowDeliverables()}
-              >
+              <Button type="primary" onClick={() => handleAddRowDeliverables()}>
                 Tambah Data
               </Button>
               {noOfRowsDeliverables !== 0 && (
-                <Button type="primary" danger
-                  onClick={() => handleDropRowDeliverables()}
-                >
+                <Button type="primary" danger onClick={() => handleDropRowDeliverables()}>
                   Hapus Baris Terakhir
                 </Button>
               )}
@@ -770,15 +1337,11 @@ const EditRPP = () => {
               )
             })}
             <Col>
-              <Button type="primary" 
-                onClick={() => handleAddRowMilestones()}
-              >
+              <Button type="primary" onClick={() => handleAddRowMilestones()}>
                 Tambah Data
               </Button>
               {noOfRowsMilestones !== 0 && (
-                <Button type="primary" danger
-                  onClick={() => handleDropRowMilestones()}
-                >
+                <Button type="primary" danger onClick={() => handleDropRowMilestones()}>
                   Hapus Baris Terakhir
                 </Button>
               )}
@@ -793,7 +1356,7 @@ const EditRPP = () => {
             <div className="spacebottom"></div>
             <h4>RENCANA CAPAIAN PERMINGGU</h4>
             <hr />
-        
+
             <Table columns={columnRencanaCapaianMingguan} dataSource={dataCapaianMingguan} />
             {[...Array(noOfRowsCapaianPerminggu)].map((elementInArray, index) => {
               return (
@@ -844,13 +1407,13 @@ const EditRPP = () => {
               )
             })}
             <Col>
-              <Button type="primary" 
-                onClick={() => handleAddRowRencanaCapaianPerminggu()}
-              >
+              <Button type="primary" onClick={() => handleAddRowRencanaCapaianPerminggu()}>
                 Tambah Data
               </Button>
               {noOfRowsCapaianPerminggu !== 0 && (
-                <Button type="primary" danger
+                <Button
+                  type="primary"
+                  danger
                   onClick={() => handleDropRowRencanaCapaianPerminggu()}
                 >
                   Hapus Baris Terakhir
@@ -865,10 +1428,13 @@ const EditRPP = () => {
           <div>
             <br />
             <div className="spacebottom"></div>
-           
+
             <h4>JADWAL PENYELESAIAN PEKERJAAN KESELURUHAN</h4>
-            <hr/>
-            <Table columns={columnJadwalPenyelesaianKeseluruhan} dataSource={dataJadwalPenyelesaianKeseluruhan} />
+            <hr />
+            <Table
+              columns={columnJadwalPenyelesaianKeseluruhan}
+              dataSource={dataJadwalPenyelesaianKeseluruhan}
+            />
             {[...Array(noOfRowsJadwalPenyelesaianPekerjaanKeseluruhan)].map(
               (elementInArray, index) => {
                 return (
@@ -950,13 +1516,13 @@ const EditRPP = () => {
               },
             )}
             <Col>
-              <Button type="primary" 
-                onClick={() => handleAddRowJadwalPenyelesaianKeseluruhan()}
-              >
+              <Button type="primary" onClick={() => handleAddRowJadwalPenyelesaianKeseluruhan()}>
                 Tambah Data
               </Button>
               {noOfRowsJadwalPenyelesaianPekerjaanKeseluruhan !== 0 && (
-                <Button type="primary" danger
+                <Button
+                  type="primary"
+                  danger
                   onClick={() => handleDropRowJadwalPenyelesaianKeseluruhan()}
                 >
                   Hapus Baris Terakhir
@@ -967,11 +1533,510 @@ const EditRPP = () => {
           <hr />
           <div className="spacebottom"></div>
 
-          <Button type="primary" htmlType="submit" block onClick={tesHandle}>
+          {/* <Button type="primary" htmlType="submit" block onClick={tesHandle}>
             SUBMIT LOOGBOOK
-          </Button>
+          </Button> */}
         </Form>
       </div>
+
+      
+      {/* MODAL EDIT DELIVERABLES */}
+      <Modal
+        title="Edit Deliverables"
+        open={isModalDeliverablesEditOpen}
+        // onOk={handleOkModalDeliverablesEdit}
+        onCancel={handleCancelModalDeliverablesEdit}
+        footer={false}
+        destroyOnClose
+      >
+        <Form
+          name="form_edit_deliverables"
+          form={formDeliverables}
+          labelCol={{
+            span: 8,
+          }}
+          wrapperCol={{
+            span: 16,
+          }}
+          style={{
+            maxWidth: 600,
+          }}
+          initialValues={dataDeliverablesEdit}
+          autoComplete="off"
+          fields={[
+            {
+              name: ['deliverables'],
+              value: dataDeliverablesEdit.deliverables,
+            },
+            {
+              name: ['duedate'],
+              value: dataDeliverablesEdit.duedate,
+            },
+          ]}
+        >
+          <Form.Item
+            label="Deliverables"
+            rules={[
+              {
+                required: true,
+                message: 'Mohon isi Deliverables !!!',
+              },
+            ]}
+          >
+            <TextArea
+              defaultValue={dataDeliverablesEdit.deliverables}
+              onChange={(e) => {
+                setDataDeliverablesEditChangeDeliverables(e.target.value)
+              }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Due Date"
+            initialValue={dataDeliverablesEdit}
+            rules={[
+              {
+                required: true,
+                message: 'Mohon isi Tanggal Deliverables !!!',
+              },
+              {
+                type: 'date',
+                warningOnly: true,
+              },
+            ]}
+          >
+            <DatePicker
+              defaultValue={dayjs(dataDeliverablesEdit.duedate, dateFormat)}
+              onChange={(date, datestring) => {
+                setDataDeliverablesEditChangeDueDate(datestring)
+              }}
+              disabledDate={(current) => {
+                let minusToGetLimit = new Date().getDay()
+                if(minusToGetLimit === 0){
+                  setLimitMinusDay(7)
+                }else{
+                  setLimitMinusDay(minusToGetLimit)
+                }
+                return (
+                  moment().add(-1, 'days') >= current ||
+                  moment().add(7 - limitMinusDay, 'days') >= current
+                )
+              }}
+            />
+          </Form.Item>
+          <Button type="primary" onClick={putDataDeliverablesEdit}>
+            Simpan Perubahan
+          </Button>
+        </Form>
+      </Modal>
+
+      {/* MODAL EDIT MILESTONES */}
+      <Modal
+        title="Edit Milestones"
+        open={isModalMilestonesEditOpen}
+        onCancel={handleCancelModalMilestonesEdit}
+        footer={false}
+        destroyOnClose
+      >
+        <Form
+          name="form_edit_milestones"
+          form={formMilestones}
+          labelCol={{
+            span: 8,
+          }}
+          wrapperCol={{
+            span: 16,
+          }}
+          style={{
+            maxWidth: 600,
+          }}
+          initialValues={dataMilestonesEdit}
+          autoComplete="off"
+          fields={[
+            {
+              name: ['deskripsi'],
+              value: dataMilestonesEdit.deskripsi,
+            },
+            {
+              name: ['tanggalmulai'],
+              value: dataDeliverablesEdit.tanggalmulai,
+            },
+            {
+              name: ['tanggalselesai'],
+              value: dataDeliverablesEdit.tanggalselesai,
+            },
+          ]}
+        >
+          <Form.Item
+            label="Deskripsi"
+            rules={[
+              {
+                required: true,
+                message: 'Mohon isi Deskripsi !!!',
+              },
+            ]}
+          >
+            <TextArea
+              defaultValue={dataMilestonesEdit.deskripsi}
+              onChange={(e) => setDataMilestonesEditDeskripsi(e.target.value)}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Tanggal Mulai"
+            initialValue={dataMilestonesEdit}
+            rules={[
+              {
+                required: true,
+                message: 'Mohon isi Tanggal Mulai Milestones !!!',
+              },
+              {
+                type: 'date',
+                warningOnly: true,
+              },
+            ]}
+          >
+            <Popover content={<div>{popoverStartDate}</div>}>
+              <DatePicker
+                defaultValue={dayjs(dataMilestonesEdit.tanggalmulai, dateFormat)}
+                onChange={(date, datestring) => setDataMilestonesEditTanggalMulai(datestring)}
+                disabledDate={(current) => {
+                  let minusToGetLimit = new Date().getDay()
+                  if(minusToGetLimit === 0){
+                    setLimitMinusDay(7)
+                  }else{
+                    setLimitMinusDay(minusToGetLimit)
+                  }
+                  return (
+                    moment().add(-1, 'days') >= current ||
+                    moment().add(7 - limitMinusDay, 'days') >= current
+                  )
+                }}
+              />
+            </Popover>
+          </Form.Item>
+
+          <Form.Item
+            label="Tanggal Selesai"
+            name="tanggalselesaimilestones"
+            initialValue={dataMilestonesEdit}
+            rules={[
+              {
+                required: true,
+                message: 'Mohon isi Tanggal Selesai Milestones !!!',
+              },
+              {
+                type: 'date',
+                warningOnly: true,
+              },
+            ]}
+          >
+            <Popover content={<div>Tanggal selesai masih dapat diedit</div>}>
+              <DatePicker
+                defaultValue={dayjs(dataMilestonesEdit.tanggalselesai, dateFormat)}
+                onChange={(date, datestring) => setDataMilestonesEditTanggalSelesai(datestring)}
+                disabledDate={(current) => {
+                  let minusToGetLimit = new Date().getDay()
+                  if(minusToGetLimit === 0){
+                    setLimitMinusDay(7)
+                  }else{
+                    setLimitMinusDay(minusToGetLimit)
+                  }
+                  return (
+                    moment().add(-1, 'days') >= current ||
+                    moment().add(7 - limitMinusDay, 'days') >= current
+                  )
+                }}
+              />
+            </Popover>
+          </Form.Item>
+          <Button type="primary" onClick={putDataMilestonesEdit}>
+            Simpan Perubahan
+          </Button>
+        </Form>
+      </Modal>
+
+      {/* MODAL EDIT RENCANA CAPAIAN MINGGUAN */}
+      <Modal
+        title="Edit Rencana Capaian PerMinggu"
+        open={isModalRencanaCapaianMingguanEditOpen}
+        onCancel={handleCancelModalRencanaCapaianMingguanEdit}
+        footer={false}
+        destroyOnClose
+      >
+        <Form
+          name="form_edit_rencana_capaian_mingguan"
+          form={formRencanaCapaianMingguan}
+          labelCol={{
+            span: 8,
+          }}
+          wrapperCol={{
+            span: 16,
+          }}
+          style={{
+            maxWidth: 600,
+          }}
+          initialValues={dataRencanaCapaianMingguanEdit}
+          autoComplete="off"
+          fields={[
+            {
+              name: ['rencanacapaian'],
+              value: dataRencanaCapaianMingguanEdit.rencanacapaian,
+            },
+            {
+              name: ['tanggalmulai'],
+              value: dataRencanaCapaianMingguanEdit.tanggalmulai,
+            },
+            {
+              name: ['tanggalselesai'],
+              value: dataRencanaCapaianMingguanEdit.tanggalselesai,
+            },
+          ]}
+        >
+          <Form.Item
+            label="Rencana Capaian"
+            name="rencanacapaianmingguan"
+            rules={[
+              {
+                required: true,
+                message: 'Mohon isi Rencana Capaian!!!',
+              },
+            ]}
+          >
+            <TextArea
+              defaultValue={dataRencanaCapaianMingguanEdit.rencanacapaian}
+              onChange={(e) => setDataRencanaCapaianMingguanEditRencana(e.target.value)}
+            />
+          </Form.Item>
+
+          <br />
+          <b>{dataRencanaCapaianMingguanEdit.tanggalmulai} &nbsp;s/d&nbsp; {dataRencanaCapaianMingguanEdit.tanggalberakhir}</b>
+          <Form.Item
+            label="Minggu Rencana Capaian"
+            rules={[
+              {
+                required: true,
+                message: 'Mohon isi Tanggal Rencana Capaian Mingguan !!!',
+              },
+              {
+                type: 'date',
+                warningOnly: true,
+              },
+            ]}
+          >
+         <Popover content={<div>Klik untuk mengubah, jika tidak boleh dikosongkan saja</div>}>
+         <DatePicker
+              picker="week"
+              onChange={(date, datestring) => {
+                console.log(datestring)
+                setDataRencanaCapaianMingguanEditTanggalMulai(getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4)))
+                setDataRencanaCapaianMingguanEditTanggalBerakhir(getEndDateOfWeek(datestring.slice(5, 7), datestring.slice(0, 4)))
+              }}
+              disabledDate={(current) => {
+                let minusToGetLimit = new Date().getDay()
+                if(minusToGetLimit === 0){
+                  setLimitMinusDay(7)
+                }else{
+                  setLimitMinusDay(minusToGetLimit)
+                }
+
+                return (
+                  moment().add(-1, 'days') >= current ||
+                  moment().add(7 - limitMinusDay, 'days') >= current
+                )
+              }}
+            />
+         </Popover>
+          </Form.Item>
+          <Button type="primary" onClick={putDataRencanaCapaianMingguanEdit}>
+            Simpan Perubahan
+          </Button>
+        </Form>
+      </Modal>
+
+
+      {/* MODAL JADWAL PENYELESAIAN KESELURUHAN */}
+      <Modal
+        title="Edit Penyelesaian Keseluruhan"
+        open={isModalJadwalPenyelesaianEditOpen}
+        onCancel={handleCancelModalJadwalPenyelesaianEdit}
+        footer={false}
+        destroyOnClose
+      >
+        <Form
+          name="form_edit_jadwal_penyelesaian"
+          form={formJadwalPenyelesaian}
+          initialValues={dataJadwalPenyelesaianEdit}
+          labelCol={{
+            span: 8,
+          }}
+          wrapperCol={{
+            span: 16,
+          }}
+          style={{
+            maxWidth: 600,
+          }}
+          autoComplete="off"
+          fields={[
+            {
+              name: ['butirpekerjaan'],
+              value: dataJadwalPenyelesaianEdit.butirpekerjaan,
+            },
+            {
+              name:['jenispekerjaan'],
+              value: dataJadwalPenyelesaianEdit.jenispekerjaan
+            },
+            {
+              name: ['tanggalmulai'],
+              value: dataJadwalPenyelesaianEdit.tanggalmulai,
+            },
+            {
+              name: ['tanggalselesai'],
+              value: dataJadwalPenyelesaianEdit.tanggalselesai,
+            },
+          ]}
+        >
+          <Form.Item
+            label="Butir Pekerjaan"
+            rules={[
+              {
+                required: true,
+                message: 'Mohon isi butir pekerjaan!!!',
+              },
+            ]}
+          >
+            <TextArea
+              defaultValue={dataJadwalPenyelesaianEdit.butirpekerjaan}
+              onChange={(e) => setDataJadwalPenyelesaianEditButirPekerjaan(e.target.value)}
+            />
+          </Form.Item>
+
+          <br />
+          <Form.Item
+            label="Jenis Pekerjaan"
+            rules={[
+              {
+                required: true,
+                message: 'Mohon isi jenis pekerjaan!!!',
+              },
+            ]}
+          >
+            <Select
+            defaultValue={dataJadwalPenyelesaianEdit.jenispekerjaan}
+            options={[
+              { value: 'exploration', label: 'exploration' },
+              { value: 'analysis', label: 'analysis' },
+              { value: 'design', label: 'design' },
+              { value: 'implementation', label: 'implementation' },
+              { value: 'testing', label: 'testing' },
+            ]}
+            onChange={(e)=>setDataJadwalPenyelesaianEditJenisPekerjaan(e)}
+            />
+            
+          </Form.Item>
+          <br/>
+
+             <b>Tanggal : {dataJadwalPenyelesaianEdit.tanggalmulai} &nbsp;s/d&nbsp; {dataJadwalPenyelesaianEdit.tanggalselesai}</b>
+          <Form.Item
+            label="Minggu Mulai"
+            rules={[
+              {
+                required: true,
+               
+              },
+              {
+                type: 'date',
+                warningOnly: true,
+              },
+            ]}
+          >
+
+    
+         <DatePicker
+         name='tanggalmulaijadwalpenyelesaian'
+              picker="week"
+              onChange={(date, datestring) => 
+              
+                  setDataJadwalPenyelesaianEditTanggalMulai(getDateOfISOWeek(
+                    datestring.slice(5, 7),
+                    datestring.slice(0, 4),
+                  ))
+                 
+                
+              }
+              disabled={handleStatusStartWeekDatePicker}
+              disabledDate={(current) => {
+                let minusToGetLimit = new Date().getDay()
+                if(minusToGetLimit === 0){
+                  setLimitMinusDay(7)
+                }else{
+                  setLimitMinusDay(minusToGetLimit)
+                }
+
+                return (
+                  moment().add(-1, 'days') >= current ||
+                  moment().add(7 - limitMinusDay, 'days') >= current
+                )
+              }}
+            />
+     
+          </Form.Item>
+
+          <Form.Item
+            label="Minggu Selesai"
+            rules={[
+              {
+                required: true,
+               
+              },
+              {
+                type: 'date',
+                warningOnly: true,
+              },
+            ]}
+          >
+
+    
+         <DatePicker
+         name='tanggalselesaijadwalpenyelesaian'
+              picker="week"
+              onChange={(date, datestring) => 
+            
+                  setDataJadwalPenyelesaianEditTanggalSelesai(getEndDateOfWeek(
+                    datestring.slice(5, 7),
+                    datestring.slice(0, 4),
+                  ))
+
+              }
+              disabledDate={(current) => {
+                let minusToGetLimit = new Date().getDay()
+                if(minusToGetLimit === 0){
+                  setLimitMinusDay(7)
+                }else{
+                  setLimitMinusDay(minusToGetLimit)
+                }
+
+                return (
+                  moment().add(-1, 'days') >= current ||
+                  moment().add(7 - limitMinusDay, 'days') >= current
+                )
+              }}
+            />
+     
+          </Form.Item>
+          <Button type="primary" htmlType='submit' onClick={putDataJadwalPenyelesaianEdit} >
+            Simpan Perubahan
+          </Button>
+        </Form>
+      </Modal>
+
+
+      <FloatButton
+        type="primary"
+        onClick={() => history.push(`/rencanaPenyelesaianProyek`)}
+        icon={<ArrowLeftOutlined />}
+        tooltip={<div>Kembali ke Rekap RPP</div>}
+      />
     </>
   )
 }

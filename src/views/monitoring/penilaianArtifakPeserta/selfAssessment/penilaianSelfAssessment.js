@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useHistory, useParams } from 'react-router-dom'
 import { CCard, CCardBody, CCardHeader, CCol, CContainer, CRow } from '@coreui/react'
+import {ArrowLeftOutlined } from '@ant-design/icons';
 import Chart, {
   CommonSeriesSettings,
   Legend,
@@ -19,6 +20,7 @@ import {
   Button,
   Card,
   Col,
+  FloatButton,
   Form,
   Input,
   Modal,
@@ -589,11 +591,7 @@ const PenilaianSelfAssessment = () => {
     <>
       <>
         <div className="container2">
-        <Popover content={<div>Kembali ke rekap Self Assessment</div>}>
-        <Button type="primary" size='medium' className="spacebottom" onClick={btnKembali}>
-            Kembali
-          </Button>
-        </Popover>
+       
 
           {title('RENCANA PENGERJAAN PROYEK ( RPP )')}
           <div style={{ padding: 10 }}>
@@ -946,6 +944,11 @@ const PenilaianSelfAssessment = () => {
           </Form>
         </Modal>
       </>
+      <FloatButton type='primary'  onClick={btnKembali} icon={<ArrowLeftOutlined />} tooltip={<div>Kembali ke Rekap Self Assessment Peserta</div>} />
+
+
+
+
     </>
   )
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Box from '@mui/material/Box'
+import {ArrowLeftOutlined } from '@ant-design/icons';
 import TextField from '@mui/material/TextField'
 import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
@@ -11,7 +12,7 @@ import Table from 'react-bootstrap/Table'
 import { Refresh } from '@mui/icons-material'
 import axios from 'axios'
 import { Route, Router, useHistory, useParams } from 'react-router-dom'
-import { Popover, notification } from 'antd'
+import { FloatButton, Popover, notification } from 'antd'
 import routes from 'src/routes'
 
 const FormEditLogbook = (props) => {
@@ -169,9 +170,7 @@ const FormEditLogbook = (props) => {
     <>
       <React.Fragment>
         <div className="container">
-        <Popover content={<div>Kembali ke list logbook</div>}>
-        <Button type="primary" onClick={()=>history.push(`/logbook`)}>Kembali</Button>
-        </Popover>
+       
           <h3 align="center" className="title-s">
             FORM PENGISIAN LOGBOOK
           </h3>
@@ -309,6 +308,11 @@ const FormEditLogbook = (props) => {
             </Button>
           </Form>
         </div>
+        <FloatButton type='primary' icon={<ArrowLeftOutlined />}  onClick={()=>history.push(`/logbook`)} tooltip={<div>Kembali ke Rekap Logbook</div>} />
+
+
+
+
       </React.Fragment>
     </>
   )

@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { Document, Page } from 'react-pdf/dist/esm/entry.webpack'
 import './rpp.css'
-import { Button, Space } from 'antd'
+import {ArrowLeftOutlined } from '@ant-design/icons';
+import { Button, FloatButton, Space } from 'antd'
 import { useHistory } from 'react-router-dom'
 function ContohRPP() {
   const [numPages, setNumPages] = useState(null)
@@ -31,10 +32,9 @@ function ContohRPP() {
 
   return (
     <div className='container'>
-           <Button className="btn-pdf" type="primary" onClick={HandleButtonKembaliKeHalamanSelanjutnya}>
-        Kembali Ke Halaman Sebelumnya
-      </Button>
-    <div className="App">
+      <h3>CONTOH PENGISIAN RPP</h3>
+        
+    <div className="App spacetop">
  
 
       <header className="App-header spacetop">
@@ -75,7 +75,13 @@ function ContohRPP() {
         </div>
       </center> */}
     </div>
+    <FloatButton type='primary' icon={<ArrowLeftOutlined />}  onClick={HandleButtonKembaliKeHalamanSelanjutnya} tooltip={<div>Kembali ke Pengisian RPP</div>} />
+
+
+
+
     </div>
+    
   )
 }
 

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import 'antd/dist/antd.css'
+import 'antd/dist/reset.css'
 import '../rpp/rpp.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faPencil, faTrashCan } from '@fortawesome/free-solid-svg-icons'
+import {ArrowLeftOutlined } from '@ant-design/icons';
 import {
   Table,
   Button,
@@ -20,6 +21,7 @@ import {
   Popover,
   Card,
   Tag,
+  FloatButton,
 } from 'antd'
 import axios from 'axios'
 import { SearchOutlined } from '@ant-design/icons'
@@ -155,12 +157,17 @@ const RekapLogbook = () => {
         const convertDate = (date) => {
           return date ? moment(date).format('DD - MM - YYYY') : null
         }
+        
+        const convertStatusPengecekan =(nilai)=>{
+          return nilai?'Sudah Dinilai' : 'Belum Dinilai'
+        }
+
         var getTempLogbook = function (obj) {
           for (var i in obj) {
             temp.push({
               id: obj[i].id,
               tools: obj[i].attributes.tools,
-              statuspengecekan: obj[i].attributes.statuspengecekan,
+              statuspengecekan: convertStatusPengecekan(obj[i].attributes.nilai),
               hasilkerja: obj[i].attributes.hasilkerja,
               nilai: obj[i].attributes.nilai,
               projectmanager: obj[i].attributes.projectmanager,
@@ -227,8 +234,8 @@ const RekapLogbook = () => {
             return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
           }
 
-          const convertStatusPengecekan =(status)=>{
-            return status?'Sudah Dicek' : 'Belum Dicek'
+          const convertStatusPengecekan =(nilai)=>{
+            return nilai?'Sudah Dinilai' : 'Belum Dinilai'
           }
   
           var getTempLogbook = function (obj) {
@@ -236,7 +243,7 @@ const RekapLogbook = () => {
               temp.push({
                 id: obj[i].id,
                 tools: obj[i].attributes.tools,
-                statuspengecekan: convertStatusPengecekan(obj[i].attributes.statuspengecekan),
+                statuspengecekan: convertStatusPengecekan(obj[i].attributes.nilai),
                 hasilkerja: obj[i].attributes.hasilkerja,
                 nilai: obj[i].attributes.nilai,
                 projectmanager: obj[i].attributes.projectmanager,
@@ -340,6 +347,16 @@ const RekapLogbook = () => {
     {
       title: 'Status Pengecekan Pembimbing',
       dataIndex: 'statuspengecekan',
+      ...getColumnSearchProps('statuspengecekan', 'Status Penilaian'),
+      render : (text,record) =>{
+        let color 
+        if (record.statuspengecekan === 'Sudah Dinilai') {
+          color= 'green'
+        } else if (record.statuspengecekan === 'Belum Dinilai') {
+          color= 'cyan'
+        } 
+        return <Tag color={color}>{record.statuspengecekan}</Tag>
+      }
     },
     {
       title: 'Aksi',
@@ -348,27 +365,17 @@ const RekapLogbook = () => {
       dataIndex: 'action',
       render: (text, record) => (
         <>
-          {rolePengguna === '0' && (
+          {rolePengguna !== '1' && rolePengguna !== '4' && (
             <Row>
-              <Col span={12} style={{ textAlign: 'center' }}>
+              <Col span={24} style={{ textAlign: 'center' }}>
                 <Popover content={<div>Lihat isi detail dokumen logbook</div>}>
                   <Button
                     size="small"
+                    type='primary'
                     onClick={() => actionLihatDetailPenilaianLogbook(record.id)}
-                    style={{ backgroundColor: '#91caff' }}
+                   
                   >
                     Lihat Detail
-                  </Button>
-                </Popover>
-              </Col>
-              <Col span={12} style={{ textAlign: 'center' }}>
-                <Popover content={<div>Lihat penilaian logbook</div>}>
-                  <Button
-                    size="small"
-                    onClick={() => actionPenilaianLogbook(record.id)}
-                    style={{ backgroundColor: '#ffd666' }}
-                  >
-                    &nbsp;&nbsp; &nbsp;&nbsp; Nilai &nbsp;&nbsp;&nbsp;&nbsp;
                   </Button>
                 </Popover>
               </Col>
@@ -376,31 +383,30 @@ const RekapLogbook = () => {
           )}
 
           {rolePengguna === '4' && (
-            <Row>
-              <Col span={6} style={{ textAlign: 'center' }}>
-                <Popconfirm
-                  placement="topRight"
-                  title="Yakin akan melakukan edit logbook?"
-                  description={desc}
-                  onConfirm={confirmToEdit}
-                  okText="Yes"
-                  cancelText="No"
-                >
-                  {/* <Button
-              id="button-pencil"
-              htmlType="submit"
-              shape="circle"
-              style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
-              onClick={() => {
-                setWannaEdit(record)
-              }}
-            >
-              <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
-            </Button> */}
-                  <Button>akyam</Button>
-                </Popconfirm>
-              </Col>
-            </Row>
+             <Row>
+             <Col span={12} style={{ textAlign: 'center' }}>
+               <Popover content={<div>Lihat isi detail dokumen logbook</div>}>
+                 <Button
+                   size="small"
+                   onClick={() => actionLihatDetailPenilaianLogbook(record.id)}
+                   style={{ backgroundColor: '#91caff' }}
+                 >
+                   Lihat Detail
+                 </Button>
+               </Popover>
+             </Col>
+             <Col span={12} style={{ textAlign: 'center' }}>
+               <Popover content={<div>Lihat penilaian logbook</div>}>
+                 <Button
+                   size="small"
+                   onClick={() => actionPenilaianLogbook(record.id)}
+                   style={{ backgroundColor: '#ffd666' }}
+                 >
+                   &nbsp;&nbsp; &nbsp;&nbsp; Nilai &nbsp;&nbsp;&nbsp;&nbsp;
+                 </Button>
+               </Popover>
+             </Col>
+           </Row>
           )}
         </>
       ),
@@ -453,26 +459,50 @@ const RekapLogbook = () => {
         <>
           <Row>
             <Col span={12} style={{ textAlign: 'center' }}>
-              <Popconfirm
-                placement="topRight"
-                title="Yakin akan melakukan edit logbook?"
-                description={desc}
-                onConfirm={confirmToEdit}
-                okText="Yes"
-                cancelText="No"
-              >
-                <Button
-                  id="button-pencil"
-                  htmlType="submit"
-                  shape="circle"
-                  style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
-                  onClick={() => {
-                    setWannaEdit(record)
-                  }}
+            {record.statuspengecekan === 'Sudah Dinilai' && (
+                  <Popover content={<div>Pengeditan logbook tidak diizinkan</div>}>
+               
+                 <Button
+                 id="button-pencil"
+                 htmlType="submit"
+                 shape="circle"
+                 disabled
+                 style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
+                 onClick={() => {
+                   setWannaEdit(record)
+                 }}
+               >
+                 <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+               </Button>
+               </Popover>
+               )}
+            
+               {record.statuspengecekan === 'Belum Dinilai' && (
+                <Popover content={<div>Lakukan pengeditan logbook</div>}>
+                  <Popconfirm
+                  placement="topRight"
+                  title="Yakin akan melakukan edit logbook?"
+                  description={desc}
+                  onConfirm={confirmToEdit}
+                  okText="Yes"
+                  cancelText="No"
                 >
-                  <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
-                </Button>
-              </Popconfirm>
+               
+                 <Button
+                 id="button-pencil"
+                 htmlType="submit"
+                 shape="circle"
+                 style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
+                 onClick={() => {
+                   setWannaEdit(record)
+                 }}
+               >
+                 <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+               </Button>
+               </Popconfirm>
+               </Popover>
+               )}
+           
               </Col>
               <Col span={12} style={{ textAlign: 'center' }}>
               <Popover content={<div>Klik untuk melihat isi detail RPP</div>}
@@ -515,7 +545,7 @@ const RekapLogbook = () => {
     )
   }
 
-
+  
   return isLoading ? (
     <Spin indicator={antIcon} />
   ) : (
@@ -540,7 +570,7 @@ const RekapLogbook = () => {
               <Row>
                 <Col span={4}>NIM</Col>
                 <Col span={2}>:</Col>
-                <Col span={8}>201511009</Col>
+                <Col span={8}>181524003</Col>
               </Row>
             </Card>
           </Space>
@@ -568,14 +598,7 @@ const RekapLogbook = () => {
           )}
          
 
-          {rolePengguna !== '1' && rolePengguna !== '5' && (
-            <Popover content={hoverKembaliKeListDokumenPeserta}>
-              <Button type="primary" shape="round" size="medium" onClick={AksiKembaliPanitia}>
-                Kembali
-              </Button>
-            </Popover>
-          )}
-
+     
           {rolePengguna === '1' && (
             <CRow>
               <CCol sm={12}>
@@ -610,6 +633,15 @@ const RekapLogbook = () => {
           )}
         </CCardBody>
       </CCard>
+           {rolePengguna !== '1' && (
+                  <FloatButton type='primary' onClick={AksiKembaliPanitia} icon={<ArrowLeftOutlined />} tooltip={<div>Kembali ke Rekap Dokumen Peserta</div>} />
+          )}
+
+
+
+
+
+
     </>
   )
 }

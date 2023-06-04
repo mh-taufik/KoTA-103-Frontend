@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import 'antd/dist/antd.css'
+import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCardHeader, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPencil, faTrashCan } from '@fortawesome/free-solid-svg-icons'
@@ -87,6 +87,7 @@ const PembobotanPenilaianFormPembimbing = () => {
           }
           getTempDataPoin(temp)
           setDataPoinPenilaian(temp1)
+          setIsLoading(false)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -280,7 +281,9 @@ const PembobotanPenilaianFormPembimbing = () => {
       })
   }
 
-  return (
+  return isLoading?  (<Spin tip="Loading" size="large">
+  <div className="content" />
+</Spin>):(
     <>
       <div className="container2">
         <h2 className="justify">Pengelolaan Poin Penilaian Form Pembimbing</h2>

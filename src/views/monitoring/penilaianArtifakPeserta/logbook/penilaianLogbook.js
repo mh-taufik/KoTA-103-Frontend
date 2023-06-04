@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useHistory, useParams } from 'react-router-dom'
 import { CCard, CCardBody, CCardHeader, CCol, CContainer, CRow } from '@coreui/react'
+import {ArrowLeftOutlined } from '@ant-design/icons';
 import Chart, {
   CommonSeriesSettings,
   Legend,
@@ -19,6 +20,7 @@ import {
   Button,
   Card,
   Col,
+  FloatButton,
   Form,
   Input,
   Modal,
@@ -178,11 +180,13 @@ const PenilaianLogbook = () => {
     await axios
       .get(`http://localhost:1337/api/jadwalpenyelesaiankeseluruhans`)
       .then((result) => {
-        console.log('hasil', result.data.data)
+        console.log('HASIL PENYELESAIAN KESELURUHAN', result.data.data)
         obj = result.data.data
 
         var findObjectByLabel = function (obj) {
+  
           for (var i in obj) {
+         
             console.log(obj[i])
             content.push({
               id: obj[i].id,
@@ -557,9 +561,7 @@ const PenilaianLogbook = () => {
     <>
       <>
         <div className="container2">
-          <Button type="primary" shape="round" className="spacebottom" onClick={btnKembali}>
-            Kembali ke list logbook
-          </Button>
+      
 
           {title('RENCANA PENGERJAAN PROYEK ( RPP )')}
           <div style={{ padding: 10 }}>
@@ -912,6 +914,12 @@ const PenilaianLogbook = () => {
           </Form>
         </Modal>
       </>
+      
+      <FloatButton type='primary' icon={<ArrowLeftOutlined />}  onClick={btnKembali} tooltip={<div>Kembali ke Rekap Logbook Peserta</div>} />
+
+
+
+
     </>
   )
 }
