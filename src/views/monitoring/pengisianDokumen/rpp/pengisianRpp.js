@@ -1,34 +1,26 @@
 import React, { useEffect, useState } from 'react'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import {
-  AutoComplete,
   Button,
-  Cascader,
   Col,
   DatePicker,
   FloatButton,
   Input,
-  InputNumber,
   Popover,
   Row,
   Select,
   Space,
-  TimePicker,
-  Tooltip,
-  TreeSelect,
   notification,
 } from 'antd'
 import './rpp.css'
 import { Form, Modal, message } from 'antd'
-import { Refresh, SentimentVeryDissatisfiedOutlined, TextSnippetSharp } from '@mui/icons-material'
-import { PoweroffOutlined } from '@ant-design/icons'
+import { SentimentVeryDissatisfiedOutlined, TextSnippetSharp } from '@mui/icons-material'
 import { Document, Page } from 'react-pdf/dist/esm/entry.webpack'
 import { useHistory } from 'react-router-dom'
 import dayjs from 'dayjs'
 import weekOfYear from 'dayjs'
 
 import customParseFormat from 'dayjs/plugin/customParseFormat'
-import { SpaceContext } from 'antd/lib/space'
 import { Box } from '@mui/material'
 import axios from 'axios'
 
@@ -42,8 +34,6 @@ const PengisianRpp = () => {
   const [form] = Form.useForm()
   const [loadings, setLoadings] = useState([])
   const [dataPeserta, setDataPeserta] = useState([])
-  const [rowDeliverables, setRowDeliverables] = useState([])
-  const [noOfRows, setNoOfRows] = useState(1)
   const [noOfRowsDeliverables, setNoOfRowsDeliverables] = useState(0)
   const [noOfRowsMilestones, setNoOfRowsMilestones] = useState(0)
   const [noOfRowsCapaianPerminggu, setNoOfRowsCapaianPerminggu] = useState(0)
@@ -66,9 +56,6 @@ const PengisianRpp = () => {
   const [idNewRpp, setIdNewRpp] = useState()
   const [isSuccessInput, setIsSuccessInput] = useState(true)
 
-  const tesh = () => {
-    console.log('==', milestones)
-  }
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages)

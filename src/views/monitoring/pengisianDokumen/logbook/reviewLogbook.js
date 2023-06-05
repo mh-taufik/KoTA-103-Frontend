@@ -16,7 +16,8 @@ import routes from 'src/routes'
 
 const ReviewLogbook = (props) => {
   var params = useParams()
-  const nim_peserta = params.nim
+  const NIM_PESERTA_BY_PARAMS = params.nim
+  let LOGBOOK = params.id
   const [isLoading, setIsLoading] = useState(true)
   const [isSpinner, setIsSpinner] = useState(true)
   const [tanggalLogbook, setTanggalLogbook] = useState()
@@ -37,8 +38,6 @@ const ReviewLogbook = (props) => {
   var dataLogbook = []
   const rolePengguna = localStorage.id_role
   const [logbookAttributesData, setLogbookAttributesData] = useState([''])
-  var idLogbook
-  var LOGBOOK = params.id
   axios.defaults.withCredentials = true
   let history = useHistory()
 
@@ -51,12 +50,7 @@ const ReviewLogbook = (props) => {
   }
 
   useEffect(() => {
-    // console.log("nama proyek awal : ", logbookPeserta.attributes.namaproyek)
-
-    // alert('idLogbook :', params.id)
-    console.log(params.id)
-    idLogbook = params.id
-    console.log('id', idLogbook)
+    
   }, [history])
 
   const handleInputLogbookDate = (date) => {
@@ -75,45 +69,45 @@ const ReviewLogbook = (props) => {
       })
   }
 
-  const getDataLogbookChosen = async (index) => {
-    enterLoading(index)
-    await axios
-      .get(`http://localhost:1337/api/logbooks/${LOGBOOK}`)
-      .then((response) => {
-        dataLogbook = response.data.data
-        console.log('data', dataLogbook)
-        setLogbookPeserta(response.data.data)
 
-        setLogbookAttributesData(response.data.data.attributes)
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-          history.push('/500')
-        }
-      })
-
-    // console.log('nama proyek awal : ', logbookPeserta.attributes.namaproyek)
-  }
 
 
   useEffect(() => {
-    getDataLogbookChosen()
+    const getDataLogbook = async (index) => {
+      enterLoading(index)
+      await axios
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}${LOGBOOK}`)
+        .then((response) => {
+          dataLogbook = response.data.data
+          console.log('data', dataLogbook)
+          setLogbookPeserta(response.data.data)
+  
+          setLogbookAttributesData(response.data.data.attributes)
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+            history.push('/500')
+          }
+        })
+  
+    }
+    getDataLogbook()
   }, [history])
 
 
   const hoverButtonKembali = <div>Klik tombol, untuk kembali ke list logbook</div>
 
   const handlingButtonKembali = () => {
-    (rolePengguna !=='1')? history.push(`/rekapDokumenPeserta/logbookPeserta/${nim_peserta}`): history.push(`/logbook`)
+    (rolePengguna !=='1')? history.push(`/rekapDokumenPeserta/logbookPeserta/${NIM_PESERTA_BY_PARAMS}`): history.push(`/logbook`)
   }
 
   return (

@@ -118,9 +118,6 @@ const FormPengisianLogbook = (props) => {
     })
   }
 
-  // useEffect(() => {
-  //   console.log('usernamePeserta', params.id)
-  // }, [])
 
   const handleInputLogbookDate = async (date) => {
     await axios
