@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import {ArrowLeftOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import {
   AutoComplete,
   Button,
@@ -66,11 +66,9 @@ const PengisianRpp = () => {
   const [idNewRpp, setIdNewRpp] = useState()
   const [isSuccessInput, setIsSuccessInput] = useState(true)
 
-
-  const tesh = () =>{
+  const tesh = () => {
     console.log('==', milestones)
   }
-
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages)
@@ -103,8 +101,6 @@ const PengisianRpp = () => {
     console.log('NIM PESERTA ', NIM_PESERTA)
     getInformasiDataPeserta()
   }, history)
-
-
 
   /**HANDLE FAILED INPUT */
   const onFinishFailed = () => {
@@ -205,7 +201,7 @@ const PengisianRpp = () => {
   }
 
   const handleAddRowRencanaCapaianPerminggu = () => {
-    let newField = { tanggalmulai: '',tanggalberakhir:'', rencana: '' }
+    let newField = { tanggalmulai: '', tanggalberakhir: '', rencana: '' }
     setCapaianPerminggu([...capaianPerminggu, newField])
     setNoOfRowsCapaianPerminggu(noOfRowsCapaianPerminggu + 1)
   }
@@ -277,17 +273,15 @@ const PengisianRpp = () => {
   /**get data date berdasarkan minggu dalam tahun */
   function formatDate(date) {
     var d = new Date(date),
-        month = '' + (d.getMonth() + 1),
-        day = '' + d.getDate(),
-        year = d.getFullYear();
+      month = '' + (d.getMonth() + 1),
+      day = '' + d.getDate(),
+      year = d.getFullYear()
 
-    if (month.length < 2) 
-        month = '0' + month;
-    if (day.length < 2) 
-        day = '0' + day;
+    if (month.length < 2) month = '0' + month
+    if (day.length < 2) day = '0' + day
 
-    return [year, month, day].join('-');
-}
+    return [year, month, day].join('-')
+  }
 
   function getDateOfISOWeek(w, y) {
     var simple = new Date(y, 0, 1 + (w - 1) * 7)
@@ -298,7 +292,7 @@ const PengisianRpp = () => {
     } else {
       ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay())
     }
- 
+
     ISOweekStart = new Date(ISOweekStart)
     return formatDate(ISOweekStart.toDateString())
     // console.log(ISOweekStart)
@@ -316,26 +310,14 @@ const PengisianRpp = () => {
       ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay())
     }
 
-    ISOweekStart.setDate(ISOweekStart.getDate()+4)
+    ISOweekStart.setDate(ISOweekStart.getDate() + 4)
     return formatDate(ISOweekStart.toDateString())
-
-   
   }
 
   /** HANDLE RANGE DATE SAAT MEMILIH  */
   const disabledDate = (current) => {
     // Can not select days before today and today
     return current && current < dayjs().endOf('day')
-  }
-
-  const disabledWeek = (current) => {
-    // Can not select days before today and today
-   return current && current
-  }
-  /** TEST */
-  const tesHandle = () => {
-    console.log('tes isi jadwal', jadwalPenyelesaianKeseluruhan)
-    // console.log('data copy==> ', deliverablesCopy)
   }
 
   /** API HANDLE SUBMIT */
@@ -370,13 +352,15 @@ const PengisianRpp = () => {
           perankelompok: peranDalamPekerjaan,
           peserta: {
             connect: [dataPeserta.id],
-          }
+          },
         },
-      }).then((res) => {
+      })
+      .then((res) => {
         console.log(res.data.data)
         setIdNewRpp(res.data.data.id)
         setIsSuccessInput(true)
-      }).catch(function (error) {
+      })
+      .catch(function (error) {
         setIsSuccessInput(false)
         if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
           history.push({
@@ -392,146 +376,150 @@ const PengisianRpp = () => {
         }
       })
 
-
-      if(isSuccessInput){
-        notification.success({message:'Data RPP Berhasil ditambahkan'})
-        setTimeout({
-
-        },1000)
-        history.push(`/rencanaPenyelesaianProyek`)
-      }else{
-        notification.error({message:'Data RPP Gagal Ditambahkan'})
-      }
-
-     
-  
+    if (isSuccessInput) {
+      notification.success({ message: 'Data RPP Berhasil ditambahkan' })
+      setTimeout({}, 1000)
+      history.push(`/rencanaPenyelesaianProyek`)
+    } else {
+      notification.error({ message: 'Data RPP Gagal Ditambahkan' })
+    }
   }
 
   /** POST DELIVERABLES, RCM, MILESTONES, PENYELESAIAN KESELURUHAN */
-  useEffect(()=>{
-   
-    const postDataDeliverables = async(data) =>{
-      for(var i in data){
-        await axios.post(`http://localhost:1337/api/deliverables`,{
-          'data' : {
-            'deliverables' : data[i].deliverables,
-            'duedate' : data[i].duedate,
-            'rpp' : {
-              'connect' : [idNewRpp]
-            }
-          }
-        }).then((res)=>{
-          setIsSuccessInput(true)
-
-        }).catch(function (error) {
-          setIsSuccessInput(false)
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
+  useEffect(() => {
+    const postDataDeliverables = async (data) => {
+      for (var i in data) {
+        await axios
+          .post(`http://localhost:1337/api/deliverables`, {
+            data: {
+              deliverables: data[i].deliverables,
+              duedate: data[i].duedate,
+              rpp: {
+                connect: [idNewRpp],
               },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-            history.push('/500')
-          }
-        })
+            },
+          })
+          .then((res) => {
+            setIsSuccessInput(true)
+          })
+          .catch(function (error) {
+            setIsSuccessInput(false)
+            if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+              history.push({
+                pathname: '/login',
+                state: {
+                  session: true,
+                },
+              })
+            } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+              history.push('/404')
+            } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+              history.push('/500')
+            }
+          })
       }
     }
 
-    const postDataMilestones = async(data) =>{
-      for(var i in data){
-        await axios.post(`http://localhost:1337/api/milestones`,{
-          'data' : {
-            'deskripsi' : data[i].deskripsi,
-            'tanggalmulai' : data[i].tanggalmulai,
-            'tanggalselesai' : data[i].tanggalselesai,
-            'rpp' : {
-              'connect' : [idNewRpp]
-            }
-          }
-        }).then((res)=>{
-          setIsSuccessInput(true)
-        }).catch(function (error) {
-          setIsSuccessInput(false)
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
+    const postDataMilestones = async (data) => {
+      for (var i in data) {
+        await axios
+          .post(`http://localhost:1337/api/milestones`, {
+            data: {
+              deskripsi: data[i].deskripsi,
+              tanggalmulai: data[i].tanggalmulai,
+              tanggalselesai: data[i].tanggalselesai,
+              rpp: {
+                connect: [idNewRpp],
               },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-            history.push('/500')
-          }
-        })
+            },
+          })
+          .then((res) => {
+            setIsSuccessInput(true)
+          })
+          .catch(function (error) {
+            setIsSuccessInput(false)
+            if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+              history.push({
+                pathname: '/login',
+                state: {
+                  session: true,
+                },
+              })
+            } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+              history.push('/404')
+            } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+              history.push('/500')
+            }
+          })
       }
     }
 
-    const postDataRencanaCapaianPerminggu = async(data) =>{
-      for(var i in data){
-        await axios.post(`http://localhost:1337/api/rencanacapaianmingguans`,{
-          'data' : {
-            'rencanacapaian' : data[i].rencana,
-            'tanggalmulai' : data[i].tanggalmulai,
-            'tanggalberakhir' : data[i].tanggalberakhir,
-            'rpp' : {
-              'connect' : [idNewRpp]
-            }
-          }
-        }).then((res)=>{
-          setIsSuccessInput(true)
-        }).catch(function (error) {
-          setIsSuccessInput(false)
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
+    const postDataRencanaCapaianPerminggu = async (data) => {
+      for (var i in data) {
+        await axios
+          .post(`http://localhost:1337/api/rencanacapaianmingguans`, {
+            data: {
+              rencanacapaian: data[i].rencana,
+              tanggalmulai: data[i].tanggalmulai,
+              tanggalberakhir: data[i].tanggalberakhir,
+              rpp: {
+                connect: [idNewRpp],
               },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-            history.push('/500')
-          }
-        })
+            },
+          })
+          .then((res) => {
+            setIsSuccessInput(true)
+          })
+          .catch(function (error) {
+            setIsSuccessInput(false)
+            if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+              history.push({
+                pathname: '/login',
+                state: {
+                  session: true,
+                },
+              })
+            } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+              history.push('/404')
+            } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+              history.push('/500')
+            }
+          })
       }
     }
 
-    const postDataJadwalPenyelesaianKeseluruhan = async(data) =>{
-      for(var i in data){
-        await axios.post(`http://localhost:1337/api/jadwalpenyelesaiankeseluruhans`,{
-          'data' : {
-            'jenispekerjaan' : data[i].jenispekerjaan,
-            'butirpekerjaan' : data[i].butirpekerjaan,
-            'tanggalmulai' : data[i].minggumulai,
-            'tanggalselesai' : data[i].mingguselesai,
-            'rpp' : {
-              'connect' : [idNewRpp]
-            }
-          }
-        }).then((res)=>{
-          setIsSuccessInput(true)
-        }).catch(function (error) {
-          setIsSuccessInput(false)
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
+    const postDataJadwalPenyelesaianKeseluruhan = async (data) => {
+      for (var i in data) {
+        await axios
+          .post(`http://localhost:1337/api/jadwalpenyelesaiankeseluruhans`, {
+            data: {
+              jenispekerjaan: data[i].jenispekerjaan,
+              butirpekerjaan: data[i].butirpekerjaan,
+              tanggalmulai: data[i].minggumulai,
+              tanggalselesai: data[i].mingguselesai,
+              rpp: {
+                connect: [idNewRpp],
               },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-            history.push('/500')
-          }
-        })
+            },
+          })
+          .then((res) => {
+            setIsSuccessInput(true)
+          })
+          .catch(function (error) {
+            setIsSuccessInput(false)
+            if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+              history.push({
+                pathname: '/login',
+                state: {
+                  session: true,
+                },
+              })
+            } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+              history.push('/404')
+            } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+              history.push('/500')
+            }
+          })
       }
     }
 
@@ -539,12 +527,7 @@ const PengisianRpp = () => {
     postDataMilestones(milestones)
     postDataRencanaCapaianPerminggu(capaianPerminggu)
     postDataJadwalPenyelesaianKeseluruhan(jadwalPenyelesaianKeseluruhan)
-
-  
-  
-
-
-  },[idNewRpp])
+  }, [idNewRpp])
 
   const showModal = () => {
     setIsModalOpen(true)
@@ -562,7 +545,7 @@ const PengisianRpp = () => {
     history.push(`/rencanaPenyelesaianProyek/peserta/formPengisianRPP/contohPengisianRPP`)
   }
 
-  const handleButtonKembali = () =>{
+  const handleButtonKembali = () => {
     history.push(`/rencanaPenyelesaianProyek`)
   }
 
@@ -570,7 +553,6 @@ const PengisianRpp = () => {
     <>
       <div className="container">
         <Space>
-       
           <Modal
             title="Format Pengisian Dokumen RPP"
             visible={isModalOpen}
@@ -637,6 +619,7 @@ const PengisianRpp = () => {
             remember: true,
           }}
           autoComplete="off"
+          onFinish={handleSubmitRPP}
           onFinishFailed={onFinishFailed}
         >
           {/* <Button onClick={tes}>tes</Button> */}
@@ -647,8 +630,12 @@ const PengisianRpp = () => {
               label="Tanggal Mulai Pengerjaan"
               rules={[
                 {
-                  type: 'object',
+                  required: 'true',
                   message: 'Masukkan tanggal pengerjaan terlebih dahulu',
+                },
+                {
+                  type: 'date',
+                  warningOnly: 'true',
                 },
               ]}
             >
@@ -731,14 +718,30 @@ const PengisianRpp = () => {
                       </Form.Item>
                     </Col>
                     <Col span={8}>
-                      <DatePicker
-                        disabledDate={disabledDate}
-                        style={{ width: '70%' }}
-                        value={deliverables.date}
-                        onChange={(date, datestring) =>
-                          handleDataDeliverables(index, datestring, 'duedate')
-                        }
-                      />
+                      <Form.Item
+                        name={`tanggaldeliverables${index}`}
+                        key={index}
+                        label="Tanggal"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Masukkan tanggal deliverables terlebih dahulu !',
+                          },
+                          {
+                            type: 'date',
+                            warningOnly: 'true',
+                          },
+                        ]}
+                      >
+                        <DatePicker
+                          disabledDate={disabledDate}
+                          style={{ width: '70%' }}
+                          value={deliverables.date}
+                          onChange={(date, datestring) =>
+                            handleDataDeliverables(index, datestring, 'duedate')
+                          }
+                        />
+                      </Form.Item>
                     </Col>
                   </Row>
                 </div>
@@ -808,14 +811,30 @@ const PengisianRpp = () => {
                       </Form.Item>
                     </Col>
                     <Col span={8}>
-                      <RangePicker
-                        style={{ width: '100%' }}
-                        disabledDate={disabledDate}
-                        onChange={(date, datestring) => {
-                          handleDataMilestones(index, datestring[0], 'tanggalmulai')
-                          handleDataMilestones(index, datestring[1], 'tanggalselesai')
-                        }}
-                      />
+                      <Form.Item
+                        name={`tanggalmilestones${index}`}
+                        key={index}
+                        label="Tanggal"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Masukkan tanggal milestones terlebih dahulu !',
+                          },
+                          {
+                            type: 'date',
+                            warningOnly: 'true',
+                          },
+                        ]}
+                      >
+                        <RangePicker
+                          style={{ width: '100%' }}
+                          disabledDate={disabledDate}
+                          onChange={(date, datestring) => {
+                            handleDataMilestones(index, datestring[0], 'tanggalmulai')
+                            handleDataMilestones(index, datestring[1], 'tanggalselesai')
+                          }}
+                        />
+                      </Form.Item>
                     </Col>
                   </Row>
                 </div>
@@ -855,12 +874,6 @@ const PengisianRpp = () => {
                         key={index}
                         style={{ width: '100%' }}
                         label={index + 1}
-                        // rules={[
-                        //   {
-                        //     required: true,
-                        //     message: 'Masukkan rencana perminggu terlebih dahulu !',
-                        //   },
-                        // ]}
                       >
                         <TextArea
                           rows={4}
@@ -874,26 +887,41 @@ const PengisianRpp = () => {
                       </Form.Item>
                     </Col>
                     <Col span={8}>
-                      <DatePicker
-                        picker="week"
-                        placeholder="Minggu Ke"
-                        disabledDate={disabledDate}
-                        
-                        size="middle"
-                        style={{ width: '100%' }}
-                        onChange={(date, datestring) =>[
-                          handleDataRencanaCapaianPerminggu(
-                            index,
-                            getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
-                            'tanggalmulai'
-                          ),  handleDataRencanaCapaianPerminggu(
-                            index,
-                            getDateOfEndWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
-                            'tanggalberakhir',
-                          )]
-                         
-                        }
-                      />
+                      <Form.Item
+                        name={`tanggalcapaianmingguan${index}`}
+                        key={index}
+                        label="Tanggal"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Masukkan tanggal rencana terlebih dahulu !',
+                          },
+                          {
+                            type: 'date',
+                            warningOnly: 'true',
+                          },
+                        ]}
+                      >
+                        <DatePicker
+                          picker="week"
+                          placeholder="Minggu Ke"
+                          disabledDate={disabledDate}
+                          size="middle"
+                          style={{ width: '100%' }}
+                          onChange={(date, datestring) => [
+                            handleDataRencanaCapaianPerminggu(
+                              index,
+                              getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
+                              'tanggalmulai',
+                            ),
+                            handleDataRencanaCapaianPerminggu(
+                              index,
+                              getDateOfEndWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
+                              'tanggalberakhir',
+                            ),
+                          ]}
+                        />
+                      </Form.Item>
                     </Col>
                   </Row>
                 </div>
@@ -977,31 +1005,47 @@ const PengisianRpp = () => {
                         />
                       </Col>
                       <Col span={8}>
-                        <RangePicker
-                          picker="week"
-                          placeholder="Minggu Ke"
-                          disabledDate={disabledDate}
-                          size="middle"
-                          style={{ width: '100%', paddingLeft: 20 }}
-                          onChange={(date, datestring) => {
-                            handleDataJadwalPenyelesaianKeseluruhan(
-                              index,
-                              getDateOfISOWeek(
-                                datestring[0].slice(5, 7),
-                                datestring[0].slice(0, 4),
-                              ),
-                              'minggumulai',
-                            )
-                            handleDataJadwalPenyelesaianKeseluruhan(
-                              index,
-                              getDateOfEndWeek(
-                                datestring[1].slice(5, 7),
-                                datestring[1].slice(0, 4),
-                              ),
-                              'mingguselesai',
-                            )
-                          }}
-                        />
+                        <Form.Item
+                          name={`tanggaljadwal${index}`}
+                          key={index}
+                          label="Tanggal"
+                          rules={[
+                            {
+                              required: true,
+                              message: 'Masukkan tanggal jadwal penyelesaian terlebih dahulu !',
+                            },
+                            {
+                              type: 'date',
+                              warningOnly: 'true',
+                            },
+                          ]}
+                        >
+                          <RangePicker
+                            picker="week"
+                            placeholder="Minggu Ke"
+                            disabledDate={disabledDate}
+                            size="middle"
+                            style={{ width: '100%', paddingLeft: 20 }}
+                            onChange={(date, datestring) => {
+                              handleDataJadwalPenyelesaianKeseluruhan(
+                                index,
+                                getDateOfISOWeek(
+                                  datestring[0].slice(5, 7),
+                                  datestring[0].slice(0, 4),
+                                ),
+                                'minggumulai',
+                              )
+                              handleDataJadwalPenyelesaianKeseluruhan(
+                                index,
+                                getDateOfEndWeek(
+                                  datestring[1].slice(5, 7),
+                                  datestring[1].slice(0, 4),
+                                ),
+                                'mingguselesai',
+                              )
+                            }}
+                          />
+                        </Form.Item>
                       </Col>
                     </Row>
                   </div>
@@ -1030,36 +1074,40 @@ const PengisianRpp = () => {
           <hr />
           <div className="spacebottom"></div>
 
-          {/* htmlType="submit" */}
-          <Button type="primary" block onClick={() => handleSubmitRPP(NIM_PESERTA)}>
-            SUBMIT RPP
-          </Button>
-             {/* <Button type="primary" block onClick={()=>console.log(jadwalPenyelesaianKeseluruhan)}>
-            SUBMIT LOOGBOOK
-          </Button> */}
+          <Row>
+            <Col span={24}>
+             <Popover content={<div>Lakukan pengumpulan RPP</div>}>
+             <Button type="primary" htmlType="submit">
+                SUBMIT RPP
+              </Button>
+             </Popover>
+            </Col>
+          </Row>
         </Form>
       </div>
       <>
-    <FloatButton
-      shape="circle"
-      type="primary"
-      style={{
-        right: 94,
-      }}
-      onClick={()=>{history.push(`/rencanaPenyelesaianProyek`)}}
-      tooltip={<div>Kembali ke Rekap RPP</div>}
-      icon={<ArrowLeftOutlined />}
-    />
-    <FloatButton
-      shape="square"
-      type="primary"
-      style={{
-        right: 24,
-      }}
-      onClick={showModal} tooltip={<div>Contoh Pengisian RPP</div>} 
-     
-    />
-  </>
+        <FloatButton
+          shape="circle"
+          type="primary"
+          style={{
+            right: 94,
+          }}
+          onClick={() => {
+            history.push(`/rencanaPenyelesaianProyek`)
+          }}
+          tooltip={<div>Kembali ke Rekap RPP</div>}
+          icon={<ArrowLeftOutlined />}
+        />
+        <FloatButton
+          shape="square"
+          type="primary"
+          style={{
+            right: 24,
+          }}
+          onClick={showModal}
+          tooltip={<div>Contoh Pengisian RPP</div>}
+        />
+      </>
     </>
   )
 }
