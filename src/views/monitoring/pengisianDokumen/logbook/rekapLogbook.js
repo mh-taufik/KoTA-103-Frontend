@@ -3,20 +3,16 @@ import 'antd/dist/reset.css'
 import '../rpp/rpp.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEye, faPencil, faTrashCan } from '@fortawesome/free-solid-svg-icons'
-import {ArrowLeftOutlined } from '@ant-design/icons';
+import { faEye, faPencil } from '@fortawesome/free-solid-svg-icons'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import {
   Table,
   Button,
   Row,
   Col,
-  Form,
   Input,
-  Modal,
   Space,
-  notification,
   Spin,
-  Select,
   Popconfirm,
   Popover,
   Card,
@@ -28,25 +24,23 @@ import { SearchOutlined } from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
 import { useHistory, useParams, Router } from 'react-router-dom'
 import { LoadingOutlined } from '@ant-design/icons'
-import { Box } from '@mui/material'
 import moment from 'moment'
 
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const RekapLogbook = () => {
-  var idPeserta = useParams() //ngambil dari params, dimana params untuk menunjukkan detail logbook
+  const PARAMS = useParams()
+  const NIM_PESERTA_FROM_PARAMS = PARAMS.id //ngambil dari params, dimana params untuk menunjukkan detail logbook
+  const NIM_PESERTA_AS_USER = localStorage.username
   let searchInput
   const [state, setState] = useState({ searchText: '', searchedColumn: '' })
   const [logbookPeserta, setLogbookPeserta] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [wannaEdit, setWannaEdit] = useState(false)
-  const [idPengguna, setIdPengguna] = useState(localStorage.username)
+  const [dataPeserta, setDataPeserta] = useState([])
+
   let rolePengguna = localStorage.id_role
   let history = useHistory()
-  const { id } = useParams()
   const [loadings, setLoadings] = useState([])
-  const [statusTerlambat, isStatusTerlambat] = useState(false)
-  const [statusBelumDiNilai, isStatusBelumDinilai] = useState(false)
-
   const desc = '*edit logbook yang dipilih'
   axios.defaults.withCredentials = true
 
@@ -124,7 +118,6 @@ const RekapLogbook = () => {
     })
   }
 
-
   const handleReset = (clearFilters, selectedKeys, confirm, dataIndex, index) => {
     enterLoading(index)
     clearFilters()
@@ -141,49 +134,58 @@ const RekapLogbook = () => {
   }
 
   const refreshData = (index) => {
-    var PESERTA
+    let PESERTA
     if (rolePengguna === '1') {
-      PESERTA = idPengguna
+      PESERTA = NIM_PESERTA_AS_USER
     } else {
-      PESERTA = idPeserta.id
+      PESERTA = NIM_PESERTA_FROM_PARAMS
     }
 
     axios
-      .get(`http://localhost:1337/api/logbooks?populate=*&filters[peserta][username]=${PESERTA}`)
+      .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/get-all/${PESERTA}`)
       .then((result) => {
-        //setLogbookPeserta(result.data.data)
-        var temp = []
-        var temp1 = result.data.data
+        var temp = result.data.data
+        var temp_res = []
         const convertDate = (date) => {
-          return date ? moment(date).format('DD - MM - YYYY') : null
-        }
-        
-        const convertStatusPengecekan =(nilai)=>{
-          return nilai?'Sudah Dinilai' : 'Belum Dinilai'
+          let temp_date_split = date.split('-')
+          const month = [
+            'Januari',
+            'Februari',
+            'Maret',
+            'April',
+            'Mei',
+            'Juni',
+            'Juli',
+            'Agustus',
+            'September',
+            'Oktober',
+            'November',
+            'Desember',
+          ]
+          let date_month = temp_date_split[1]
+          let month_of_date = month[parseInt(date_month) - 1]
+          return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
         }
 
-        var getTempLogbook = function (obj) {
+        const convertStatusPengecekan = (nilai) => {
+          return nilai ? 'Sudah Dinilai' : 'Belum Dinilai'
+        }
+
+        let getTempRes = function (obj) {
           for (var i in obj) {
-            temp.push({
+            temp_res.push({
               id: obj[i].id,
-              tools: obj[i].attributes.tools,
-              statuspengecekan: convertStatusPengecekan(obj[i].attributes.nilai),
-              hasilkerja: obj[i].attributes.hasilkerja,
-              nilai: obj[i].attributes.nilai,
-              projectmanager: obj[i].attributes.projectmanager,
-              keterangan: obj[i].attributes.keterangan,
-              namaproyek: obj[i].attributes.namaproyek,
-              technicalleader: obj[i].attributes.technicalleader,
-              tugas: obj[i].attributes.tugas,
-              waktudankegiatan: obj[i].attributes.waktudankegiatan,
-              tanggallogbook: convertDate(obj[i].attributes.tanggallogbook),
-              statuspengumpulan: obj[i].attributes.statuspengumpulan,
+              date: convertDate(obj[i].date),
+              grade: obj[i].grade,
+              status: obj[i].status,
+              grade_status: convertStatusPengecekan(obj[i].grade),
             })
           }
         }
-        getTempLogbook(temp1)
-        setLogbookPeserta(temp)
-        // console.log(result.data.data)
+
+        getTempRes(temp)
+        setLogbookPeserta(temp_res)
+        setIsLoading(false)
         setIsLoading(false)
         setLoadings((prevLoadings) => {
           const newLoadings = [...prevLoadings]
@@ -194,24 +196,51 @@ const RekapLogbook = () => {
   }
 
   useEffect(() => {
-    console.log('idpeserta ==> ', idPeserta.id)
-    async function getLogbookPeserta(record, index) {
-      var PESERTA
+    async function getDataInformasiPeserta() {
+      let PESERTA
       if (rolePengguna === '1') {
-        PESERTA = idPengguna
+        PESERTA = parseInt(NIM_PESERTA_AS_USER)
       } else {
-        PESERTA = idPeserta.id
+        PESERTA = parseInt(NIM_PESERTA_FROM_PARAMS)
+      }
+
+      await axios
+        .post(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-by-id`, {
+          id: [PESERTA],
+        })
+        .then((result) => {
+           setDataPeserta(result.data.data[0])
+          
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+            history.push('/500')
+          }
+        })
+    }
+
+    async function getLogbookPeserta(record, index) {
+      let PESERTA
+      if (rolePengguna === '1') {
+        PESERTA = NIM_PESERTA_AS_USER
+      } else {
+        PESERTA = NIM_PESERTA_FROM_PARAMS
       }
       enterLoading(index)
       await axios
-        .get(`http://localhost:1337/api/logbooks?populate=*&filters[peserta][username]=${PESERTA}`)
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/get-all/${PESERTA}`)
         .then((result) => {
-          //setLogbookPeserta(result.data.data)
-          var temp = []
-          var temp1 = result.data.data
-          // const convertDate = (date) => {
-          //   return date ? moment(date).format('DD - MM - YYYY') : null
-          // }
+          var temp = result.data.data
+          var temp_res = []
           const convertDate = (date) => {
             let temp_date_split = date.split('-')
             const month = [
@@ -230,36 +259,27 @@ const RekapLogbook = () => {
             ]
             let date_month = temp_date_split[1]
             let month_of_date = month[parseInt(date_month) - 1]
-            // console.log(month_of_date,'isi date monts', month_of_date)
             return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
           }
 
-          const convertStatusPengecekan =(nilai)=>{
-            return nilai?'Sudah Dinilai' : 'Belum Dinilai'
+          const convertStatusPengecekan = (nilai) => {
+            return nilai ? 'Sudah Dinilai' : 'Belum Dinilai'
           }
-  
-          var getTempLogbook = function (obj) {
+
+          let getTempRes = function (obj) {
             for (var i in obj) {
-              temp.push({
+              temp_res.push({
                 id: obj[i].id,
-                tools: obj[i].attributes.tools,
-                statuspengecekan: convertStatusPengecekan(obj[i].attributes.nilai),
-                hasilkerja: obj[i].attributes.hasilkerja,
-                nilai: obj[i].attributes.nilai,
-                projectmanager: obj[i].attributes.projectmanager,
-                keterangan: obj[i].attributes.keterangan,
-                namaproyek: obj[i].attributes.namaproyek,
-                technicalleader: obj[i].attributes.technicalleader,
-                tugas: obj[i].attributes.tugas,
-                waktudankegiatan: obj[i].attributes.waktudankegiatan,
-                tanggallogbook: convertDate(obj[i].attributes.tanggallogbook),
-                statuspengumpulan: obj[i].attributes.statuspengumpulan,
+                date: convertDate(obj[i].date),
+                grade: obj[i].grade,
+                status: obj[i].status,
+                grade_status: convertStatusPengecekan(obj[i].grade),
               })
             }
           }
-          getTempLogbook(temp1)
-          setLogbookPeserta(temp)
-          // console.log(result.data.data)
+
+          getTempRes(temp)
+          setLogbookPeserta(temp_res)
           setIsLoading(false)
         })
         .catch(function (error) {
@@ -278,39 +298,36 @@ const RekapLogbook = () => {
         })
     }
     getLogbookPeserta()
+    getDataInformasiPeserta()
   }, [history])
 
-  //EDIT LOGBOOK
   const confirmToEdit = () => {
     history.push(`/logbook/formEditLogbook/${wannaEdit.id}`)
   }
 
   const handleCreateLogbook = () => {
-    history.push(`/logbook/formlogbook/${idPengguna}`)
+    history.push(`/logbook/formlogbook/${NIM_PESERTA_AS_USER}`)
   }
 
-  //HOVER BUTTON
-  const hoverButtonLihatDetail = <div>Klik tombol, untuk melihat isi logbook peserta</div>
-
-  //AKSI BUTTON LIHAT DETAIL
   const actionLihatDetailPenilaianLogbook = (idLogbook) => {
-    history.push(`/rekapDokumenPeserta/logbookPeserta/${idPeserta.id}/detail/${idLogbook}`)
+    history.push(
+      `/rekapDokumenPeserta/logbookPeserta/${NIM_PESERTA_FROM_PARAMS}/detail/${idLogbook}`,
+    )
   }
 
   const actionPenilaianLogbook = (idLogbook) => {
-    history.push(`/rekapDokumenPeserta/logbookPeserta/${idPeserta.id}/nilai/${idLogbook}`)
+    history.push(
+      `/rekapDokumenPeserta/logbookPeserta/${NIM_PESERTA_FROM_PARAMS}/nilai/${idLogbook}`,
+    )
   }
 
-  const hoverKembaliKeListDokumenPeserta = <div>Ke list dokumen peserta</div>
-  //AKSI PANITIA KEMBALI
   const AksiKembaliPanitia = () => {
     history.push(`/rekapDokumenPeserta`)
   }
 
-  //KOLOM
   const columnsPanitiaPembimbing = [
     {
-      title: 'No',
+      title: 'NO',
       dataIndex: 'no',
       width: '5%',
       align: 'center',
@@ -319,47 +336,49 @@ const RekapLogbook = () => {
       },
     },
     {
-      title: 'Tanggal Logbook',
-      dataIndex: 'tanggallogbook',
-      key: 'tanggallogbook',
-      ...getColumnSearchProps('tanggallogbook', 'Poin Penilaian'),
+      title: 'TANGGAL LOGBOOK',
+      dataIndex: 'date',
+      key: 'date',
+      ...getColumnSearchProps('date', 'Tanggal Logbook'),
     },
     {
-      title: 'Status Pengumpulan',
-      dataIndex: 'statuspengumpulan',
-      key: 'statuspengumpulan',
-      ...getColumnSearchProps('statuspengumpulan', 'Status Poin Penilaian'),
+      title: 'STATUS PENGUMPULAN',
+      dataIndex: 'status',
+      key: 'status',
+      ...getColumnSearchProps('status', 'Status Pengumpulan'),
       render: (text, record) => {
         var color = ''
-        if (record.statuspengumpulan === 'terlambat') {
+        if (record.status === 'Terlambat') {
           color = 'volcano'
-        } else if (record.statuspengumpulan === 'tepat waktu') {
+        } else if (record.status === 'Tepat Waktu') {
           color = 'green'
         }
 
-        return <Tag color={color}>{record.statuspengumpulan}</Tag>
+        return <Tag color={color}>{record.status}</Tag>
       },
     },
     {
-      title: 'Penilaian',
-      dataIndex: 'nilai',
+      title: 'PENILAIAN',
+      dataIndex: 'grade',
+      ...getColumnSearchProps('grade', 'Status Penilaian'),
+      render: (text, record) => {
+        let color
+        if (record.grade === 'SANGAT BAIK') {
+          color = 'green'
+        } else if (record.grade === 'BAIK') {
+          color = 'cyan'
+        } else if (record.grade === 'CUKUP') {
+          color = 'warning'
+        } else if (record.grade === 'KURANG') {
+          color = 'magenta'
+        } else if (record.grade === 'BELUM DINILAI') {
+          color = 'default'
+        }
+        return <Tag color={color}>{record.grade}</Tag>
+      },
     },
     {
-      title: 'Status Pengecekan Pembimbing',
-      dataIndex: 'statuspengecekan',
-      ...getColumnSearchProps('statuspengecekan', 'Status Penilaian'),
-      render : (text,record) =>{
-        let color 
-        if (record.statuspengecekan === 'Sudah Dinilai') {
-          color= 'green'
-        } else if (record.statuspengecekan === 'Belum Dinilai') {
-          color= 'cyan'
-        } 
-        return <Tag color={color}>{record.statuspengecekan}</Tag>
-      }
-    },
-    {
-      title: 'Aksi',
+      title: 'AKSI',
       width: '20%',
       align: 'center',
       dataIndex: 'action',
@@ -371,9 +390,9 @@ const RekapLogbook = () => {
                 <Popover content={<div>Lihat isi detail dokumen logbook</div>}>
                   <Button
                     size="small"
-                    type='primary'
+                    type="primary"
+                   shape='round'
                     onClick={() => actionLihatDetailPenilaianLogbook(record.id)}
-                   
                   >
                     Lihat Detail
                   </Button>
@@ -383,43 +402,44 @@ const RekapLogbook = () => {
           )}
 
           {rolePengguna === '4' && (
-             <Row>
-             <Col span={12} style={{ textAlign: 'center' }}>
-               <Popover content={<div>Lihat isi detail dokumen logbook</div>}>
-                 <Button
-                   size="small"
-                   onClick={() => actionLihatDetailPenilaianLogbook(record.id)}
-                   style={{ backgroundColor: '#91caff' }}
-                 >
-                   Lihat Detail
-                 </Button>
-               </Popover>
-             </Col>
-             <Col span={12} style={{ textAlign: 'center' }}>
-               <Popover content={<div>Lihat penilaian logbook</div>}>
-                 <Button
-                   size="small"
-                   onClick={() => actionPenilaianLogbook(record.id)}
-                   style={{ backgroundColor: '#ffd666' }}
-                 >
-                   &nbsp;&nbsp; &nbsp;&nbsp; Nilai &nbsp;&nbsp;&nbsp;&nbsp;
-                 </Button>
-               </Popover>
-             </Col>
-           </Row>
+            <Row>
+              <Col span={12} style={{ textAlign: 'center' }}>
+                <Popover content={<div>Lihat isi detail dokumen logbook</div>}>
+                  <Button
+                    size="small"
+                    shape='round'
+                    onClick={() => actionLihatDetailPenilaianLogbook(record.id)}
+                    style={{ backgroundColor: '#91caff' }}
+                  >
+                    Lihat Detail
+                  </Button>
+                </Popover>
+              </Col>
+              <Col span={12} style={{ textAlign: 'center' }}>
+                <Popover content={<div>Lihat penilaian logbook</div>}>
+                  <Button
+                    size="small"
+                    onClick={() => actionPenilaianLogbook(record.id)}
+                    style={{ backgroundColor: '#ffd666' }}
+                  >
+                    &nbsp;&nbsp; &nbsp;&nbsp; Nilai &nbsp;&nbsp;&nbsp;&nbsp;
+                  </Button>
+                </Popover>
+              </Col>
+            </Row>
           )}
         </>
       ),
     },
   ]
 
-  //KOLOM
-    const handleSeeDetailLogbook = (record) =>{
-      history.push(`/logbook/detaillogbook/${record.id}`)
+  const handleSeeDetailLogbook = (record) => {
+    history.push(`/logbook/detaillogbook/${record.id}`)
   }
+
   const columns = [
     {
-      title: 'No',
+      title: 'NO',
       dataIndex: 'no',
       width: '5%',
       align: 'center',
@@ -428,30 +448,29 @@ const RekapLogbook = () => {
       },
     },
     {
-      title: 'Tanggal Logbook',
-      dataIndex: 'tanggallogbook',
-      key: 'tanggallogbook',
-      ...getColumnSearchProps('tanggallogbook', 'Poin Penilaian'),
+      title: 'TANGGAL LOGBOOK',
+      dataIndex: 'date',
+      key: 'date',
+      ...getColumnSearchProps('date', 'Tanggal Logbook'),
     },
     {
-      title: 'Status Pengumpulan',
-      dataIndex: 'statuspengumpulan',
-      key: 'statuspengumpulan',
-      ...getColumnSearchProps('statuspengumpulan', 'Status Poin Penilaian'),
+      title: 'STATUS PENGUMPULAN',
+      dataIndex: 'status',
+      key: 'status',
+      ...getColumnSearchProps('status', 'Status Pengumpulan'),
       render: (text, record) => {
         var color = ''
-        if (record.statuspengumpulan === 'terlambat') {
+        if (record.status === 'Terlambat') {
           color = 'volcano'
-        } else if (record.statuspengumpulan === 'tepat waktu') {
+        } else if (record.status === 'Tepat Waktu') {
           color = 'green'
         }
-
-        return <Tag color={color}>{record.statuspengumpulan}</Tag>
+        return <Tag color={color}>{record.status}</Tag>
       },
     },
 
     {
-      title: 'Aksi',
+      title: 'AKSI',
       width: '15%',
       align: 'center',
       dataIndex: 'action',
@@ -459,54 +478,50 @@ const RekapLogbook = () => {
         <>
           <Row>
             <Col span={12} style={{ textAlign: 'center' }}>
-            {record.statuspengecekan === 'Sudah Dinilai' && (
-                  <Popover content={<div>Pengeditan logbook tidak diizinkan</div>}>
-               
-                 <Button
-                 id="button-pencil"
-                 htmlType="submit"
-                 shape="circle"
-                 disabled
-                 style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
-                 onClick={() => {
-                   setWannaEdit(record)
-                 }}
-               >
-                 <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
-               </Button>
-               </Popover>
-               )}
-            
-               {record.statuspengecekan === 'Belum Dinilai' && (
+              {record.grade_status === 'Sudah Dinilai' && (
+                <Popover content={<div>Pengeditan logbook tidak diizinkan</div>}>
+                  <Button
+                    id="button-pencil"
+                    htmlType="submit"
+                    shape="circle"
+                    disabled
+                    style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
+                    onClick={() => {
+                      setWannaEdit(record)
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+                  </Button>
+                </Popover>
+              )}
+
+              {record.grade_status === 'Belum Dinilai' && (
                 <Popover content={<div>Lakukan pengeditan logbook</div>}>
                   <Popconfirm
-                  placement="topRight"
-                  title="Yakin akan melakukan edit logbook?"
-                  description={desc}
-                  onConfirm={confirmToEdit}
-                  okText="Yes"
-                  cancelText="No"
-                >
-               
-                 <Button
-                 id="button-pencil"
-                 htmlType="submit"
-                 shape="circle"
-                 style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
-                 onClick={() => {
-                   setWannaEdit(record)
-                 }}
-               >
-                 <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
-               </Button>
-               </Popconfirm>
-               </Popover>
-               )}
-           
-              </Col>
-              <Col span={12} style={{ textAlign: 'center' }}>
-              <Popover content={<div>Klik untuk melihat isi detail RPP</div>}
-              >
+                    placement="topRight"
+                    title="Yakin akan melakukan edit logbook?"
+                    description={desc}
+                    onConfirm={confirmToEdit}
+                    okText="Yes"
+                    cancelText="No"
+                  >
+                    <Button
+                      id="button-pencil"
+                      htmlType="submit"
+                      shape="circle"
+                      style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
+                      onClick={() => {
+                        setWannaEdit(record)
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+                    </Button>
+                  </Popconfirm>
+                </Popover>
+              )}
+            </Col>
+            <Col span={12} style={{ textAlign: 'center' }}>
+              <Popover content={<div>Klik untuk melihat isi detail RPP</div>}>
                 <Button
                   id="button-eye"
                   htmlType="submit"
@@ -519,8 +534,6 @@ const RekapLogbook = () => {
                   <FontAwesomeIcon icon={faEye} style={{ color: 'black' }} />
                 </Button>
               </Popover>
-              
-
             </Col>
           </Row>
         </>
@@ -532,10 +545,10 @@ const RekapLogbook = () => {
     return (
       <>
         <div>
-          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius:2 }}>
+          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius: 2 }}>
             <Col span={24}>
               <b>
-                <h4 style={{color:'#f6ffed', marginLeft:30, marginTop:6}}>{judul}</h4>
+                <h5 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h5>
               </b>
             </Col>
           </Row>
@@ -545,41 +558,48 @@ const RekapLogbook = () => {
     )
   }
 
-  
   return isLoading ? (
-    <Spin indicator={antIcon} />
+    <Spin tip="Loading" size="large">
+      <div className="content" />
+    </Spin>
   ) : (
     <>
-      
-
-
-        {rolePengguna !== '1' && (
-          <Space className='spacebottom'
-            direction="vertical"
-            size="middle"
-            style={{
-              display: 'flex'
-            }}
-          >
-            <Card title="Informasi Peserta" size="small" style={{padding:30}}>
-              <Row>
-                <Col span={4}>Nama Lengkap</Col>
-                <Col span={2}>:</Col>
-                <Col span={8}>Gina Anifah Choirunnisa</Col>
-              </Row>
-              <Row>
-                <Col span={4}>NIM</Col>
-                <Col span={2}>:</Col>
-                <Col span={8}>181524003</Col>
-              </Row>
-            </Card>
-          </Space>
-        )}
-    
-     
+      {rolePengguna !== '1' && (
+        <Space
+          className="spacebottom"
+          direction="vertical"
+          size="middle"
+          style={{
+            display: 'flex',
+          }}
+        >
+          <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
+            <Row style={{padding:5}}>
+              <Col span={4}>Nama Lengkap</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>{dataPeserta.name}</Col>
+            </Row>
+            <Row style={{padding:5}}>
+              <Col span={4}>NIM</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>{dataPeserta.nim}</Col>
+            </Row>
+            <Row style={{padding:5}}>
+              <Col span={4}>Sistem Kerja</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>{dataPeserta.work_system}</Col>
+            </Row>
+            <Row style={{padding:5}}>
+              <Col span={4}>Angkatan</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>{dataPeserta.year}</Col>
+            </Row>
+          </Card>
+        </Space>
+      )}
 
       <CCard className="mb-4">
-      {title('REKAP LOGBOOK PESERTA')}
+        {title('REKAP LOGBOOK PESERTA')}
         <CCardBody>
           {rolePengguna === '1' && (
             <Row>
@@ -596,14 +616,11 @@ const RekapLogbook = () => {
               </Col>
             </Row>
           )}
-         
 
-     
           {rolePengguna === '1' && (
             <CRow>
               <CCol sm={12}>
-            
-                <hr/>
+                <hr />
                 <Table
                   scroll={{ x: 'max-content' }}
                   columns={columns}
@@ -619,7 +636,7 @@ const RekapLogbook = () => {
             <CRow>
               <CCol sm={12}>
                 <div className="spacebottom"></div>
-              
+
                 <hr />
                 <Table
                   scroll={{ x: 'max-content' }}
@@ -633,15 +650,14 @@ const RekapLogbook = () => {
           )}
         </CCardBody>
       </CCard>
-           {rolePengguna !== '1' && (
-                  <FloatButton type='primary' onClick={AksiKembaliPanitia} icon={<ArrowLeftOutlined />} tooltip={<div>Kembali ke Rekap Dokumen Peserta</div>} />
-          )}
-
-
-
-
-
-
+      {rolePengguna !== '1' && (
+        <FloatButton
+          type="primary"
+          onClick={AksiKembaliPanitia}
+          icon={<ArrowLeftOutlined />}
+          tooltip={<div>Kembali ke Rekap Dokumen Peserta</div>}
+        />
+      )}
     </>
   )
 }

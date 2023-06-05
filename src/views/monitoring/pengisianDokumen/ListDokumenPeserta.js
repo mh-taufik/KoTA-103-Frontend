@@ -2,20 +2,8 @@ import React, { useEffect, useState } from 'react'
 import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faCheck,
-} from '@fortawesome/free-solid-svg-icons'
-import {
-  Tabs,
-  Table,
-  Button,
-  Row,
-  Col,
-  Input,
-  Space,
-  Spin,
-  Popover,
-} from 'antd'
+import { faCheck } from '@fortawesome/free-solid-svg-icons'
+import { Tabs, Table, Button, Row, Col, Input, Space, Spin, Popover } from 'antd'
 import axios from 'axios'
 import { useHistory } from 'react-router-dom'
 import './rpp/rpp.css'
@@ -35,7 +23,7 @@ const ListDokumenPeserta = () => {
   const [loadings, setLoadings] = useState([])
   axios.defaults.withCredentials = true
   const [pesertaD3, setPesertaD3] = useState([])
-  const [pesertaD4, setPesertaD4] = useState([])
+  const [dataPeserta, setDataPeserta] = useState([])
   var rolePengguna = localStorage.id_role
   const [searchText, setSearchText] = useState('')
   const [searchedColumn, setSearchedColumn] = useState('')
@@ -89,19 +77,6 @@ const ListDokumenPeserta = () => {
             }}
           >
             Reset
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => {
-              confirm({
-                closeDropdown: false,
-              })
-              setSearchText(selectedKeys[0])
-              setSearchedColumn(dataIndex)
-            }}
-          >
-            Filter
           </Button>
           <Button
             type="link"
@@ -170,30 +145,36 @@ const ListDokumenPeserta = () => {
   }
 
   useEffect(() => {
-    const getAllListPesertaD3 = async (record, index) => {
-      var APIGETPESERTAD3
-
+    const getAllListPeserta = async (record, index) => {
       await axios
-        .get(`${APIGETPESERTAD3}`)
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-all`)
         .then((res) => {
-          setIsLoading(false)
-          console.log('d3', res.data.data)
-          var temp = []
-          var tempdata = res.data.data
-          var getDataD3 = function (obj) {
-            for (var i in obj) {
-              temp.push({
-                id: obj[i].id,
-                nama: obj[i].attributes.nama,
-                prodi: obj[i].attributes.prodi,
-                username: obj[i].attributes.username,
+          let tempData = res.data.data
+          let tempRes = []
+          function getProdi(prodi) {
+            return prodi === 0 ? 'D3' : 'D4'
+          }
+          let funcTempRes = function (obj) {
+            for (var i in tempData) {
+              tempRes.push({
+                nim: obj[i].nim,
+                name: obj[i].name,
+                year: obj[i].year,
+                id_participant: obj[i].id_participant,
+                IPK: obj[i].IPK,
+                work_system: obj[i].work_system,
+                status_cv: obj[i].status_cv,
+                status_interest: obj[i].status_interest,
+                id_account: obj[i].id_account,
+                id_cv: obj[i].id_cv,
+                id_prodi: getProdi(obj[i].id_prodi),
               })
             }
           }
+          funcTempRes(tempData)
+          setDataPeserta(tempRes)
 
-          getDataD3(tempdata)
-          console.log('temp', temp)
-          setPesertaD3(temp)
+          setIsLoading(false)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -211,55 +192,12 @@ const ListDokumenPeserta = () => {
         })
     }
 
-    const getAllListPesertaD4 = async (record, index) => {
-      var APIGETPESERTAD4
-      (rolePengguna !== '1')? APIGETPESERTAD4 = 'http://localhost:1337/api/pesertas?filters[prodi]=D4': APIGETPESERTAD4 = 'http://localhost:1337/api/pesertas?filters[prodi]=D3'
-      await axios
-        .get(`${APIGETPESERTAD4}`)
-        .then((res) => {
-          console.log('d4 all == ', res.data.data)
-          setIsLoading(false)
-          // setPesertaD4(res.data.data)
-          var temp = []
-          var tempdata = res.data.data
-          var getDataD4 = function (obj) {
-            for (var i in obj) {
-              temp.push({
-                id: obj[i].id,
-                nama: obj[i].attributes.nama,
-                prodi: obj[i].attributes.prodi,
-                username: obj[i].attributes.username,
-              })
-            }
-          }
-
-          getDataD4(tempdata)
-          console.log('temp', temp)
-          setPesertaD4(temp)
-        })
-        .catch(function (error) {
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
-              },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-            history.push('/500')
-          }
-        })
-    }
-
-    getAllListPesertaD3()
-    getAllListPesertaD4()
+    getAllListPeserta()
   }, [history])
 
   const columnsRpp = [
     {
-      title: 'No',
+      title: 'NO',
       dataIndex: 'no',
       width: '5%',
       align: 'center',
@@ -269,19 +207,34 @@ const ListDokumenPeserta = () => {
     },
     {
       title: 'NIM',
-      dataIndex: 'username',
+      dataIndex: 'nim',
       width: '5%',
       key: 'username',
+      ...getColumnSearchProps('nim'),
     },
     {
-      title: 'Nama Peserta',
-      dataIndex: 'nama',
+      title: 'PRODI',
+      dataIndex: 'id_prodi',
+      width: '7%',
+      key: 'id_prodi',
+      ...getColumnSearchProps('id_prodi'),
+    },
+    {
+      title: 'NAMA PESERTA',
+      dataIndex: 'name',
       width: '40%',
       key: 'nama',
-      ...getColumnSearchProps('nama'),
+      ...getColumnSearchProps('name'),
     },
     {
-      title: 'Aksi',
+      title: 'SISTEM KERJA',
+      dataIndex: 'work_system',
+      width: '15%',
+      key: 'work_system',
+      ...getColumnSearchProps('work_system'),
+    },
+    {
+      title: 'AKSI',
       dataIndex: 'action',
       align: 'center',
       render: (text, record) => (
@@ -292,7 +245,7 @@ const ListDokumenPeserta = () => {
                 <Button
                   type="primary"
                   style={{ borderColor: 'white' }}
-                  onClick={() => actionSeeListRPPParticipant(record.username)}
+                  onClick={() => actionSeeListRPPParticipant(record.nim)}
                   size="small"
                 >
                   <Text style={{ fontSize: '3', color: 'white' }}>Lihat Detail</Text>
@@ -317,17 +270,33 @@ const ListDokumenPeserta = () => {
     },
     {
       title: 'NIM',
-      dataIndex: 'username',
+      dataIndex: 'nim',
       width: '5%',
       key: 'username',
+      ...getColumnSearchProps('nim'),
+    },
+    {
+      title: 'PRODI',
+      dataIndex: 'id_prodi',
+      width: '7%',
+      key: 'id_prodi',
+      ...getColumnSearchProps('id_prodi'),
     },
     {
       title: 'Nama Peserta',
-      dataIndex: 'nama',
+      dataIndex: 'name',
       width: '40%',
       key: 'nama',
-      ...getColumnSearchProps('nama'),
+      ...getColumnSearchProps('name'),
     },
+    {
+      title: 'Sistem Kerja',
+      dataIndex: 'work_system',
+      width: '15%',
+      key: 'work_system',
+      ...getColumnSearchProps('work_system'),
+    },
+
     {
       title: 'Aksi',
       dataIndex: 'action',
@@ -336,23 +305,19 @@ const ListDokumenPeserta = () => {
         <>
           <Row>
             <Col span={24} style={{ textAlign: 'center' }}>
-             
-          
               <Popover content={<div>Lihat list dokumen, detail, dan penilaian logbook</div>}>
                 <Button
                   type="primary"
                   style={{ borderColor: 'white' }}
                   onClick={() => {
                     console.log('logbook dari peserta : ', record)
-                    actionSeeListLogbookParticipant(record.username)
-               
+                    actionSeeListLogbookParticipant(record.nim)
                   }}
                   size="small"
                 >
                   <Text style={{ fontSize: '2', color: 'white' }}>Lihat Detail</Text>
                 </Button>
               </Popover>
-            
             </Col>
           </Row>
         </>
@@ -362,7 +327,7 @@ const ListDokumenPeserta = () => {
 
   const columnsSelfAssessment = [
     {
-      title: 'No',
+      title: 'NO',
       dataIndex: 'no',
       width: '5%',
       align: 'center',
@@ -372,26 +337,40 @@ const ListDokumenPeserta = () => {
     },
     {
       title: 'NIM',
-      dataIndex: 'username',
+      dataIndex: 'nim',
       width: '5%',
       key: 'username',
+      ...getColumnSearchProps('nim'),
     },
     {
-      title: 'Nama Peserta',
-      dataIndex: 'nama',
+      title: 'PRODI',
+      dataIndex: 'id_prodi',
+      width: '7%',
+      key: 'id_prodi',
+      ...getColumnSearchProps('id_prodi'),
+    },
+    {
+      title: 'NAMA PESERTA',
+      dataIndex: 'name',
       width: '40%',
       key: 'nama',
-      ...getColumnSearchProps('nama'),
+      ...getColumnSearchProps('name'),
     },
     {
-      title: 'Aksi',
+      title: 'SISTEM KERJA',
+      dataIndex: 'work_system',
+      width: '15%',
+      key: 'work_system',
+      ...getColumnSearchProps('work_system'),
+    },
+    {
+      title: 'AKSI',
       dataIndex: 'action',
       align: 'center',
       render: (text, record) => (
         <>
           <Row>
             <Col span={24} style={{ textAlign: 'center' }}>
-              
               <Popover
                 content={<div>Lihat list dokumen, detail, dan penilaian self assessment</div>}
               >
@@ -400,13 +379,11 @@ const ListDokumenPeserta = () => {
                   type="primary"
                   style={{ borderColor: 'white' }}
                   size="small"
-                  onClick={() => actionSeeListSelfAssessmentPeserta(record.username)}
+                  onClick={() => actionSeeListSelfAssessmentPeserta(record.nim)}
                 >
                   <Text style={{ fontSize: '3', color: 'white' }}>Lihat Detail</Text>
                 </Button>
               </Popover>
-
-            
             </Col>
           </Row>
         </>
@@ -414,9 +391,9 @@ const ListDokumenPeserta = () => {
     },
   ]
 
-  const columnsLaporan= [
+  const columnsLaporan = [
     {
-      title: 'No',
+      title: 'NO',
       dataIndex: 'no',
       width: '5%',
       align: 'center',
@@ -426,27 +403,40 @@ const ListDokumenPeserta = () => {
     },
     {
       title: 'NIM',
-      dataIndex: 'username',
+      dataIndex: 'nim',
       width: '5%',
       key: 'username',
+      ...getColumnSearchProps('nim'),
     },
     {
-      title: 'Nama Peserta',
-      dataIndex: 'nama',
+      title: 'PRODI',
+      dataIndex: 'id_prodi',
+      width: '7%',
+      key: 'id_prodi',
+      ...getColumnSearchProps('id_prodi'),
+    },
+    {
+      title: 'NAMA PESERTA',
+      dataIndex: 'name',
       width: '40%',
       key: 'nama',
-      ...getColumnSearchProps('nama'),
+      ...getColumnSearchProps('name'),
     },
     {
-      title: 'Aksi',
+      title: 'SISTEM KERJA',
+      dataIndex: 'work_system',
+      width: '15%',
+      key: 'work_system',
+      ...getColumnSearchProps('work_system'),
+    },
+    {
+      title: 'AKSI',
       dataIndex: 'action',
       align: 'center',
       render: (text, record) => (
         <>
           <Row>
             <Col span={24} style={{ textAlign: 'center' }}>
-            
-
               <Popover
                 content={
                   <>
@@ -454,7 +444,7 @@ const ListDokumenPeserta = () => {
                     <div>(form penilaian pembimbing)</div>
                   </>
                 }
-                onClick={() => actionSeeListLaporan(record.username)}
+                onClick={() => actionSeeListLaporan(record.nim)}
               >
                 <Button type="primary" style={{ borderColor: 'white' }} size="small">
                   <Text style={{ fontSize: '3', color: 'white' }}>Lihat Detail</Text>
@@ -489,9 +479,9 @@ const ListDokumenPeserta = () => {
   }
 
   return isLoading ? (
-   <Spin tip="Loading" size="large">
-        <div className="content" />
-      </Spin>
+    <Spin tip="Loading" size="large">
+      <div className="content" />
+    </Spin>
   ) : (
     <>
       <CCard className="mb-4">
@@ -500,679 +490,314 @@ const ListDokumenPeserta = () => {
           <CRow>
             <CCol sm={12}>
               <Tabs type="card" onChange={onChange}>
-                {pesertaD4.length > 0 && (
-                  <>
-                    <TabPane tab="PESERTA" key="1">
-                    <CCard className="mb-4" style={{ padding: '20px' }}>
-                        <Tabs type="card">
-                          <TabPane tab="RPP" key="2.1">
-                          <CCard className="mb-4" style={{ padding: '20px' }}>
-                              <CRow>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#339900',
-                                              borderColor: '#339900',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            <FontAwesomeIcon
-                                              style={{ paddingTop: '10px' }}
-                                              icon={faCheck}
-                                            />
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Sudah Mengumpulkan RPP</h6>
-                                          <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#CC0033',
-                                              borderColor: '#CC0033',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            !
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Belum memiliki RPP</h6>
-                                          <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                              </CRow>
-                              <CCard className="mb-4">
-                                <CCardBody>
-                                  <CRow>
-                                    <CCol sm={12}>
-                                      <Table
-                                        scroll={{ x: 'max-content' }}
-                                        columns={columnsRpp}
-                                        dataSource={pesertaD4}
-                                        rowKey="id"
-                                        bordered
-                                      />
-                                    </CCol>
-                                  </CRow>
-                                </CCardBody>
-                              </CCard>
-                            </CCard>
-                          </TabPane>
-                          <TabPane tab="Logbook" key="2.2">
-                            <CCard className="mb-4" style={{ padding: '20px' }}>
-                              <CRow>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#339900',
-                                              borderColor: '#339900',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            <FontAwesomeIcon
-                                              style={{ paddingTop: '10px' }}
-                                              icon={faCheck}
-                                            />
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Sudah Mengumpulkan Semua Logbook</h6>
-                                          <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#CC0033',
-                                              borderColor: '#CC0033',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            !
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Logbook Masih Belum Lengkap</h6>
-                                          <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                              </CRow>
-                              <CCard className="mb-4">
-                                <CCardBody>
-                                  <CRow>
-                                    <CCol sm={12}>
-                                      <Table
-                                        scroll={{ x: 'max-content' }}
-                                        columns={columnsLogbook}
-                                        dataSource={pesertaD4}
-                                        rowKey="id"
-                                        bordered
-                                      />
-                                    </CCol>
-                                  </CRow>
-                                </CCardBody>
-                              </CCard>
-                            </CCard>
-                          </TabPane>
-                          <TabPane tab="Self Assessment" key="2.3">
-                          <CCard className="mb-4" style={{ padding: '20px' }}>
-                              <CRow>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#339900',
-                                              borderColor: '#339900',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            <FontAwesomeIcon
-                                              style={{ paddingTop: '10px' }}
-                                              icon={faCheck}
-                                            />
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Self Assesment Lengkap</h6>
-                                          <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#CC0033',
-                                              borderColor: '#CC0033',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            !
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Self Assessment Tidak Lengkap</h6>
-                                          <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                              </CRow>
-                              <CCard className="mb-4">
-                                <CCardBody>
-                                  <CRow>
-                                    <CCol sm={12}>
-                                      <Table
-                                        scroll={{ x: 'max-content' }}
-                                        columns={columnsSelfAssessment}
-                                        dataSource={pesertaD4}
-                                        rowKey="id"
-                                        bordered
-                                      />
-                                    </CCol>
-                                  </CRow>
-                                </CCardBody>
-                              </CCard>
-                            </CCard>
-                          </TabPane>
-                          <TabPane tab="Laporan" key="2.4">
-                          <CCard className="mb-4" style={{ padding: '20px' }}>
-                              <CRow>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#339900',
-                                              borderColor: '#339900',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            <FontAwesomeIcon
-                                              style={{ paddingTop: '10px' }}
-                                              icon={faCheck}
-                                            />
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Laporan Lengkap</h6>
-                                          <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#CC0033',
-                                              borderColor: '#CC0033',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            !
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Laporan Tidak Lengkap</h6>
-                                          <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                              </CRow>
-                              <CCard className="mb-4">
-                                <CCardBody>
-                                  <CRow>
-                                    <CCol sm={12}>
-                                      <Table
-                                        scroll={{ x: 'max-content' }}
-                                        columns={columnsLaporan}
-                                        dataSource={pesertaD4}
-                                        rowKey="id"
-                                        bordered
-                                      />
-                                    </CCol>
-                                  </CRow>
-                                </CCardBody>
-                              </CCard>
-                            </CCard>
-                          </TabPane>
-                        </Tabs>
-                      </CCard>
-                    </TabPane>
-                  </>
-                )}
-
-                {/* {pesertaD4.length > 0 && (
-                  <> */}
-                    {/* <TabPane tab="Prodi D4" key="2">
-                    <h4 className="justify">DOKUMEN PESERTA D4 - PRAKTIK KERJA LAPANGAN (PKL)</h4>
-                      <div className="spacebottom"></div>
-                      <hr />
-                      <Table
-                        scroll={{ x: 'max-content' }}
-                        columns={columns}
-                        dataSource={pesertaD4}
-                        rowKey="id"
-                        bordered
-                      />
-                    </TabPane> */}
-                    {/* <TabPane tab="Prodi D4" key="2">
-                      <CCard className="mb-4" style={{ padding: '20px' }}>
-                        <Tabs type="card">
-                          <TabPane tab="RPP" key="2.1">
-                          <CCard className="mb-4" style={{ padding: '20px' }}>
-                              <CRow>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#339900',
-                                              borderColor: '#339900',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            <FontAwesomeIcon
-                                              style={{ paddingTop: '10px' }}
-                                              icon={faCheck}
-                                            />
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Sudah Mengumpulkan RPP</h6>
-                                          <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#CC0033',
-                                              borderColor: '#CC0033',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            !
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Belum memiliki RPP</h6>
-                                          <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                              </CRow>
-                              <CCard className="mb-4">
-                                <CCardBody>
-                                  <CRow>
-                                    <CCol sm={12}>
-                                      <Table
-                                        scroll={{ x: 'max-content' }}
-                                        columns={columnsRpp}
-                                        dataSource={pesertaD4}
-                                        rowKey="id"
-                                        bordered
-                                      />
-                                    </CCol>
-                                  </CRow>
-                                </CCardBody>
-                              </CCard>
-                            </CCard>
-                          </TabPane>
-                          <TabPane tab="Logbook" key="2.2">
-                            <CCard className="mb-4" style={{ padding: '20px' }}>
-                              <CRow>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#339900',
-                                              borderColor: '#339900',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            <FontAwesomeIcon
-                                              style={{ paddingTop: '10px' }}
-                                              icon={faCheck}
-                                            />
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Sudah Mengumpulkan Semua Logbook</h6>
-                                          <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#CC0033',
-                                              borderColor: '#CC0033',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            !
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Logbook Masih Belum Lengkap</h6>
-                                          <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                              </CRow>
-                              <CCard className="mb-4">
-                                <CCardBody>
-                                  <CRow>
-                                    <CCol sm={12}>
-                                      <Table
-                                        scroll={{ x: 'max-content' }}
-                                        columns={columnsLogbook}
-                                        dataSource={pesertaD4}
-                                        rowKey="id"
-                                        bordered
-                                      />
-                                    </CCol>
-                                  </CRow>
-                                </CCardBody>
-                              </CCard>
-                            </CCard>
-                          </TabPane>
-                          <TabPane tab="Self Assessment" key="2.3">
-                          <CCard className="mb-4" style={{ padding: '20px' }}>
-                              <CRow>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#339900',
-                                              borderColor: '#339900',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            <FontAwesomeIcon
-                                              style={{ paddingTop: '10px' }}
-                                              icon={faCheck}
-                                            />
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Self Assesment Lengkap</h6>
-                                          <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#CC0033',
-                                              borderColor: '#CC0033',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            !
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Self Assessment Tidak Lengkap</h6>
-                                          <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                              </CRow>
-                              <CCard className="mb-4">
-                                <CCardBody>
-                                  <CRow>
-                                    <CCol sm={12}>
-                                      <Table
-                                        scroll={{ x: 'max-content' }}
-                                        columns={columnsSelfAssessment}
-                                        dataSource={pesertaD4}
-                                        rowKey="id"
-                                        bordered
-                                      />
-                                    </CCol>
-                                  </CRow>
-                                </CCardBody>
-                              </CCard>
-                            </CCard>
-                          </TabPane>
-                          <TabPane tab="Laporan" key="2.4">
-                          <CCard className="mb-4" style={{ padding: '20px' }}>
-                              <CRow>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#339900',
-                                              borderColor: '#339900',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            <FontAwesomeIcon
-                                              style={{ paddingTop: '10px' }}
-                                              icon={faCheck}
-                                            />
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Laporan Lengkap</h6>
-                                          <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                                <CCol sm={6}>
-                                  <CCard className="mb-4" id="card-filter">
-                                    <CCardBody>
-                                      <Row justify="space-around" align="middle">
-                                        <Col span={6}>
-                                          <Button
-                                            type="primary"
-                                            shape="circle"
-                                            style={{
-                                              backgroundColor: '#CC0033',
-                                              borderColor: '#CC0033',
-                                              color: 'white',
-                                              width: '60px',
-                                              height: '60px',
-                                              fontSize: '30px',
-                                            }}
-                                          >
-                                            !
-                                          </Button>
-                                        </Col>
-                                        <Col span={18} style={{ paddingTop: '10px' }}>
-                                          <h6>Laporan Tidak Lengkap</h6>
-                                          <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
-                                        </Col>
-                                      </Row>
-                                    </CCardBody>
-                                  </CCard>
-                                </CCol>
-                              </CRow>
-                              <CCard className="mb-4">
-                                <CCardBody>
-                                  <CRow>
-                                    <CCol sm={12}>
-                                      <Table
-                                        scroll={{ x: 'max-content' }}
-                                        columns={columnsLaporan}
-                                        dataSource={pesertaD4}
-                                        rowKey="id"
-                                        bordered
-                                      />
-                                    </CCol>
-                                  </CRow>
-                                </CCardBody>
-                              </CCard>
-                            </CCard>
-                          </TabPane>
-                        </Tabs>
-                      </CCard>
-                    </TabPane> */}
-                  {/* </>
-                )} */}
+                <TabPane tab="RPP" key="2.1">
+                  <CCard className="mb-4" style={{ padding: '20px' }}>
+                    <CRow>
+                      <CCol sm={6}>
+                        <CCard className="mb-4" id="card-filter">
+                          <CCardBody>
+                            <Row justify="space-around" align="middle">
+                              <Col span={6}>
+                                <Button
+                                  type="primary"
+                                  shape="circle"
+                                  style={{
+                                    backgroundColor: '#339900',
+                                    borderColor: '#339900',
+                                    color: 'white',
+                                    width: '60px',
+                                    height: '60px',
+                                    fontSize: '30px',
+                                  }}
+                                >
+                                  <FontAwesomeIcon style={{ paddingTop: '10px' }} icon={faCheck} />
+                                </Button>
+                              </Col>
+                              <Col span={18} style={{ paddingTop: '10px' }}>
+                                <h6>Sudah Mengumpulkan RPP</h6>
+                                <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
+                              </Col>
+                            </Row>
+                          </CCardBody>
+                        </CCard>
+                      </CCol>
+                      <CCol sm={6}>
+                        <CCard className="mb-4" id="card-filter">
+                          <CCardBody>
+                            <Row justify="space-around" align="middle">
+                              <Col span={6}>
+                                <Button
+                                  type="primary"
+                                  shape="circle"
+                                  style={{
+                                    backgroundColor: '#CC0033',
+                                    borderColor: '#CC0033',
+                                    color: 'white',
+                                    width: '60px',
+                                    height: '60px',
+                                    fontSize: '30px',
+                                  }}
+                                >
+                                  !
+                                </Button>
+                              </Col>
+                              <Col span={18} style={{ paddingTop: '10px' }}>
+                                <h6>Belum memiliki RPP</h6>
+                                <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
+                              </Col>
+                            </Row>
+                          </CCardBody>
+                        </CCard>
+                      </CCol>
+                    </CRow>
+                    <CCard className="mb-4">
+                      <CCardBody>
+                        <CRow>
+                          <CCol sm={12}>
+                            <Table
+                              scroll={{ x: 'max-content' }}
+                              columns={columnsRpp}
+                              dataSource={dataPeserta}
+                              rowKey="id"
+                              bordered
+                            />
+                          </CCol>
+                        </CRow>
+                      </CCardBody>
+                    </CCard>
+                  </CCard>
+                </TabPane>
+                <TabPane tab="Logbook" key="2.2">
+                  <CCard className="mb-4" style={{ padding: '20px' }}>
+                    <CRow>
+                      <CCol sm={6}>
+                        <CCard className="mb-4" id="card-filter">
+                          <CCardBody>
+                            <Row justify="space-around" align="middle">
+                              <Col span={6}>
+                                <Button
+                                  type="primary"
+                                  shape="circle"
+                                  style={{
+                                    backgroundColor: '#339900',
+                                    borderColor: '#339900',
+                                    color: 'white',
+                                    width: '60px',
+                                    height: '60px',
+                                    fontSize: '30px',
+                                  }}
+                                >
+                                  <FontAwesomeIcon style={{ paddingTop: '10px' }} icon={faCheck} />
+                                </Button>
+                              </Col>
+                              <Col span={18} style={{ paddingTop: '10px' }}>
+                                <h6>Sudah Mengumpulkan Semua Logbook</h6>
+                                <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
+                              </Col>
+                            </Row>
+                          </CCardBody>
+                        </CCard>
+                      </CCol>
+                      <CCol sm={6}>
+                        <CCard className="mb-4" id="card-filter">
+                          <CCardBody>
+                            <Row justify="space-around" align="middle">
+                              <Col span={6}>
+                                <Button
+                                  type="primary"
+                                  shape="circle"
+                                  style={{
+                                    backgroundColor: '#CC0033',
+                                    borderColor: '#CC0033',
+                                    color: 'white',
+                                    width: '60px',
+                                    height: '60px',
+                                    fontSize: '30px',
+                                  }}
+                                >
+                                  !
+                                </Button>
+                              </Col>
+                              <Col span={18} style={{ paddingTop: '10px' }}>
+                                <h6>Logbook Masih Belum Lengkap</h6>
+                                <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
+                              </Col>
+                            </Row>
+                          </CCardBody>
+                        </CCard>
+                      </CCol>
+                    </CRow>
+                    <CCard className="mb-4">
+                      <CCardBody>
+                        <CRow>
+                          <CCol sm={12}>
+                            <Table
+                              scroll={{ x: 'max-content' }}
+                              columns={columnsLogbook}
+                              dataSource={dataPeserta}
+                              rowKey="id"
+                              bordered
+                            />
+                          </CCol>
+                        </CRow>
+                      </CCardBody>
+                    </CCard>
+                  </CCard>
+                </TabPane>
+                <TabPane tab="Self Assessment" key="2.3">
+                  <CCard className="mb-4" style={{ padding: '20px' }}>
+                    <CRow>
+                      <CCol sm={6}>
+                        <CCard className="mb-4" id="card-filter">
+                          <CCardBody>
+                            <Row justify="space-around" align="middle">
+                              <Col span={6}>
+                                <Button
+                                  type="primary"
+                                  shape="circle"
+                                  style={{
+                                    backgroundColor: '#339900',
+                                    borderColor: '#339900',
+                                    color: 'white',
+                                    width: '60px',
+                                    height: '60px',
+                                    fontSize: '30px',
+                                  }}
+                                >
+                                  <FontAwesomeIcon style={{ paddingTop: '10px' }} icon={faCheck} />
+                                </Button>
+                              </Col>
+                              <Col span={18} style={{ paddingTop: '10px' }}>
+                                <h6>Self Assesment Lengkap</h6>
+                                <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
+                              </Col>
+                            </Row>
+                          </CCardBody>
+                        </CCard>
+                      </CCol>
+                      <CCol sm={6}>
+                        <CCard className="mb-4" id="card-filter">
+                          <CCardBody>
+                            <Row justify="space-around" align="middle">
+                              <Col span={6}>
+                                <Button
+                                  type="primary"
+                                  shape="circle"
+                                  style={{
+                                    backgroundColor: '#CC0033',
+                                    borderColor: '#CC0033',
+                                    color: 'white',
+                                    width: '60px',
+                                    height: '60px',
+                                    fontSize: '30px',
+                                  }}
+                                >
+                                  !
+                                </Button>
+                              </Col>
+                              <Col span={18} style={{ paddingTop: '10px' }}>
+                                <h6>Self Assessment Tidak Lengkap</h6>
+                                <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
+                              </Col>
+                            </Row>
+                          </CCardBody>
+                        </CCard>
+                      </CCol>
+                    </CRow>
+                    <CCard className="mb-4">
+                      <CCardBody>
+                        <CRow>
+                          <CCol sm={12}>
+                            <Table
+                              scroll={{ x: 'max-content' }}
+                              columns={columnsSelfAssessment}
+                              dataSource={dataPeserta}
+                              rowKey="id"
+                              bordered
+                            />
+                          </CCol>
+                        </CRow>
+                      </CCardBody>
+                    </CCard>
+                  </CCard>
+                </TabPane>
+                <TabPane tab="Laporan" key="2.4">
+                  <CCard className="mb-4" style={{ padding: '20px' }}>
+                    <CRow>
+                      <CCol sm={6}>
+                        <CCard className="mb-4" id="card-filter">
+                          <CCardBody>
+                            <Row justify="space-around" align="middle">
+                              <Col span={6}>
+                                <Button
+                                  type="primary"
+                                  shape="circle"
+                                  style={{
+                                    backgroundColor: '#339900',
+                                    borderColor: '#339900',
+                                    color: 'white',
+                                    width: '60px',
+                                    height: '60px',
+                                    fontSize: '30px',
+                                  }}
+                                >
+                                  <FontAwesomeIcon style={{ paddingTop: '10px' }} icon={faCheck} />
+                                </Button>
+                              </Col>
+                              <Col span={18} style={{ paddingTop: '10px' }}>
+                                <h6>Laporan Lengkap</h6>
+                                <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
+                              </Col>
+                            </Row>
+                          </CCardBody>
+                        </CCard>
+                      </CCol>
+                      <CCol sm={6}>
+                        <CCard className="mb-4" id="card-filter">
+                          <CCardBody>
+                            <Row justify="space-around" align="middle">
+                              <Col span={6}>
+                                <Button
+                                  type="primary"
+                                  shape="circle"
+                                  style={{
+                                    backgroundColor: '#CC0033',
+                                    borderColor: '#CC0033',
+                                    color: 'white',
+                                    width: '60px',
+                                    height: '60px',
+                                    fontSize: '30px',
+                                  }}
+                                >
+                                  !
+                                </Button>
+                              </Col>
+                              <Col span={18} style={{ paddingTop: '10px' }}>
+                                <h6>Laporan Tidak Lengkap</h6>
+                                <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
+                              </Col>
+                            </Row>
+                          </CCardBody>
+                        </CCard>
+                      </CCol>
+                    </CRow>
+                    <CCard className="mb-4">
+                      <CCardBody>
+                        <CRow>
+                          <CCol sm={12}>
+                            <Table
+                              scroll={{ x: 'max-content' }}
+                              columns={columnsLaporan}
+                              dataSource={dataPeserta}
+                              rowKey="id"
+                              bordered
+                            />
+                          </CCol>
+                        </CRow>
+                      </CCardBody>
+                    </CCard>
+                  </CCard>
+                </TabPane>
               </Tabs>
             </CCol>
           </CRow>

@@ -393,7 +393,9 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
         {' '}
         <div className="container">
          
-          <div className="spacetop"></div>
+        
+       
+          <h3 className="title-s spacetop">PENGISIAN SELF ASSESSMENT</h3>
           <Box sx={{ color: 'warning.main' }}>
             <ul>
               <li>Pastikan minggu yang dipilih belum pernah diisi sebelumnya</li>
@@ -404,8 +406,7 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
               </li>
             </ul>
           </Box>
-          <h3 className="title-s spacetop">PENGISIAN SELF ASSESSMENT</h3>
-
+          <div className="spacetop"></div>
           <b>PILIH MINGGU SELF ASSESSMENT &nbsp;&nbsp;&nbsp; : &nbsp;</b>
           <Space direction="vertical" size={12}>
             <DatePicker

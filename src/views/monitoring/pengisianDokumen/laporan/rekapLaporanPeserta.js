@@ -177,19 +177,19 @@ const RekapLaporanPeserta = () => {
       // console.log(month_of_date,'isi date monts', month_of_date)
       return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
     }
-    
+
     await axios
       .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get-all/${NIM_PESERTA}`)
       .then((res) => {
         let temp = res.data.data
         let temp_after = []
-        let funcGetTempAfter = function(obj){
-          for(var i in obj){
+        let funcGetTempAfter = function (obj) {
+          for (var i in obj) {
             temp_after.push({
-              id : obj[i].id,
-              uri : obj[i].uri,
-              phase : obj[i].phase,
-              upload_date : convertDate(obj[i].upload_date)
+              id: obj[i].id,
+              uri: obj[i].uri,
+              phase: obj[i].phase,
+              upload_date: convertDate(obj[i].upload_date),
             })
           }
         }
@@ -237,23 +237,23 @@ const RekapLaporanPeserta = () => {
         return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
       }
 
-
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get-all/${NIM_PESERTA}`)
         .then((res) => {
           let temp = res.data.data
           let temp_after = []
-          let funcGetTempAfter = function(obj){
-            for(var i in obj){
+          let funcGetTempAfter = function (obj) {
+            for (var i in obj) {
               temp_after.push({
-                id : obj[i].id,
-                uri : obj[i].uri,
-                phase : obj[i].phase,
-                upload_date : convertDate(obj[i].upload_date)
+                id: obj[i].id,
+                uri: obj[i].uri,
+                phase: obj[i].phase,
+                upload_date: convertDate(obj[i].upload_date),
               })
             }
           }
           funcGetTempAfter(temp)
+          setIsLoading(false)
           setDataLaporanPeserta(temp_after)
         })
         .catch(function (error) {
@@ -462,14 +462,13 @@ const RekapLaporanPeserta = () => {
     )
   }
 
-  // isLoading ? (
-  //   <Spin indicator={antIcon} />
-  // ) :
-
-  return (
+  return isLoading ? (
+    <Spin tip="Loading" size="large">
+      <div className="content" />
+    </Spin>
+  ) : (
     <>
       <div>
-        {/* {rolePengguna === '1' && <h1>[Hi Data Peserta]</h1>} */}
         {contextHolder}
         {rolePengguna !== '1' && (
           <Space
@@ -535,7 +534,7 @@ const RekapLaporanPeserta = () => {
                 />
               </CCol>
             </CRow>
-          )} 
+          )}
         </CCardBody>
       </CCard>
     </>

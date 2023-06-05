@@ -69,10 +69,9 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
   useEffect(() => {
     async function getDataPoinPenilaianSelfAssessment() {
       await axios
-        .get('http://localhost:1337/api/poinpenilaianselfassessments')
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/get`)
         .then((result) => {
           setPoinPenilaian(result.data.data)
-          console.log(result.data.data)
           setIsLoading(false)
         })
         .catch(function (error) {
@@ -102,16 +101,6 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
     setChoose(record)
   }
 
-  const showModalDelete = (record, index) => {
-    Modal.confirm({
-      title: 'Konfirmasi hapus poin penilaian?',
-      okText: 'Ya',
-      onOk: () => {
-        handleOkDelete(record, index)
-      },
-    })
-  }
-
   const handleOkCreate = async (index) => {
     enterLoading(index)
     await axios
@@ -129,7 +118,6 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
 
         setIsModalCreateVisible(false)
         form.resetFields()
-        // console.log(response)
       })
       .catch((error) => {
         setIsModalCreateVisible(false)
@@ -149,12 +137,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
     await axios
       .get(`http://localhost:1337/api/poinpenilaianselfassessments/${record.id}`)
       .then((result) => {
-        // setPoinPenilaian(result.data.data)
         console.log('data : ', result.data.data)
-        // form1.setFieldsValue({
-        //   poinpenilaian:result.data.data.attributes.poinpenilaian,
-        //   status : result.data.data.attributes.status
-        // })
         setPoinEdited(result.data.data.attributes)
         setEPoinPenilaian(result.data.data.attributes.poinpenilaian)
         setEStatus(result.data.data.attributes.status)
@@ -177,55 +160,8 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
       })
   }
 
-  const handleOkEdit = async (record, index) => {
-    enterLoading(index)
-    await axios
-      .put(`http://localhost:1337/api/poinpenilaianselfassessments/${record.id}`, {
-        poinpenilaian: poinName,
-        status: poinStatus,
-      })
-      .then((response) => {
-        refreshData(index)
-        notification.success({
-          message: 'Poin penilaian berhasil diubah',
-        })
-        setIsModalEditVisible(false)
-        refreshData(index)
-      })
-      .catch((error) => {
-        setIsModalEditVisible(false)
-        setLoadings((prevLoadings) => {
-          const newLoadings = [...prevLoadings]
-          newLoadings[index] = false
-          return newLoadings
-        })
-        notification.error({
-          message: 'Poin penilaian telah dipakai!',
-        })
-      })
-  }
 
-  const handleOkDelete = async (record, index) => {
-    enterLoading(index)
-    await axios
-      .delete(`http://localhost:1337/api/poinpenilaianselfassessments/${record.id}`)
-      .then((response) => {
-        refreshData(index)
-        notification.success({
-          message: 'Poin Self Assessment berhasil dihapus',
-        })
-      })
-      .catch((error) => {
-        notification.error({
-          message: 'Poin Penilaian gagal dihapus!',
-        })
-        setLoadings((prevLoadings) => {
-          const newLoadings = [...prevLoadings]
-          newLoadings[index] = false
-          return newLoadings
-        })
-      })
-  }
+
 
   const handleCancelCreate = () => {
     setIsModalCreateVisible(false)
@@ -323,7 +259,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
       ),
   })
 
-  //PENCARIAN
+
   const handleSearch = (selectedKeys, confirm, dataIndex, index) => {
     enterLoading(index)
     confirm()
@@ -338,7 +274,6 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
     })
   }
 
-  //RESET PENCARIAN
   const handleReset = (clearFilters, selectedKeys, confirm, dataIndex, index) => {
     enterLoading(index)
     clearFilters()
@@ -346,7 +281,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
     setState({ searchText: '' })
     handleSearch(selectedKeys, confirm, dataIndex, index)
   }
-  //KOLOM
+
   const columns = [
     {
       title: 'No',
@@ -359,8 +294,8 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
     },
     {
       title: 'Poin Penilaian',
-      dataIndex: ['attributes', 'poinpenilaian'],
-      ...getColumnSearchProps('poinpenilaian', 'Poin Penilaian'),
+      dataIndex:'aspect_name',
+      ...getColumnSearchProps('aspect_name', 'Poin Penilaian'),
     },
     {
       title: 'Status Poin Penilaian',
@@ -382,7 +317,6 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
                 shape="circle"
                 style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
                 onClick={() => {
-                  // showModalEdit(record)
                   getPoinById(record)
                   console.log(record.id)
                   showModalEdit(record)
@@ -391,40 +325,12 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
                 <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
               </Button>
             </Col>
-            {/* <Col span={12} style={{ textAlign: 'center' }}>
-              <Button
-                id="button-trash"
-                htmlType="submit"
-                shape="circle"
-                loading={loadings[`delete-${record.id}`]}
-                style={{ backgroundColor: '#e9033d', borderColor: '#e9033d' }}
-                onClick={() => {
-                  showModalDelete(record, `delete-${record.id}`)
-                }}
-              >
-                <FontAwesomeIcon icon={faTrashCan} style={{ color: 'black' }} />
-              </Button>
-            </Col> */}
           </Row>
         </>
       ),
     },
   ]
 
-  const options = [
-    {
-      label: 'Active',
-      value: 'active',
-    },
-    {
-      label: 'Non Active',
-      value: 'non active',
-    },
-    {
-      label: 'Disabled',
-      value: 'disabled',
-    },
-  ]
 
   return isLoading ? (
     <Spin tip="Loading" size="large">
@@ -535,6 +441,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
         onCancel={handleCancelEdit}
         width={600}
         zIndex={9999999}
+        destroyOnClose
         footer={[
           <Button key="back" onClick={handleCancelEdit}>
             Batal
@@ -590,49 +497,6 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
         </Form>
       </Modal>
 
-      {/* <Modal title="Ubah Data Poin Penilaian Self Assessment"
-        visible={isModaleditVisible}
-        onOk={form1.submit}
-        onCancel={handleCancelEdit}
-        width={600}
-        zIndex={9999999}
-        footer={[
-          <Button key="back" onClick={handleCancelEdit}>
-            Batal
-          </Button>,
-          <Button loading={loadings[1]} key="submit" type="primary" onClick={form1.submit}>
-            Simpan
-          </Button>]}>
-        <Form
-          form={form1}
-          name="basic"
-          wrapperCol={{ span: 24 }}
-          onFinish={() => handleOkEdit(1)}
-          autoComplete="off"
-          fields={[
-            {
-              name: ["poinPenilaian"],
-              value: 
-            },
-            {
-              name : ["poinStatus"],
-              value : choose.id
-            }
-          ]}
-        >
-          <b>Nama Poin Penilaian<span style={{ color: "red" }}> *</span></b>
-          <Form.Item
-            name="poinPenilaian"
-            rules={[{ required: true, message: 'Nama poin penilaian tidak boleh kosong!' }]}
-          >
-            <Input onChange={e => {
-              setChoose(pre => {
-                return { ...pre, 'attributes':{'poinPenilaian': e.target.value} }
-              })
-            }} value={choose.id} />
-          </Form.Item>
-        </Form>
-      </Modal> */}
     </>
   )
 }
