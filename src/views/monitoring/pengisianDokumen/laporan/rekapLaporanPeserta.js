@@ -48,7 +48,6 @@ const RekapLaporanPeserta = () => {
   const [dataLaporanPeserta, setDataLaporanPeserta] = useState([])
   let rolePengguna = localStorage.id_role
   let history = useHistory()
-  const { id } = useParams()
   const [loadings, setLoadings] = useState([])
   const [statusTerlambat, isStatusTerlambat] = useState(false)
   const [statusBelumDiNilai, isStatusBelumDinilai] = useState(false)
@@ -67,23 +66,25 @@ const RekapLaporanPeserta = () => {
           ref={(node) => {
             searchInput = node
           }}
-          placeholder={`Search ${name}`}
+          placeholder={`Cari berdasarkan ${name}`}
           value={selectedKeys[0]}
           onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{ width: 188, marginBottom: 8, display: 'block' }}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex, `cari`)}
+          style={{ marginBottom: 8, display: 'block' }}
         />
         <Space>
           <Button
             type="primary"
-            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex, `cari`)}
             icon={<SearchOutlined />}
             size="small"
+            loading={loadings[`cari`]}
             style={{ width: 90 }}
           >
-            Search
+            Cari
           </Button>
           <Button
+            loading={loadings[99]}
             onClick={() => handleReset(clearFilters, '', confirm, dataIndex, 99)}
             size="small"
             style={{ width: 90 }}
@@ -96,26 +97,26 @@ const RekapLaporanPeserta = () => {
     filterIcon: (filtered) => (
       <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
     ),
-    onFilter: (value, record) => {
-      return get(record, dataIndex).toString().toLowerCase().includes(value.toLowerCase())
-    },
-    onFilterDropdownVisibleChange: (visible) => {
+    onFilter: (value, record) =>
+      record[dataIndex]
+        ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase())
+        : '',
+    onFilterDropdownOpenChange: (visible) => {
       if (visible) {
-        setTimeout(() => searchInput.select())
+        setTimeout(() => searchInput.select(), 100)
       }
     },
-    render: (text) => {
-      return isequal(state.searchedColumn, dataIndex) ? (
+    render: (text) =>
+      state.searchedColumn === dataIndex ? (
         <Highlighter
           highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
           searchWords={[state.searchText]}
           autoEscape
-          textToHighlight={text.toString()}
+          textToHighlight={text ? text.toString() : ''}
         />
       ) : (
         text
-      )
-    },
+      ),
   })
 
   const handleSearch = (selectedKeys, confirm, dataIndex, index) => {
@@ -146,15 +147,19 @@ const RekapLaporanPeserta = () => {
       return newLoadings
     })
   }
+
   const refreshData = async (index) => {
-    var PESERTA
-    rolePengguna !== '1' ? (PESERTA = idPeserta.id) : (PESERTA = idPengguna)
+    let NIM_PESERTA
+    if (rolePengguna !== '1') {
+      NIM_PESERTA = parseInt(idPeserta.id)
+    } else {
+      NIM_PESERTA = parseInt(idPengguna)
+    }
     await axios
-      .get(`http://localhost:1337/api/laporans?populate=*&filters[peserta][username]=${PESERTA}`)
+      .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get-all/${NIM_PESERTA}`)
       .then((res) => {
         console.log(res.data.data)
         setDataLaporanPeserta(res.data.data)
-        // console.log(result.data.data)
         setIsLoading(false)
         setLoadings((prevLoadings) => {
           const newLoadings = [...prevLoadings]
@@ -165,15 +170,18 @@ const RekapLaporanPeserta = () => {
   }
 
   useEffect(() => {
-    // console.log('idpeserta ==> ', idPeserta.id)
+    async function getInformasiDataPeserta() {}
 
     async function getLaporanPeserta(record, index) {
-      var PESERTA
-      rolePengguna !== '1' ? (PESERTA = idPeserta.id) : (PESERTA = idPengguna)
-      enterLoading(index)
+      let NIM_PESERTA
+      if (rolePengguna !== '1') {
+        NIM_PESERTA = parseInt(idPeserta.id)
+      } else {
+        NIM_PESERTA = parseInt(idPengguna)
+      }
 
       await axios
-        .get(`http://localhost:1337/api/laporans?populate=*&filters[peserta][username]=${PESERTA}`)
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get-all/${NIM_PESERTA}`)
         .then((res) => {
           console.log(res.data.data)
           setDataLaporanPeserta(res.data.data)
@@ -197,9 +205,9 @@ const RekapLaporanPeserta = () => {
     getLaporanPeserta()
   }, [history])
 
-  const actionLihatDetailLaporanPeserta = (idLogbook) => {
-    history.push(`/rekapDokumenPeserta/logbookPeserta/${idPeserta.id}/detail/${idLogbook}`)
-  }
+  // const actionLihatDetailLaporanPeserta = (idLogbook) => {
+  //   history.push(`/rekapDokumenPeserta/logbookPeserta/${idPeserta.id}/detail/${idLogbook}`)
+  // }
 
   const actionPenilaianFormPembimbingJurusan = (idLogbook) => {
     history.push(`/rekapDokumenPeserta/laporan/${idPeserta.id}/nilai/${idLogbook}`)
@@ -310,37 +318,37 @@ const RekapLaporanPeserta = () => {
     },
     {
       title: 'Tanggal Pengumpulan',
-      dataIndex: ['attributes', 'tanggalpengumpulan'],
+      dataIndex: 'upload_date',
       width: '10%',
-      ...getColumnSearchProps(['attributes', 'tanggalpengumpulan'], 'Tanggal Pengumpulan'),
+      ...getColumnSearchProps('upload_date', 'Tanggal Pengumpulan'),
     },
-    {
-      title: 'Deadline Pengumpulan',
-      dataIndex: ['attributes', 'deadlinen'],
-      width: '10%',
-      ...getColumnSearchProps(['attributes', 'deadlinen'], 'Deadline'),
-    },
-    {
-      title: 'Status',
-      width: '10%',
-      dataIndex: ['attributes', 'status'],
-      ...getColumnSearchProps(['attributes', 'status'], 'Status'),
-      render: (text, record) => {
-        var color = ''
-        if (record.attributes.status === 'terlambat') {
-          color = 'volcano'
-        } else if (record.attributes.status === 'tepat waktu') {
-          color = 'green'
-        }
+    // {
+    //   title: 'Deadline Pengumpulan',
+    //   dataIndex: ['attributes', 'deadlinen'],
+    //   width: '10%',
+    //   ...getColumnSearchProps(['attributes', 'deadlinen'], 'Deadline'),
+    // },
+    // {
+    //   title: 'Status',
+    //   width: '10%',
+    //   dataIndex: ['attributes', 'status'],
+    //   ...getColumnSearchProps(['attributes', 'status'], 'Status'),
+    //   render: (text, record) => {
+    //     var color = ''
+    //     if (record.attributes.status === 'terlambat') {
+    //       color = 'volcano'
+    //     } else if (record.attributes.status === 'tepat waktu') {
+    //       color = 'green'
+    //     }
 
-        return <Tag color={color}>{record.attributes.status}</Tag>
-      },
-    },
+    //     return <Tag color={color}>{record.attributes.status}</Tag>
+    //   },
+    // },
     {
       title: 'Link Drive',
-      dataIndex: ['attributes', 'link_drive'],
+      dataIndex: 'uri',
       width: '10%',
-      ...getColumnSearchProps(['attributes', 'link_drive'], 'Link Drive'),
+      ...getColumnSearchProps('uri', 'Link Drive'),
     },
 
     {
@@ -360,7 +368,7 @@ const RekapLaporanPeserta = () => {
             </Col>
             <Col span={12} style={{ textAlign: 'center' }}>
               <Popover content={<div>Salin Link Gdrive</div>}>
-                <Button type="primary" onClick={() => info(record.attributes.link_drive)}>
+                <Button type="primary" onClick={() => info(record.uri)}>
                   Copy
                 </Button>
               </Popover>
@@ -446,7 +454,7 @@ const RekapLaporanPeserta = () => {
             </CRow>
           )}
 
-          {rolePengguna !== '5' && rolePengguna !== '1' && (
+          {/* {rolePengguna !== '5' && rolePengguna !== '1' && (
             <CRow>
               <CCol sm={12}>
                 <div className="spacebottom"></div>
@@ -461,7 +469,7 @@ const RekapLaporanPeserta = () => {
                 />
               </CCol>
             </CRow>
-          )}
+          )}  */}
         </CCardBody>
       </CCard>
     </>
