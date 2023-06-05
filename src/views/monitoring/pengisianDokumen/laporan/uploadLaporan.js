@@ -36,7 +36,7 @@ export default function UploadLaporan() {
   const [idPeserta, setIdPeserta] = useState()
   const [isiDetailLaporan, setIsiDetailLaporan] = useState([])
   const params = useParams()
-  const idLaporan = params.id
+  const ID_LAPORAN_PESERTA = params.id
 
   function onFileChange(event) {
     console.log(event)
@@ -97,24 +97,17 @@ export default function UploadLaporan() {
   }
 
   const onSubmit = async (values) => {
-    console.log('link', linkGdrive)
-    console.log('peserta', NIM_PESERTA)
     let todayDate = new Date()
     await axios
-      .put(`http://localhost:1337/api/laporans/${idLaporan}`, {
-        data: {
-          link_drive: linkGdrive,
-          status: 'tepat waktu',
-          tanggalpengumpulan: formatDate(todayDate.toDateString()),
-          peserta: {
-            connect: [idPeserta],
-          },
-        },
+      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/update`, {
+        'id' : isiDetailLaporan.id,
+        'phase' : isiDetailLaporan.fase,
+        'uri' : linkGdrive
       })
       .then((res) => {
         console.log('hasil', res.data.data)
         notification.success({
-          message: 'Submit data berhasil',
+          message: 'Submit data pembaruan link berhasil',
         })
 
         history.push(`/laporan`)
@@ -129,7 +122,7 @@ export default function UploadLaporan() {
     getIdPeserta()
 
     const getDataLaporanPeserta = async () => {
-      await axios.get(`http://localhost:1337/api/laporans/${idLaporan}?populate=*`).then((res) => {
+      await axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get/${ID_LAPORAN_PESERTA}`).then((res) => {
         console.log('RES', res.data.data)
         const convertDate = (date) => {
           let temp_date_split = date.split('-')
@@ -160,9 +153,10 @@ export default function UploadLaporan() {
      
         waltemp = {
             id: temp.id,
-            link_drive: temp.attributes.link_drive,
-            tanggal_deadline: convertDate(temp.attributes.deadlinen),
-            tanggal_pengumpulan: convertDate(temp.attributes.tanggalpengumpulan),
+            link_drive: temp.uri,
+            // tanggal_deadline: convertDate(temp.attributes.deadlinen),
+            fase : temp.phase,
+            tanggal_pengumpulan: convertDate(temp.upload_date),
           }
         
       
@@ -270,7 +264,7 @@ export default function UploadLaporan() {
               name="linkGdrive"
               rules={[{ required: true, message: 'Isi link gdrive terlebih dahulu' }]}
             >
-              <Input type="url" name='linkdrive'  onChange={(e) => setLinkGdrive(e.target.value)} />
+              <Input type="url"  onChange={(e) => setLinkGdrive(e.target.value)} />
             </Form.Item>
 
             <Button type="primary" htmlType="submit">

@@ -158,7 +158,6 @@ const RekapLaporanPeserta = () => {
     await axios
       .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get-all/${NIM_PESERTA}`)
       .then((res) => {
-        console.log(res.data.data)
         setDataLaporanPeserta(res.data.data)
         setIsLoading(false)
         setLoadings((prevLoadings) => {
@@ -183,7 +182,6 @@ const RekapLaporanPeserta = () => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get-all/${NIM_PESERTA}`)
         .then((res) => {
-          console.log(res.data.data)
           setDataLaporanPeserta(res.data.data)
         })
         .catch(function (error) {
@@ -205,10 +203,6 @@ const RekapLaporanPeserta = () => {
     getLaporanPeserta()
   }, [history])
 
-  // const actionLihatDetailLaporanPeserta = (idLogbook) => {
-  //   history.push(`/rekapDokumenPeserta/logbookPeserta/${idPeserta.id}/detail/${idLogbook}`)
-  // }
-
   const actionPenilaianFormPembimbingJurusan = (idLogbook) => {
     history.push(`/rekapDokumenPeserta/laporan/${idPeserta.id}/nilai/${idLogbook}`)
   }
@@ -229,37 +223,37 @@ const RekapLaporanPeserta = () => {
     },
     {
       title: 'Tanggal Pengumpulan',
-      width: '7%',
-      dataIndex: ['attributes', 'tanggalpengumpulan'],
-      ...getColumnSearchProps(['attributes', 'tanggalpengumpulan'], 'Tanggal Pengumpulan'),
+      dataIndex: 'upload_date',
+      width: '10%',
+      ...getColumnSearchProps('upload_date', 'Tanggal Pengumpulan'),
     },
-    {
-      title: 'Deadline Pengumpulan',
-      dataIndex: ['attributes', 'deadlinen'],
-      width: '7%',
-      ...getColumnSearchProps(['attributes', 'deadlinen'], 'Deadline'),
-    },
-    {
-      title: 'Status',
-      dataIndex: ['attributes', 'status'],
-      width: '7%',
-      ...getColumnSearchProps(['attributes', 'status'], 'Status'),
-      render: (text, record) => {
-        var color = ''
-        if (record.attributes.status === 'terlambat') {
-          color = 'volcano'
-        } else if (record.attributes.status === 'tepat waktu') {
-          color = 'green'
-        }
+    // {
+    //   title: 'Deadline Pengumpulan',
+    //   dataIndex: ['attributes', 'deadlinen'],
+    //   width: '7%',
+    //   ...getColumnSearchProps(['attributes', 'deadlinen'], 'Deadline'),
+    // },
+    // {
+    //   title: 'Status',
+    //   dataIndex: ['attributes', 'status'],
+    //   width: '7%',
+    //   ...getColumnSearchProps(['attributes', 'status'], 'Status'),
+    //   render: (text, record) => {
+    //     var color = ''
+    //     if (record.attributes.status === 'terlambat') {
+    //       color = 'volcano'
+    //     } else if (record.attributes.status === 'tepat waktu') {
+    //       color = 'green'
+    //     }
 
-        return <Tag color={color}>{record.attributes.status}</Tag>
-      },
-    },
+    //     return <Tag color={color}>{record.attributes.status}</Tag>
+    //   },
+    // },
     {
       title: 'Link Drive',
-      dataIndex: ['attributes', 'link_drive'],
-      width: '20%',
-      ...getColumnSearchProps(['attributes', 'link_drive'], 'Link Drive'),
+      dataIndex: 'uri',
+      width: '10%',
+      ...getColumnSearchProps('uri', 'Link Drive'),
     },
     {
       title: 'Aksi',
@@ -290,7 +284,7 @@ const RekapLaporanPeserta = () => {
               </Col>
               <Col span={12} style={{ textAlign: 'center' }}>
                 <Popover content={<div>Salin Link Gdrive</div>}>
-                  <Button type="primary" onClick={() => info(record.attributes.link_drive)}>
+                  <Button type="primary" onClick={() => info(record.uri)}>
                     Copy
                   </Button>
                 </Popover>
