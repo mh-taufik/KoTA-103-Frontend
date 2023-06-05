@@ -155,10 +155,46 @@ const RekapLaporanPeserta = () => {
     } else {
       NIM_PESERTA = parseInt(idPengguna)
     }
+
+    const convertDate = (date) => {
+      let temp_date_split = date.split('-')
+      const month = [
+        'Januari',
+        'Februari',
+        'Maret',
+        'April',
+        'Mei',
+        'Juni',
+        'Juli',
+        'Agustus',
+        'September',
+        'Oktober',
+        'November',
+        'Desember',
+      ]
+      let date_month = temp_date_split[1]
+      let month_of_date = month[parseInt(date_month) - 1]
+      // console.log(month_of_date,'isi date monts', month_of_date)
+      return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
+    }
+    
     await axios
       .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get-all/${NIM_PESERTA}`)
       .then((res) => {
-        setDataLaporanPeserta(res.data.data)
+        let temp = res.data.data
+        let temp_after = []
+        let funcGetTempAfter = function(obj){
+          for(var i in obj){
+            temp_after.push({
+              id : obj[i].id,
+              uri : obj[i].uri,
+              phase : obj[i].phase,
+              upload_date : convertDate(obj[i].upload_date)
+            })
+          }
+        }
+        funcGetTempAfter(temp)
+        setDataLaporanPeserta(temp_after)
         setIsLoading(false)
         setLoadings((prevLoadings) => {
           const newLoadings = [...prevLoadings]
@@ -179,10 +215,46 @@ const RekapLaporanPeserta = () => {
         NIM_PESERTA = parseInt(idPengguna)
       }
 
+      const convertDate = (date) => {
+        let temp_date_split = date.split('-')
+        const month = [
+          'Januari',
+          'Februari',
+          'Maret',
+          'April',
+          'Mei',
+          'Juni',
+          'Juli',
+          'Agustus',
+          'September',
+          'Oktober',
+          'November',
+          'Desember',
+        ]
+        let date_month = temp_date_split[1]
+        let month_of_date = month[parseInt(date_month) - 1]
+        // console.log(month_of_date,'isi date monts', month_of_date)
+        return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
+      }
+
+
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get-all/${NIM_PESERTA}`)
         .then((res) => {
-          setDataLaporanPeserta(res.data.data)
+          let temp = res.data.data
+          let temp_after = []
+          let funcGetTempAfter = function(obj){
+            for(var i in obj){
+              temp_after.push({
+                id : obj[i].id,
+                uri : obj[i].uri,
+                phase : obj[i].phase,
+                upload_date : convertDate(obj[i].upload_date)
+              })
+            }
+          }
+          funcGetTempAfter(temp)
+          setDataLaporanPeserta(temp_after)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -448,7 +520,7 @@ const RekapLaporanPeserta = () => {
             </CRow>
           )}
 
-          {/* {rolePengguna !== '5' && rolePengguna !== '1' && (
+          {rolePengguna !== '1' && (
             <CRow>
               <CCol sm={12}>
                 <div className="spacebottom"></div>
@@ -463,7 +535,7 @@ const RekapLaporanPeserta = () => {
                 />
               </CCol>
             </CRow>
-          )}  */}
+          )} 
         </CCardBody>
       </CCard>
     </>

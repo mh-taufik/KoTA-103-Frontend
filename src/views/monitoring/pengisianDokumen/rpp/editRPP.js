@@ -34,6 +34,8 @@ import { faEye, faPencil } from '@fortawesome/free-solid-svg-icons'
 
 const { TextArea } = Input
 const EditRPP = () => {
+const [, updateState] = React.useState();
+const forceUpdate = React.useCallback(() => updateState({}), []);
   const dateFormat = 'YYYY-MM-DD'
   let params = useParams()
   let PESERTA_ID_RPP_EDIT = params.id
@@ -71,6 +73,7 @@ const EditRPP = () => {
   const [dataCapaianMingguan, setDataCapaianMingguan] = useState([])
   const [dataDeliverables, setDataDeliverables] = useState([])
   const [dataJadwalPenyelesaianKeseluruhan, setDataJadwalPenyelesaianKeseluruhan] = useState([])
+  const [isSuccessInputEdit, setIsSuccessInputEdit] = useState([])
 
   /**LIMIT PANGURANGAN HARI DALAM MINGGU */
   const [limitMinusDay, setLimitMinusDay] = useState()
@@ -155,11 +158,19 @@ const EditRPP = () => {
   }
 
   /**HANDLE MODAL AND DATA EDIT RENCANA CAPAIAN MINGGUAN */
-  const [isModalRencanaCapaianMingguanEditOpen, setIsModalRencanaCapaianMingguanEditOpen] = useState(false)
+  const [isModalRencanaCapaianMingguanEditOpen, setIsModalRencanaCapaianMingguanEditOpen] =
+    useState(false)
   const [dataRencanaCapaianMingguanEdit, setDataRencanaCapaianMingguanEdit] = useState([])
-  const [dataRencanaCapaianMingguanEditRencana, setDataRencanaCapaianMingguanEditRencana] = useState()
-  const [dataRencanaCapaianMingguanEditTanggalMulai, setDataRencanaCapaianMingguanEditTanggalMulai] = useState()
-  const [dataRencanaCapaianMingguanEditTanggalBerakhir, setDataRencanaCapaianMingguanEditTanggalBerakhir] = useState()
+  const [dataRencanaCapaianMingguanEditRencana, setDataRencanaCapaianMingguanEditRencana] =
+    useState()
+  const [
+    dataRencanaCapaianMingguanEditTanggalMulai,
+    setDataRencanaCapaianMingguanEditTanggalMulai,
+  ] = useState()
+  const [
+    dataRencanaCapaianMingguanEditTanggalBerakhir,
+    setDataRencanaCapaianMingguanEditTanggalBerakhir,
+  ] = useState()
 
   /** HANDLE MODAL EDIT RENCANA CAPAIAN MINGGUAN*/
   const showModalRencanaCapaianMingguanEdit = (data) => {
@@ -175,36 +186,42 @@ const EditRPP = () => {
   }
 
   /** PUT DATA RENCANA CAPAIAN MINGGUAN */
-  const putDataRencanaCapaianMingguanEdit = async()=>{
-    await axios.put(`http://localhost:1337/api/rencanacapaianmingguans/${dataRencanaCapaianMingguanEdit.id}`,{
-      'data':{
-        'rencanacapaian' : dataRencanaCapaianMingguanEditRencana,
-        'tanggalmulai' : dataRencanaCapaianMingguanEditTanggalMulai,
-        'tanggalberakhir' : dataRencanaCapaianMingguanEditTanggalBerakhir
-      }
-    }).then((res)=>{
-      console.log(res)
-      console.log(res.data.data)
-      setIsModalRencanaCapaianMingguanEditOpen(false)
-      notification.success({message:'Data Rencana Capaian Mingguan Berhasil Diubah'})
-      
-    })
+  const putDataRencanaCapaianMingguanEdit = async () => {
+    await axios
+      .put(
+        `http://localhost:1337/api/rencanacapaianmingguans/${dataRencanaCapaianMingguanEdit.id}`,
+        {
+          data: {
+            rencanacapaian: dataRencanaCapaianMingguanEditRencana,
+            tanggalmulai: dataRencanaCapaianMingguanEditTanggalMulai,
+            tanggalberakhir: dataRencanaCapaianMingguanEditTanggalBerakhir,
+          },
+        },
+      )
+      .then((res) => {
+        console.log(res)
+        console.log(res.data.data)
+        setIsModalRencanaCapaianMingguanEditOpen(false)
+        notification.success({ message: 'Data Rencana Capaian Mingguan Berhasil Diubah' })
+      })
 
     refreshDataRPP()
-
   }
 
-    /**HANDLE MODAL AND DATA EDIT JADWAL PENYELESAIAN */
-    const [isModalJadwalPenyelesaianEditOpen, setIsModalJadwalPenyelesaianEditOpen] = useState(false)
-    const [dataJadwalPenyelesaianEdit, setDataJadwalPenyelesaianEdit] = useState([])
-    const [handleStatusStartWeekDatePicker, setHandleStatusStartWeekDatePicker] = useState()
-    const [dataJadwalPenyelesaianEditButirPekerjaan, setDataJadwalPenyelesaianEditButirPekerjaan] = useState()
-    const [dataJadwalPenyelesaianEditJenisPekerjaan, setDataJadwalPenyelesaianEditJenisPekerjaan] = useState()
-    const [dataJadwalPenyelesaianEditTanggalMulai, setDataJadwalPenyelesaianEditTanggalMulai] = useState()
-    const [dataJadwalPenyelesaianEditTanggalSelesai, setDataJadwalPenyelesaianEditTanggalSelesai] = useState()
-    
+  /**HANDLE MODAL AND DATA EDIT JADWAL PENYELESAIAN */
+  const [isModalJadwalPenyelesaianEditOpen, setIsModalJadwalPenyelesaianEditOpen] = useState(false)
+  const [dataJadwalPenyelesaianEdit, setDataJadwalPenyelesaianEdit] = useState([])
+  const [handleStatusStartWeekDatePicker, setHandleStatusStartWeekDatePicker] = useState()
+  const [dataJadwalPenyelesaianEditButirPekerjaan, setDataJadwalPenyelesaianEditButirPekerjaan] =
+    useState()
+  const [dataJadwalPenyelesaianEditJenisPekerjaan, setDataJadwalPenyelesaianEditJenisPekerjaan] =
+    useState()
+  const [dataJadwalPenyelesaianEditTanggalMulai, setDataJadwalPenyelesaianEditTanggalMulai] =
+    useState()
+  const [dataJadwalPenyelesaianEditTanggalSelesai, setDataJadwalPenyelesaianEditTanggalSelesai] =
+    useState()
 
-    /** HANDLE MODAL EDIT RENCANA CAPAIAN MINGGUAN*/
+  /** HANDLE MODAL EDIT RENCANA CAPAIAN MINGGUAN*/
   const showModalJadwalPenyelesaianEdit = (data, statusDatePickerStart) => {
     setDataJadwalPenyelesaianEditButirPekerjaan(undefined)
     setDataJadwalPenyelesaianEditJenisPekerjaan(undefined)
@@ -219,30 +236,84 @@ const EditRPP = () => {
     setIsModalJadwalPenyelesaianEditOpen(false)
   }
 
-    /** PUT DATA JADWAL PENYELESAIAN */
-    const putDataJadwalPenyelesaianEdit = async()=>{
-      await axios.put(`http://localhost:1337/api/jadwalpenyelesaiankeseluruhans/${dataJadwalPenyelesaianEdit.id}`,{
-        'data':{
-        'butirpekerjaan' : dataJadwalPenyelesaianEditButirPekerjaan,
-        'jenispekerjaan' : dataJadwalPenyelesaianEditJenisPekerjaan,
-        'tanggalmulai' : dataJadwalPenyelesaianEditTanggalMulai,
-        'tanggalselesai' : dataJadwalPenyelesaianEditTanggalSelesai
+  /** ADD DATA TO RPP */
+  /** HANDLE ADD DELIVERABLES */
+  const postDataDeliverablesAdditional = async(data) =>{
+    let id_rpp = parseInt(PESERTA_ID_RPP_EDIT)
+    console.log('data', data)
+    console.log('id_rpp', id_rpp)
+    for(var i in data){
+      var iterator = 1
+      await axios.post(`http://localhost:1337/api/deliverables`,{
+        'data' : {
+          'deliverables' : data[i].deliverables,
+          'duedate' : data[i].date,
+          'rpp' : {
+            'connect' : id_rpp
+          }
         }
       }).then((res)=>{
+        setIsSuccessInputEdit(true)
+        console.log(res)
+      })
+      iterator++
+      if(iterator === data.length){
+        notification.success({message:'Data Milestones Berhasil Ditambahkan!!!'})
+      }
+      
+    }
+    refreshDataRPP()
+    setNoOfRowsMilestones(0)
+    setMilestones(undefined)
+    forceUpdate()
+
+   
+  }
+
+  /** HANDLE ADD MILESTONES */
+  const postDataMilestonesAdditional = async(data) =>{
+    for(var i in data){
+      await axios.post(`http://localhost:1337/api/milestones`,{
+        'data' : {
+          'deskripsi' : data[i].deskripsi,
+          'tanggalmulai' : data[i].tanggalmulai,
+          'tanggalselesai' : data[i].tanggalselesai,
+          'rpp' : {
+            'connect' : [parseInt( PESERTA_ID_RPP_EDIT)]
+        }
+      }
+      }).then((res)=>{
+        setIsSuccessInputEdit(true)
+        console.log(res)
+      })
+    }
+    refreshDataRPP()
+  }
+
+
+  /** PUT DATA JADWAL PENYELESAIAN */
+  const putDataJadwalPenyelesaianEdit = async () => {
+    await axios
+      .put(
+        `http://localhost:1337/api/jadwalpenyelesaiankeseluruhans/${dataJadwalPenyelesaianEdit.id}`,
+        {
+          data: {
+            butirpekerjaan: dataJadwalPenyelesaianEditButirPekerjaan,
+            jenispekerjaan: dataJadwalPenyelesaianEditJenisPekerjaan,
+            tanggalmulai: dataJadwalPenyelesaianEditTanggalMulai,
+            tanggalselesai: dataJadwalPenyelesaianEditTanggalSelesai,
+          },
+        },
+      )
+      .then((res) => {
         console.log(res)
         console.log(res.data.data)
         setIsModalJadwalPenyelesaianEditOpen(false)
-        notification.success({message:'Data Jadwal Penyelesaian Keseluruhan Berhasil Diubah'})
-        
+        notification.success({ message: 'Data Jadwal Penyelesaian Keseluruhan Berhasil Diubah' })
       })
-  
-      refreshDataRPP()
-  
-    }
 
-
-
-
+    refreshDataRPP()
+  }
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages)
@@ -551,20 +622,17 @@ const EditRPP = () => {
   /** FUNCTIONAL */
   /**get data date berdasarkan minggu dalam tahun */
 
-    function formatDate(date) {
-      var d = new Date(date),
-          month = '' + (d.getMonth() + 1),
-          day = '' + d.getDate(),
-          year = d.getFullYear();
+  function formatDate(date) {
+    var d = new Date(date),
+      month = '' + (d.getMonth() + 1),
+      day = '' + d.getDate(),
+      year = d.getFullYear()
 
-      if (month.length < 2) 
-          month = '0' + month;
-      if (day.length < 2) 
-          day = '0' + day;
+    if (month.length < 2) month = '0' + month
+    if (day.length < 2) day = '0' + day
 
-      return [year, month, day].join('-');
+    return [year, month, day].join('-')
   }
-
 
   function getDateOfISOWeek(w, y) {
     var simple = new Date(y, 0, 1 + (w - 1) * 7)
@@ -578,8 +646,6 @@ const EditRPP = () => {
     return formatDate(ISOweekStart.toDateString())
   }
 
-
-
   function getEndDateOfWeek(w, y) {
     var simple = new Date(y, 0, 1 + (w - 1) * 7)
     var dow = simple.getDay()
@@ -592,12 +658,9 @@ const EditRPP = () => {
       ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay())
     }
 
-    ISOweekStart.setDate(ISOweekStart.getDate()+4)
+    ISOweekStart.setDate(ISOweekStart.getDate() + 4)
     return formatDate(ISOweekStart.toDateString())
-
-   
   }
-
 
   /** HANDLE RANGE DATE SAAT MEMILIH  */
   const disabledDate = (current) => {
@@ -606,7 +669,6 @@ const EditRPP = () => {
   }
 
   const getWeekBasedOnDate = (date) => {
-    
     var year = new Date(date.getFullYear(), 0, 1)
     var days = Math.floor((date - year) / (24 * 60 * 60 * 1000))
     var week = Math.ceil((date.getDay() + 1 + days) / 7)
@@ -965,7 +1027,6 @@ const EditRPP = () => {
         }
       },
     },
-
   ]
 
   const columnJadwalPenyelesaianKeseluruhan = [
@@ -1009,9 +1070,9 @@ const EditRPP = () => {
       render: (text, record) => {
         let dateLimit = new Date()
         let minusToGetLimit = new Date().getDay()
-        if(minusToGetLimit === 0){
+        if (minusToGetLimit === 0) {
           setLimitMinusDay(7)
-        }else{
+        } else {
           setLimitMinusDay(minusToGetLimit)
         }
 
@@ -1019,20 +1080,22 @@ const EditRPP = () => {
         dateLimit.setDate(dateLimit.getDate() + (7 - limitMinusDay))
         let recStartDate = new Date(record.tanggalmulai)
         let recFinishDate = new Date(record.tanggalselesai)
-        let weekOnDateFinish = getWeekBasedOnDate(recFinishDate)-1
-        let yearOnDateFinish = record.tanggalselesai.slice(0,4)
-        let limitDateGetMondayDateBasedOnFinishDate = getDateOfISOWeek(weekOnDateFinish,yearOnDateFinish) 
+        let weekOnDateFinish = getWeekBasedOnDate(recFinishDate) - 1
+        let yearOnDateFinish = record.tanggalselesai.slice(0, 4)
+        let limitDateGetMondayDateBasedOnFinishDate = getDateOfISOWeek(
+          weekOnDateFinish,
+          yearOnDateFinish,
+        )
         let monLimit = new Date(limitDateGetMondayDateBasedOnFinishDate)
         let limitDateToEdit = formatDate(dateLimit.toDateString())
         let statusDatePickerStart
 
         // console.log(recDueDate, dateLimit, '---', recDueDate > dateLimit)
- 
 
         if (limitDateGetMondayDateBasedOnFinishDate > limitDateToEdit) {
-          if(record.tanggalmulai > limitDateToEdit){
+          if (record.tanggalmulai > limitDateToEdit) {
             statusDatePickerStart = false //jika belum limit , disable nya di false,(tidak di disable)
-          }else{
+          } else {
             statusDatePickerStart = true
           }
           return (
@@ -1043,15 +1106,14 @@ const EditRPP = () => {
                 onClick={() => {
                   console.log(record)
                   showModalJadwalPenyelesaianEdit(record, statusDatePickerStart)
-              
+
                   console.log(dateLimit)
                   console.log(weekOnDateFinish)
                   console.log(yearOnDateFinish)
                   console.log(limitDateGetMondayDateBasedOnFinishDate)
                   console.log(monLimit)
-          
+
                   // console.log(limitDateGetMondayDateBasedOnFinishDate>limitDateToEdit)
-           
                 }}
                 style={{ backgroundColor: '#fff566', borderColor: '#fff566' }}
               >
@@ -1075,7 +1137,6 @@ const EditRPP = () => {
         }
       },
     },
-    
   ]
 
   return (
@@ -1139,6 +1200,10 @@ const EditRPP = () => {
           Catatan :
           <ul>
             <li>Isi sesuai dengan perencanaan proyek yang diberikan</li>
+            <li>
+              Data dapat ditambahkan dan diedit apabila tanggal tersebut belum memasuki minggu saat
+              ini
+            </li>
           </ul>
         </Box>
         <div className="spacebottom"></div>
@@ -1161,7 +1226,8 @@ const EditRPP = () => {
           autoComplete="off"
           onFinishFailed={onFinishFailed}
         >
-          <div>
+       
+          <div className="spacetop">
             <Row>
               <Col style={{ paddingBottom: 20 }} span={8}>
                 Tanggal Mulai
@@ -1175,14 +1241,18 @@ const EditRPP = () => {
               <Col span={6}>{dataRPP.tanggal_selesai}</Col>
               <Col span={4}>Ubah Tanggal :</Col>
               <Col span={6}>
-                {' '}
                 <DatePicker
                   picker="date"
                   disabledDate={(current) => {
-                    // console.log( current.isAfter(moment()))
+                    if (new Date().getDay() === 0) {
+                      setLimitMinusDay(7)
+                    } else {
+                      setLimitMinusDay(new Date().getDay())
+                    }
+
                     return (
                       moment().add(-1, 'days') >= current ||
-                      moment().add(7 - new Date().getDay(), 'days') >= current
+                      moment().add(7 - limitMinusDay, 'days') >= current
                     )
                   }}
                 />
@@ -1249,7 +1319,19 @@ const EditRPP = () => {
                     </Col>
                     <Col span={8}>
                       <DatePicker
-                        disabledDate={disabledDate}
+                        disabledDate={(current) => {
+                          let minusToGetLimit = new Date().getDay()
+                          if (minusToGetLimit === 0) {
+                            setLimitMinusDay(7)
+                          } else {
+                            setLimitMinusDay(minusToGetLimit)
+                          }
+
+                          return (
+                            moment().add(-1, 'days') >= current ||
+                            moment().add(7 - limitMinusDay, 'days') >= current
+                          )
+                        }}
                         style={{ width: '70%' }}
                         value={deliverables.date}
                         onChange={(date, datestring) =>
@@ -1266,9 +1348,20 @@ const EditRPP = () => {
                 Tambah Data
               </Button>
               {noOfRowsDeliverables !== 0 && (
-                <Button type="primary" danger onClick={() => handleDropRowDeliverables()}>
-                  Hapus Baris Terakhir
-                </Button>
+                <>
+                  <Button type="primary" danger onClick={() => handleDropRowDeliverables()}>
+                    Hapus Baris Terakhir
+                  </Button>
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      console.log(deliverables)
+                      postDataDeliverablesAdditional(deliverables)
+                    }}
+                  >
+                    Simpan Data
+                  </Button>
+                </>
               )}
             </Col>
           </div>
@@ -1325,7 +1418,19 @@ const EditRPP = () => {
                     <Col span={8}>
                       <RangePicker
                         style={{ width: '100%' }}
-                        disabledDate={disabledDate}
+                        disabledDate={(current) => {
+                          let minusToGetLimit = new Date().getDay()
+                          if (minusToGetLimit === 0) {
+                            setLimitMinusDay(7)
+                          } else {
+                            setLimitMinusDay(minusToGetLimit)
+                          }
+
+                          return (
+                            moment().add(-1, 'days') >= current ||
+                            moment().add(7 - limitMinusDay, 'days') >= current
+                          )
+                        }}
                         onChange={(date, datestring) => {
                           handleDataMilestones(index, datestring[0], 'tanggalmulai')
                           handleDataMilestones(index, datestring[1], 'tanggalselesai')
@@ -1341,9 +1446,20 @@ const EditRPP = () => {
                 Tambah Data
               </Button>
               {noOfRowsMilestones !== 0 && (
-                <Button type="primary" danger onClick={() => handleDropRowMilestones()}>
-                  Hapus Baris Terakhir
-                </Button>
+                <>
+                  <Button type="primary" danger onClick={() => handleDropRowMilestones()}>
+                    Hapus Baris Terakhir
+                  </Button>
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      console.log(milestones)
+                      postDataMilestonesAdditional(milestones)
+                    }}
+                  >
+                    Simpan Data
+                  </Button>
+                </>
               )}
             </Col>
           </div>
@@ -1387,20 +1503,54 @@ const EditRPP = () => {
                       </Form.Item>
                     </Col>
                     <Col span={8}>
-                      <DatePicker
-                        picker="week"
-                        placeholder="Minggu Ke"
-                        disabledDate={disabledDate}
-                        size="middle"
+                      <Form.Item
+                        name={`capaian${index}`}
+                        key={index}
                         style={{ width: '100%' }}
-                        onChange={(date, datestring) =>
-                          handleDataRencanaCapaianPerminggu(
-                            index,
-                            getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
-                            'tanggal',
-                          )
-                        }
-                      />
+                        label="Tanggal"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Masukkan Tanggal Rencana Perminggu Terlebih Dahulu  !!!',
+                          },
+                          {
+                            type: 'date',
+                            warningOnly: true,
+                          },
+                        ]}
+                      >
+                        <DatePicker
+                          picker="week"
+                          placeholder="Minggu Ke"
+                          disabledDate={(current) => {
+                            let minusToGetLimit = new Date().getDay()
+                            if (minusToGetLimit === 0) {
+                              setLimitMinusDay(7)
+                            } else {
+                              setLimitMinusDay(minusToGetLimit)
+                            }
+
+                            return (
+                              moment().add(-1, 'days') >= current ||
+                              moment().add(7 - limitMinusDay, 'days') >= current
+                            )
+                          }}
+                          size="middle"
+                          style={{ width: '100%' }}
+                          onChange={(date, datestring) => [
+                            handleDataRencanaCapaianPerminggu(
+                              index,
+                              getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
+                              'tanggalmulai',
+                            ),
+                            handleDataRencanaCapaianPerminggu(
+                              index,
+                              getEndDateOfWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
+                              'tanggalberakhir',
+                            ),
+                          ]}
+                        />
+                      </Form.Item>
                     </Col>
                   </Row>
                 </div>
@@ -1411,13 +1561,24 @@ const EditRPP = () => {
                 Tambah Data
               </Button>
               {noOfRowsCapaianPerminggu !== 0 && (
-                <Button
-                  type="primary"
-                  danger
-                  onClick={() => handleDropRowRencanaCapaianPerminggu()}
-                >
-                  Hapus Baris Terakhir
-                </Button>
+                <>
+                  <Button
+                    type="primary"
+                    danger
+                    onClick={() => handleDropRowRencanaCapaianPerminggu()}
+                  >
+                    Hapus Baris Terakhir
+                  </Button>
+
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      console.log(capaianPerminggu)
+                    }}
+                  >
+                    Simpan Data
+                  </Button>
+                </>
               )}
             </Col>
           </div>
@@ -1487,7 +1648,19 @@ const EditRPP = () => {
                         <RangePicker
                           picker="week"
                           placeholder="Minggu Ke"
-                          disabledDate={disabledDate}
+                          disabledDate={(current) => {
+                            let minusToGetLimit = new Date().getDay()
+                            if (minusToGetLimit === 0) {
+                              setLimitMinusDay(7)
+                            } else {
+                              setLimitMinusDay(minusToGetLimit)
+                            }
+
+                            return (
+                              moment().add(-1, 'days') >= current ||
+                              moment().add(7 - limitMinusDay, 'days') >= current
+                            )
+                          }}
                           size="middle"
                           style={{ width: '100%' }}
                           onChange={(date, datestring) => {
@@ -1501,7 +1674,7 @@ const EditRPP = () => {
                             )
                             handleDataJadwalPenyelesaianKeseluruhan(
                               index,
-                              getDateOfISOWeek(
+                              getEndDateOfWeek(
                                 datestring[1].slice(5, 7),
                                 datestring[1].slice(0, 4),
                               ),
@@ -1520,26 +1693,32 @@ const EditRPP = () => {
                 Tambah Data
               </Button>
               {noOfRowsJadwalPenyelesaianPekerjaanKeseluruhan !== 0 && (
-                <Button
-                  type="primary"
-                  danger
-                  onClick={() => handleDropRowJadwalPenyelesaianKeseluruhan()}
-                >
-                  Hapus Baris Terakhir
-                </Button>
+                <>
+                  <Button
+                    type="primary"
+                    danger
+                    onClick={() => handleDropRowJadwalPenyelesaianKeseluruhan()}
+                  >
+                    Hapus Baris Terakhir
+                  </Button>
+
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      console.log(jadwalPenyelesaianKeseluruhan)
+                    }}
+                  >
+                    Simpan Data
+                  </Button>
+                </>
               )}
             </Col>
           </div>
           <hr />
           <div className="spacebottom"></div>
-
-          {/* <Button type="primary" htmlType="submit" block onClick={tesHandle}>
-            SUBMIT LOOGBOOK
-          </Button> */}
         </Form>
       </div>
 
-      
       {/* MODAL EDIT DELIVERABLES */}
       <Modal
         title="Edit Deliverables"
@@ -1612,9 +1791,9 @@ const EditRPP = () => {
               }}
               disabledDate={(current) => {
                 let minusToGetLimit = new Date().getDay()
-                if(minusToGetLimit === 0){
+                if (minusToGetLimit === 0) {
                   setLimitMinusDay(7)
-                }else{
+                } else {
                   setLimitMinusDay(minusToGetLimit)
                 }
                 return (
@@ -1702,9 +1881,9 @@ const EditRPP = () => {
                 onChange={(date, datestring) => setDataMilestonesEditTanggalMulai(datestring)}
                 disabledDate={(current) => {
                   let minusToGetLimit = new Date().getDay()
-                  if(minusToGetLimit === 0){
+                  if (minusToGetLimit === 0) {
                     setLimitMinusDay(7)
-                  }else{
+                  } else {
                     setLimitMinusDay(minusToGetLimit)
                   }
                   return (
@@ -1737,9 +1916,9 @@ const EditRPP = () => {
                 onChange={(date, datestring) => setDataMilestonesEditTanggalSelesai(datestring)}
                 disabledDate={(current) => {
                   let minusToGetLimit = new Date().getDay()
-                  if(minusToGetLimit === 0){
+                  if (minusToGetLimit === 0) {
                     setLimitMinusDay(7)
-                  }else{
+                  } else {
                     setLimitMinusDay(minusToGetLimit)
                   }
                   return (
@@ -1810,7 +1989,10 @@ const EditRPP = () => {
           </Form.Item>
 
           <br />
-          <b>{dataRencanaCapaianMingguanEdit.tanggalmulai} &nbsp;s/d&nbsp; {dataRencanaCapaianMingguanEdit.tanggalberakhir}</b>
+          <b>
+            {dataRencanaCapaianMingguanEdit.tanggalmulai} &nbsp;s/d&nbsp;{' '}
+            {dataRencanaCapaianMingguanEdit.tanggalberakhir}
+          </b>
           <Form.Item
             label="Minggu Rencana Capaian"
             rules={[
@@ -1824,36 +2006,39 @@ const EditRPP = () => {
               },
             ]}
           >
-         <Popover content={<div>Klik untuk mengubah, jika tidak boleh dikosongkan saja</div>}>
-         <DatePicker
-              picker="week"
-              onChange={(date, datestring) => {
-                console.log(datestring)
-                setDataRencanaCapaianMingguanEditTanggalMulai(getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4)))
-                setDataRencanaCapaianMingguanEditTanggalBerakhir(getEndDateOfWeek(datestring.slice(5, 7), datestring.slice(0, 4)))
-              }}
-              disabledDate={(current) => {
-                let minusToGetLimit = new Date().getDay()
-                if(minusToGetLimit === 0){
-                  setLimitMinusDay(7)
-                }else{
-                  setLimitMinusDay(minusToGetLimit)
-                }
+            <Popover content={<div>Klik untuk mengubah, jika tidak boleh dikosongkan saja</div>}>
+              <DatePicker
+                picker="week"
+                onChange={(date, datestring) => {
+                  console.log(datestring)
+                  setDataRencanaCapaianMingguanEditTanggalMulai(
+                    getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
+                  )
+                  setDataRencanaCapaianMingguanEditTanggalBerakhir(
+                    getEndDateOfWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
+                  )
+                }}
+                disabledDate={(current) => {
+                  let minusToGetLimit = new Date().getDay()
+                  if (minusToGetLimit === 0) {
+                    setLimitMinusDay(7)
+                  } else {
+                    setLimitMinusDay(minusToGetLimit)
+                  }
 
-                return (
-                  moment().add(-1, 'days') >= current ||
-                  moment().add(7 - limitMinusDay, 'days') >= current
-                )
-              }}
-            />
-         </Popover>
+                  return (
+                    moment().add(-1, 'days') >= current ||
+                    moment().add(7 - limitMinusDay, 'days') >= current
+                  )
+                }}
+              />
+            </Popover>
           </Form.Item>
           <Button type="primary" onClick={putDataRencanaCapaianMingguanEdit}>
             Simpan Perubahan
           </Button>
         </Form>
       </Modal>
-
 
       {/* MODAL JADWAL PENYELESAIAN KESELURUHAN */}
       <Modal
@@ -1883,8 +2068,8 @@ const EditRPP = () => {
               value: dataJadwalPenyelesaianEdit.butirpekerjaan,
             },
             {
-              name:['jenispekerjaan'],
-              value: dataJadwalPenyelesaianEdit.jenispekerjaan
+              name: ['jenispekerjaan'],
+              value: dataJadwalPenyelesaianEdit.jenispekerjaan,
             },
             {
               name: ['tanggalmulai'],
@@ -1922,27 +2107,28 @@ const EditRPP = () => {
             ]}
           >
             <Select
-            defaultValue={dataJadwalPenyelesaianEdit.jenispekerjaan}
-            options={[
-              { value: 'exploration', label: 'exploration' },
-              { value: 'analysis', label: 'analysis' },
-              { value: 'design', label: 'design' },
-              { value: 'implementation', label: 'implementation' },
-              { value: 'testing', label: 'testing' },
-            ]}
-            onChange={(e)=>setDataJadwalPenyelesaianEditJenisPekerjaan(e)}
+              defaultValue={dataJadwalPenyelesaianEdit.jenispekerjaan}
+              options={[
+                { value: 'exploration', label: 'exploration' },
+                { value: 'analysis', label: 'analysis' },
+                { value: 'design', label: 'design' },
+                { value: 'implementation', label: 'implementation' },
+                { value: 'testing', label: 'testing' },
+              ]}
+              onChange={(e) => setDataJadwalPenyelesaianEditJenisPekerjaan(e)}
             />
-            
           </Form.Item>
-          <br/>
+          <br />
 
-             <b>Tanggal : {dataJadwalPenyelesaianEdit.tanggalmulai} &nbsp;s/d&nbsp; {dataJadwalPenyelesaianEdit.tanggalselesai}</b>
+          <b>
+            Tanggal : {dataJadwalPenyelesaianEdit.tanggalmulai} &nbsp;s/d&nbsp;{' '}
+            {dataJadwalPenyelesaianEdit.tanggalselesai}
+          </b>
           <Form.Item
             label="Minggu Mulai"
             rules={[
               {
                 required: true,
-               
               },
               {
                 type: 'date',
@@ -1950,26 +2136,20 @@ const EditRPP = () => {
               },
             ]}
           >
-
-    
-         <DatePicker
-         name='tanggalmulaijadwalpenyelesaian'
+            <DatePicker
+              name="tanggalmulaijadwalpenyelesaian"
               picker="week"
-              onChange={(date, datestring) => 
-              
-                  setDataJadwalPenyelesaianEditTanggalMulai(getDateOfISOWeek(
-                    datestring.slice(5, 7),
-                    datestring.slice(0, 4),
-                  ))
-                 
-                
+              onChange={(date, datestring) =>
+                setDataJadwalPenyelesaianEditTanggalMulai(
+                  getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
+                )
               }
               disabled={handleStatusStartWeekDatePicker}
               disabledDate={(current) => {
                 let minusToGetLimit = new Date().getDay()
-                if(minusToGetLimit === 0){
+                if (minusToGetLimit === 0) {
                   setLimitMinusDay(7)
-                }else{
+                } else {
                   setLimitMinusDay(minusToGetLimit)
                 }
 
@@ -1979,7 +2159,6 @@ const EditRPP = () => {
                 )
               }}
             />
-     
           </Form.Item>
 
           <Form.Item
@@ -1987,7 +2166,6 @@ const EditRPP = () => {
             rules={[
               {
                 required: true,
-               
               },
               {
                 type: 'date',
@@ -1995,24 +2173,19 @@ const EditRPP = () => {
               },
             ]}
           >
-
-    
-         <DatePicker
-         name='tanggalselesaijadwalpenyelesaian'
+            <DatePicker
+              name="tanggalselesaijadwalpenyelesaian"
               picker="week"
-              onChange={(date, datestring) => 
-            
-                  setDataJadwalPenyelesaianEditTanggalSelesai(getEndDateOfWeek(
-                    datestring.slice(5, 7),
-                    datestring.slice(0, 4),
-                  ))
-
+              onChange={(date, datestring) =>
+                setDataJadwalPenyelesaianEditTanggalSelesai(
+                  getEndDateOfWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
+                )
               }
               disabledDate={(current) => {
                 let minusToGetLimit = new Date().getDay()
-                if(minusToGetLimit === 0){
+                if (minusToGetLimit === 0) {
                   setLimitMinusDay(7)
-                }else{
+                } else {
                   setLimitMinusDay(minusToGetLimit)
                 }
 
@@ -2022,14 +2195,12 @@ const EditRPP = () => {
                 )
               }}
             />
-     
           </Form.Item>
-          <Button type="primary" htmlType='submit' onClick={putDataJadwalPenyelesaianEdit} >
+          <Button type="primary" htmlType="submit" onClick={putDataJadwalPenyelesaianEdit}>
             Simpan Perubahan
           </Button>
         </Form>
       </Modal>
-
 
       <FloatButton
         type="primary"

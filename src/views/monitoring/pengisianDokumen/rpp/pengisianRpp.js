@@ -301,7 +301,7 @@ const PengisianRpp = () => {
  
     ISOweekStart = new Date(ISOweekStart)
     return formatDate(ISOweekStart.toDateString())
-    console.log(ISOweekStart)
+    // console.log(ISOweekStart)
   }
 
   function getDateOfEndWeek(w, y) {
@@ -316,7 +316,7 @@ const PengisianRpp = () => {
       ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay())
     }
 
-    ISOweekStart.setDate(ISOweekStart.getDate()+7)
+    ISOweekStart.setDate(ISOweekStart.getDate()+4)
     return formatDate(ISOweekStart.toDateString())
 
    

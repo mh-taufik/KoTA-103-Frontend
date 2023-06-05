@@ -123,8 +123,8 @@ const ReviewLogbook = (props) => {
 
         <div className="container">
           <h3 align="center" className="title-s">
-            {rolePengguna === '1' && <>FORM LOGBOOK</>}
-            LOGBOOK PESERTA
+          
+           FORM LOGBOOK PESERTA
           </h3>
 
           <Form>

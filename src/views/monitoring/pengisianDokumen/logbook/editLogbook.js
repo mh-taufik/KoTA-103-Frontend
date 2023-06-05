@@ -302,6 +302,20 @@ const FormEditLogbook = (props) => {
                 </Form.Group>
               </Col>
             </Row>
+            <Row>
+              <Col>
+                <Form.Group className="mb-3" controlId="keterangan">
+                  <Form.Label>Keterangan</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    placeholder="keterangan"
+                    name="keterangan"
+                    defaultValue={logbookAttributesData.keterangan}
+                    onChange={(e) => setKeterangan(e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
 
             <Button className="form-control btn btn-primary" onClick={submitLogbook}>
               Submit Logbook

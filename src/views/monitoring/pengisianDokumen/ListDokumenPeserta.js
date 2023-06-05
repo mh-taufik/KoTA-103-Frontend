@@ -3,11 +3,6 @@ import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-  faPencil,
-  faLock,
-  faTrashCan,
-  faEdit,
-  faPen,
   faCheck,
 } from '@fortawesome/free-solid-svg-icons'
 import {
@@ -16,11 +11,7 @@ import {
   Button,
   Row,
   Col,
-  Form,
   Input,
-  Modal,
-  notification,
-  Radio,
   Space,
   Spin,
   Popover,
@@ -181,8 +172,6 @@ const ListDokumenPeserta = () => {
   useEffect(() => {
     const getAllListPesertaD3 = async (record, index) => {
       var APIGETPESERTAD3
-      (rolePengguna !== 1)? APIGETPESERTAD3 = 'http://localhost:1337/api/pesertas?filters[prodi]=D3': APIGETPESERTAD3 = 'http://localhost:1337/api/pesertas?filters[prodi]=D4'
-      //GET DATA PESERTA BASED ON ROLE, PANITIA OR PEMBIMBING (tes aja)
 
       await axios
         .get(`${APIGETPESERTAD3}`)
