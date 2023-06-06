@@ -40,90 +40,57 @@ const PengelolaanDeadline = () => {
   let history = useHistory()
   const [dataEdit, setDataEdit] = useState([])
   const [dataDeadlineEdit, setDataDeadlineEdit] = useState([])
-  const [top, setTop] = useState(10);
-  const [bottom, setBottom] = useState(10);
+  const [top, setTop] = useState(10)
+  const [bottom, setBottom] = useState(10)
 
- 
   axios.defaults.withCredentials = true
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const showModal = (data) => {
-    setIsModalOpen(true)
-    setDataEdit(data)
-  }
 
-  const handleOk = () => {
-    setIsModalOpen(false)
-  }
 
-  const handleCancel = () => {
-    setIsModalOpen(false)
-    form.resetFields()
-  }
-  // const onFinish = (values) => {
-  //   console.log(rentangHariEdit, tanggalPengumpulanDimulaiEdit)
-  // }
   const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo)
   }
 
-  // const putDataDeadlineEdited = async () => {
-  //   await axios.put(`http://localhost:1337/api/deadlines`, {
-  //     data: {
-  //       rentanghari: rentangHariEdit,
-  //       tanggalpengumpulandibuka: tanggalPengumpulanDimulaiEdit,
-  //     },
-  //   })
-  // }
-
-  const handleDeadlineEdit = (idDeadline, dataValue, keyData, dataIndex) => {
+  const handleDeadlineEdit = (idDeadline,deadlineName, dataValue, keyData, dataIndex) => {
     if (dataDeadlineEdit[dataIndex]) {
       dataDeadlineEdit[dataIndex][keyData] = dataValue
     } else {
       dataDeadlineEdit[dataIndex] = {
         id_deadline: idDeadline,
+        nama_deadline : deadlineName,
         [keyData]: dataValue,
       }
     }
     setDataDeadlineEdit(dataDeadlineEdit)
   }
 
-
-  async function putDataDeadlineUpdate(){
+  async function putDataDeadlineUpdate() {
+    console.log('DATA UPDATE', dataDeadlineEdit)
     for(var i in dataDeadlineEdit){
-      let a = 0
-      let new_rentang_hari = dataDeadlineEdit[i].rentang_hari
-      let id = dataDeadlineEdit[i].id_deadline
-      let new_tanggal = dataDeadlineEdit[i].tanggal
-      await axios.put(`http://localhost:1337/api/deadlines/${id}`,{
-        'data' : {
-          'rentanghari' : new_rentang_hari,
-          'tanggalpengumpulandibuka' : new_tanggal
-        }
-      }).then((res)=>{
-        console.log(res)
+      await axios.put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/update`,{
+        'day_range' : dataDeadlineEdit[i].rentang_hari,
+        'id':dataDeadlineEdit[i].id_deadline,
+        'finish_assignment_date' :dataDeadlineEdit[i].tanggal_selesai,
+        'start_assignment_date' : dataDeadlineEdit[i].tanggal_dimulai,
+        'name' : dataDeadlineEdit[i].nama_deadline
 
+       
+      }).then((result)=>{
+        console.log(result)
       })
-
-      a++
-      if(parseInt(a) === parseInt(i)){
-        notification.success({
-          message:'Data Deadline Berhasil Diubah'
-        })
-      }
     }
+   
 
-    refreshData()
+    // refreshData()
   }
 
-  const refreshData = async(index) =>{
-    await axios
-    .get('http://localhost:1337/api/deadlines')
-    .then((res) => {
+  const refreshData = async (index) => {
+    await axios.get('http://localhost:1337/api/deadlines').then((res) => {
       console.log('reas', res.data.data)
       let temp = res.data.data
       let temp1 = []
-   
+
       temp1 = {
         logbook_id: temp[0].id,
         rpp_id: temp[1].id,
@@ -156,31 +123,38 @@ const PengelolaanDeadline = () => {
   useEffect(() => {
     async function getDataDeadline() {
       await axios
-        .get('http://localhost:1337/api/deadlines')
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all`)
         .then((res) => {
-          console.log('reas', res.data.data)
+          console.log('res', res.data.data)
           let temp = res.data.data
           let temp1 = []
-       
+
           temp1 = {
             logbook_id: temp[0].id,
             rpp_id: temp[1].id,
             self_assessment_id: temp[2].id,
             laporan_id: temp[3].id,
-            logbook_name: temp[0].attributes.name,
-            rpp_name: temp[1].attributes.name,
-            self_assessment_name: temp[2].attributes.name,
-            laporan_name: temp[3].attributes.name,
-            logbook_rentang_hari: temp[0].attributes.rentanghari,
-            rpp_rentang_hari: temp[1].attributes.rentanghari,
-            self_assessment_rentang_hari: temp[2].attributes.rentanghari,
-            laporan_rentang_hari: temp[3].attributes.rentanghari,
-            logbook_tanggal: temp[0].attributes.tanggalpengumpulandibuka,
-            rpp_tanggal: temp[1].attributes.tanggalpengumpulandibuka,
-            self_assessment_tanggal: temp[2].attributes.tanggalpengumpulandibuka,
-            laporan_tanggal: temp[3].attributes.tanggalpengumpulandibuka,
-          }
 
+            logbook_name: temp[0].name,
+            rpp_name: temp[1].name,
+            self_assessment_name: temp[2].name,
+            laporan_name: temp[3].name,
+
+            logbook_rentang_hari: temp[0].day_range,
+            rpp_rentang_hari: temp[1].day_range,
+            self_assessment_rentang_hari: temp[2].day_range,
+            laporan_rentang_hari: temp[3].day_range,
+
+            logbook_tanggal_mulai: temp[0].start_assignment_date,
+            rpp_tanggal_mulai: temp[1].start_assignment_date,
+            self_assessment_tanggal_mulai: temp[2].start_assignment_date,
+            laporan_tanggal_mulai: temp[3].start_assignment_date,
+
+            logbook_tanggal_selesai: temp[0].finish_assignment_date,
+            rpp_tanggal_selesai: temp[1].finish_assignment_date,
+            self_assessment_tanggal_selesai: temp[2].finish_assignment_date,
+            laporan_tanggal_selesai: temp[3].finish_assignment_date,
+          }
           console.log(temp1)
           setDataDeadline(temp1)
           setIsLoading(false)
@@ -225,7 +199,7 @@ const PengelolaanDeadline = () => {
             </ul>
           </Box>
         </Typography>
-       
+
         <Form
           name="basic"
           labelCol={{
@@ -234,7 +208,6 @@ const PengelolaanDeadline = () => {
           wrapperCol={{
             span: 16,
           }}
-      
           initialValues={{
             remember: true,
           }}
@@ -292,28 +265,33 @@ const PengelolaanDeadline = () => {
             },
           ]}
         >
-    
-     
-          <div className='spacetop'></div>
-          <Button type='primary' onClick={putDataDeadlineUpdate}>Simpan Data</Button>
-          <div className='spacebottom'></div>
-          <Row style={{paddingLeft:30, paddingRight:30}}>
-            <Col span={8} >
-              <b style={{fontSize:18}}>DEADLINE</b>
+          <div className="spacetop"></div>
+          <Button type="primary" onClick={putDataDeadlineUpdate} htmlType="submit">
+            Simpan Data
+          </Button>
+          <div className="spacebottom"></div>
+          <Row style={{ paddingLeft: 30, paddingRight: 30 }}>
+            <Col span={6}>
+              <b style={{ fontSize: 18 }}>DEADLINE</b>
             </Col>
-            <Col span={8} >
-              <b style={{fontSize:18}}>RENTANG HARI</b>
+            <Col span={6}>
+              <b style={{ fontSize: 18 }}>RENTANG HARI</b>
             </Col>
-            <Col span={8} >
-              <b style={{fontSize:18}}>TANGGAL PENGUMPULAN DIBUKA</b>
+            <Col span={6}>
+              <b style={{ fontSize: 18 }}>TANGGAL PENGUMPULAN DIBUKA</b>
+            </Col>
+            <Col span={6}>
+              <b style={{ fontSize: 18 }}>TANGGAL PENGUMPULAN DITUTUP</b>
             </Col>
           </Row>
-          <hr/>
-          <Row style={{padding:30}}>
-            <Col span={8} ><b style={{fontSize:15}}>{dataDeadline.logbook_name}</b></Col>
-            <Col span={8} >
+          <hr />
+          <Row style={{ padding: 30 }}>
+            <Col span={6}>
+              <b style={{ fontSize: 15 }}>{dataDeadline.logbook_name}</b>
+            </Col>
+            <Col span={6}>
               <Form.Item
-                name='logbook_rentang_hari'
+                name="logbook_rentang_hari"
                 layout="inline"
                 rules={[
                   {
@@ -325,26 +303,42 @@ const PengelolaanDeadline = () => {
                 <Input
                   type="number"
                   maxLength={2}
-                  onChange={(e) =>
-                     handleDeadlineEdit(dataDeadline.logbook_id, e.target.value, 'rentang_hari', 0)
+                  onChange={
+                    (e) =>
+                      handleDeadlineEdit(dataDeadline.logbook_id, dataDeadline.logbook_name,e.target.value, 'rentang_hari', 0)
                     // console.log(e.target.value)
                   }
                 />
               </Form.Item>
             </Col>
-            <Col span={8} style={{padding:5}}>
-            <DatePicker onChange={(date,datestring)=>handleDeadlineEdit(dataDeadline.logbook_id,datestring,'tanggal', 0)
-            
-            } name='tanggal_pengumpulan_dimulai' defaultValue={dayjs(dataDeadline.logbook_tanggal, dateFormat)}/>
+            <Col span={6} style={{ padding: 5 }}>
+              <DatePicker
+                onChange={(date, datestring) =>
+                  handleDeadlineEdit(dataDeadline.logbook_id,dataDeadline.logbook_name, datestring, 'tanggal_dimulai', 0)
+                }
+                name='logbook_tanggal_mulai'
+                defaultValue={dayjs(dataDeadline.logbook_tanggal_mulai, dateFormat)}
+              />
+            </Col>
+            <Col span={6} style={{ padding: 5 }}>
+              <DatePicker
+                onChange={(date, datestring) =>
+                  handleDeadlineEdit(dataDeadline.logbook_id,dataDeadline.logbook_name, datestring, 'tanggal_selesai', 0)
+                }
+                name='logbook_tanggal_selesai'
+                defaultValue={dayjs(dataDeadline.logbook_tanggal_selesai, dateFormat)}
+              />
             </Col>
           </Row>
-          <hr/>
+          <hr />
 
-          <Row style={{padding:30}}>
-            <Col span={8} ><b style={{fontSize:15}}>{dataDeadline.rpp_name}</b></Col>
-            <Col span={8} >
+          <Row style={{ padding: 30 }}>
+            <Col span={6}>
+              <b style={{ fontSize: 15 }}>{dataDeadline.rpp_name}</b>
+            </Col>
+            <Col span={6}>
               <Form.Item
-                name='rpp_rentang_hari'
+                name="rpp_rentang_hari"
                 layout="inline"
                 rules={[
                   {
@@ -356,26 +350,42 @@ const PengelolaanDeadline = () => {
                 <Input
                   type="number"
                   maxLength={2}
-                  onChange={(e) =>
-                     handleDeadlineEdit(dataDeadline.rpp_id, e.target.value, 'rentang_hari', 1)
+                  onChange={
+                    (e) =>
+                      handleDeadlineEdit(dataDeadline.rpp_id,dataDeadline.rpp_name, e.target.value, 'rentang_hari', 1)
                     // console.log(e.target.value)
                   }
                 />
               </Form.Item>
             </Col>
-            <Col span={8} style={{padding:5}}>
-            <DatePicker onChange={(date,datestring)=>handleDeadlineEdit(dataDeadline.rpp_id,datestring,'tanggal', 1)
-            
-            } name='tanggal_pengumpulan_dimulai' defaultValue={dayjs(dataDeadline.rpp_tanggal, dateFormat)}/>
+            <Col span={6} style={{ padding: 5 }}>
+              <DatePicker
+                onChange={(date, datestring) =>
+                  handleDeadlineEdit(dataDeadline.rpp_id,dataDeadline.rpp_name, datestring, 'tanggal_mulai', 1)
+                }
+                name='rpp_tanggal_mulai'
+                defaultValue={dayjs(dataDeadline.rpp_tanggal_mulai, dateFormat)}
+              />
+            </Col>
+            <Col span={6} style={{ padding: 5 }}>
+              <DatePicker
+                onChange={(date, datestring) =>
+                  handleDeadlineEdit(dataDeadline.rpp_id,dataDeadline.rpp_name, datestring, 'tanggal_selesai', 1)
+                }
+                name='rpp_tanggal_selesai'
+                defaultValue={dayjs(dataDeadline.rpp_tanggal_selesai, dateFormat)}
+              />
             </Col>
           </Row>
-          <hr/>
+          <hr />
 
-          <Row style={{padding:30}}>
-            <Col span={8} ><b style={{fontSize:15}}>{dataDeadline.self_assessment_name}</b></Col>
-            <Col span={8} >
+          <Row style={{ padding: 30 }}>
+            <Col span={6}>
+              <b style={{ fontSize: 15 }}>{dataDeadline.self_assessment_name}</b>
+            </Col>
+            <Col span={6}>
               <Form.Item
-                name='self_assessment_rentang_hari'
+                name="self_assessment_rentang_hari"
                 layout="inline"
                 rules={[
                   {
@@ -387,26 +397,58 @@ const PengelolaanDeadline = () => {
                 <Input
                   type="number"
                   maxLength={2}
-                  onChange={(e) =>
-                     handleDeadlineEdit(dataDeadline.self_assessment_id, e.target.value, 'rentang_hari', 2)
+                  onChange={
+                    (e) =>
+                      handleDeadlineEdit(
+                        dataDeadline.self_assessment_id,
+                        dataDeadline.self_assessment_name,
+                        e.target.value,
+                        'rentang_hari',
+                        2,
+                      )
                     // console.log(e.target.value)
                   }
                 />
               </Form.Item>
             </Col>
-            <Col span={8} style={{padding:5}}>
-            <DatePicker onChange={(date,datestring)=>handleDeadlineEdit(dataDeadline.self_assessment_id,datestring,'tanggal', 2)
-            
-            } name='tanggal_pengumpulan_dimulai' defaultValue={dayjs(dataDeadline.self_assessment_tanggal, dateFormat)}/>
+            <Col span={6} style={{ padding: 5 }}>
+              <DatePicker
+                onChange={(date, datestring) =>
+                  handleDeadlineEdit(
+                    dataDeadline.self_assessment_id,dataDeadline.self_assessment_name,
+                    datestring,
+                    'tanggal_dimulai',
+                    2,
+                  )
+                }
+              
+                defaultValue={dayjs(dataDeadline.self_assessment_tanggal_mulai, dateFormat)}
+              />
+            </Col>
+            <Col span={6} style={{ padding: 5 }}>
+              <DatePicker
+                onChange={(date, datestring) =>
+                  handleDeadlineEdit(
+                    dataDeadline.self_assessment_id,dataDeadline.self_assessment_name,
+                    datestring,
+                    'tanggal_selesai',
+                    2,
+                  )
+                }
+              
+                defaultValue={dayjs(dataDeadline.self_assessment_tanggal_selesai, dateFormat)}
+              />
             </Col>
           </Row>
-          <hr/>
+          <hr />
 
-          <Row style={{padding:30}}>
-            <Col span={8} ><b style={{fontSize:15}}>{dataDeadline.laporan_name}</b></Col>
-            <Col span={8} >
+          <Row style={{ padding: 30 }}>
+            <Col span={6}>
+              <b style={{ fontSize: 15 }}>{dataDeadline.laporan_name}</b>
+            </Col>
+            <Col span={6}>
               <Form.Item
-                name='laporan_rentang_hari'
+                name="laporan_rentang_hari"
                 layout="inline"
                 rules={[
                   {
@@ -418,21 +460,34 @@ const PengelolaanDeadline = () => {
                 <Input
                   type="number"
                   maxLength={2}
-                  onChange={(e) =>
-                     handleDeadlineEdit(dataDeadline.laporan_id, e.target.value, 'rentang_hari', 3)
+                  onChange={
+                    (e) =>
+                      handleDeadlineEdit(dataDeadline.laporan_id,dataDeadline.laporan_name, e.target.value, 'rentang_hari', 3)
                     // console.log(e.target.value)
                   }
                 />
               </Form.Item>
             </Col>
-            <Col span={8} style={{padding:5}}>
-            <DatePicker onChange={(date,datestring)=>handleDeadlineEdit(dataDeadline.laporan_id,datestring,'tanggal', 3)
-            
-            } name='tanggal_pengumpulan_dimulai' defaultValue={dayjs(dataDeadline.laporan_tanggal, dateFormat)}/>
+            <Col span={6} style={{ padding: 5 }}>
+              <DatePicker
+                onChange={(date, datestring) =>
+                  handleDeadlineEdit(dataDeadline.laporan_id,dataDeadline.laporan_name, datestring, 'tanggal_dimulai', 3)
+                }
+              
+                defaultValue={dayjs(dataDeadline.laporan_tanggal_mulai, dateFormat)}
+              />
+            </Col>
+            <Col span={6} style={{ padding: 5 }}>
+              <DatePicker
+                onChange={(date, datestring) =>
+                  handleDeadlineEdit(dataDeadline.laporan_id,dataDeadline.laporan_name, datestring, 'tanggal_selesai', 3)
+                }
+              
+                defaultValue={dayjs(dataDeadline.laporan_tanggal_selesai, dateFormat)}
+              />
             </Col>
           </Row>
-          <hr/>
-          
+          <hr />
         </Form>
       </div>
     </>

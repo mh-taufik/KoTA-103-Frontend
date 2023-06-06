@@ -146,7 +146,6 @@ const PemetaanPembimbingJurusan = () => {
 
 
   const refreshData = (index) => {
-    // window.location.reload(false);
     axios.get('http://localhost:1337/api/perusahaans?populate=*').then((result) => {
       setPembimbingChoosen(' ')
       setPerusahaan(result.data.data)
@@ -194,9 +193,9 @@ const PemetaanPembimbingJurusan = () => {
   useEffect(() => {
     async function getDataPemetaanPerusahaan() {
       await axios
-        .get('http://localhost:1337/api/perusahaans?populate=*')
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all`)
         .then((result) => {
-          setPerusahaan(result.data.data)
+          console.log('datas', result)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -250,7 +249,7 @@ const PemetaanPembimbingJurusan = () => {
         })
     }
 
-    getAllPembimbingJurusan()
+    // getAllPembimbingJurusan()
     getDataPemetaanPerusahaan()
   }, [history])
 
