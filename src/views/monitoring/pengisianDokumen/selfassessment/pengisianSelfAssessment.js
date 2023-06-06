@@ -64,207 +64,30 @@ const FormPengisianSelfAssessment = () => {
     })
   }
 
-  /** HANDLE RANGE DATE SAAT MEMILIH  */
-  const disabledDate = (current) => {
-    // Can not select days before today and today
-    return current && current < dayjs().endOf('day')
-  }
-
-  /** HANDLE INPUT NILAI DAN KETERANGAN */
-  const handlePengisianNilaiDanKeteranganSelfAssessment = (
-    index,
-    value,
-    idSelfAssessment,
-    keyData,
-  ) => {
-    if (dataPengisianSelfAssessmentPeserta[index]) {
-      dataPengisianSelfAssessmentPeserta[index][keyData] = value
-    } else {
-      dataPengisianSelfAssessmentPeserta[index] = {
-        [keyData]: value,
-        id: idSelfAssessment,
-      }
-    }
-    setDataPengisianSelfAssessmentPeserta(dataPengisianSelfAssessmentPeserta)
-  }
-
-  useEffect(() => {
-    console.log('hasil pengisian SA', dataPengisianSelfAssessmentPeserta)
-  }, [dataPengisianSelfAssessmentPeserta])
-
-  /** API */
-
-  const getInformasiDataPeserta = async () => {
-    await axios
-      .get(`http://localhost:1337/api/pesertas?filters[username][$eq]=${NIM_PESERTA}`)
-      .then((response) => {
-        // setIdPeserta(response.data.data)
-        console.log('data peserta', response.data.data[0])
-        setIdPeserta(response.data.data[0].id)
-      })
-  }
-
-  const submitData = async () => {
-  
-   
-    console.log(dataPengisianSelfAssessmentPeserta)
-    if (isDateAvailable) {
-      if(dataPengisianSelfAssessmentPeserta.length < 1){
-        notification.error({message:'Penambahan self assessment ditolak, karena tidak ada satupun poin yang terisi'})
-      }else{
-        
-      let dateToday = new Date()
-      function formatDate(date) {
-        var d = new Date(date),
-          month = '' + (d.getMonth() + 1),
-          day = '' + d.getDate(),
-          year = d.getFullYear()
-
-        if (month.length < 2) month = '0' + month
-        if (day.length < 2) day = '0' + day
-
-        return [year, month, day].join('-')
-      }
-      await axios
-        .post(`http://localhost:1337/api/selfassessments`, {
-          data: {
-            tanggalmulai: tanggalMulaiSelfAssessment,
-            tanggalselesai: tanggalBerakhirSelfAssessment,
-            tanggal_pengumpulan: formatDate(dateToday),
-            peserta: {
-              connect: [idPeserta],
-            },
-          },
-        })
-        .then((response) => {
-          console.log('response new self assessment', response.data.data)
-          console.log('response new self assessment ID', response.data.data.id)
-          setNewIdSelfAssessment(response.data.data.id)
-        })
-        .catch(function (error) {
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
-              },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-            history.push('/500')
-          }
-        })
-      }
-    } else {
-      notification.error({
-        message:
-          'Silahkan ubah minggu self assessment terlebih dahulu, untuk bisa melakukan submit !!!',
-      })
-    }
-  }
-
-const handleSuccessSubmit = (idSelfAssessment) =>{
-  notification.success({
-    message: 'Data self assessment berhasil ditambahkan',
-  })
-  history.push(`/selfAssessment/formSelfAssessment/detail/${idSelfAssessment}`)
-}
-
-  useEffect(() => {
-    console.log('ID BARU', newIdSelfAssessment)
-
-    const inputNilaiDanKeteranganSelfAssessment = async (data, idSelfAssessment) => {
-
-      let a = 0
-      let stop = data.length - 1
-
-      for (var i in data) {
-        let res = true
-       
-      
-        await axios
-          .post('http://localhost:1337/api/selfasspoins', {
-            data: {
-              nilai: data[i].nilai,
-              keterangan: data[i].keterangan,
-              selfassessment: {
-                connect: [idSelfAssessment],
-              },
-              poinpenilaianselfassessment: {
-                connect: [data[i].id],
-              },
-            },
-          })
-          .then((response) => {
-            console.log('HASIL ISI SA POIN', response.data.data)
-            res = true
-         
-           
-          })
-          .catch(function (error) {
-            setIsSuccessSubmit(false)
-            if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-              history.push({
-                pathname: '/login',
-                state: {
-                  session: true,
-                },
-              })
-            } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-              history.push('/404')
-            } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-              history.push('/500')
-            }
-          })
-          
-          console.log('i ', i, ' dan ', 'a ', a,  ' ','type', typeof(a), typeof(i), a === parseInt(i), res,  '--', a === parseInt(i) && res)
-          if(stop === parseInt(i) && res ){
-            handleSuccessSubmit(idSelfAssessment)
-          }
-
-          a++
-      }
-
-     
-     
-    }
-
-    inputNilaiDanKeteranganSelfAssessment(dataPengisianSelfAssessmentPeserta, newIdSelfAssessment)
-  }, [newIdSelfAssessment])
-
-  useEffect(() => {
-    console.log('tanggal berakhir', tanggalBerakhirSelfAssessment)
-  }, [tanggalBerakhirSelfAssessment])
-
-  const onChange = (date, dateString) => {
-    console.log(date, dateString)
-    alert(date, dateString)
-  }
-
   useEffect(() => {
     const getPoinPenilaianSelfAssessment = async (record, index) => {
       enterLoading(index)
       await axios
         .get(
-          'http://localhost:1337/api/poinpenilaianselfassessments?filters[$or][0][status][$eq]=non active&filters[$or][1][status][$eq]=active',
+          `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/get`,
         )
-        .then((response) => {
-          setIsLoading(false)
+        .then((result) => {
+          console.log(result.data.data)
+
+         
           let temp = []
-          let temp1 = response.data.data
+          let temp1 = result.data.data
           let getTempPoinPenilaianSelfAssessment = function (obj) {
             for (var i in obj) {
               temp.push({
-                id: obj[i].id,
-                poinpenilaian: obj[i].attributes.poinpenilaian,
-                status: obj[i].attributes.status,
-                tanggalmulaipengisian: obj[i].attributes.tanggalmulaipengisian,
+                aspect_id: obj[i].aspect_id,
+                poinpenilaian: obj[i].aspect_name,
               })
             }
           }
           getTempPoinPenilaianSelfAssessment(temp1)
           setKomponenPenilaianSelfAssessment(temp)
+          setIsLoading(false)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -283,8 +106,25 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
     }
 
     getPoinPenilaianSelfAssessment()
-    getInformasiDataPeserta()
   }, [history])
+
+   /** HANDLE INPUT NILAI DAN KETERANGAN */
+   const handlePengisianNilaiDanKeteranganSelfAssessment = (
+    index,
+    value,
+    idSelfAssessment,
+    keyData,
+  ) => {
+    if (dataPengisianSelfAssessmentPeserta[index]) {
+      dataPengisianSelfAssessmentPeserta[index][keyData] = value
+    } else {
+      dataPengisianSelfAssessmentPeserta[index] = {
+        [keyData]: value,
+        aspect_id: parseInt(idSelfAssessment),
+      }
+    }
+    setDataPengisianSelfAssessmentPeserta(dataPengisianSelfAssessmentPeserta)
+  }
 
   function formatDate(date) {
     var d = new Date(date),
@@ -328,10 +168,11 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
     return formatDate(ISOweekStart.toDateString())
   }
 
+  /**PENGECEKAN DATA TANGGAL */
   const handleDateIsAvailable = async (tanggalmulai,tanggalselesai) => {
     await axios
       .get(
-        `http://localhost:1337/api/selfassessments?populate=*&filters[peserta][username]=${NIM_PESERTA}&filters[tanggalmulai]=${tanggalmulai}`,
+        ``,
       )
       .then((res) => {
         console.log('IS DATA AVAILABLE', res.data.data)
@@ -346,7 +187,7 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
         } else {
           // setIsDateAvailable(true)
           // return true
-          let end= new Date(tanggalselesai)
+          let end = new Date(tanggalselesai)
           end.setDate(end.getDate()+1) //jika hari lebih dari hari ini
           end = new Date(end)
           let today = new Date()
@@ -380,12 +221,61 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
       })
   }
 
+  /**SUBMIT DATA */
+  const submitData = async () => {
+    // console.log(dataPengisianSelfAssessmentPeserta)
+    setIsDateAvailable(true)
+    // if (isDateAvailable) {
+      if(dataPengisianSelfAssessmentPeserta.length < 1){
+        notification.error({message:'Penambahan self assessment ditolak, karena tidak ada satupun poin yang terisi'})
+      }else{
+      const data = JSON.parse( JSON.stringify(dataPengisianSelfAssessmentPeserta))
+      const a = data
+      console.log('hmmm',data)
+      await axios.post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/create`,{
+        'start_date' : tanggalMulaiSelfAssessment,
+        'finish_date' : tanggalBerakhirSelfAssessment,
+        'grade' : data
+      }).then((result)=>{
+        console.log(result)
+      })
+        
+      }
+    // } else {
+    //   notification.error({
+    //     message:
+    //       'Silahkan ubah minggu self assessment terlebih dahulu, untuk bisa melakukan submit !!!',
+    //   })
+    // }
+  }
+
+const handleSuccessSubmit = (idSelfAssessment) =>{
+  notification.success({
+    message: 'Data self assessment berhasil ditambahkan',
+  })
+  history.push(`/selfAssessment/formSelfAssessment/detail/${idSelfAssessment}`)
+}
+
+
+  useEffect(() => {
+    console.log('tanggal berakhir', tanggalBerakhirSelfAssessment)
+  }, [tanggalBerakhirSelfAssessment])
+
+  const onChange = (date, dateString) => {
+    console.log(date, dateString)
+    alert(date, dateString)
+  }
+
+
+
 
   const handleKembaliKeRekapSelfAssessment = () => {
     history.push(`/selfAssessment`)
   }
   return isLoading ? (
-    <Spin indicator={antIcon} />
+    <Spin tip="Loading" size="large">
+    <div className="content" />
+  </Spin>
   ) : (
     <>
       {/* <Button onClick={tes}>tes</Button> */}
@@ -415,9 +305,9 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
                 return moment().add(-1, 'days')  >= current || current.isAfter(moment())
               }}
               onChange={(date, datestring) => {
-                let tanggalmulai = getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4))
-                let tanggalselesai = getDateOfEndWeek(datestring.slice(5, 7), datestring.slice(0, 4))
-                let handling = handleDateIsAvailable(tanggalmulai,tanggalselesai)
+                // let tanggalmulai = getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4))
+                // let tanggalselesai = getDateOfEndWeek(datestring.slice(5, 7), datestring.slice(0, 4))
+                // let handling = handleDateIsAvailable(tanggalmulai,tanggalselesai)
                 setTanggalMulaiSelfAssessment(
                   getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
                 )
@@ -432,7 +322,7 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
           <hr className="spacetop" />
 
           <Row>
-            {/* <Col span={2}><h6>NO</h6></Col> */}
+
             <Col span={8} style={{ padding: 2 }}>
               <h6>ASPEK PENILAIAN</h6>
             </Col>
@@ -446,38 +336,10 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
           <hr />
 
           {komponenPenilaianSelfAssessment.map((poinSelfAssessment, index) => {
-            if (poinSelfAssessment.status === 'non active') {
+       
               return (
                 <>
-                  <Row key={poinSelfAssessment.id}>
-                    <Col span={8} style={{ padding: 8 }}>
-                      <Text strong>{poinSelfAssessment.poinpenilaian}</Text>
-                    </Col>
-
-                    <Col span={4} style={{ padding: 8 }}>
-                      <Input
-                        type="number"
-                        name={`nilai` + index}
-                        placeholder="belum diizinkan untuk mengisi"
-                        disabled
-                      />
-                    </Col>
-
-                    <Col span={12} style={{ padding: 8 }}>
-                      <TextArea
-                        placeholder="belum diizinkan untuk mengisi"
-                        disabled
-                        maxLength={1000}
-                        name={`keterangan` + index}
-                      />
-                    </Col>
-                  </Row>
-                </>
-              )
-            } else {
-              return (
-                <>
-                  <Row key={poinSelfAssessment.id}>
+                  <Row key={poinSelfAssessment.aspect_id}>
                     <Col span={8} style={{ padding: 8 }}>
                       <Text strong>{poinSelfAssessment.poinpenilaian}</Text>
                     </Col>
@@ -489,8 +351,8 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
                           handlePengisianNilaiDanKeteranganSelfAssessment(
                             index,
                             e,
-                            poinSelfAssessment.id,
-                            'nilai',
+                            poinSelfAssessment.aspect_id,
+                            'grade',
                           )
                         }
                       />
@@ -504,8 +366,8 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
                           handlePengisianNilaiDanKeteranganSelfAssessment(
                             index,
                             e.target.value,
-                            poinSelfAssessment.id,
-                            'keterangan',
+                            poinSelfAssessment.aspect_id,
+                            'description',
                           )
                         }
                       />
@@ -513,12 +375,9 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
                   </Row>
                 </>
               )
-            }
+            
           })}
 
-          {/* <Button type="primary" onClick={submitData} htmlType="submit">
-            Submit
-          </Button> */}
           <Popconfirm
             placement="topLeft"
             title={'Anda yakin akan submit ? pastikan sudah terisi dengan baik, karena tidak dapat edit kembali '}
@@ -527,7 +386,7 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
             okText="Yes"
             cancelText="No"
           >
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" >
               Submit
             </Button>
           </Popconfirm>
