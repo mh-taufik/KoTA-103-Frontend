@@ -5,21 +5,20 @@ import Form from 'react-bootstrap/Form'
 import Container from 'react-bootstrap/Container'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../rpp/rpp.css'
-import {ArrowLeftOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import { Col, Row } from 'react-bootstrap'
 import Table from 'react-bootstrap/Table'
 import { Refresh } from '@mui/icons-material'
 import axios from 'axios'
 import { Route, Router, useHistory, useParams } from 'react-router-dom'
-import { Button, Card, FloatButton, Popover, Space, notification } from 'antd'
+import { Button, Card, FloatButton, Popover, Space, Spin, notification } from 'antd'
 import routes from 'src/routes'
 
 const ReviewLogbook = (props) => {
   var params = useParams()
   const NIM_PESERTA_BY_PARAMS = params.nim
-  let LOGBOOK = params.id
+  const LOGBOOK = params.id
   const [isLoading, setIsLoading] = useState(true)
-  const [isSpinner, setIsSpinner] = useState(true)
   const [tanggalLogbook, setTanggalLogbook] = useState()
   const [loadings, setLoadings] = useState([])
   const [tanggalProyek, setTanggalProyek] = useState()
@@ -50,39 +49,56 @@ const ReviewLogbook = (props) => {
   }
 
   useEffect(() => {
-    
-  }, [history])
 
-  const handleInputLogbookDate = (date) => {
-    // console.log('tanggal', value)
-
-    axios
-      .get(`http://localhost:1337/api/logbooks?filters[tanggallogbook][$eq]=${date}`)
-      .then((result) => {
-        const ress = result.data.data.length
-        if (ress > 0) {
-          notification.warning({
-            message: 'Pilih tanggal lain, logbook sudah tersedia',
-          })
-          setSubmitAccepted(0)
-        }
-      })
-  }
-
-
-
-
-  useEffect(() => {
     const getDataLogbook = async (index) => {
-      enterLoading(index)
+      const ID_LOGBOOK = parseInt(LOGBOOK)
       await axios
-        .get(`${process.env.REACT_APP_API_GATEWAY_URL}${LOGBOOK}`)
-        .then((response) => {
-          dataLogbook = response.data.data
-          console.log('data', dataLogbook)
-          setLogbookPeserta(response.data.data)
-  
-          setLogbookAttributesData(response.data.data.attributes)
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/get/${ID_LOGBOOK}`)
+        .then((result) => {
+          const convertDate = (date) => {
+            var temp_date_split = date.split('-')
+            const month = [
+              'Januari',
+              'Februari',
+              'Maret',
+              'April',
+              'Mei',
+              'Juni',
+              'Juli',
+              'Agustus',
+              'September',
+              'Oktober',
+              'November',
+              'Desember',
+            ]
+            var date_month = temp_date_split[1]
+            var month_of_date = month[parseInt(date_month) - 1]
+            return date ? `${temp_date_split[2]}  ${month_of_date}  ${temp_date_split[0]}` : null
+          }
+
+          let data = result.data.data
+          let temp_res = []
+       
+              temp_res = {
+                date : convertDate(data.date),
+                description : data.description,
+                grade : data.grade,
+                id : data.id,
+                participant_id : data.participant_id,
+                project_manager : data.project_manager,
+                project_name : data.project_name,
+                status : data.status.status,
+                task : data.task,
+                technical_leader : data.technical_leader,
+                time_and_activity : data.time_and_activity,
+                tools : data.tools,
+                work_result : data.work_result
+              }
+      
+
+          console.log(temp_res)
+          setLogbookAttributesData(temp_res)
+          setIsLoading(false)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -98,19 +114,23 @@ const ReviewLogbook = (props) => {
             history.push('/500')
           }
         })
-  
     }
     getDataLogbook()
   }, [history])
 
-
   const hoverButtonKembali = <div>Klik tombol, untuk kembali ke list logbook</div>
 
   const handlingButtonKembali = () => {
-    (rolePengguna !=='1')? history.push(`/rekapDokumenPeserta/logbookPeserta/${NIM_PESERTA_BY_PARAMS}`): history.push(`/logbook`)
+    rolePengguna !== '1'
+      ? history.push(`/rekapDokumenPeserta/logbookPeserta/${NIM_PESERTA_BY_PARAMS}`)
+      : history.push(`/logbook`)
   }
 
-  return (
+  return isLoading ? (
+    <Spin tip="Loading" size="large">
+      <div className="content" />
+    </Spin>
+  ) : (
     <>
       <React.Fragment>
      
@@ -122,20 +142,11 @@ const ReviewLogbook = (props) => {
           </h3>
 
           <Form>
-            <Row>
-              <Col>
-                <Form.Group controlId="tanggalLogbook">
-                  <Form.Label>Tanggal Logbook</Form.Label>
-                  <Form.Control
-                    type="date"
-                    name="tanggallogbook"
-                    placeholder={false}
-                    value={logbookAttributesData.tanggallogbook}
-                    onChange={(e) => handleInputLogbookDate(e.target.value)}
-                    disabled
-                  />
-                </Form.Group>
+            <Row className='spacebottom'>
+              <Col span={2}>
+               Tanggal Logbook
               </Col>
+              <Col span={2}>{logbookAttributesData.date}</Col>
             </Row>
             <Row>
               <Col>
@@ -143,9 +154,8 @@ const ReviewLogbook = (props) => {
                   <Form.Label>Nama Proyek</Form.Label>
                   <Form.Control
                     type="text"
-                    defaultValue={logbookAttributesData.namaproyek}
+                    defaultValue={logbookAttributesData.project_name}
                     name="namaproyek"
-                    onChange={(e) => setNamaProyek(e.target.value)}
                     disabled
                   />
                 </Form.Group>
@@ -156,8 +166,7 @@ const ReviewLogbook = (props) => {
                   <Form.Control
                     type="text"
                     name="projectmanager"
-                    defaultValue={logbookAttributesData.projectmanager}
-                    onChange={(e) => setProjectManager(e.target.value)}
+                    defaultValue={logbookAttributesData.project_manager}
                     required
                     disabled
                   />
@@ -169,8 +178,7 @@ const ReviewLogbook = (props) => {
                   <Form.Control
                     type="text"
                     name="technicalleader"
-                    defaultValue={logbookAttributesData.technicalleader}
-                    onChange={(e) => setTechnicalLeader(e.target.value)}
+                    defaultValue={logbookAttributesData.technical_leader}
                     required
                     disabled
                   />
@@ -184,9 +192,9 @@ const ReviewLogbook = (props) => {
                   <Form.Label>Tugas</Form.Label>
                   <Form.Control
                     as="textarea"
+                    rows={5}
                     name="tugas"
-                    defaultValue={logbookAttributesData.tugas}
-                    onChange={(e) => setTugasPeserta(e.target.value)}
+                    defaultValue={logbookAttributesData.task}
                     disabled
                   />
                 </Form.Group>
@@ -198,9 +206,9 @@ const ReviewLogbook = (props) => {
                   <Form.Label>Waktu dan Kegiatan</Form.Label>
                   <Form.Control
                     as="textarea"
+                    rows={5}
                     name="waktudankegiatan"
-                    defaultValue={logbookAttributesData.waktudankegiatan}
-                    onChange={(e) => setWaktuDanKegiatanPeserta(e.target.value)}
+                    defaultValue={logbookAttributesData.time_and_activity}
                     disabled
                   />
                 </Form.Group>
@@ -214,7 +222,6 @@ const ReviewLogbook = (props) => {
                     type="text"
                     name="tools"
                     defaultValue={logbookAttributesData.tools}
-                    onChange={(e) => setTools(e.target.value)}
                     disabled
                   />
                 </Form.Group>
@@ -225,10 +232,10 @@ const ReviewLogbook = (props) => {
                 <Form.Group className="mb-3" controlId="hasilKerja">
                   <Form.Label>Hasil Kerja</Form.Label>
                   <Form.Control
-                    type="text"
+                    as="textarea"
+                    rows={5}
                     name="hasilkerja"
-                    defaultValue={logbookAttributesData.hasilkerja}
-                    onChange={(e) => setHasilKerja(e.target.value)}
+                    defaultValue={logbookAttributesData.work_result}
                     disabled
                   />
                 </Form.Group>
@@ -240,9 +247,9 @@ const ReviewLogbook = (props) => {
                   <Form.Label>Keterangan</Form.Label>
                   <Form.Control
                     as="textarea"
+                    rows={5}
                     name="keterangan"
-                    defaultValue={logbookAttributesData.keterangan}
-                    onChange={(e) => setKeterangan(e.target.value)}
+                    defaultValue={logbookAttributesData.description}
                     disabled
                   />
                 </Form.Group>
@@ -253,7 +260,12 @@ const ReviewLogbook = (props) => {
           </Form>
         </div>
       </React.Fragment>
-      <FloatButton type='primary' onClick={handlingButtonKembali} icon={<ArrowLeftOutlined />} tooltip={<div>Kembali ke Rekap Logbook</div>} />
+      <FloatButton
+        type="primary"
+        onClick={handlingButtonKembali}
+        icon={<ArrowLeftOutlined />}
+        tooltip={<div>Kembali ke Rekap Logbook</div>}
+      />
     </>
   )
 }
