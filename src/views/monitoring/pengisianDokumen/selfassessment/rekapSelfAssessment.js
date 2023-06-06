@@ -95,21 +95,25 @@ const RekapSelfAssessment = () => {
             return  date? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`:null
           }
 
-          var getTempSelfAssessment = function (obj) {
+          // if(result.data.data.length>0){
+          //   var getTempSelfAssessment = function (obj) {
            
-            for (var i in obj) {
-              temp.push({
-                tanggal_mulai: obj[i].start_date,
-                tanggal_selesai : obj[i].finish_date,
-                id: obj[i].self_assessment_id,
-                participant_id : obj[i].participant_id
-              })
-            }
-          }
-       
-          getTempSelfAssessment(temp1)
-          setSelfAssessmentPeserta(temp)
-          console.log('data',temp)
+          //     for (var i in obj) {
+          //       temp.push({
+          //         tanggal_mulai: obj[i].start_date,
+          //         tanggal_selesai : obj[i].finish_date,
+          //         id: obj[i].self_assessment_id,
+          //         participant_id : obj[i].participant_id
+          //       })
+          //     }
+          //   }
+         
+          //   getTempSelfAssessment(temp1)
+          //   setSelfAssessmentPeserta(temp)
+          // }else{
+            setSelfAssessmentPeserta(result.data.data)
+          // }
+          // console.log('data',temp)
           setIsLoading(false)
         })
         .catch(function (error) {

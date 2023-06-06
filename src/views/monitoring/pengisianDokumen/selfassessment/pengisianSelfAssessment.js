@@ -229,8 +229,7 @@ const FormPengisianSelfAssessment = () => {
       if(dataPengisianSelfAssessmentPeserta.length < 1){
         notification.error({message:'Penambahan self assessment ditolak, karena tidak ada satupun poin yang terisi'})
       }else{
-      const data = JSON.parse( JSON.stringify(dataPengisianSelfAssessmentPeserta))
-      const a = data
+      const data = JSON.parse(JSON.stringify(dataPengisianSelfAssessmentPeserta))
       console.log('hmmm',data)
       await axios.post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/create`,{
         'start_date' : tanggalMulaiSelfAssessment,
@@ -278,7 +277,7 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
   </Spin>
   ) : (
     <>
-      {/* <Button onClick={tes}>tes</Button> */}
+   
       <Form>
         {' '}
         <div className="container">

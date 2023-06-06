@@ -32,7 +32,8 @@ import moment from 'moment'
 
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const RekapRPP = () => {
-  var idPeserta = useParams()
+  const PARAMS = useParams()
+  const NIM_PESERTA_FROM_PARAMS = PARAMS.id
   //ngambil dari params, dimana params untuk menunjukkan detail logbook
   let searchInput
   const [state, setState] = useState({ searchText: '', searchedColumn: '' })
@@ -40,11 +41,11 @@ const RekapRPP = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [wannaEdit, setWannaEdit] = useState(false)
   const [wannaDetail, setWannaDetail] = useState(false)
-  const [idPengguna, setIdPengguna] = useState(localStorage.username)
+  const [NIM_PESERTA_AS_USER, setNIM_PESERTA_AS_USER] = useState(localStorage.username)
   let rolePengguna = localStorage.id_role
   let history = useHistory()
   const [loadings, setLoadings] = useState([])
-  const [infoDataPeserta, setInfoDataPeserta] = useState([])
+  const [dataPeserta, setDataPeserta] = useState([])
 
   const desc = '*edit RPP yang dipilih'
   const descdetail = '*detail RPP yang dipilih'
@@ -61,14 +62,15 @@ const RekapRPP = () => {
   const refreshData = (index) => {
     let PESERTA
     if (rolePengguna === '1') {
-      PESERTA = idPengguna
+      PESERTA = NIM_PESERTA_AS_USER
     } else {
-      PESERTA = idPeserta.id
+      PESERTA = NIM_PESERTA_FROM_PARAMS
     }
     axios
-      .get(`http://localhost:1337/api/rpps?populate=*&filters[peserta][username]=${PESERTA}`)
+      .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/get-all/${PESERTA}`)
       .then((result) => {
-        let temp = []
+        if(result.data.data.length>0){
+          let temp = []
         let temp1 = result.data.data
         const convertDate = (date) => {
           let temp_date_split = date.split('-')
@@ -88,30 +90,27 @@ const RekapRPP = () => {
           ]
           let date_month = temp_date_split[1]
           let month_of_date = month[parseInt(date_month) - 1]
-          // console.log(month_of_date,'isi date monts', month_of_date)
           return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
-        }
-
-        const convertStatusPengecekan =(status)=>{
-          return status?'Sudah Dicek' : 'Belum Dicek'
         }
 
         let getDataTempRPP = function (obj) {
           for (var i in obj) {
             temp.push({
-              id: obj[i].id,
-              judul_pekerjaan: obj[i].attributes.judulpekerjaan,
-              status: obj[i].attributes.status,
-              deskripsi_tugas: obj[i].attributes.deskripsi_tugas,
-              tanggal_mulai: convertDate(obj[i].attributes.tanggal_mulai),
-              tanggal_selesai: convertDate(obj[i].attributes.tanggal_selesai),
-              waktupengisian: obj[i].attributes.waktupengisian,
+              rpp_id: obj[i].rpp_id,
+              work_title: obj[i].work_title,
+              start_date: convertDate(obj[i].start_date),
+              finish_date: convertDate(obj[i].finish_date),
             })
           }
         }
 
         getDataTempRPP(temp1)
         setRppPeserta(temp)
+        }else{
+          setRppPeserta(result.data.data)
+        }
+        
+        setIsLoading(false)
         setLoadings((prevLoadings) => {
           const newLoadings = [...prevLoadings]
           newLoadings[index] = false
@@ -120,61 +119,20 @@ const RekapRPP = () => {
       })
   }
 
-  /** GET DATA PESERTA */
-  const GetDataInfoPeserta = async (index) => {
-    var PESERTA
-    if (rolePengguna === '1') {
-      PESERTA = idPengguna
-    } else {
-      PESERTA = idPeserta.id
-    }
-    await axios
-      .get(`http://localhost:1337/api/pesertas?filters[username][$eq]=${PESERTA}`)
-      .then((result) => {
-        setInfoDataPeserta(result.data.data[0].attributes)
-        console.log('res', result)
-        console.log('data peserta', result.data.data[0].attributes)
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
-          history.push('/500')
-        }
-      })
-  }
-
-  /**
-   * idPengguna = role nya peserta
-   * idPengguna = role selain peserta
-   **/
-
-  useEffect(() => {
-    console.log('data rpp', rppPeserta)
-  }, [rppPeserta])
-
-  useEffect(() => {
-    console.log('idpeserta ==> ', idPeserta.id)
-
+   useEffect(() => {
     async function getRppPeserta(index) {
       let PESERTA
       if (rolePengguna === '1') {
-        PESERTA = idPengguna
+        PESERTA = NIM_PESERTA_AS_USER
       } else {
-        PESERTA = idPeserta.id
+        PESERTA = NIM_PESERTA_FROM_PARAMS
       }
       enterLoading(index)
       await axios
-        .get(`http://localhost:1337/api/rpps?populate=*&filters[peserta][username]=${PESERTA}`)
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/get-all/${PESERTA}`)
         .then((result) => {
-          let temp = []
+          if(result.data.data.length>0){
+            let temp = []
           let temp1 = result.data.data
           const convertDate = (date) => {
             let temp_date_split = date.split('-')
@@ -194,27 +152,57 @@ const RekapRPP = () => {
             ]
             let date_month = temp_date_split[1]
             let month_of_date = month[parseInt(date_month) - 1]
-            // console.log(month_of_date,'isi date monts', month_of_date)
             return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
           }
 
           let getDataTempRPP = function (obj) {
             for (var i in obj) {
               temp.push({
-                id: obj[i].id,
-                judul_pekerjaan: obj[i].attributes.judulpekerjaan,
-                status: obj[i].attributes.status,
-                deskripsi_tugas: obj[i].attributes.deskripsi_tugas,
-                tanggal_mulai: convertDate(obj[i].attributes.tanggal_mulai),
-                tanggal_selesai: convertDate(obj[i].attributes.tanggal_selesai),
-                waktupengisian: obj[i].attributes.waktupengisian,
+                rpp_id: obj[i].rpp_id,
+                work_title: obj[i].work_title,
+                start_date: convertDate(obj[i].start_date),
+                finish_date: convertDate(obj[i].finish_date),
               })
             }
           }
 
           getDataTempRPP(temp1)
           setRppPeserta(temp)
+          }else{
+            setRppPeserta(result.data.data)
+          }
+          
           setIsLoading(false)
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+            history.push('/500')
+          }
+        })
+    }
+
+    const GetDataInfoPeserta = async (index) => {
+      var PESERTA
+      if (rolePengguna === '1') {
+        PESERTA = parseInt(NIM_PESERTA_AS_USER)
+      } else {
+        PESERTA = parseInt(NIM_PESERTA_FROM_PARAMS)
+      }
+      await axios
+        .post(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-by-id`,{
+          id:[PESERTA]
+        })
+        .then((result) => {
+          setDataPeserta(result.data.data[0])
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -338,7 +326,7 @@ const RekapRPP = () => {
 
   /** TOMBOL DETAIL RPP PESERTA (PEMBIMBING DAN PANITIA) */
   const actionLihatRPPPeserta = (idRPP) => {
-    history.push(`/rekapDokumenPeserta/rppPeserta/${idPeserta.id}/detail/${idRPP}`)
+    history.push(`/rekapDokumenPeserta/rppPeserta/${NIM_PESERTA_FROM_PARAMS}/detail/${idRPP}`)
   }
 
   /** HOVER BUTTON */
@@ -347,7 +335,7 @@ const RekapRPP = () => {
   /** KOLOM UNTUK PANITIA DAN PEMBIMBING JURUSAN */
   const columnsPanitiaPembimbing = [
     {
-      title: 'No',
+      title: 'NO',
       dataIndex: 'no',
       width: '5%',
       align: 'center',
@@ -357,30 +345,24 @@ const RekapRPP = () => {
     },
     {
       title: 'Judul Pekerjaan',
-      dataIndex: 'judul_pekerjaan',
-      key: 'judul_pekerjaan',
-      ...getColumnSearchProps('judul_pekerjaan', 'Judul Pekerjaan'),
+      dataIndex: 'work_title',
+      key: 'work_title',
+      ...getColumnSearchProps('work_title', 'Judul Pekerjaan'),
     },
     {
       title: 'Tanggal Mulai Pengerjaan',
-      dataIndex: 'tanggal_mulai',
-      key: 'tanggal_mulai',
-      ...getColumnSearchProps('tanggal_mulai', 'Tanggal Mulai Pengerjaan'),
+      dataIndex: 'start_date',
+      key: 'start_date',
+      ...getColumnSearchProps('start_date', 'Tanggal Mulai Pengerjaan'),
     },
     {
       title: 'Tanggal Selesai Pengerjaan',
-      dataIndex: 'tanggal_selesai',
-      key: 'tanggal_selesai',
-      ...getColumnSearchProps('tanggal_selesai', 'Tanggal Selesai Pengerjaan'),
+      dataIndex: 'finish_date',
+      key: 'finish_date',
+      ...getColumnSearchProps('finish_date', 'Tanggal Selesai Pengerjaan'),
     },
     {
-      title: 'Status Pengumpulan',
-      dataIndex: 'status',
-      key: 'status',
-      ...getColumnSearchProps('status', 'Status'),
-    },
-    {
-      title: 'Aksi',
+      title: 'AKSI',
       width: '5%',
       align: 'center',
       dataIndex: 'action',
@@ -395,7 +377,7 @@ const RekapRPP = () => {
                     type="primary"
                     shape="round"
                     size="small"
-                    onClick={() => actionLihatRPPPeserta(record.id)}
+                    onClick={() => actionLihatRPPPeserta(record.rpp_id)}
                   >
                     Lihat Detail
                   </Button>
@@ -413,7 +395,7 @@ const RekapRPP = () => {
                   type="primary"
                   shape="round"
                   size="small"
-                  onClick={() => actionLihatRPPPeserta(record.id)}
+                  onClick={() => actionLihatRPPPeserta(record.rpp_id)}
                 >
                   Lihat Detail
                 </Button>
@@ -429,7 +411,7 @@ const RekapRPP = () => {
 /** KOLOM PESERTA */
   const columns = [
     {
-      title: 'No',
+      title: 'NO',
       dataIndex: 'no',
       width: '5%',
       align: 'center',
@@ -439,31 +421,24 @@ const RekapRPP = () => {
     },
     {
       title: 'Judul Pekerjaan',
-      dataIndex: 'judul_pekerjaan',
-      key: 'judul_pekerjaan',
-      ...getColumnSearchProps('judul_pekerjaan', 'Judul Pekerjaan'),
+      dataIndex: 'work_title',
+      key: 'work_title',
+      ...getColumnSearchProps('work_title', 'Judul Pekerjaan'),
     },
     {
       title: 'Tanggal Mulai Pengerjaan',
-      dataIndex: 'tanggal_mulai',
-      key: 'tanggal_mulai',
-      ...getColumnSearchProps('tanggal_mulai', 'Tanggal Mulai Pengerjaan'),
+      dataIndex: 'start_date',
+      key: 'start_date',
+      ...getColumnSearchProps('start_date', 'Tanggal Mulai Pengerjaan'),
     },
     {
       title: 'Tanggal Selesai Pengerjaan',
-      dataIndex: 'tanggal_selesai',
-      key: 'tanggal_selesai',
-      ...getColumnSearchProps('tanggal_selesai', 'Tanggal Selesai Pengerjaan'),
+      dataIndex: 'finish_date',
+      key: 'finish_date',
+      ...getColumnSearchProps('finish_date', 'Tanggal Selesai Pengerjaan'),
     },
     {
-      title: 'Status RPP',
-      dataIndex: 'status',
-      key: 'status',
-      ...getColumnSearchProps('status', 'Status'),
-    },
-
-    {
-      title: 'Aksi',
+      title: 'AKSI',
       width: '10%',
       align: 'center',
       dataIndex: 'action',
@@ -534,7 +509,7 @@ const RekapRPP = () => {
           <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius:2 }}>
             <Col span={24}>
               <b>
-                <h4 style={{color:'#f6ffed', marginLeft:30, marginTop:6}}>{judul}</h4>
+                <h5 style={{color:'#f6ffed', marginLeft:30, marginTop:6}}>{judul}</h5>
               </b>
             </Col>
           </Row>
@@ -547,44 +522,46 @@ const RekapRPP = () => {
   return (
     <>
        <div>
-        {/* {rolePengguna === '1' && <h1>[Hi Data Peserta]</h1>} */}
+       {rolePengguna !== '1' && (
+        <Space
+          className="spacebottom"
+          direction="vertical"
+          size="middle"
+          style={{
+            display: 'flex',
+          }}
+        >
+          <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
+            <Row style={{padding:5}}>
+              <Col span={4}>Nama Lengkap</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>{dataPeserta.name}</Col>
+            </Row>
+            <Row style={{padding:5}}>
+              <Col span={4}>NIM</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>{dataPeserta.nim}</Col>
+            </Row>
+            <Row style={{padding:5}}>
+              <Col span={4}>Sistem Kerja</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>{dataPeserta.work_system}</Col>
+            </Row>
+            <Row style={{padding:5}}>
+              <Col span={4}>Angkatan</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>{dataPeserta.year}</Col>
+            </Row>
+          </Card>
+        </Space>
+      )}
 
-        {rolePengguna !== '1' && (
-          <Space
-            direction="vertical"
-            size="middle"
-            bordered
-            style={{
-              display: 'flex',
-            }}
-          >
-            <Card title="Informasi Peserta" size="small" style={{padding:25}}>
-              <Row>
-                <Col span={4}>Nama Lengkap</Col>
-                <Col span={2}>:</Col>
-                <Col span={8}>Gina Anifah Choirunnisa</Col>
-              </Row>
-              <Row>
-                <Col span={4}>NIM</Col>
-                <Col span={2}>:</Col>
-                <Col span={8}>181524003</Col>
-              </Row>
-            </Card>
-          </Space>
-        )}
       </div>
       <div className="spacetop"></div>
       <div className="spacetop">
         <CCard className="mb-4">
           {title('REKAP RENCANA PENYELESAIAN PROYEK PESERTA')}
           <CCardBody>
-          {/* {rolePengguna !== '1' && (
-            <Popover content={<div>ke list dokumen peserta</div>}>
-              <Button type="primary"  size="small" onClick={buttonKembaliKeListHandling}>
-                Kembali
-              </Button>
-            </Popover>
-          )} */}
             {rolePengguna === '1' && (
               <Row>
                 <Col span={24} style={{ textAlign: 'right' }}>
