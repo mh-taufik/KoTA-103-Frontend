@@ -11,7 +11,7 @@ import Table from 'react-bootstrap/Table'
 import { Refresh } from '@mui/icons-material'
 import axios from 'axios'
 import { Route, Router, useHistory, useParams } from 'react-router-dom'
-import { Button, Card, FloatButton, Popover, Space, Spin, notification } from 'antd'
+import { Button, Card, FloatButton, Popover, Space, Spin, Tag, notification } from 'antd'
 import routes from 'src/routes'
 
 const ReviewLogbook = (props) => {
@@ -126,6 +126,14 @@ const ReviewLogbook = (props) => {
       : history.push(`/logbook`)
   }
 
+  const setTagColorStatus = (status) =>{
+    if(status === 'Terlambat'){
+      return 'red'
+    }else{
+      return 'green'
+    }
+
+  } 
   return isLoading ? (
     <Spin tip="Loading" size="large">
       <div className="content" />
@@ -144,9 +152,11 @@ const ReviewLogbook = (props) => {
           <Form>
             <Row className='spacebottom'>
               <Col span={2}>
-               Tanggal Logbook
+               Tanggal Logbook : 
               </Col>
-              <Col span={2}>{logbookAttributesData.date}</Col>
+              <Col span={8}>{logbookAttributesData.date}</Col>
+              <Col span={2}>Status Pengumpulan : </Col>
+              <Col span={4}><Tag color={setTagColorStatus(logbookAttributesData.status)}>{logbookAttributesData.status}</Tag></Col>
             </Row>
             <Row>
               <Col>
