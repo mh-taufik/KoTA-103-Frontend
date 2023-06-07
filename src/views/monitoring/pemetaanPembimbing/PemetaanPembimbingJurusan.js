@@ -2,9 +2,7 @@ import React, { useEffect, useState } from 'react'
 import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPencil, faLock, faTrashCan, faEdit, faPen } from '@fortawesome/free-solid-svg-icons'
-import get from 'lodash.get'
-import isequal from 'lodash.isequal'
+import { faPencil} from '@fortawesome/free-solid-svg-icons'
 
 import {
   Tabs,
@@ -18,19 +16,15 @@ import {
   notification,
   Space,
   Select,
-  Dropdown,
   Spin,
+  Popover,
 } from 'antd'
 import axios from 'axios'
 import '../pengisianDokumen/rpp/rpp.css'
 import { useHistory } from 'react-router-dom'
 import { SearchOutlined } from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
-import { LoadingOutlined } from '@ant-design/icons'
-import { Option } from 'antd/lib/mentions'
 
-const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
-const { TabPane } = Tabs
 
 const PemetaanPembimbingJurusan = () => {
   let searchInput
@@ -43,14 +37,12 @@ const PemetaanPembimbingJurusan = () => {
   const [loadings, setLoadings] = useState([])
   const [form1] = Form.useForm()
   const [dataHasilPemetaan, setDataHasilPemetaan] = useState([])
-  const [pembimbingChoosen, setPembimbingChoosen] = useState([])
   const [idChoosen, setIdChoosen] = useState()
   const [idPerusahaanChoosen, setIdPerusahaanChoosen] = useState()
   axios.defaults.withCredentials = true
   const USER_ID_PRODI = localStorage.id_prodi
   const [optPembimbing, setOptPembimbing] = useState([])
-  const [prodi,setProdi] = useState()
-
+  const [prodi, setProdi] = useState()
 
   const getColumnSearchProps = (dataIndex, name) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -146,18 +138,17 @@ const PemetaanPembimbingJurusan = () => {
     setDataToEdit(record)
   }
 
-  
   const handleCancelEdit = () => {
     setIsModalEditOpen(false)
   }
 
-  const refreshData = async(index) => {
+  const refreshData = async (index) => {
     await axios
-    .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all`)
-    .then((result) => {
-     setDataHasilPemetaan(result.data.data)
-      setIsLoading(false)
-    })
+      .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all`)
+      .then((result) => {
+        setDataHasilPemetaan(result.data.data)
+        setIsLoading(false)
+      })
   }
 
   const HandleEditPembimbingJurusan = async (id, idPembimbing, index) => {
@@ -194,9 +185,9 @@ const PemetaanPembimbingJurusan = () => {
   }
 
   useEffect(() => {
-    if(USER_ID_PRODI===0){
+    if (USER_ID_PRODI === 0) {
       setProdi('D3')
-    }else{
+    } else {
       setProdi('D4')
     }
 
@@ -204,7 +195,8 @@ const PemetaanPembimbingJurusan = () => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all`)
         .then((result) => {
-         setDataHasilPemetaan(result.data.data)
+          setDataHasilPemetaan(result.data.data)
+          console.log(result.data.data)
           setIsLoading(false)
         })
         .catch(function (error) {
@@ -223,17 +215,17 @@ const PemetaanPembimbingJurusan = () => {
         })
     }
 
-    const getAllPembimbingJurusan = async() => {
+    const getAllPembimbingJurusan = async () => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}account/get-supervisor`)
         .then((result) => {
           let temp_data = result.data.data
           let data_res = []
-          let funcDataRes = function(data){
-            for(var i in data){
+          let funcDataRes = function (data) {
+            for (var i in data) {
               data_res.push({
-                value : data[i].id_lecturer,
-                label : data[i].name
+                value: data[i].id_lecturer,
+                label: data[i].name,
               })
             }
           }
@@ -262,37 +254,57 @@ const PemetaanPembimbingJurusan = () => {
 
   const columns = [
     {
-      title: 'Nama Perusahaan',
+      title: 'NO',
+      dataIndex: 'no',
+      width: '5%',
+      align: 'center',
+      render: (value, item, index) => {
+        return index + 1
+      },
+    },
+    {
+      title: 'NAMA PERUSAHAAN',
       dataIndex: 'company_name',
       ...getColumnSearchProps('company_name', 'Nama Perusahaan'),
       width: '40%',
     },
     {
-      title: 'Nama Pembimbing Jurusan',
+      title: 'NAMA PEMBIMBING JURUSAN',
       dataIndex: 'lecturer_name',
       ...getColumnSearchProps('lecturer_name', 'Nama Pembimbing Jurusan'),
       width: '30%',
     },
+    Table.EXPAND_COLUMN,
     {
-      title: 'Aksi',
+      title: 'PESERTA',
+      dataIndex: 'peserta',
+      render: (text, record) => {
+        let count_participant = record.participant.length
+        return <b>{count_participant}</b>
+      },
+    },
+    {
+      title: 'AKSI',
       dataIndex: 'action',
       align: 'center',
       render: (text, record) => (
         <>
           <Row>
             <Col span={24} style={{ textAlign: 'center' }}>
-              <Button
-                id="button-pencil"
-                htmlType="submit"
-                shape="circle"
-                style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
-                onClick={() => {
-                  setIdPerusahaanChoosen(record.company_id)
-                  showModalEdit(record)
-                }}
-              >
-                <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
-              </Button>
+              <Popover content={<div>Lakukan pengeditan pembimbing</div>}>
+                <Button
+                  id="button-pencil"
+                  htmlType="submit"
+                  shape="circle"
+                  style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
+                  onClick={() => {
+                    setIdPerusahaanChoosen(record.company_id)
+                    showModalEdit(record)
+                  }}
+                >
+                  <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+                </Button>
+              </Popover>
             </Col>
           </Row>
         </>
@@ -303,7 +315,6 @@ const PemetaanPembimbingJurusan = () => {
   const onChange = (activeKey) => {
     setKey(activeKey)
   }
-
 
   const title = (judul) => {
     return (
@@ -322,60 +333,54 @@ const PemetaanPembimbingJurusan = () => {
     )
   }
 
+  const first_items = [
+    {
+      key: '1',
+      label: 'PEMETAAN',
+      children: (
+        <>
+          <h5 className="spacebottom spacetop" style={{ textAlign: 'center' }}>
+            TABEL PEMETAAN PEMBIMBING JURUSAN PROGRAM STUDI {prodi}{' '}
+          </h5>
+          <Table
+            scroll={{ x: 'max-content' }}
+            expandable={{
+              expandedRowRender: (rec) => (
+                <ul>
+                  {rec.participant.map((data, idx) => {
+                    return (
+                      <Row style={{ padding: 7 }} key={idx}>
+                        <Col span={2}>{idx + 1}</Col>
+                        <Col span={4}>{data.id}</Col>
+                        <Col span={8}>{data.name}</Col>
+                      </Row>
+                    )
+                  })}
+                </ul>
+              ),
+            }}
+            columns={columns}
+            dataSource={dataHasilPemetaan}
+            rowKey="id"
+            bordered
+          />
+        </>
+      ),
+    },
+  ]
+
   return isLoading ? (
     <Spin tip="Loading" size="large">
       <div className="content" />
     </Spin>
   ) : (
     <>
-     
       <CCard className="mb-4">
-      {title('PEMETAAN PEMBIMBING JURUSAN')}
+        {title('PEMETAAN PEMBIMBING JURUSAN')}
         <CCardBody>
           <CRow>
             <CCol sm={12}>
-              <Tabs type="card" onChange={onChange}>
-                <TabPane tab='PEMETAAN' key="1">
-                  <h5 className='spacebottom spacetop' style={{textAlign:'center'}}>TABEL PEMETAAN PEMBIMBING JURUSAN PROGRAM STUDI {prodi} </h5>
-                  <Table
-                    scroll={{ x: 'max-content' }}
-                    expandable={{
-                      expandedRowRender: (rec) => (
-                        <ul>
-                          {rec.participant.map((data, idx) => {
-                            return (
-                              <Row style={{padding:7}} key={data.id}>
-                                <Col span={2}>{idx+1}</Col>
-                                <Col span={4}>{data.id}</Col>
-                                <Col span={8}>{data.name}</Col>
-                              </Row>
-                            )
-                          })}
-                        </ul>
-                      ),
-                    }}
-                    columns={columns}
-                    dataSource={dataHasilPemetaan}
-                    rowKey='id'
-                    bordered
-                  />
-                </TabPane>
-
-                {/* {perusahaan.length > 0 && (
-                  <>
-                    <TabPane tab="Prodi D4" key="2">
-                      <h6>Tabel Pemetaan Perusahaan Prodi D4 </h6>
-                      <Table
-                        scroll={{ x: 'max-content' }}
-                        columns={columns}
-                        dataSource={perusahaan}
-                        rowKey="perusahaan."
-                        bordered
-                      />
-                    </TabPane>
-                  </>
-                )} */}
-              </Tabs>
+              <Tabs type="card" items={first_items} onChange={onChange}></Tabs>
             </CCol>
           </CRow>
         </CCardBody>
@@ -398,11 +403,11 @@ const PemetaanPembimbingJurusan = () => {
           </Button>,
         ]}
       >
-          <div style={{marginTop:10}}></div>
-          <hr/>
-        <b >{dataToEdit.company_name}</b>
-        <hr/>
-        <div className='spacebottom'></div>
+        <div style={{ marginTop: 10 }}></div>
+        <hr />
+        <b>{dataToEdit.company_name}</b>
+        <hr />
+        <div className="spacebottom"></div>
         <Form
           form={form1}
           name="basic"
@@ -424,7 +429,7 @@ const PemetaanPembimbingJurusan = () => {
             rules={[{ required: true, message: 'Nama Pembimbing Tidak Boleh Kosong' }]}
           >
             <Select
-            name='nama_pembimbing'
+              name="nama_pembimbing"
               showSearch
               style={{
                 width: 400,
