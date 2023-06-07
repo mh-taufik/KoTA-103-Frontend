@@ -34,6 +34,7 @@ const PemetaanPembimbingJurusan = () => {
   const [isModaleditOpen, setIsModalEditOpen] = useState(false)
   const [dataToEdit, setDataToEdit] = useState([])
   let history = useHistory()
+  const [CURRENT_YEAR, SET_CURRENT_YEAR] = useState(new Date().getFullYear())
   const [loadings, setLoadings] = useState([])
   const [form1] = Form.useForm()
   const [dataHasilPemetaan, setDataHasilPemetaan] = useState([])
@@ -193,7 +194,7 @@ const PemetaanPembimbingJurusan = () => {
 
     async function getDataPemetaanPerusahaan() {
       await axios
-        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all`)
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all?year=${CURRENT_YEAR}`)
         .then((result) => {
           setDataHasilPemetaan(result.data.data)
           console.log(result.data.data)
@@ -337,13 +338,18 @@ const PemetaanPembimbingJurusan = () => {
     {
       key: '1',
       label: 'PEMETAAN',
-      children: (
+      children: 
         <>
           <h5 className="spacebottom spacetop" style={{ textAlign: 'center' }}>
             TABEL PEMETAAN PEMBIMBING JURUSAN PROGRAM STUDI {prodi}{' '}
           </h5>
           <Table
             scroll={{ x: 'max-content' }}
+            columns={columns}
+            dataSource={dataHasilPemetaan}
+            rowKey={dataHasilPemetaan.company_id}
+            bordered
+            pagination={true}
             expandable={{
               expandedRowRender: (rec) => (
                 <ul>
@@ -359,13 +365,9 @@ const PemetaanPembimbingJurusan = () => {
                 </ul>
               ),
             }}
-            columns={columns}
-            dataSource={dataHasilPemetaan}
-            rowKey="id"
-            bordered
           />
         </>
-      ),
+      
     },
   ]
 
