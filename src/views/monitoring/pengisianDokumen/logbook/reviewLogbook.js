@@ -7,34 +7,16 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import '../rpp/rpp.css'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { Col, Row } from 'react-bootstrap'
-import Table from 'react-bootstrap/Table'
-import { Refresh } from '@mui/icons-material'
 import axios from 'axios'
 import { Route, Router, useHistory, useParams } from 'react-router-dom'
 import { Button, Card, FloatButton, Popover, Space, Spin, Tag, notification } from 'antd'
-import routes from 'src/routes'
 
 const ReviewLogbook = (props) => {
   var params = useParams()
   const NIM_PESERTA_BY_PARAMS = params.nim
   const LOGBOOK = params.id
   const [isLoading, setIsLoading] = useState(true)
-  const [tanggalLogbook, setTanggalLogbook] = useState()
   const [loadings, setLoadings] = useState([])
-  const [tanggalProyek, setTanggalProyek] = useState()
-  const [tools, setTools] = useState()
-  const [hasilKerja, setHasilKerja] = useState()
-  const [projectManager, setProjectManager] = useState()
-  const [keterangan, setKeterangan] = useState()
-  const [namaProyek, setNamaProyek] = useState()
-  const [technicalLeader, setTechnicalLeader] = useState()
-  const [tugasPeserta, setTugasPeserta] = useState()
-  const [waktuDanKegiatanPeserta, setWaktuDanKegiatanPeserta] = useState()
-  const [statusPengecekanPembimbing, setStatusPengecekanPembimbing] = useState(0)
-  const [submitAccepted, setSubmitAccepted] = useState(1)
-  const [logbookPeserta, setLogbookPeserta] = useState([])
-  const [usernamePeserta, setUsernamePeserta] = useState()
-  var dataLogbook = []
   const rolePengguna = localStorage.id_role
   const [logbookAttributesData, setLogbookAttributesData] = useState([''])
   axios.defaults.withCredentials = true
@@ -55,49 +37,55 @@ const ReviewLogbook = (props) => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/get/${ID_LOGBOOK}`)
         .then((result) => {
-          const convertDate = (date) => {
-            var temp_date_split = date.split('-')
-            const month = [
-              'Januari',
-              'Februari',
-              'Maret',
-              'April',
-              'Mei',
-              'Juni',
-              'Juli',
-              'Agustus',
-              'September',
-              'Oktober',
-              'November',
-              'Desember',
-            ]
-            var date_month = temp_date_split[1]
-            var month_of_date = month[parseInt(date_month) - 1]
-            return date ? `${temp_date_split[2]}  ${month_of_date}  ${temp_date_split[0]}` : null
-          }
+          console.log('RES', result.data.data)
+          // const convertDate = (date) => {
+          //   var temp_date_split = date.split('-')
+          //   const month = [
+          //     'Januari',
+          //     'Februari',
+          //     'Maret',
+          //     'April',
+          //     'Mei',
+          //     'Juni',
+          //     'Juli',
+          //     'Agustus',
+          //     'September',
+          //     'Oktober',
+          //     'November',
+          //     'Desember',
+          //   ]
+          //   var date_month = temp_date_split[1]
+          //   var month_of_date = month[parseInt(date_month) - 1]
+          //   return date ? `${temp_date_split[2]}  ${month_of_date}  ${temp_date_split[0]}` : null
+          // }
 
-          let data = result.data.data
-          let temp_res = []
+          // const cekDataIsNull = (data) =>{
+          //   return data?data:" "
+          // }
+
+          // let data = result.data.data
+          // let temp_res = []
        
-              temp_res = {
-                date : convertDate(data.date),
-                description : data.description,
-                grade : data.grade,
-                id : data.id,
-                participant_id : data.participant_id,
-                project_manager : data.project_manager,
-                project_name : data.project_name,
-                status : data.status.status,
-                task : data.task,
-                technical_leader : data.technical_leader,
-                time_and_activity : data.time_and_activity,
-                tools : data.tools,
-                work_result : data.work_result
-              }
+          //     temp_res = {
+          //       date : convertDate(data.date),
+          //       description : cekDataIsNull(data.description),
+          //       grade : data.grade,
+          //       id : data.id,
+          //       participant_id : data.participant_id,
+          //       project_manager : data.project_manager,
+          //       project_name : data.project_name,
+          //       status : data.status.status,
+          //       task : data.task,
+          //       technical_leader : data.technical_leader,
+          //       time_and_activity : data.time_and_activity,
+          //       tools : data.tools,
+          //       work_result : data.work_result,
+          //       encountered_problem : cekDataIsNull(data.encountered_problem)
+          //     }
       
 
-          console.log(temp_res)
-          setLogbookAttributesData(temp_res)
+          // console.log(temp_res)
+          setLogbookAttributesData(result.data.data)
           setIsLoading(false)
         })
         .catch(function (error) {

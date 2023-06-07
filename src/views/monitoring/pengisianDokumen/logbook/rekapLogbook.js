@@ -239,6 +239,7 @@ const RekapLogbook = () => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/get-all/${PESERTA}`)
         .then((result) => {
+         if(result.data.data.length>0){
           var temp = result.data.data
           var temp_res = []
           const convertDate = (date) => {
@@ -262,9 +263,7 @@ const RekapLogbook = () => {
             return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
           }
 
-          const convertStatusPengecekan = (nilai) => {
-            return nilai ? 'Sudah Dinilai' : 'Belum Dinilai'
-          }
+
 
           let getTempRes = function (obj) {
             for (var i in obj) {
@@ -272,14 +271,16 @@ const RekapLogbook = () => {
                 id: obj[i].id,
                 date: convertDate(obj[i].date),
                 grade: obj[i].grade,
-                status: obj[i].status,
-                grade_status: convertStatusPengecekan(obj[i].grade),
+                status: obj[i].status
               })
             }
           }
 
           getTempRes(temp)
           setLogbookPeserta(temp_res)
+         }else{
+          setLogbookPeserta(result.data.data)
+         }
           setIsLoading(false)
         })
         .catch(function (error) {
@@ -478,7 +479,7 @@ const RekapLogbook = () => {
         <>
           <Row>
             <Col span={12} style={{ textAlign: 'center' }}>
-              {record.grade_status === 'Sudah Dinilai' && (
+              {record.grade !== 'BELUM DINILAI' && (
                 <Popover content={<div>Pengeditan logbook tidak diizinkan</div>}>
                   <Button
                     id="button-pencil"
@@ -495,7 +496,7 @@ const RekapLogbook = () => {
                 </Popover>
               )}
 
-              {record.grade_status === 'Belum Dinilai' && (
+              {record.grade === 'BELUM DINILAI' && (
                 <Popover content={<div>Lakukan pengeditan logbook</div>}>
                   <Popconfirm
                     placement="topRight"

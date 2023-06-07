@@ -70,30 +70,30 @@ const RekapSelfAssessment = () => {
         .then((result) => {
           console.log(result.data.data)
 
-          var temp = []
-          var temp1 = result.data.data
+          // var temp = []
+          // var temp1 = result.data.data
           
-          let convertDate = function (date){
-            let temp_date_split = date.split('-')
-            const month = [
-              'Januari',
-              'Februari',
-              'Maret',
-              'April',
-              'Mei',
-              'Juni',
-              'Juli',
-              'Agustus',
-              'September',
-              'Oktober',
-              'November',
-              'Desember',
-            ]
-            let date_month = temp_date_split[1]
-            let month_of_date = month[parseInt(date_month) - 1]
-            // console.log(month_of_date,'isi date monts', month_of_date)
-            return  date? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`:null
-          }
+          // let convertDate = function (date){
+          //   let temp_date_split = date.split('-')
+          //   const month = [
+          //     'Januari',
+          //     'Februari',
+          //     'Maret',
+          //     'April',
+          //     'Mei',
+          //     'Juni',
+          //     'Juli',
+          //     'Agustus',
+          //     'September',
+          //     'Oktober',
+          //     'November',
+          //     'Desember',
+          //   ]
+          //   let date_month = temp_date_split[1]
+          //   let month_of_date = month[parseInt(date_month) - 1]
+          //   // console.log(month_of_date,'isi date monts', month_of_date)
+          //   return  date? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`:null
+          // }
 
           // if(result.data.data.length>0){
           //   var getTempSelfAssessment = function (obj) {
@@ -506,7 +506,7 @@ const RekapSelfAssessment = () => {
             </>
           )}
 
-          {rolePengguna === '1' && (
+          {/* {rolePengguna === '1' && (
             <CRow>
               <CCol sm={12}>
                 <hr />
@@ -534,7 +534,7 @@ const RekapSelfAssessment = () => {
                 />
               </CCol>
             </CRow>
-          )}
+          )} */}
         </CCardBody>
       </CCard>
       {rolePengguna !== '1' && (

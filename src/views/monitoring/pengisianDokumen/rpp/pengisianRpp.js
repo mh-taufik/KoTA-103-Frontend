@@ -329,18 +329,14 @@ const PengisianRpp = () => {
   /** HANDLE TAMBAH RPP */
   const handleSubmitRPP = async (data, index) => {
     await axios
-      .post('http://localhost:1337/api/rpps?populate=*', {
-        data: {
-          tanggal_mulai: tanggalMulaiPekerjaan,
-          tanggal_selesai: tanggalBerakhirPekerjaan,
-          status: ' ',
-          judulpekerjaan: topikPekerjaan,
-          deskripsi_tugas: deskripsiTugas,
-          perankelompok: peranDalamPekerjaan,
-          peserta: {
-            connect: [dataPeserta.id],
-          },
-        },
+      .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/create`, {
+   
+          'start_date': tanggalMulaiPekerjaan,
+          'finish_date': tanggalBerakhirPekerjaan,
+          'work_title': topikPekerjaan,
+          'task_description': deskripsiTugas,
+          'group_role': peranDalamPekerjaan,
+         
       })
       .then((res) => {
         console.log(res.data.data)
@@ -618,7 +614,7 @@ const PengisianRpp = () => {
               rules={[
                 {
                   required: 'true',
-                  message: 'Masukkan tanggal pengerjaan terlebih dahulu',
+                  message: 'Masukkan tanggal pengerjaan terlebih dahulu !',
                 },
                 {
                   type: 'date',

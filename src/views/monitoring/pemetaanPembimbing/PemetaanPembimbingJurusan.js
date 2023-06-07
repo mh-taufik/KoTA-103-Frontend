@@ -185,7 +185,7 @@ const PemetaanPembimbingJurusan = () => {
   }
 
   useEffect(() => {
-    if (USER_ID_PRODI === 0) {
+    if (USER_ID_PRODI === '0') {
       setProdi('D3')
     } else {
       setProdi('D4')
