@@ -16,13 +16,13 @@ import {
   Input,
   Modal,
   notification,
-
   Space,
-
   Select,
   Dropdown,
+  Spin,
 } from 'antd'
 import axios from 'axios'
+import '../pengisianDokumen/rpp/rpp.css'
 import { useHistory } from 'react-router-dom'
 import { SearchOutlined } from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
@@ -37,20 +37,21 @@ const PemetaanPembimbingJurusan = () => {
   const [state, setState] = useState({ searchText: '', searchedColumn: '' })
   const [isLoading, setIsLoading] = useState(true)
   const [key, setKey] = useState('1')
-  const [isModaleditVisible, setIsModalEditVisible] = useState(false)
-  const [choose, setChoose] = useState([])
+  const [isModaleditOpen, setIsModalEditOpen] = useState(false)
+  const [dataToEdit, setDataToEdit] = useState([])
   let history = useHistory()
   const [loadings, setLoadings] = useState([])
   const [form1] = Form.useForm()
-  const [pembimbing, setPembimbing] = useState([])
+  const [dataHasilPemetaan, setDataHasilPemetaan] = useState([])
   const [pembimbingChoosen, setPembimbingChoosen] = useState([])
   const [idChoosen, setIdChoosen] = useState()
   const [idPerusahaanChoosen, setIdPerusahaanChoosen] = useState()
   axios.defaults.withCredentials = true
-  const [perusahaan, setPerusahaan] = useState([])
-  const [perusahaanEdit, setPerusahaanEdit] = useState([])
-  const [selectedItems, setSelectedItems] = useState([])
+  const USER_ID_PRODI = localStorage.id_prodi
   const [optPembimbing, setOptPembimbing] = useState([])
+  const [prodi,setProdi] = useState()
+
+
   const getColumnSearchProps = (dataIndex, name) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
       <div style={{ padding: 8 }}>
@@ -58,23 +59,25 @@ const PemetaanPembimbingJurusan = () => {
           ref={(node) => {
             searchInput = node
           }}
-          placeholder={`Search ${name}`}
+          placeholder={`Cari berdasarkan ${name}`}
           value={selectedKeys[0]}
           onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{ width: 188, marginBottom: 8, display: 'block' }}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex, `cari`)}
+          style={{ marginBottom: 8, display: 'block' }}
         />
         <Space>
           <Button
             type="primary"
-            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex, `cari`)}
             icon={<SearchOutlined />}
             size="small"
+            loading={loadings[`cari`]}
             style={{ width: 90 }}
           >
-            Search
+            Cari
           </Button>
           <Button
+            loading={loadings[99]}
             onClick={() => handleReset(clearFilters, '', confirm, dataIndex, 99)}
             size="small"
             style={{ width: 90 }}
@@ -87,26 +90,26 @@ const PemetaanPembimbingJurusan = () => {
     filterIcon: (filtered) => (
       <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
     ),
-    onFilter: (value, record) => {
-      return get(record, dataIndex).toString().toLowerCase().includes(value.toLowerCase())
-    },
-    onFilterDropdownVisibleChange: (visible) => {
+    onFilter: (value, record) =>
+      record[dataIndex]
+        ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase())
+        : '',
+    onFilterDropdownOpenChange: (visible) => {
       if (visible) {
-        setTimeout(() => searchInput.select())
+        setTimeout(() => searchInput.select(), 100)
       }
     },
-    render: (text) => {
-      return isequal(state.searchedColumn, dataIndex) ? (
+    render: (text) =>
+      state.searchedColumn === dataIndex ? (
         <Highlighter
           highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
           searchWords={[state.searchText]}
           autoEscape
-          textToHighlight={text.toString()}
+          textToHighlight={text ? text.toString() : ''}
         />
       ) : (
         text
-      )
-    },
+      ),
   })
 
   const handleSearch = (selectedKeys, confirm, dataIndex, index) => {
@@ -138,22 +141,22 @@ const PemetaanPembimbingJurusan = () => {
     })
   }
 
-
   const showModalEdit = (record) => {
-    setIsModalEditVisible(true)
-    setChoose(record)
+    setIsModalEditOpen(true)
+    setDataToEdit(record)
   }
 
+  
+  const handleCancelEdit = () => {
+    setIsModalEditOpen(false)
+  }
 
-  const refreshData = (index) => {
-    axios.get('http://localhost:1337/api/perusahaans?populate=*').then((result) => {
-      setPembimbingChoosen(' ')
-      setPerusahaan(result.data.data)
-      setLoadings((prevLoadings) => {
-        const newLoadings = [...prevLoadings]
-        newLoadings[index] = false
-        return newLoadings
-      })
+  const refreshData = async(index) => {
+    await axios
+    .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all`)
+    .then((result) => {
+     setDataHasilPemetaan(result.data.data)
+      setIsLoading(false)
     })
   }
 
@@ -171,7 +174,7 @@ const PemetaanPembimbingJurusan = () => {
         notification.success({
           message: 'Data Pembimbing Jurusan Berhasil Diubah',
         })
-        setIsModalEditVisible(false)
+        setIsModalEditOpen(false)
         form1.resetFields()
       })
       .catch(function (error) {
@@ -191,11 +194,18 @@ const PemetaanPembimbingJurusan = () => {
   }
 
   useEffect(() => {
+    if(USER_ID_PRODI===0){
+      setProdi('D3')
+    }else{
+      setProdi('D4')
+    }
+
     async function getDataPemetaanPerusahaan() {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all`)
         .then((result) => {
-          console.log('datas', result)
+         setDataHasilPemetaan(result.data.data)
+          setIsLoading(false)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -213,25 +223,22 @@ const PemetaanPembimbingJurusan = () => {
         })
     }
 
-    const getAllPembimbingJurusan = async () => {
+    const getAllPembimbingJurusan = async() => {
       await axios
-        .get('http://localhost:1337/api/pembimbing-jurusans')
-        .then((res) => {
-          console.log('data pembimbing', res.data.data)
-          let temp = res.data.data
-          let temp1 = []
-          let funcGetTempRes = function (data) {
-            for (var i in data) {
-              temp1.push({
-                value: data[i].id,
-                label: data[i].attributes.nama,
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}account/get-supervisor`)
+        .then((result) => {
+          let temp_data = result.data.data
+          let data_res = []
+          let funcDataRes = function(data){
+            for(var i in data){
+              data_res.push({
+                value : data[i].id_lecturer,
+                label : data[i].name
               })
             }
           }
-
-          funcGetTempRes(temp)
-          console.log('RES', temp1)
-          setOptPembimbing(temp1)
+          funcDataRes(temp_data)
+          setOptPembimbing(data_res)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -249,22 +256,21 @@ const PemetaanPembimbingJurusan = () => {
         })
     }
 
-    // getAllPembimbingJurusan()
+    getAllPembimbingJurusan()
     getDataPemetaanPerusahaan()
   }, [history])
-
 
   const columns = [
     {
       title: 'Nama Perusahaan',
-      dataIndex: ['attributes', 'namaperusahaan'],
-      ...getColumnSearchProps(['attributes', 'namaperusahaan'], 'Nama Perusahaan'),
+      dataIndex: 'company_name',
+      ...getColumnSearchProps('company_name', 'Nama Perusahaan'),
       width: '40%',
     },
     {
       title: 'Nama Pembimbing Jurusan',
-      dataIndex: ['attributes', 'pembimbingjurusan', 'data', 'attributes', 'nama'],
-      // ...getColumnSearchProps( ['attributes', 'pembimbingjurusan', 'data', 'attributes', 'nama'], 'Nama Pembimbing Jurusan'),
+      dataIndex: 'lecturer_name',
+      ...getColumnSearchProps('lecturer_name', 'Nama Pembimbing Jurusan'),
       width: '30%',
     },
     {
@@ -281,17 +287,13 @@ const PemetaanPembimbingJurusan = () => {
                 shape="circle"
                 style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
                 onClick={() => {
-                  setIdPerusahaanChoosen(record.id)
-
+                  setIdPerusahaanChoosen(record.company_id)
                   showModalEdit(record)
-                  console.log('data edit', record)
-                  // console.log("pembimbing choosen", pembimbingChoosen)
                 }}
               >
                 <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
               </Button>
             </Col>
-           
           </Row>
         </>
       ),
@@ -302,10 +304,6 @@ const PemetaanPembimbingJurusan = () => {
     setKey(activeKey)
   }
 
-  const handleCancelEdit = () => {
-    setIsModalEditVisible(false)
-  }
-
 
   const title = (judul) => {
     return (
@@ -314,7 +312,7 @@ const PemetaanPembimbingJurusan = () => {
           <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius: 2 }}>
             <Col span={24}>
               <b>
-                <h4 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h4>
+                <h5 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h5>
               </b>
             </Col>
           </Row>
@@ -324,39 +322,44 @@ const PemetaanPembimbingJurusan = () => {
     )
   }
 
-  // isLoading ? (<Spin indicator={antIcon} />) : (
-  return (
+  return isLoading ? (
+    <Spin tip="Loading" size="large">
+      <div className="content" />
+    </Spin>
+  ) : (
     <>
-      {title('PEMETAAN PEMBIMBING JURUSAN')}
+     
       <CCard className="mb-4">
+      {title('PEMETAAN PEMBIMBING JURUSAN')}
         <CCardBody>
-          {localStorage.getItem('id_role') === '3' && key === '1' && <></>}
           <CRow>
             <CCol sm={12}>
               <Tabs type="card" onChange={onChange}>
-                {perusahaan.length > 0 && (
-                  <>
-                    <TabPane tab="PEMETAAN" key="1">
-                      <h6>Tabel Pemetaan Perusahaan Prodi D3 </h6>
-                      <Table
-                        scroll={{ x: 'max-content' }}
-                        expandable={{
-                          expandedRowRender: (rec) => (
-                            <ul>
-                              {rec.attributes.pesertas.data.map((data, idx) => {
-                                return <li style={{fontSize:14, padding:5}} key={data.id}>{data.attributes.nama}</li>
-                              })}
-                            </ul>
-                          ),
-                        }}
-                        columns={columns}
-                        dataSource={perusahaan}
-                        rowKey="id"
-                        bordered
-                      />
-                    </TabPane>
-                  </>
-                )}
+                <TabPane tab='PEMETAAN' key="1">
+                  <h5 className='spacebottom spacetop' style={{textAlign:'center'}}>TABEL PEMETAAN PEMBIMBING JURUSAN PROGRAM STUDI {prodi} </h5>
+                  <Table
+                    scroll={{ x: 'max-content' }}
+                    expandable={{
+                      expandedRowRender: (rec) => (
+                        <ul>
+                          {rec.participant.map((data, idx) => {
+                            return (
+                              <Row style={{padding:7}} key={data.id}>
+                                <Col span={2}>{idx+1}</Col>
+                                <Col span={4}>{data.id}</Col>
+                                <Col span={8}>{data.name}</Col>
+                              </Row>
+                            )
+                          })}
+                        </ul>
+                      ),
+                    }}
+                    columns={columns}
+                    dataSource={dataHasilPemetaan}
+                    rowKey='id'
+                    bordered
+                  />
+                </TabPane>
 
                 {/* {perusahaan.length > 0 && (
                   <>
@@ -380,11 +383,12 @@ const PemetaanPembimbingJurusan = () => {
 
       <Modal
         title="Ubah Pembimbing Jurusan"
-        visible={isModaleditVisible}
+        open={isModaleditOpen}
         onOk={form1.submit}
         onCancel={handleCancelEdit}
         width={600}
         zIndex={9999999}
+        destroyOnClose
         footer={[
           <Button key="back" onClick={handleCancelEdit}>
             Batal
@@ -394,16 +398,24 @@ const PemetaanPembimbingJurusan = () => {
           </Button>,
         ]}
       >
+          <div style={{marginTop:10}}></div>
+          <hr/>
+        <b >{dataToEdit.company_name}</b>
+        <hr/>
+        <div className='spacebottom'></div>
         <Form
           form={form1}
           name="basic"
           wrapperCol={{ span: 24 }}
-          onFinish={() => {HandleEditPembimbingJurusan(idPerusahaanChoosen, idChoosen);form1.resetFields()}}
+          onFinish={() => {
+            HandleEditPembimbingJurusan(idPerusahaanChoosen, idChoosen)
+            form1.resetFields()
+          }}
           autoComplete="off"
           fields={[
             {
-              name: 'namapembimbing',
-              value: pembimbingChoosen,
+              name: 'nama_pembimbing',
+              value: dataToEdit.lecturer_name,
             },
           ]}
         >
@@ -412,10 +424,10 @@ const PemetaanPembimbingJurusan = () => {
             rules={[{ required: true, message: 'Nama Pembimbing Tidak Boleh Kosong' }]}
           >
             <Select
+            name='nama_pembimbing'
               showSearch
-              
               style={{
-                width: 200,
+                width: 400,
               }}
               placeholder="Search to Select"
               optionFilterProp="children"
@@ -425,8 +437,10 @@ const PemetaanPembimbingJurusan = () => {
                   .toLowerCase()
                   .localeCompare((optionB?.label ?? '').toLowerCase())
               }
+              defaultValue={dataToEdit.lecturer_name}
               onChange={(value) => {
                 setIdChoosen(value)
+                console.log(value)
               }}
               options={optPembimbing}
             />
