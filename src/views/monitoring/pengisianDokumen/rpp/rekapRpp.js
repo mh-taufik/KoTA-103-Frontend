@@ -3,8 +3,8 @@ import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faPencil, faTrashCan } from '@fortawesome/free-solid-svg-icons'
-import {ArrowLeftOutlined } from '@ant-design/icons';
-import { FloatButton } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons'
+import { FloatButton } from 'antd'
 import {
   Table,
   Button,
@@ -69,70 +69,8 @@ const RekapRPP = () => {
     axios
       .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/get-all/${PESERTA}`)
       .then((result) => {
-        if(result.data.data.length>0){
+        if (result.data.data.length > 0) {
           let temp = []
-        let temp1 = result.data.data
-        const convertDate = (date) => {
-          let temp_date_split = date.split('-')
-          const month = [
-            'Januari',
-            'Februari',
-            'Maret',
-            'April',
-            'Mei',
-            'Juni',
-            'Juli',
-            'Agustus',
-            'September',
-            'Oktober',
-            'November',
-            'Desember',
-          ]
-          let date_month = temp_date_split[1]
-          let month_of_date = month[parseInt(date_month) - 1]
-          return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
-        }
-
-        let getDataTempRPP = function (obj) {
-          for (var i in obj) {
-            temp.push({
-              rpp_id: obj[i].rpp_id,
-              work_title: obj[i].work_title,
-              start_date: convertDate(obj[i].start_date),
-              finish_date: convertDate(obj[i].finish_date),
-            })
-          }
-        }
-
-        getDataTempRPP(temp1)
-        setRppPeserta(temp)
-        }else{
-          setRppPeserta(result.data.data)
-        }
-        
-        setIsLoading(false)
-        setLoadings((prevLoadings) => {
-          const newLoadings = [...prevLoadings]
-          newLoadings[index] = false
-          return newLoadings
-        })
-      })
-  }
-
-   useEffect(() => {
-    async function getRppPeserta(index) {
-      let PESERTA
-      if (rolePengguna === '1') {
-        PESERTA = NIM_PESERTA_AS_USER
-      } else {
-        PESERTA = NIM_PESERTA_FROM_PARAMS
-      }
-      enterLoading(index)
-      await axios
-        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/get-all/${PESERTA}`)
-        .then((result) => {
-          if(result.data.data.length>0){
-            let temp = []
           let temp1 = result.data.data
           const convertDate = (date) => {
             let temp_date_split = date.split('-')
@@ -168,10 +106,74 @@ const RekapRPP = () => {
 
           getDataTempRPP(temp1)
           setRppPeserta(temp)
-          }else{
+        } else {
+          setRppPeserta(result.data.data)
+        }
+
+        setIsLoading(false)
+        setLoadings((prevLoadings) => {
+          const newLoadings = [...prevLoadings]
+          newLoadings[index] = false
+          return newLoadings
+        })
+      })
+  }
+
+  useEffect(() => {
+    async function getRppPeserta(index) {
+      let PESERTA
+      if (rolePengguna === '1') {
+        PESERTA = NIM_PESERTA_AS_USER
+      } else {
+        PESERTA = NIM_PESERTA_FROM_PARAMS
+      }
+      enterLoading(index)
+      await axios
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/get-all/${PESERTA}`)
+        .then((result) => {
+          if (result.data.data.length > 0) {
+            let temp = []
+            let temp1 = result.data.data
+            const convertDate = (date) => {
+              let temp_date_split = date.split('-')
+              const month = [
+                'Januari',
+                'Februari',
+                'Maret',
+                'April',
+                'Mei',
+                'Juni',
+                'Juli',
+                'Agustus',
+                'September',
+                'Oktober',
+                'November',
+                'Desember',
+              ]
+              let date_month = temp_date_split[1]
+              let month_of_date = month[parseInt(date_month) - 1]
+              return date
+                ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
+                : null
+            }
+
+            let getDataTempRPP = function (obj) {
+              for (var i in obj) {
+                temp.push({
+                  rpp_id: obj[i].rpp_id,
+                  work_title: obj[i].work_title,
+                  start_date: convertDate(obj[i].start_date),
+                  finish_date: convertDate(obj[i].finish_date),
+                })
+              }
+            }
+
+            getDataTempRPP(temp1)
+            setRppPeserta(temp)
+          } else {
             setRppPeserta(result.data.data)
           }
-          
+
           setIsLoading(false)
         })
         .catch(function (error) {
@@ -198,11 +200,12 @@ const RekapRPP = () => {
         PESERTA = parseInt(NIM_PESERTA_FROM_PARAMS)
       }
       await axios
-        .post(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-by-id`,{
-          id:[PESERTA]
+        .post(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-by-id`, {
+          id: [PESERTA],
         })
         .then((result) => {
           setDataPeserta(result.data.data[0])
+          setIsLoading(false)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -267,7 +270,7 @@ const RekapRPP = () => {
       record[dataIndex]
         ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase())
         : '',
-    onFilterDropdownVisibleChange: (visible) => {
+    onFilterDropdownOpenChange: (visible) => {
       if (visible) {
         setTimeout(() => searchInput.select(), 100)
       }
@@ -314,7 +317,7 @@ const RekapRPP = () => {
 
   /** TOMBOL DETAIL RPP */
   const confirmToDetail = (idMhs) => {
-    (rolePengguna !=='1')
+    rolePengguna !== '1'
       ? history.push(`/rencanaPenyelesaianProyek/DetailRPP/${wannaDetail.id}/${idMhs}`)
       : history.push(`/rencanaPenyelesaianProyek/detail/${wannaDetail.id}`)
   }
@@ -368,8 +371,8 @@ const RekapRPP = () => {
       dataIndex: 'action',
       render: (text, record) => (
         <>
-         {/* ROLE PANITIA */}
-          {rolePengguna !=='1' &&(
+          {/* ROLE PANITIA */}
+          {rolePengguna !== '1' && (
             <Row>
               <Col span={6} style={{ textAlign: 'center' }}>
                 <Popover content={hoverButtonLihatDetail}>
@@ -389,26 +392,26 @@ const RekapRPP = () => {
           {/* ROLE PEMBIMBING JURUSAN */}
           {rolePengguna === '4' && (
             <Row>
-            <Col span={6} style={{ textAlign: 'center' }}>
-              <Popover content={hoverButtonLihatDetail}>
-                <Button
-                  type="primary"
-                  shape="round"
-                  size="small"
-                  onClick={() => actionLihatRPPPeserta(record.rpp_id)}
-                >
-                  Lihat Detail
-                </Button>
-              </Popover>
-            </Col>
-          </Row>
+              <Col span={6} style={{ textAlign: 'center' }}>
+                <Popover content={hoverButtonLihatDetail}>
+                  <Button
+                    type="primary"
+                    shape="round"
+                    size="small"
+                    onClick={() => actionLihatRPPPeserta(record.rpp_id)}
+                  >
+                    Lihat Detail
+                  </Button>
+                </Popover>
+              </Col>
+            </Row>
           )}
         </>
       ),
     },
   ]
 
-/** KOLOM PESERTA */
+  /** KOLOM PESERTA */
   const columns = [
     {
       title: 'NO',
@@ -468,8 +471,7 @@ const RekapRPP = () => {
               </Popconfirm>
             </Col>
             <Col span={12} style={{ textAlign: 'center' }}>
-            
-                <Popover content={<div>Lihat detail RPP</div>}>
+              <Popover content={<div>Lihat detail RPP</div>}>
                 <Button
                   id="button-eye"
                   htmlType="submit"
@@ -481,8 +483,7 @@ const RekapRPP = () => {
                 >
                   <FontAwesomeIcon icon={faEye} style={{ color: 'black' }} />
                 </Button>
-                </Popover>
-         
+              </Popover>
             </Col>
           </Row>
         </>
@@ -490,21 +491,24 @@ const RekapRPP = () => {
     },
   ]
 
-
   // isLoading ? (
   //   <Spin indicator={antIcon} />
   // ) :
-  const buttonKembaliKeListHandling= () => {
+  const buttonKembaliKeListHandling = () => {
     history.push(`/rekapDokumenPeserta`)
   }
   const title = (judul) => {
-    return (
+    return isLoading ? (
+      <Spin tip="Loading" size="large">
+        <div className="content" />
+      </Spin>
+    ) : (
       <>
         <div>
-          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius:2 }}>
+          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius: 2 }}>
             <Col span={24}>
               <b>
-                <h5 style={{color:'#f6ffed', marginLeft:30, marginTop:6}}>{judul}</h5>
+                <h5 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h5>
               </b>
             </Col>
           </Row>
@@ -516,41 +520,40 @@ const RekapRPP = () => {
 
   return (
     <>
-       <div>
-       {rolePengguna !== '1' && (
-        <Space
-          className="spacebottom"
-          direction="vertical"
-          size="middle"
-          style={{
-            display: 'flex',
-          }}
-        >
-          <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
-            <Row style={{padding:5}}>
-              <Col span={4}>Nama Lengkap</Col>
-              <Col span={2}>:</Col>
-              <Col span={8}>{dataPeserta.name}</Col>
-            </Row>
-            <Row style={{padding:5}}>
-              <Col span={4}>NIM</Col>
-              <Col span={2}>:</Col>
-              <Col span={8}>{dataPeserta.nim}</Col>
-            </Row>
-            <Row style={{padding:5}}>
-              <Col span={4}>Sistem Kerja</Col>
-              <Col span={2}>:</Col>
-              <Col span={8}>{dataPeserta.work_system}</Col>
-            </Row>
-            <Row style={{padding:5}}>
-              <Col span={4}>Angkatan</Col>
-              <Col span={2}>:</Col>
-              <Col span={8}>{dataPeserta.year}</Col>
-            </Row>
-          </Card>
-        </Space>
-      )}
-
+      <div>
+        {rolePengguna !== '1' && (
+          <Space
+            className="spacebottom"
+            direction="vertical"
+            size="middle"
+            style={{
+              display: 'flex',
+            }}
+          >
+            <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
+              <Row style={{ padding: 5 }}>
+                <Col span={4}>Nama Lengkap</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.name}</Col>
+              </Row>
+              <Row style={{ padding: 5 }}>
+                <Col span={4}>NIM</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.nim}</Col>
+              </Row>
+              <Row style={{ padding: 5 }}>
+                <Col span={4}>Sistem Kerja</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.work_system}</Col>
+              </Row>
+              <Row style={{ padding: 5 }}>
+                <Col span={4}>Angkatan</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.year}</Col>
+              </Row>
+            </Card>
+          </Space>
+        )}
       </div>
       <div className="spacetop"></div>
       <div className="spacetop">
@@ -591,7 +594,7 @@ const RekapRPP = () => {
             {rolePengguna !== '1' && (
               <CRow>
                 <CCol sm={12}>
-                <h4 className="justify">TABEL RENCANA PENYELESAIAN PROYEK (RPP) PESERTA</h4>
+                  <h4 className="justify">TABEL RENCANA PENYELESAIAN PROYEK (RPP) PESERTA</h4>
                   <hr />
                   <Table
                     scroll={{ x: 'max-content' }}
@@ -606,8 +609,13 @@ const RekapRPP = () => {
           </CCardBody>
         </CCard>
       </div>
-       {rolePengguna !== '1' && (
-            <FloatButton type='primary' onClick={buttonKembaliKeListHandling} icon={<ArrowLeftOutlined />} tooltip={<div>Kembali ke Rekap Dokumen Peserta</div>} />
+      {rolePengguna !== '1' && (
+        <FloatButton
+          type="primary"
+          onClick={buttonKembaliKeListHandling}
+          icon={<ArrowLeftOutlined />}
+          tooltip={<div>Kembali ke Rekap Dokumen Peserta</div>}
+        />
       )}
     </>
   )

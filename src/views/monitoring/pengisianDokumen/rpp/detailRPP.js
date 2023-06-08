@@ -16,7 +16,7 @@ import {
   TableRow,
 } from '@mui/material'
 import Paper from '@mui/material/Paper'
-import { Button, FloatButton, Popover, Space } from 'antd'
+import { Button, FloatButton, Popover, Space, Spin } from 'antd'
 
 const DetailRPP = (props) => {
   var params = useParams()
@@ -158,6 +158,8 @@ const DetailRPP = (props) => {
           temp_jadwalKeseluruhans(temp_jadwalKeseluruhan)
           setDataJadwalPenyelesaianKeseluruhan(temp_jadwalKeseluruhan1)
           console.log('capaian mingguan', temp_jadwalKeseluruhan1)
+
+          setIsLoading(false)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -183,7 +185,9 @@ const DetailRPP = (props) => {
   }
 
 
-  return (
+  return isLoading?( <Spin tip="Loading" size="large">
+  <div className="content" />
+</Spin>): (
     <>
       <div className="container2">
       <React.Fragment>

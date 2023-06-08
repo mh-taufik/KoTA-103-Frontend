@@ -51,14 +51,7 @@ export default function UploadLaporan() {
     setNumPages(nextNumPages)
   }
 
-  const getIdPeserta = async () => {
-    await axios
-      .get(`http://localhost:1337/api/pesertas?populate=*&filters[username][$eq]=${NIM_PESERTA}`)
-      .then((res) => {
-        console.log(res.data.data[0].id)
-        setIdPeserta(res.data.data[0].id)
-      })
-  }
+
 
   function formatDate(date) {
     var d = new Date(date),
@@ -119,7 +112,7 @@ export default function UploadLaporan() {
   }
 
   useEffect(() => {
-    getIdPeserta()
+
 
     const getDataLaporanPeserta = async () => {
       await axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get/${ID_LAPORAN_PESERTA}`).then((res) => {

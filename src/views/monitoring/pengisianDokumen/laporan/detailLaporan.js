@@ -31,19 +31,11 @@ export default function UploadLaporan() {
   const idLaporan = params.id
 
 
-  const getIdPeserta = async () => {
-    await axios
-      .get(`http://localhost:1337/api/pesertas?populate=*&filters[username][$eq]=${NIM_PESERTA}`)
-      .then((res) => {
-        console.log(res.data.data[0].id)
-        setIdPeserta(res.data.data[0].id)
-      })
-  }
 
 
 
   useEffect(() => {
-    getIdPeserta()
+
 
     const getDataLaporanPeserta = async () => {
       await axios.get(`http://localhost:1337/api/laporans/${idLaporan}?populate=*`).then((res) => {

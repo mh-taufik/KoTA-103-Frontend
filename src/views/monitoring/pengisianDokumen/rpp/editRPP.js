@@ -12,6 +12,7 @@ import {
   Row,
   Select,
   Space,
+  Spin,
   Table,
   notification,
 } from 'antd'
@@ -34,6 +35,7 @@ import { faEye, faPencil } from '@fortawesome/free-solid-svg-icons'
 
 const { TextArea } = Input
 const EditRPP = () => {
+const [isLoading, setIsLoading] = useState(true)
 const [, updateState] = React.useState();
 const forceUpdate = React.useCallback(() => updateState({}), []);
   const dateFormat = 'YYYY-MM-DD'
@@ -782,6 +784,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
           temp_jadwalKeseluruhans(temp_jadwalKeseluruhan)
           setDataJadwalPenyelesaianKeseluruhan(temp_jadwalKeseluruhan1)
           console.log('capaian mingguan', temp_jadwalKeseluruhan1)
+          setIsLoading(false)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -1139,7 +1142,9 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
     },
   ]
 
-  return (
+  return isLoading?( <Spin tip="Loading" size="large">
+  <div className="content" />
+</Spin>):(
     <>
       <div className="container">
         {/* <button
@@ -1881,15 +1886,14 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                 onChange={(date, datestring) => setDataMilestonesEditTanggalMulai(datestring)}
                 disabledDate={(current) => {
                   let minusToGetLimit = new Date().getDay()
-                  let limit_minus_day = 0
                   if (minusToGetLimit === 0) {
-                   limit_minus_day = 7
+                    setLimitMinusDay(7)
                   } else {
-                    limit_minus_day = 0
+                    setLimitMinusDay(minusToGetLimit)
                   }
                   return (
                     moment().add(-1, 'days') >= current ||
-                    moment().add(7 - limit_minus_day, 'days') >= current
+                    moment().add(7 - limitMinusDay, 'days') >= current
                   )
                 }}
               />
