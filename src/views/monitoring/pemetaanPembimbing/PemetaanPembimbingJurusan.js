@@ -152,21 +152,22 @@ const PemetaanPembimbingJurusan = () => {
       })
   }
 
-  const HandleEditPembimbingJurusan = async (id, idPembimbing, index) => {
+  const HandleEditPembimbingJurusan = async (idPerusahaan, idPembimbing, index) => {
+    // console.log(idPerusahaan,'---', )
+    // console.log(idPembimbing,'-)-', )
     await axios
-      .put(`http://localhost:1337/api/perusahaans/${id}`, {
-        data: {
-          pembimbingjurusan: {
-            connect: [idPembimbing],
-          },
-        },
-      })
+      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/update`, [{
+        "company_id" : parseInt(idPerusahaan),
+        "lecturer_id" : parseInt(idPembimbing)
+      }])
       .then((res) => {
-        refreshData(index)
+        console.log(res)
+     
         notification.success({
           message: 'Data Pembimbing Jurusan Berhasil Diubah',
         })
         setIsModalEditOpen(false)
+        refreshData(index)
         form1.resetFields()
       })
       .catch(function (error) {

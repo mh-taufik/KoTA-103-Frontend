@@ -126,8 +126,11 @@ const RekapSelfAssessment = () => {
             })
           } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
             history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+          } else if (error.toJSON().status > 500 && error.toJSON().status <= 599) {
             history.push('/500')
+          } else if(error.toJSON().status === 500){
+            setSelfAssessmentPeserta(undefined)
+            setIsLoading(false)
           }
         })
     }
@@ -506,7 +509,7 @@ const RekapSelfAssessment = () => {
             </>
           )}
 
-          {/* {rolePengguna === '1' && (
+          {rolePengguna === '1' && (
             <CRow>
               <CCol sm={12}>
                 <hr />
@@ -534,7 +537,7 @@ const RekapSelfAssessment = () => {
                 />
               </CCol>
             </CRow>
-          )} */}
+          )}
         </CCardBody>
       </CCard>
       {rolePengguna !== '1' && (

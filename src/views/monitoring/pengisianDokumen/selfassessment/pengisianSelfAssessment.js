@@ -278,7 +278,7 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
   ) : (
     <>
    
-      <Form>
+      {/* <Form>
         {' '}
         <div className="container">
          
@@ -394,7 +394,7 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
       <FloatButton type='primary' onClick={handleKembaliKeRekapSelfAssessment} icon={<ArrowLeftOutlined />} tooltip={<div>Kembali ke Rekap Self Assessment</div>} />
 
 
-
+ */}
 
     </>
   )
