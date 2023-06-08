@@ -29,17 +29,12 @@ import '../pengisianDokumen/rpp/rpp.css'
 import TextArea from 'antd/lib/input/TextArea'
 import { Box } from '@mui/material'
 
-const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const PembobotanPenilaianFormPembimbing = () => {
   const [form] = Form.useForm()
   let history = useHistory()
   const [loadings, setLoadings] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [poinPenilaianFormPembimbing, setPoinPenilaianFormPembimbing] = useState({})
-  const [nilaiPoinSatu, setNilaiPoinSatu] = useState()
-  const [nilaiPoinDua, setNilaiPoinDua] = useState()
-  const [nilaiPoinTigas, setNilaiPoinTiga] = useState()
-  const [isCanUpdate, setIsCanUpdate] = useState(true)
   const [dataPoinPenilaian, setDataPoinPenilaian] = useState([])
   const [isSuccessUpdateData, setIsSuccessUpdateData] = useState(true)
 
@@ -55,23 +50,23 @@ const PembobotanPenilaianFormPembimbing = () => {
     const getDataPoinPenilaianFormPembimbing = async (index) => {
       // enterLoading(index)
       await axios
-        .get('http://localhost:1337/api/pembobotanformpembimbings')
+        .get('http://localhost:8080/monitoring/supervisor/grade/aspect/get')
         .then((result) => {
           console.log(result)
-          console.log(result.data.data)
+          console.log('AKHAHDIO', result.data.data)
           setPoinPenilaianFormPembimbing({
             idNilaiProsesBimbingan: result.data.data[0].id,
             idNilaiLaporan: result.data.data[1].id,
             idNilaiLainnya: result.data.data[2].id,
-            bobotNilaiProsesBimbingan: result.data.data[0].attributes.bobot,
-            bobotNilaiLaporan: result.data.data[1].attributes.bobot,
-            bobotNilaiLainnya: result.data.data[2].attributes.bobot,
-            deskripsiNilaiProsesBimbingan: result.data.data[0].attributes.deskripsi,
-            deskripsiNilaiLaporan: result.data.data[1].attributes.deskripsi,
-            deskripsiNilaiLainnya: result.data.data[2].attributes.deskripsi,
-            poinNilaiProsesBimbingan: result.data.data[0].attributes.poin,
-            poinNilaiLaporan: result.data.data[1].attributes.poin,
-            poinNilaiLainnya: result.data.data[2].attributes.poin,
+            bobotNilaiProsesBimbingan: result.data.data[0].max_grade,
+            bobotNilaiLaporan: result.data.data[1].max_grade,
+            bobotNilaiLainnya: result.data.data[2].max_grade,
+            deskripsiNilaiProsesBimbingan: result.data.data[0].description,
+            deskripsiNilaiLaporan: result.data.data[1].description,
+            deskripsiNilaiLainnya: result.data.data[2].description,
+            poinNilaiProsesBimbingan: result.data.data[0].name,
+            poinNilaiLaporan: result.data.data[1].name,
+            poinNilaiLainnya: result.data.data[2].name,
           })
 
           let temp = result.data.data
@@ -89,24 +84,24 @@ const PembobotanPenilaianFormPembimbing = () => {
           setDataPoinPenilaian(temp1)
           setIsLoading(false)
         })
-        .catch(function (error) {
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
-              },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-            history.push('/500')
-          }
-        })
+        // .catch(function (error) {
+        //   if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+        //     history.push({
+        //       pathname: '/login',
+        //       state: {
+        //         session: true,
+        //       },
+        //     })
+        //   } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+        //     history.push('/404')
+        //   } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+        //     history.push('/500')
+        //   }
+        // })
     }
 
     getDataPoinPenilaianFormPembimbing()
-    console.log('res', poinPenilaianFormPembimbing)
+    // console.log('res', poinPenilaianFormPembimbing)
   }, [history])
 
   const SimpanDataPerubahanPembobotan = async (index) => {
@@ -185,48 +180,49 @@ const PembobotanPenilaianFormPembimbing = () => {
   }
 
   const putBobotPenilaianDanDeskripsi = async (data) => {
-    for (var i in data) {
-      let id = data[i].id
-      let deskripsi_new = data[i].deskripsi
-      let bobot_new = data[i].bobot
-      await axios
-        .put(`http://localhost:1337/api/pembobotanformpembimbings/${id}`, {
-          data: {
-            deskripsi: deskripsi_new,
-            bobot: bobot_new,
-          },
-        })
-        .then((res) => {
-          console.log(res)
-          setIsSuccessUpdateData(true)
-          refreshData()
-        })
-        .catch(function (error) {
-          setIsSuccessUpdateData(false)
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
-              },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-            history.push('/500')
-          }
-        })
-    }
+    console.log('NAH GIN', data)
+    // for (var i in data) {
+    //   let id = data[i].id
+    //   let deskripsi_new = data[i].deskripsi
+    //   let bobot_new = data[i].bobot
+    //   await axios
+    //     .put(`http://localhost:1337/api/pembobotanformpembimbings/${id}`, {
+    //       data: {
+    //         deskripsi: deskripsi_new,
+    //         bobot: bobot_new,
+    //       },
+    //     })
+    //     .then((res) => {
+    //       console.log(res)
+    //       setIsSuccessUpdateData(true)
+    //       refreshData()
+    //     })
+    //     .catch(function (error) {
+    //       setIsSuccessUpdateData(false)
+    //       if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+    //         history.push({
+    //           pathname: '/login',
+    //           state: {
+    //             session: true,
+    //           },
+    //         })
+    //       } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+    //         history.push('/404')
+    //       } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+    //         history.push('/500')
+    //       }
+    //     })
+    // }
 
-    if (isSuccessUpdateData) {
-      notification.success({
-        message: 'Data bobot penilaian berhasil diperbarui',
-      })
-    } else {
-      notification.warning({
-        message: 'Data bobot penilaian gagal diperbarui',
-      })
-    }
+    // if (isSuccessUpdateData) {
+    //   notification.success({
+    //     message: 'Data bobot penilaian berhasil diperbarui',
+    //   })
+    // } else {
+    //   notification.warning({
+    //     message: 'Data bobot penilaian gagal diperbarui',
+    //   })
+    // }
   }
 
   const refreshData = async (index) => {
@@ -285,7 +281,7 @@ const PembobotanPenilaianFormPembimbing = () => {
   <div className="content" />
 </Spin>):(
     <>
-      <div className="container2">
+      {/* <div className="container2">
         <h2 className="justify">Pengelolaan Poin Penilaian Form Pembimbing</h2>
 
         <hr></hr>
@@ -562,7 +558,7 @@ const PembobotanPenilaianFormPembimbing = () => {
             </CCardBody>
           </CCard>
         </Form>
-      </div>
+      </div> */}
     </>
   )
 }

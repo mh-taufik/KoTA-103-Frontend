@@ -18,7 +18,7 @@ const ReviewLogbook = (props) => {
   const [isLoading, setIsLoading] = useState(true)
   const [loadings, setLoadings] = useState([])
   const rolePengguna = localStorage.id_role
-  const [logbookAttributesData, setLogbookAttributesData] = useState([''])
+  const [logbookAttributesData, setLogbookAttributesData] = useState()
   axios.defaults.withCredentials = true
   let history = useHistory()
 
@@ -144,7 +144,7 @@ const ReviewLogbook = (props) => {
               </Col>
               <Col span={8}>{logbookAttributesData.date}</Col>
               <Col span={2}>Status Pengumpulan : </Col>
-              <Col span={4}><Tag color={setTagColorStatus(logbookAttributesData.status)}>{logbookAttributesData.status}</Tag></Col>
+              <Col span={4}><Tag color={setTagColorStatus(logbookAttributesData.status.status)}>{logbookAttributesData.status.status}</Tag></Col>
             </Row>
             <Row>
               <Col>

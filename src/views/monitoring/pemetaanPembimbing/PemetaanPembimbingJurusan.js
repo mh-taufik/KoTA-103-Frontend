@@ -194,7 +194,7 @@ const PemetaanPembimbingJurusan = () => {
 
     async function getDataPemetaanPerusahaan() {
       await axios
-        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all?year=${CURRENT_YEAR}`)
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all`)
         .then((result) => {
           setDataHasilPemetaan(result.data.data)
           console.log(result.data.data)

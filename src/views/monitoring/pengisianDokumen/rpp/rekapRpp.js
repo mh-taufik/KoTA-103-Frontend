@@ -314,7 +314,7 @@ const RekapRPP = () => {
 
   /** TOMBOL DETAIL RPP */
   const confirmToDetail = (idMhs) => {
-    idMhs
+    (rolePengguna !=='1')
       ? history.push(`/rencanaPenyelesaianProyek/DetailRPP/${wannaDetail.id}/${idMhs}`)
       : history.push(`/rencanaPenyelesaianProyek/detail/${wannaDetail.id}`)
   }
@@ -369,7 +369,7 @@ const RekapRPP = () => {
       render: (text, record) => (
         <>
          {/* ROLE PANITIA */}
-          {rolePengguna !=='1' && rolePengguna !=='4' && (
+          {rolePengguna !=='1' &&(
             <Row>
               <Col span={6} style={{ textAlign: 'center' }}>
                 <Popover content={hoverButtonLihatDetail}>
@@ -468,26 +468,21 @@ const RekapRPP = () => {
               </Popconfirm>
             </Col>
             <Col span={12} style={{ textAlign: 'center' }}>
-              <Popconfirm
-                placement="topRight"
-                title="Yakin akan melihat detail RPP?"
-                description={descdetail}
-                onConfirm={() => confirmToDetail()}
-                okText="Yes"
-                cancelText="No"
-              >
+            
+                <Popover content={<div>Lihat detail RPP</div>}>
                 <Button
                   id="button-eye"
                   htmlType="submit"
                   shape="circle"
                   style={{ backgroundColor: '#bae0ff', borderColor: '#bae0ff' }}
                   onClick={() => {
-                    setWannaDetail(record)
+                    history.push(`/rencanaPenyelesaianProyek/detail/${record.rpp_id}`)
                   }}
                 >
                   <FontAwesomeIcon icon={faEye} style={{ color: 'black' }} />
                 </Button>
-              </Popconfirm>
+                </Popover>
+         
             </Col>
           </Row>
         </>

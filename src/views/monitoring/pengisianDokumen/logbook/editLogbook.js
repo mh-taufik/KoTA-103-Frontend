@@ -16,9 +16,10 @@ import { FloatButton, Popover, notification } from 'antd'
 import routes from 'src/routes'
 
 const FormEditLogbook = (props) => {
-  var params = useParams()
+  const params = useParams()
+  const ID_LOGBOOK = params.id
+
   const [isLoading, setIsLoading] = useState(true)
-  const [isSpinner, setIsSpinner] = useState(true)
   const [tanggalLogbook, setTanggalLogbook] = useState()
   const [loadings, setLoadings] = useState([])
   const [tanggalProyek, setTanggalProyek] = useState()
@@ -50,12 +51,34 @@ const FormEditLogbook = (props) => {
   }
 
   useEffect(() => {
-    // console.log("nama proyek awal : ", logbookPeserta.attributes.namaproyek)
+    const getDataLogbook = async (index) => {
+      enterLoading(index)
+      await axios
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/get/${ID_LOGBOOK}`)
+        .then((response) => {
+          dataLogbook = response.data.data
+          console.log('data', dataLogbook)
+        
+          setLogbookAttributesData(response.data.data.attributes)
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+            history.push('/500')
+          }
+        })
+    }
 
-    // alert('idLogbook :', params.id)
-    console.log(params.id)
-    idLogbook = params.id
-    console.log('id', idLogbook)
+
+    getDataLogbook()
   }, [history])
 
   const handleInputLogbookDate = (date) => {
@@ -77,7 +100,7 @@ const FormEditLogbook = (props) => {
   const getDataLogbookChosen = async (index) => {
     enterLoading(index)
     await axios
-      .get(`http://localhost:1337/api/logbooks/${LOGBOOK}`)
+      .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/get/${ID_LOGBOOK}`)
       .then((response) => {
         dataLogbook = response.data.data
         console.log('data', dataLogbook)
@@ -175,7 +198,7 @@ const FormEditLogbook = (props) => {
             FORM PENGISIAN LOGBOOK
           </h3>
 
-          <Form>
+          {/* <Form>
             <Row>
               <Col>
                 <Form.Group controlId="tanggalLogbook">
@@ -320,7 +343,7 @@ const FormEditLogbook = (props) => {
             <Button className="form-control btn btn-primary" onClick={submitLogbook}>
               Submit Logbook
             </Button>
-          </Form>
+          </Form> */}
         </div>
         <FloatButton type='primary' icon={<ArrowLeftOutlined />}  onClick={()=>history.push(`/logbook`)} tooltip={<div>Kembali ke Rekap Logbook</div>} />
 

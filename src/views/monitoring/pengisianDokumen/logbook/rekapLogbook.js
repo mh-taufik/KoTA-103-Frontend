@@ -144,7 +144,9 @@ const RekapLogbook = () => {
     axios
       .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/get-all/${PESERTA}`)
       .then((result) => {
-        var temp = result.data.data
+        const temp = result.data.data
+
+        
         var temp_res = []
         const convertDate = (date) => {
           let temp_date_split = date.split('-')
@@ -210,6 +212,7 @@ const RekapLogbook = () => {
         })
         .then((result) => {
            setDataPeserta(result.data.data[0])
+         
           
         })
         .catch(function (error) {
@@ -240,6 +243,7 @@ const RekapLogbook = () => {
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/get-all/${PESERTA}`)
         .then((result) => {
          if(result.data.data.length>0){
+          console.log(result.data.data)
           var temp = result.data.data
           var temp_res = []
           const convertDate = (date) => {
