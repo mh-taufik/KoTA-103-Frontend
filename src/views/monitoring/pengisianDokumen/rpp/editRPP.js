@@ -38,7 +38,7 @@ const [, updateState] = React.useState();
 const forceUpdate = React.useCallback(() => updateState({}), []);
   const dateFormat = 'YYYY-MM-DD'
   let params = useParams()
-  let PESERTA_ID_RPP_EDIT = params.id
+  let RPP_ID = params.id
   dayjs.extend(customParseFormat)
   let history = useHistory()
   const { RangePicker } = DatePicker
@@ -89,7 +89,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
   const showModalDeliverablesEdit = (data) => {
     setDataDeliverablesEditChangeDeliverables(undefined)
     setDataDeliverablesEditChangeDueDate(undefined)
-    setDataDeliverablesEdit({ duedate: data.duedate, deliverables: data.deliverables, id: data.id })
+    setDataDeliverablesEdit({ due_date: data.due_date, deliverables: data.deliverables, id: data.id })
     setIsModalDeliverablesEditOpen(true)
   }
 
@@ -161,8 +161,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
   const [isModalRencanaCapaianMingguanEditOpen, setIsModalRencanaCapaianMingguanEditOpen] =
     useState(false)
   const [dataRencanaCapaianMingguanEdit, setDataRencanaCapaianMingguanEdit] = useState([])
-  const [dataRencanaCapaianMingguanEditRencana, setDataRencanaCapaianMingguanEditRencana] =
-    useState()
+  const [dataRencanaCapaianMingguanEditRencana, setDataRencanaCapaianMingguanEditRencana] = useState()
   const [
     dataRencanaCapaianMingguanEditTanggalMulai,
     setDataRencanaCapaianMingguanEditTanggalMulai,
@@ -239,7 +238,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
   /** ADD DATA TO RPP */
   /** HANDLE ADD DELIVERABLES */
   const postDataDeliverablesAdditional = async(data) =>{
-    let id_rpp = parseInt(PESERTA_ID_RPP_EDIT)
+    let id_rpp = parseInt(RPP_ID)
     console.log('data', data)
     console.log('id_rpp', id_rpp)
     for(var i in data){
@@ -279,7 +278,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
           'tanggalmulai' : data[i].tanggalmulai,
           'tanggalselesai' : data[i].tanggalselesai,
           'rpp' : {
-            'connect' : [parseInt( PESERTA_ID_RPP_EDIT)]
+            'connect' : [parseInt( RPP_ID)]
         }
       }
       }).then((res)=>{
@@ -335,7 +334,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
   /**REFRESH DATA */
   const refreshDataRPP = async () => {
     await axios
-      .get(`http://localhost:1337/api/rpps?populate=*&filters[id][$eq]=${PESERTA_ID_RPP_EDIT}`)
+      .get(`http://localhost:1337/api/rpps?populate=*&filters[id][$eq]=${RPP_ID}`)
       .then((response) => {
         console.log(response.data.data)
         setDataRPP({
@@ -476,7 +475,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
 
   const handleAddRowDeliverables = () => {
     setNoOfRowsDeliverables(noOfRowsDeliverables + 1)
-    let newField = { deliverables: '', date: '' }
+    let newField = { deliverables: '', due_date: '' }
     setDeliverables([...deliverables, newField])
   }
 
@@ -513,7 +512,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
   }
 
   const handleAddRowMilestones = () => {
-    let newField = { deskripsi: ' ', tanggalmulai: ' ', tanggalselesai: ' ' }
+    let newField = { description: ' ', start_date: ' ', finish_date: ' ' }
     setMilestones([...milestones, newField])
     setNoOfRowsMilestones(noOfRowsMilestones + 1)
   }
@@ -551,7 +550,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
   }
 
   const handleAddRowRencanaCapaianPerminggu = () => {
-    let newField = { tanggal: '', rencana: '' }
+    let newField = { start_date: '',finish_date:'', achievement_plan: '' }
     setCapaianPerminggu([...capaianPerminggu, newField])
     setNoOfRowsCapaianPerminggu(noOfRowsCapaianPerminggu + 1)
   }
@@ -691,32 +690,50 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
   }
 
   useEffect(() => {
-    const getRPP = async () => {
+    const getRPPDetailPeserta = async (index) => {
       await axios
-        .get(`http://localhost:1337/api/rpps?populate=*&filters[id][$eq]=${PESERTA_ID_RPP_EDIT}`)
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/get/${RPP_ID}`)
         .then((response) => {
           console.log(response.data.data)
+
+
           setDataRPP({
-            tanggal_mulai: response.data.data[0].attributes.tanggal_mulai,
-            tanggal_selesai: response.data.data[0].attributes.tanggal_selesai,
-            perankelompok: response.data.data[0].attributes.perankelompok,
-            waktupengisian: response.data.data[0].attributes.waktupengisian,
-            judulpekerjaan: response.data.data[0].attributes.judulpekerjaan,
-            deskripsi_tugas: response.data.data[0].attributes.deskripsi_tugas,
-            status: response.data.data[0].status,
+            start_date: response.data.data.start_date,
+            finish_date: response.data.data.finish_date,
+            group_role: response.data.data.group_role,
+            work_title: response.data.data.work_title,
+            task_description: response.data.data.task_description,
           })
 
+              /**SET DATA DELIVERABLES */
+              let temp_del = []
+              let temp_del1 = []
+              temp_del = response.data.data.deliverables
+              let temp_deliverables = function (obj) {
+                for (var i in obj) {
+                  temp_del1.push({
+                    id: obj[i].id,
+                    due_date: obj[i].due_date,
+                    deliverables: obj[i].deliverables,
+                  })
+                }
+              }
+    
+              temp_deliverables(temp_del)
+              setDataDeliverables(temp_del1)
+              console.log('deliverables', temp_del1)
+
           /** SET DATA MILESTONES */
-          var temp_mil = []
-          var temp_mil1 = []
-          temp_mil = response.data.data[0].attributes.milestones.data
-          var temp_milestone = function (obj) {
+          let temp_mil = []
+          let temp_mil1 = []
+          temp_mil = response.data.data.milestones
+          let temp_milestone = function (obj) {
             for (var i in obj) {
               temp_mil1.push({
                 id: obj[i].id,
-                deskripsi: obj[i].attributes.deskripsi,
-                tanggalmulai: obj[i].attributes.tanggalmulai,
-                tanggalselesai: obj[i].attributes.tanggalselesai,
+                description: obj[i].description,
+                start_date: obj[i].start_date,
+                finish_date: obj[i].finish_date,
               })
             }
           }
@@ -725,35 +742,19 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
           setDataMilestones(temp_mil1)
           console.log('milestones', temp_mil1)
 
-          /**SET DATA DELIVERABLES */
-          var temp_del = []
-          var temp_del1 = []
-          temp_del = response.data.data[0].attributes.deliverables.data
-          var temp_deliverables = function (obj) {
-            for (var i in obj) {
-              temp_del1.push({
-                id: obj[i].id,
-                duedate: obj[i].attributes.duedate,
-                deliverables: obj[i].attributes.deliverables,
-              })
-            }
-          }
-
-          temp_deliverables(temp_del)
-          setDataDeliverables(temp_del1)
-          console.log('deliverables', temp_del1)
+      
 
           /**SET DATA RENCANA CAPAIAN MINGGUAN */
-          var temp_rcm = []
-          var temp_rcm1 = []
-          temp_rcm = response.data.data[0].attributes.rencanacapaianmingguans.data
-          var temp_rencanaCapaianMingguan = function (obj) {
+          let temp_rcm = []
+          let temp_rcm1 = []
+          temp_rcm = response.data.data.weekly_achievement_plans
+          let temp_rencanaCapaianMingguan = function (obj) {
             for (var i in obj) {
               temp_rcm1.push({
                 id: obj[i].id,
-                rencanacapaian: obj[i].attributes.rencanacapaian,
-                tanggalmulai: obj[i].attributes.tanggalmulai,
-                tanggalberakhir: obj[i].attributes.tanggalberakhir,
+                achievement_plan: obj[i].achievement_plan,
+                start_date: obj[i].start_date,
+                finish_date: obj[i].finish_date,
               })
             }
           }
@@ -765,16 +766,15 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
           /** JADWAL PENYELESAIAN KESELURUHAN */
           let temp_jadwalKeseluruhan = []
           let temp_jadwalKeseluruhan1 = []
-          temp_jadwalKeseluruhan =
-            response.data.data[0].attributes.jadwalpenyelesaiankeseluruhans.data
+          temp_jadwalKeseluruhan = response.data.data.completion_schedules
           let temp_jadwalKeseluruhans = function (obj) {
             for (var i in obj) {
               temp_jadwalKeseluruhan1.push({
                 id: obj[i].id,
-                jenispekerjaan: obj[i].attributes.jenispekerjaan,
-                butirpekerjaan: obj[i].attributes.butirpekerjaan,
-                tanggalmulai: obj[i].attributes.tanggalmulai,
-                tanggalselesai: obj[i].attributes.tanggalselesai,
+                task_type: obj[i].task_type,
+                task_name: obj[i].task_name,
+                start_date: obj[i].start_date,
+                finish_date: obj[i].finish_date,
               })
             }
           }
@@ -793,13 +793,13 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
             })
           } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
             history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
             history.push('/500')
           }
         })
     }
 
-    getRPP()
+    getRPPDetailPeserta()
     setHandleStatusStartWeekDatePicker(false)
   }, [history])
 
@@ -815,8 +815,8 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
     },
     {
       title: 'TANGGAL',
-      dataIndex: 'duedate',
-      key: 'duedate',
+      dataIndex: 'due_date',
+      key: 'due_date',
       width: '20%',
     },
     {
@@ -834,7 +834,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
 
         /**MENGAMBIL TANGGAL HARI INI + SISA NYA(DALAM MINGGU) / MENGAMBIL TANGGAL AKHIR DIMINGGU INI */
         dateLimit.setDate(dateLimit.getDate() + (7 - new Date().getDay()))
-        let recDueDate = new Date(record.duedate)
+        let recDueDate = new Date(record.due_date)
         // console.log(recDueDate, dateLimit, '---', recDueDate > dateLimit)
 
         if (recDueDate > dateLimit) {
@@ -884,20 +884,20 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
     },
     {
       title: 'TANGGAL MULAI',
-      dataIndex: 'tanggalmulai',
-      key: 'tanggalmulai',
+      dataIndex: 'start_date',
+      key: 'start_date',
       width: '10%',
     },
     {
       title: 'TANGGAL SELESAI',
-      dataIndex: 'tanggalselesai',
-      key: 'tanggalselesai',
+      dataIndex: 'finish_date',
+      key: 'finish_date',
       width: '10%',
     },
     {
       title: 'DESKRIPSI',
-      dataIndex: 'deskripsi',
-      key: 'deskripsi',
+      dataIndex: 'description',
+      key: 'description',
       width: '30%',
     },
     {
@@ -909,8 +909,8 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
 
         /**MENGAMBIL TANGGAL HARI INI + SISA NYA(DALAM MINGGU) / MENGAMBIL TANGGAL AKHIR DIMINGGU INI */
         dateLimit.setDate(dateLimit.getDate() + (7 - new Date().getDay()))
-        let recStartDate = new Date(record.tanggalmulai)
-        let recFinishDate = new Date(record.tanggalselesai)
+        let recStartDate = new Date(record.start_date)
+        let recFinishDate = new Date(record.finish_date)
         let popoverSD
         // console.log(recDueDate, dateLimit, '---', recDueDate > dateLimit)
 
@@ -965,20 +965,20 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
     },
     {
       title: 'TANGGAL MULAI',
-      dataIndex: 'tanggalmulai',
-      key: 'tanggalmulai',
+      dataIndex: 'start_date',
+      key: 'start_date',
       width: '20%',
     },
     {
       title: 'TANGGAL BERAKHIR',
-      dataIndex: 'tanggalberakhir',
-      key: 'tanggalberakhir',
+      dataIndex: 'finish_date',
+      key: 'finish_date',
       width: '20%',
     },
     {
       title: 'RENCANA CAPAIAN',
-      dataIndex: 'rencanacapaian',
-      key: 'rencanacapaian',
+      dataIndex: 'achievement_plan',
+      key: 'achievement_plan',
       width: '30%',
     },
     {
@@ -990,8 +990,8 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
 
         /**MENGAMBIL TANGGAL HARI INI + SISA NYA(DALAM MINGGU) / MENGAMBIL TANGGAL AKHIR DIMINGGU INI */
         dateLimit.setDate(dateLimit.getDate() + (7 - new Date().getDay()))
-        let recStartDate = new Date(record.tanggalmulai)
-        let recFinishDate = new Date(record.tanggalberakhir)
+        let recStartDate = new Date(record.start_date)
+        let recFinishDate = new Date(record.finish_date)
 
         // console.log(recDueDate, dateLimit, '---', recDueDate > dateLimit)
 
@@ -1041,26 +1041,26 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
     },
     {
       title: 'TANGGAL MULAI',
-      dataIndex: 'tanggalmulai',
-      key: 'tanggalmulai',
+      dataIndex: 'start_date',
+      key: 'start_date',
       width: '10%',
     },
     {
       title: 'TANGGAL SELESAI',
-      dataIndex: 'tanggalselesai',
-      key: 'tanggalselesai',
+      dataIndex: 'finish_date',
+      key: 'finish_date',
       width: '10%',
     },
     {
       title: 'JENISPEKERJAAN',
-      dataIndex: 'jenispekerjaan',
-      key: 'jenispekerjaan',
+      dataIndex: 'task_type',
+      key: 'task_type',
       width: '20%',
     },
     {
       title: 'BUTIRPEKERJAAN',
-      dataIndex: 'butirpekerjaan',
-      key: 'butirpekerjaan',
+      dataIndex: 'task_name',
+      key: 'task_name',
       width: '30%',
     },
     {
@@ -1078,10 +1078,10 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
 
         /**MENGAMBIL TANGGAL HARI INI + SISA NYA(DALAM MINGGU) / MENGAMBIL TANGGAL AKHIR DIMINGGU INI */
         dateLimit.setDate(dateLimit.getDate() + (7 - limitMinusDay))
-        let recStartDate = new Date(record.tanggalmulai)
-        let recFinishDate = new Date(record.tanggalselesai)
+        let recStartDate = new Date(record.start_date)
+        let recFinishDate = new Date(record.finish_date)
         let weekOnDateFinish = getWeekBasedOnDate(recFinishDate) - 1
-        let yearOnDateFinish = record.tanggalselesai.slice(0, 4)
+        let yearOnDateFinish = record.finish_date.slice(0, 4)
         let limitDateGetMondayDateBasedOnFinishDate = getDateOfISOWeek(
           weekOnDateFinish,
           yearOnDateFinish,
@@ -1232,13 +1232,13 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
               <Col style={{ paddingBottom: 20 }} span={8}>
                 Tanggal Mulai
               </Col>
-              <Col span={8}>{dataRPP.tanggal_mulai}</Col>
+              <Col span={8}>{dataRPP.start_date}</Col>
             </Row>
             <Row>
               <Col style={{ paddingBottom: 20 }} span={8}>
                 Tanggal Selesai
               </Col>
-              <Col span={6}>{dataRPP.tanggal_selesai}</Col>
+              <Col span={6}>{dataRPP.finish_date}</Col>
               <Col span={4}>Ubah Tanggal :</Col>
               <Col span={6}>
                 <DatePicker
@@ -1263,7 +1263,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
               <Col span={8} style={{ paddingBottom: 20 }}>
                 Topik Pekerjaan
               </Col>
-              <Col span={8}>{dataRPP.judulpekerjaan}</Col>
+              <Col span={8}>{dataRPP.work_title}</Col>
               <Col></Col>
             </Row>
 
@@ -1271,7 +1271,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
               <Col span={8} style={{ paddingBottom: 20 }}>
                 Peran Kelompok
               </Col>
-              <Col span={8}>{dataRPP.perankelompok}</Col>
+              <Col span={8}>{dataRPP.group_role}</Col>
               <Col></Col>
             </Row>
 
@@ -1279,7 +1279,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
               <Col span={8} style={{ paddingBottom: 20 }}>
                 Deskripsi Tugas
               </Col>
-              <Col span={8}>{dataRPP.deskripsi_tugas}</Col>
+              <Col span={8}>{dataRPP.task_description}</Col>
               <Col></Col>
             </Row>
           </div>
@@ -1335,7 +1335,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                         style={{ width: '70%' }}
                         value={deliverables.date}
                         onChange={(date, datestring) =>
-                          handleDataDeliverables(index, datestring, 'date')
+                          handleDataDeliverables(index, datestring, 'due_date')
                         }
                       />
                     </Col>
@@ -1406,11 +1406,11 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                       >
                         <TextArea
                           rows={4}
-                          value={milestones.deskripsi}
+                          value={milestones.description}
                           style={{ width: '100%' }}
                           placeholder="Masukkan milestones"
                           onChange={(event) => {
-                            handleDataMilestones(index, event.target.value, 'deskripsi')
+                            handleDataMilestones(index, event.target.value, 'description')
                           }}
                         />
                       </Form.Item>
@@ -1432,8 +1432,8 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                           )
                         }}
                         onChange={(date, datestring) => {
-                          handleDataMilestones(index, datestring[0], 'tanggalmulai')
-                          handleDataMilestones(index, datestring[1], 'tanggalselesai')
+                          handleDataMilestones(index, datestring[0], 'start_date')
+                          handleDataMilestones(index, datestring[1], 'finish_date')
                         }}
                       />
                     </Col>
@@ -1493,11 +1493,11 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                       >
                         <TextArea
                           rows={4}
-                          value={capaianPerminggu.deskripsi}
+                          value={capaianPerminggu.achievement_plan}
                           style={{ width: '100%' }}
                           placeholder="Masukkan rencana perminggu"
                           onChange={(event) => {
-                            handleDataRencanaCapaianPerminggu(index, event.target.value, 'rencana')
+                            handleDataRencanaCapaianPerminggu(index, event.target.value, 'achievement_plan')
                           }}
                         />
                       </Form.Item>
@@ -1541,12 +1541,12 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                             handleDataRencanaCapaianPerminggu(
                               index,
                               getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
-                              'tanggalmulai',
+                              'start_date',
                             ),
                             handleDataRencanaCapaianPerminggu(
                               index,
                               getEndDateOfWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
-                              'tanggalberakhir',
+                              'finish_date',
                             ),
                           ]}
                         />
@@ -1616,14 +1616,14 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                         >
                           <Input
                             rows={4}
-                            value={jadwalPenyelesaianKeseluruhan.butirpekerjaan}
+                            value={jadwalPenyelesaianKeseluruhan.task_name}
                             style={{ width: '100%' }}
                             placeholder="Butir Pekerjaan"
                             onChange={(event) => {
                               handleDataJadwalPenyelesaianKeseluruhan(
                                 index,
                                 event.target.value,
-                                'butirpekerjaan',
+                                'task_name',
                               )
                             }}
                           />
@@ -1634,7 +1634,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                           defaultValue="Jenis Pekerjaan"
                           style={{ width: '100%' }}
                           onChange={(value) =>
-                            handleDataJadwalPenyelesaianKeseluruhan(index, value, 'jenispekerjaan')
+                            handleDataJadwalPenyelesaianKeseluruhan(index, value, 'task_type')
                           }
                           options={[
                             { value: 'exploration', label: 'Exploration' },
@@ -1670,7 +1670,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                                 datestring[0].slice(5, 7),
                                 datestring[0].slice(0, 4),
                               ),
-                              'minggumulai',
+                              'start_date',
                             )
                             handleDataJadwalPenyelesaianKeseluruhan(
                               index,
@@ -1678,7 +1678,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                                 datestring[1].slice(5, 7),
                                 datestring[1].slice(0, 4),
                               ),
-                              'mingguselesai',
+                              'finish_date',
                             )
                           }}
                         />
@@ -1748,8 +1748,8 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
               value: dataDeliverablesEdit.deliverables,
             },
             {
-              name: ['duedate'],
-              value: dataDeliverablesEdit.duedate,
+              name: ['due_date'],
+              value: dataDeliverablesEdit.due_date,
             },
           ]}
         >
@@ -1785,7 +1785,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
             ]}
           >
             <DatePicker
-              defaultValue={dayjs(dataDeliverablesEdit.duedate, dateFormat)}
+              defaultValue={dayjs(dataDeliverablesEdit.due_date, dateFormat)}
               onChange={(date, datestring) => {
                 setDataDeliverablesEditChangeDueDate(datestring)
               }}
@@ -1834,15 +1834,15 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
           fields={[
             {
               name: ['deskripsi'],
-              value: dataMilestonesEdit.deskripsi,
+              value: dataMilestonesEdit.description,
             },
             {
               name: ['tanggalmulai'],
-              value: dataDeliverablesEdit.tanggalmulai,
+              value: dataDeliverablesEdit.start_date,
             },
             {
               name: ['tanggalselesai'],
-              value: dataDeliverablesEdit.tanggalselesai,
+              value: dataDeliverablesEdit.finish_date,
             },
           ]}
         >
@@ -1856,7 +1856,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
             ]}
           >
             <TextArea
-              defaultValue={dataMilestonesEdit.deskripsi}
+              defaultValue={dataMilestonesEdit.description}
               onChange={(e) => setDataMilestonesEditDeskripsi(e.target.value)}
             />
           </Form.Item>
@@ -1877,18 +1877,19 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
           >
             <Popover content={<div>{popoverStartDate}</div>}>
               <DatePicker
-                defaultValue={dayjs(dataMilestonesEdit.tanggalmulai, dateFormat)}
+                defaultValue={dayjs(dataMilestonesEdit.start_date, dateFormat)}
                 onChange={(date, datestring) => setDataMilestonesEditTanggalMulai(datestring)}
                 disabledDate={(current) => {
                   let minusToGetLimit = new Date().getDay()
+                  let limit_minus_day = 0
                   if (minusToGetLimit === 0) {
-                    setLimitMinusDay(7)
+                   limit_minus_day = 7
                   } else {
-                    setLimitMinusDay(minusToGetLimit)
+                    limit_minus_day = 0
                   }
                   return (
                     moment().add(-1, 'days') >= current ||
-                    moment().add(7 - limitMinusDay, 'days') >= current
+                    moment().add(7 - limit_minus_day, 'days') >= current
                   )
                 }}
               />
@@ -1912,7 +1913,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
           >
             <Popover content={<div>Tanggal selesai masih dapat diedit</div>}>
               <DatePicker
-                defaultValue={dayjs(dataMilestonesEdit.tanggalselesai, dateFormat)}
+                defaultValue={dayjs(dataMilestonesEdit.finish_date, dateFormat)}
                 onChange={(date, datestring) => setDataMilestonesEditTanggalSelesai(datestring)}
                 disabledDate={(current) => {
                   let minusToGetLimit = new Date().getDay()
@@ -1960,15 +1961,15 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
           fields={[
             {
               name: ['rencanacapaian'],
-              value: dataRencanaCapaianMingguanEdit.rencanacapaian,
+              value: dataRencanaCapaianMingguanEdit.achievement_plan,
             },
             {
               name: ['tanggalmulai'],
-              value: dataRencanaCapaianMingguanEdit.tanggalmulai,
+              value: dataRencanaCapaianMingguanEdit.start_date,
             },
             {
               name: ['tanggalselesai'],
-              value: dataRencanaCapaianMingguanEdit.tanggalselesai,
+              value: dataRencanaCapaianMingguanEdit.finish_date,
             },
           ]}
         >
@@ -1983,15 +1984,15 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
             ]}
           >
             <TextArea
-              defaultValue={dataRencanaCapaianMingguanEdit.rencanacapaian}
+              defaultValue={dataRencanaCapaianMingguanEdit.achievement_plan}
               onChange={(e) => setDataRencanaCapaianMingguanEditRencana(e.target.value)}
             />
           </Form.Item>
 
           <br />
           <b>
-            {dataRencanaCapaianMingguanEdit.tanggalmulai} &nbsp;s/d&nbsp;{' '}
-            {dataRencanaCapaianMingguanEdit.tanggalberakhir}
+            {dataRencanaCapaianMingguanEdit.start_date} &nbsp;s/d&nbsp;{' '}
+            {dataRencanaCapaianMingguanEdit.finish_date}
           </b>
           <Form.Item
             label="Minggu Rencana Capaian"
@@ -2065,19 +2066,19 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
           fields={[
             {
               name: ['butirpekerjaan'],
-              value: dataJadwalPenyelesaianEdit.butirpekerjaan,
+              value: dataJadwalPenyelesaianEdit.task_name,
             },
             {
               name: ['jenispekerjaan'],
-              value: dataJadwalPenyelesaianEdit.jenispekerjaan,
+              value: dataJadwalPenyelesaianEdit.task_type,
             },
             {
               name: ['tanggalmulai'],
-              value: dataJadwalPenyelesaianEdit.tanggalmulai,
+              value: dataJadwalPenyelesaianEdit.start_date,
             },
             {
               name: ['tanggalselesai'],
-              value: dataJadwalPenyelesaianEdit.tanggalselesai,
+              value: dataJadwalPenyelesaianEdit.finish_date,
             },
           ]}
         >
@@ -2091,7 +2092,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
             ]}
           >
             <TextArea
-              defaultValue={dataJadwalPenyelesaianEdit.butirpekerjaan}
+              defaultValue={dataJadwalPenyelesaianEdit.task_name}
               onChange={(e) => setDataJadwalPenyelesaianEditButirPekerjaan(e.target.value)}
             />
           </Form.Item>
@@ -2107,7 +2108,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
             ]}
           >
             <Select
-              defaultValue={dataJadwalPenyelesaianEdit.jenispekerjaan}
+              defaultValue={dataJadwalPenyelesaianEdit.task_type}
               options={[
                 { value: 'exploration', label: 'exploration' },
                 { value: 'analysis', label: 'analysis' },
@@ -2121,8 +2122,8 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
           <br />
 
           <b>
-            Tanggal : {dataJadwalPenyelesaianEdit.tanggalmulai} &nbsp;s/d&nbsp;{' '}
-            {dataJadwalPenyelesaianEdit.tanggalselesai}
+            Tanggal : {dataJadwalPenyelesaianEdit.start_date} &nbsp;s/d&nbsp;{' '}
+            {dataJadwalPenyelesaianEdit.finish_date}
           </b>
           <Form.Item
             label="Minggu Mulai"

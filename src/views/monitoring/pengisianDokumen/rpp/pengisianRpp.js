@@ -19,7 +19,6 @@ import { Document, Page } from 'react-pdf/dist/esm/entry.webpack'
 import { useHistory } from 'react-router-dom'
 import dayjs from 'dayjs'
 import weekOfYear from 'dayjs'
-
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { Box } from '@mui/material'
 import axios from 'axios'
@@ -28,6 +27,17 @@ const { TextArea } = Input
 const PengisianRpp = () => {
   dayjs.extend(customParseFormat)
   dayjs.extend(weekOfYear)
+  const dateFormat = 'YYYY/MM/DD';
+const weekFormat = 'MM/DD';
+const monthFormat = 'YYYY/MM';
+const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY', 'DD-MM-YYYY', 'DD-MM-YY'];
+const customFormat = (value) => `custom format: ${value.format(dateFormat)}`;
+const customWeekStartEndFormat = (value) =>
+  `${dayjs(value).startOf('week').format(weekFormat)} ~ ${dayjs(value)
+    .endOf('week')
+    .format(weekFormat)}`;
+
+
   let history = useHistory()
   const { RangePicker } = DatePicker
   const NIM_PESERTA = localStorage.username
@@ -55,6 +65,7 @@ const PengisianRpp = () => {
   const [pageNumber, setPageNumber] = useState(1)
   const [idNewRpp, setIdNewRpp] = useState()
   const [isSuccessInput, setIsSuccessInput] = useState(true)
+  const [submitAccepted, setSubmitAccepted] = useState(false)
 
 
   function onDocumentLoadSuccess({ numPages }) {
@@ -307,10 +318,11 @@ const PengisianRpp = () => {
     return current && current < dayjs().endOf('day')
   }
 
-  /** HANDLE TAMBAH RPP */
-  const handleSubmitRPP = async (data, index) => {
-    // console.log(tanggalMulaiPekerjaan,tanggalBerakhirPekerjaan,topikPekerjaan,deskripsiTugas,peranDalamPekerjaan)
-    const jsonDataDeliverables = JSON.parse(JSON.stringify(deliverables))
+
+
+  const createDataRPP = async() =>{
+    if(submitAccepted){
+      const jsonDataDeliverables = JSON.parse(JSON.stringify(deliverables))
     const jsonDataMilestones = JSON.parse(JSON.stringify(milestones))
     const jsonDataRencanaPerminggu = JSON.parse(JSON.stringify(capaianPerminggu))
     const jsonDataJadwalPenyelesaianKeseluruhan = JSON.parse(JSON.stringify(jadwalPenyelesaianKeseluruhan))
@@ -329,10 +341,9 @@ const PengisianRpp = () => {
          
       })
       .then((result) => {
-        console.log(result)
-        // console.log(res.data.data)
-        // setIdNewRpp(res.data.data.id)
-        // setIsSuccessInput(true)
+        notification.success({
+          message:'Data RPP Berhasil Ditambahkan'
+        })
       })
       .catch(function (error) {
         setIsSuccessInput(false)
@@ -349,15 +360,62 @@ const PengisianRpp = () => {
           history.push('/500')
         }
       })
-
-    // if (isSuccessInput) {
-    //   notification.success({ message: 'Data RPP Berhasil ditambahkan' })
-    //   setTimeout({}, 1000)
-    //   history.push(`/rencanaPenyelesaianProyek`)
-    // } else {
-    //   notification.error({ message: 'Data RPP Gagal Ditambahkan' })
-    // }
+    }else{
+      notification.warning({message:'Pastikan Semua Data Terisi !!! '})
+    }
   }
+
+    /** HANDLE TAMBAH RPP */
+    const handleSubmitRPP = async (data, index) => {
+      if(tanggalMulaiPekerjaan.length<1){
+        notification.warning({message:'Isi Tanggal Mulai Pengerjaan Terlebih Dahulu'})
+        setSubmitAccepted(false)
+      }else{
+        setSubmitAccepted(true)
+      }
+
+      if(tanggalBerakhirPekerjaan.length<1){
+        notification.warning({message:'Isi Tanggal Berakhir Pengerjaan Terlebih Dahulu'})
+        setSubmitAccepted(false)
+      }else{
+        setSubmitAccepted(true)
+      }
+      
+
+      if(deliverables.length<1){
+        notification.warning({message:'Isi Deliverables Terlebih Dahulu'})
+        setSubmitAccepted(false)
+      }else{
+        setSubmitAccepted(true)
+      }
+
+      if(milestones.length<1){
+        notification.warning({message:'Isi Milestones Terlebih Dahulu'})
+        setSubmitAccepted(false)
+      }else{
+        setSubmitAccepted(true)
+      }
+
+      if(capaianPerminggu.length<1){
+        notification.warning({message:'Isi Rencana Capaian Perminggu Terlebih Dahulu'})
+        setSubmitAccepted(false)
+      }else{
+        setSubmitAccepted(true)
+      }
+
+
+      if(jadwalPenyelesaianKeseluruhan.length<1){
+        notification.warning({message:'Isi Jadwal Penyelesaian Keseluruhan Terlebih Dahulu'})
+        setSubmitAccepted(false)
+      }else{
+        setSubmitAccepted(true)
+      }
+
+      createDataRPP()
+
+
+  
+    }
 
   const showModal = () => {
     setIsModalOpen(true)
@@ -382,7 +440,6 @@ const PengisianRpp = () => {
   return (
     <>
       <div className="container">
-        <button onClick={handleSubmitRPP}>tes</button>
         <Space>
           <Modal
             title="Format Pengisian Dokumen RPP"
@@ -452,7 +509,7 @@ const PengisianRpp = () => {
           onFinish={handleSubmitRPP}
           onFinishFailed={onFinishFailed}
         >
-          {/* <Button onClick={tes}>tes</Button> */}
+      
           <div>
             <Form.Item
               labelAlign="left"
@@ -651,6 +708,7 @@ const PengisianRpp = () => {
                         <RangePicker
                           style={{ width: '100%' }}
                           disabledDate={disabledDate}
+                          format={dateFormat}
                           onChange={(date, datestring) => {
                             handleDataMilestones(index, datestring[0], 'start_date')
                             handleDataMilestones(index, datestring[1], 'finish_date')

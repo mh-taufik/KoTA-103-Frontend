@@ -309,7 +309,7 @@ const RekapRPP = () => {
 
   /** TOMBOL EDIT RPP */
   const confirmToEdit = () => {
-    history.push(`/rencanaPenyelesaianProyek/edit/${wannaEdit.id}`)
+    history.push(`/rencanaPenyelesaianProyek/edit/${wannaEdit.rpp_id}`)
   }
 
   /** TOMBOL DETAIL RPP */
