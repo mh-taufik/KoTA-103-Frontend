@@ -17,6 +17,7 @@ const Page404 = () => {
   return (
     <div className='container2'>
       <Result
+       status={404||409||405||400}
     title="404"
     subTitle="Sorry, Something Wrong."
     extra={<Button type="primary" onClick={()=>history.push(`/dashboard`)}>Back Home</Button>}

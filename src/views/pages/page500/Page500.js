@@ -13,6 +13,7 @@ const Page500 = () => {
   return (
     <div className="container2">
       <Result
+       status={500 || 505 || 503}
         title="500"
         subTitle="Sorry, something went wrong."
         extra={
