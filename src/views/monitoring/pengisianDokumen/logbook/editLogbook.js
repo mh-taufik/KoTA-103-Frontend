@@ -286,7 +286,6 @@ const FormEditLogbook = (props) => {
                   <Form.Control
                     as="textarea"
                     disabled
-                    placeholder="kendala"
                     name="kendala"
                     defaultValue={logbookAttributesData.encountered_problem}
                     // onChange={(e) => setKeterangan(e.target.value)}

@@ -3,11 +3,6 @@ import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-  faPencil,
-  faLock,
-  faTrashCan,
-  faEdit,
-  faPen,
   faCheck,
 } from '@fortawesome/free-solid-svg-icons'
 import {
@@ -44,7 +39,7 @@ const RekapPenilaianPeserta = () => {
   const [loadings, setLoadings] = useState([])
   axios.defaults.withCredentials = true
   const [pesertaD3, setPesertaD3] = useState([])
-  const [pesertaD4, setPesertaD4] = useState([])
+  const [dataPeserta, setDataPeserta] = useState([])
   var rolePengguna = localStorage.id_role
   const [searchText, setSearchText] = useState('')
   const [searchedColumn, setSearchedColumn] = useState('')
@@ -179,40 +174,36 @@ const RekapPenilaianPeserta = () => {
   }
 
   useEffect(() => {
-    const getAllListPesertaD3 = async (record, index) => {
-      var APIGETPESERTA
-
-      //GET DATA PESERTA BASED ON ROLE, PANITIA OR PEMBIMBING (tes aja)
-      if (rolePengguna !== '1' && rolePengguna!=='4') {
-        APIGETPESERTA = 'http://localhost:1337/api/pesertas?filters[prodi]=D3'
-      } else if (rolePengguna === '4') {
-        APIGETPESERTA = 'http://localhost:1337/api/pesertas?filters[prodi]=D3'
-      }
-    
-
+    const getAllListPeserta = async (record, index) => {
       await axios
-        .get(`${APIGETPESERTA}`)
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-all`)
         .then((res) => {
-          // console.log("d3 all == ", res.data.data)
-          // setPesertaD3(res.data.data)
-          setIsLoading(false)
-          console.log('d3', res.data.data)
-          var temp = []
-          var tempdata = res.data.data
-          var getDataD3 = function (obj) {
-            for (var i in obj) {
-              temp.push({
-                id: obj[i].id,
-                nama: obj[i].attributes.nama,
-                prodi: obj[i].attributes.prodi,
-                username: obj[i].attributes.username,
+          let tempData = res.data.data
+          let tempRes = []
+          function getProdi(prodi) {
+            return prodi === 0 ? 'D3' : 'D4'
+          }
+          let funcTempRes = function (obj) {
+            for (var i in tempData) {
+              tempRes.push({
+                nim: obj[i].nim,
+                name: obj[i].name,
+                year: obj[i].year,
+                id_participant: obj[i].id_participant,
+                IPK: obj[i].IPK,
+                work_system: obj[i].work_system,
+                status_cv: obj[i].status_cv,
+                status_interest: obj[i].status_interest,
+                id_account: obj[i].id_account,
+                id_cv: obj[i].id_cv,
+                id_prodi: getProdi(obj[i].id_prodi),
               })
             }
           }
+          funcTempRes(tempData)
+          setDataPeserta(tempRes)
 
-          getDataD3(tempdata)
-          console.log('temp', temp)
-          setPesertaD3(temp)
+          setIsLoading(false)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -230,64 +221,12 @@ const RekapPenilaianPeserta = () => {
         })
     }
 
-    const getAllListPesertaD4 = async (record, index) => {
-      var APIGETPESERTAD4
-
-      if (rolePengguna !== '4') {
-        //API NYA PERLU DISESUAIKAN
-        APIGETPESERTAD4 = 'http://localhost:1337/api/pesertas?filters[prodi]=D4'
-      } else if (rolePengguna === '4') {
-        APIGETPESERTAD4 = 'http://localhost:1337/api/pesertas?filters[prodi]=D4'
-      }
-
-
-
-      await axios
-        .get(`${APIGETPESERTAD4}`)
-        .then((res) => {
-          console.log('d4 all == ', res.data.data)
-          setIsLoading(false)
-          // setPesertaD4(res.data.data)
-          var temp = []
-          var tempdata = res.data.data
-          var getDataD4 = function (obj) {
-            for (var i in obj) {
-              temp.push({
-                id: obj[i].id,
-                nama: obj[i].attributes.nama,
-                prodi: obj[i].attributes.prodi,
-                username: obj[i].attributes.username,
-              })
-            }
-          }
-
-          getDataD4(tempdata)
-          console.log('temp', temp)
-          setPesertaD4(temp)
-        })
-        .catch(function (error) {
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
-              },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-            history.push('/500')
-          }
-        })
-    }
-
-    getAllListPesertaD3()
-    getAllListPesertaD4()
+    getAllListPeserta()
   }, [history])
 
   const columnsRpp = [
     {
-      title: 'No',
+      title: 'NO',
       dataIndex: 'no',
       width: '5%',
       align: 'center',
@@ -297,19 +236,34 @@ const RekapPenilaianPeserta = () => {
     },
     {
       title: 'NIM',
-      dataIndex: 'username',
+      dataIndex: 'nim',
       width: '5%',
       key: 'username',
+      ...getColumnSearchProps('nim'),
     },
     {
-      title: 'Nama Peserta',
-      dataIndex: 'nama',
+      title: 'PRODI',
+      dataIndex: 'id_prodi',
+      width: '7%',
+      key: 'id_prodi',
+      ...getColumnSearchProps('id_prodi'),
+    },
+    {
+      title: 'NAMA PESERTA',
+      dataIndex: 'name',
       width: '40%',
       key: 'nama',
-      ...getColumnSearchProps('nama'),
+      ...getColumnSearchProps('name'),
     },
     {
-      title: 'Aksi',
+      title: 'SISTEM KERJA',
+      dataIndex: 'work_system',
+      width: '15%',
+      key: 'work_system',
+      ...getColumnSearchProps('work_system'),
+    },
+    {
+      title: 'AKSI',
       dataIndex: 'action',
       align: 'center',
       render: (text, record) => (
@@ -335,7 +289,7 @@ const RekapPenilaianPeserta = () => {
 
   const columnsLogbook = [
     {
-      title: 'No',
+      title: 'NO',
       dataIndex: 'no',
       width: '5%',
       align: 'center',
@@ -345,19 +299,34 @@ const RekapPenilaianPeserta = () => {
     },
     {
       title: 'NIM',
-      dataIndex: 'username',
+      dataIndex: 'nim',
       width: '5%',
       key: 'username',
+      ...getColumnSearchProps('nim'),
     },
     {
-      title: 'Nama Peserta',
-      dataIndex: 'nama',
+      title: 'PRODI',
+      dataIndex: 'id_prodi',
+      width: '7%',
+      key: 'id_prodi',
+      ...getColumnSearchProps('id_prodi'),
+    },
+    {
+      title: 'NAMA PESERTA',
+      dataIndex: 'name',
       width: '40%',
       key: 'nama',
-      ...getColumnSearchProps('nama'),
+      ...getColumnSearchProps('name'),
     },
     {
-      title: 'Aksi',
+      title: 'SISTEM KERJA',
+      dataIndex: 'work_system',
+      width: '15%',
+      key: 'work_system',
+      ...getColumnSearchProps('work_system'),
+    },
+    {
+      title: 'AKSI',
       dataIndex: 'action',
       align: 'center',
       render: (text, record) => (
@@ -390,7 +359,7 @@ const RekapPenilaianPeserta = () => {
 
   const columnsSelfAssessment = [
     {
-      title: 'No',
+      title: 'NO',
       dataIndex: 'no',
       width: '5%',
       align: 'center',
@@ -400,19 +369,34 @@ const RekapPenilaianPeserta = () => {
     },
     {
       title: 'NIM',
-      dataIndex: 'username',
+      dataIndex: 'nim',
       width: '5%',
       key: 'username',
+      ...getColumnSearchProps('nim'),
     },
     {
-      title: 'Nama Peserta',
-      dataIndex: 'nama',
+      title: 'PRODI',
+      dataIndex: 'id_prodi',
+      width: '7%',
+      key: 'id_prodi',
+      ...getColumnSearchProps('id_prodi'),
+    },
+    {
+      title: 'NAMA PESERTA',
+      dataIndex: 'name',
       width: '40%',
       key: 'nama',
-      ...getColumnSearchProps('nama'),
+      ...getColumnSearchProps('name'),
     },
     {
-      title: 'Aksi',
+      title: 'SISTEM KERJA',
+      dataIndex: 'work_system',
+      width: '15%',
+      key: 'work_system',
+      ...getColumnSearchProps('work_system'),
+    },
+    {
+      title: 'AKSI',
       dataIndex: 'action',
       align: 'center',
       render: (text, record) => (
@@ -444,7 +428,7 @@ const RekapPenilaianPeserta = () => {
 
   const columnsLaporan= [
     {
-      title: 'No',
+      title: 'NO',
       dataIndex: 'no',
       width: '5%',
       align: 'center',
@@ -454,19 +438,34 @@ const RekapPenilaianPeserta = () => {
     },
     {
       title: 'NIM',
-      dataIndex: 'username',
+      dataIndex: 'nim',
       width: '5%',
       key: 'username',
+      ...getColumnSearchProps('nim'),
     },
     {
-      title: 'Nama Peserta',
-      dataIndex: 'nama',
+      title: 'PRODI',
+      dataIndex: 'id_prodi',
+      width: '7%',
+      key: 'id_prodi',
+      ...getColumnSearchProps('id_prodi'),
+    },
+    {
+      title: 'NAMA PESERTA',
+      dataIndex: 'name',
       width: '40%',
       key: 'nama',
-      ...getColumnSearchProps('nama'),
+      ...getColumnSearchProps('name'),
     },
     {
-      title: 'Aksi',
+      title: 'SISTEM KERJA',
+      dataIndex: 'work_system',
+      width: '15%',
+      key: 'work_system',
+      ...getColumnSearchProps('work_system'),
+    },
+    {
+      title: 'AKSI',
       dataIndex: 'action',
       align: 'center',
       render: (text, record) => (
@@ -527,7 +526,7 @@ const RekapPenilaianPeserta = () => {
           <CRow>
             <CCol sm={12}>
               <Tabs type="card" onChange={onChange}>
-                {pesertaD4.length > 0 && (
+                {dataPeserta.length > 0 && (
                   <>
                     <TabPane tab="PESERTA" key="1">
                     <CCard className="mb-4" style={{ padding: '20px' }}>
@@ -603,7 +602,7 @@ const RekapPenilaianPeserta = () => {
                                       <Table
                                         scroll={{ x: 'max-content' }}
                                         columns={columnsLogbook}
-                                        dataSource={pesertaD4}
+                                        dataSource={dataPeserta}
                                         rowKey="id"
                                         bordered
                                       />
@@ -683,7 +682,7 @@ const RekapPenilaianPeserta = () => {
                                       <Table
                                         scroll={{ x: 'max-content' }}
                                         columns={columnsSelfAssessment}
-                                        dataSource={pesertaD4}
+                                        dataSource={dataPeserta}
                                         rowKey="id"
                                         bordered
                                       />
@@ -763,7 +762,7 @@ const RekapPenilaianPeserta = () => {
                                       <Table
                                         scroll={{ x: 'max-content' }}
                                         columns={columnsLaporan}
-                                        dataSource={pesertaD4}
+                                        dataSource={dataPeserta}
                                         rowKey="id"
                                         bordered
                                       />
@@ -779,7 +778,7 @@ const RekapPenilaianPeserta = () => {
                   </>
                 )}
 
-                {/* {pesertaD4.length > 0 && (
+                {/* {dataPeserta.length > 0 && (
                   <> */}
                     {/* <TabPane tab="Prodi D4" key="2">
                     <h4 className="justify">DOKUMEN PESERTA D4 - PRAKTIK KERJA LAPANGAN (PKL)</h4>
@@ -788,7 +787,7 @@ const RekapPenilaianPeserta = () => {
                       <Table
                         scroll={{ x: 'max-content' }}
                         columns={columns}
-                        dataSource={pesertaD4}
+                        dataSource={dataPeserta}
                         rowKey="id"
                         bordered
                       />
@@ -867,7 +866,7 @@ const RekapPenilaianPeserta = () => {
                                       <Table
                                         scroll={{ x: 'max-content' }}
                                         columns={columnsLogbook}
-                                        dataSource={pesertaD4}
+                                        dataSource={dataPeserta}
                                         rowKey="id"
                                         bordered
                                       />
@@ -947,7 +946,7 @@ const RekapPenilaianPeserta = () => {
                                       <Table
                                         scroll={{ x: 'max-content' }}
                                         columns={columnsSelfAssessment}
-                                        dataSource={pesertaD4}
+                                        dataSource={dataPeserta}
                                         rowKey="id"
                                         bordered
                                       />
@@ -1027,7 +1026,7 @@ const RekapPenilaianPeserta = () => {
                                       <Table
                                         scroll={{ x: 'max-content' }}
                                         columns={columnsLaporan}
-                                        dataSource={pesertaD4}
+                                        dataSource={dataPeserta}
                                         rowKey="id"
                                         bordered
                                       />
