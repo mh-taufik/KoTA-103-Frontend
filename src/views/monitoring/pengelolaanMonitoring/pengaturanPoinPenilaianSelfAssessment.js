@@ -360,6 +360,14 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
                   setEPoinTanggal(record.start_assessment_date)
                   setCoDate(record.start_assessment_date)
                   console.log(record.start_assessment_date)
+                  if(record.status === 'Active'){
+                    setEStatus(6)
+                  }else if(record.status === 'Inactive'){
+                    setEStatus(7)
+                  }else if(record.status === 'Disabled')(
+                    setEStatus(8)
+                  )
+
 
                   showModalEdit(record)
                 }}
@@ -560,16 +568,8 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
             Tanggal Poin Penilaian<span style={{ color: 'red' }}> *</span>
           </b>
           <p>Tanggal Saat Ini : {coDate}</p>
-          <Form.Item
-          name="tanggaledit"
-            rules={[
-              { required: true, message: 'Nama Poin Penilaian Tidak Boleh Kosong' },
-              {
-                type: 'date',
-                warningOnly: true,
-              },
-            ]}
-          >
+         
+         
             <DatePicker
               defaultValue={dayjs(ePoinTanggal, dateFormat)}
               onChange={
@@ -577,7 +577,8 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
                 // console.log(datestring)
               }
             />
-          </Form.Item>
+       
+       
         </Form>
       </Modal>
     </>
