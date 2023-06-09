@@ -43,7 +43,7 @@ const PengelolaanDeadline = () => {
   const [dataDeadlineEdit, setDataDeadlineEdit] = useState([])
   const [top, setTop] = useState(10)
   const [bottom, setBottom] = useState(10)
-  axios.defaults.withCredentials = true
+
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [idDeadlineEdit, setIdDeadlineEdit] = useState()
   const [nameDeadlineEdit, setNameDeadlineEdit] = useState()
@@ -76,6 +76,7 @@ const PengelolaanDeadline = () => {
         })
     }
     getDataDeadline()
+
   }, [history])
 
   const refreshData = async (index) => {

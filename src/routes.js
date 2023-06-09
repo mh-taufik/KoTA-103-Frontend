@@ -79,7 +79,7 @@ const UploadLaporan = lazyWithRetry(() => import('./views/monitoring/pengisianDo
 const RekapLogbook = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/logbook/rekapLogbook'))
 const PenilaianLogbook = lazyWithRetry(() => import('./views/monitoring/penilaianArtifakPeserta/logbook/penilaianLogbook'))
 const PembobotanSelfAssessment = lazyWithRetry(() => import('./views/monitoring/pengelolaanMonitoring/pengaturanPoinPenilaianSelfAssessment')) 
-const PoinPenilaianPembimbingJurusan = lazyWithRetry(() => import('./views/monitoring/pengelolaanMonitoring/pembobotanPenilaianFormPembimbing')) 
+const PengelolaanBobotFormPembimbing = lazyWithRetry(() => import('./views/monitoring/pengelolaanMonitoring/pengaturanBobotFormPembimbingJurusan')) 
 const PengeloaanDeadline = lazyWithRetry(() => import('./views/monitoring/pengelolaanMonitoring/pengaturanDeadline')) 
 //PENILAIAN
 const RekapPenilaianPembimbingJurusan = lazyWithRetry(() => import('./views/monitoring/penilaianArtifakPeserta/rekapPenilaianPeserta')) 
@@ -251,7 +251,7 @@ const routes = [
 
   /** PENGATURAN MONITORING */
   { path: '/pembobotanSelfAssessment', name: 'Poin Penilaian Self Assessment', component: PembobotanSelfAssessment, exact:true},
-  { path: '/poinPenilaianPembimbingJurusan', name: 'Poin Penilaian Pembimbing Jurusan', component: PoinPenilaianPembimbingJurusan, exact:true},
+  { path: '/pengelolaanPoinFormPembimbing', name: 'Poin Penilaian Pembimbing Jurusan', component: PengelolaanBobotFormPembimbing, exact:true},
   { path: '/pengelolaanDeadline', name: 'Pengeloaan Deadline', component: PengeloaanDeadline, exact:true},
 
 

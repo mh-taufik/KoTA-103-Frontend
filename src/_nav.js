@@ -517,7 +517,7 @@ const _nav = [
       {
         component: CNavItem,
         name: 'Poin Penilaian Pembimbing Jurusan',
-        to: '/poinPenilaianPembimbingJurusan',
+        to: '/pengelolaanPoinFormPembimbing',
         index: 56.2
       },
       {

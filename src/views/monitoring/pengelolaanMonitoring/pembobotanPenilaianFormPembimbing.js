@@ -52,7 +52,7 @@ const PembobotanPenilaianFormPembimbing = () => {
       await axios
         .get('http://localhost:8080/monitoring/supervisor/grade/aspect/get')
         .then((result) => {
-          console.log(result)
+          console.log(result.data)
           console.log('AKHAHDIO', result.data.data)
           setPoinPenilaianFormPembimbing({
             idNilaiProsesBimbingan: result.data.data[0].id,
@@ -75,12 +75,14 @@ const PembobotanPenilaianFormPembimbing = () => {
             for (var i in obj) {
               temp1.push({
                 id: obj[i].id,
-                deskripsi: obj[i].attributes.deskripsi,
-                bobot: obj[i].attributes.bobot,
+                name : obj[i].name,
+                description: obj[i].attributes.description,
+                max_grade: obj[i].attributes.max_grade,
               })
             }
           }
           getTempDataPoin(temp)
+          console.log('DATA', temp1)
           setDataPoinPenilaian(temp1)
           setIsLoading(false)
         })
@@ -236,15 +238,15 @@ const PembobotanPenilaianFormPembimbing = () => {
           idNilaiProsesBimbingan: result.data.data[0].id,
           idNilaiLaporan: result.data.data[1].id,
           idNilaiLainnya: result.data.data[2].id,
-          bobotNilaiProsesBimbingan: result.data.data[0].attributes.bobot,
-          bobotNilaiLaporan: result.data.data[1].attributes.bobot,
-          bobotNilaiLainnya: result.data.data[2].attributes.bobot,
-          deskripsiNilaiProsesBimbingan: result.data.data[0].attributes.deskripsi,
-          deskripsiNilaiLaporan: result.data.data[1].attributes.deskripsi,
-          deskripsiNilaiLainnya: result.data.data[2].attributes.deskripsi,
-          poinNilaiProsesBimbingan: result.data.data[0].attributes.poin,
-          poinNilaiLaporan: result.data.data[1].attributes.poin,
-          poinNilaiLainnya: result.data.data[2].attributes.poin,
+          bobotNilaiProsesBimbingan: result.data.data[0].max_grade,
+          bobotNilaiLaporan: result.data.data[1].max_grade,
+          bobotNilaiLainnya: result.data.data[2].max_grade,
+          deskripsiNilaiProsesBimbingan: result.data.data[0].description,
+          deskripsiNilaiLaporan: result.data.data[1].description,
+          deskripsiNilaiLainnya: result.data.data[2].description,
+          poinNilaiProsesBimbingan: result.data.data[0].name,
+          poinNilaiLaporan: result.data.data[1].name,
+          poinNilaiLainnya: result.data.data[2].name,
         })
 
         let temp = result.data.data
