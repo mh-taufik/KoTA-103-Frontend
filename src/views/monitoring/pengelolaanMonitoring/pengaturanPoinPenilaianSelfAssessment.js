@@ -48,6 +48,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
   const [eStatus, setEStatus] = useState('')
   const [eId, setEId] = useState()
   const [ePoinTanggal, setEPoinTanggal] = useState()
+  const [coDate, setCoDate] = useState()
 
   const [form] = Form.useForm()
   const [form1] = Form.useForm()
@@ -127,37 +128,36 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
   }
 
   const handleOkCreate = async (index) => {
-
     // if (poinTanggalDibuka) {
-      await axios
-        .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/create`, {
-          description: poinName,
-          name: poinName,
-          start_assessment_date: poinTanggalDibuka,
-          status : 6
+    await axios
+      .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/create`, {
+        description: poinName,
+        name: poinName,
+        start_assessment_date: poinTanggalDibuka,
+        status: 6,
+      })
+      .then((response) => {
+        refreshData(index)
+        notification.success({
+          message: 'Poin Penilaian Self Assessment Berhasil Ditambahkan',
         })
-        .then((response) => {
-          refreshData(index)
-          notification.success({
-            message: 'Poin Penilaian Self Assessment Berhasil Ditambahkan',
-          })
 
-          setIsModalCreateVisible(false)
-          form.resetFields()
-        })
-        .catch((error) => {
-          setIsModalCreateVisible(false)
+        setIsModalCreateVisible(false)
+        form.resetFields()
+      })
+      .catch((error) => {
+        setIsModalCreateVisible(false)
 
-          form.resetFields()
-          setLoadings((prevLoadings) => {
-            const newLoadings = [...prevLoadings]
-            newLoadings[index] = false
-            return newLoadings
-          })
-          notification.error({
-            message: 'Poin penilaian telah ada!',
-          })
+        form.resetFields()
+        setLoadings((prevLoadings) => {
+          const newLoadings = [...prevLoadings]
+          newLoadings[index] = false
+          return newLoadings
         })
+        notification.error({
+          message: 'Poin penilaian telah ada!',
+        })
+      })
     // } else {
     //   notification.warning({ message: 'Isi Status Terlebih Dahulu!!!' })
     // }
@@ -173,14 +173,24 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
     setIsModalEditVisible(false)
   }
 
-  const editDataHandle = (idPoinPenilaian, namaPoinPenilaian,statusPoinPenilaian,tanggalAksesDibuka,index) => {
-
+  const editDataHandle = (
+    idPoinPenilaian,
+    namaPoinPenilaian,
+    statusPoinPenilaian,
+    tanggalAksesDibuka,
+    index,
+  ) => {
+    console.log(idPoinPenilaian, typeof idPoinPenilaian)
+    console.log(namaPoinPenilaian, typeof namaPoinPenilaian)
+    console.log(statusPoinPenilaian, typeof statusPoinPenilaian)
+    console.log(tanggalAksesDibuka, typeof tanggalAksesDibuka)
     axios
       .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/update`, {
-        'description': namaPoinPenilaian,
-        'name': namaPoinPenilaian,
-        'id': idPoinPenilaian,
-        'start_assessment_date': tanggalAksesDibuka,
+        description: namaPoinPenilaian,
+        id: idPoinPenilaian,
+        name: namaPoinPenilaian,
+        start_assessment_date: tanggalAksesDibuka,
+        status: statusPoinPenilaian,
       })
       .then((response) => {
         console.log(response)
@@ -201,8 +211,9 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
           message: 'Data Gagal ditambahkan!',
         })
       })
+    refreshData()
   }
-  
+
   const getColumnSearchProps = (dataIndex, name) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
       <div style={{ padding: 8 }}>
@@ -245,7 +256,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
       record[dataIndex]
         ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase())
         : '',
-    onFilterDropdownVisibleChange: (visible) => {
+    onFilterDropdownOpenChange: (visible) => {
       if (visible) {
         setTimeout(() => searchInput.select(), 100)
       }
@@ -317,11 +328,11 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
       dataIndex: 'status',
       ...getColumnSearchProps('status', 'Status Poin Penilaian'),
     },
-    // {
-    //   title: 'Tanggal Mulai Dibuka Akses',
-    //   dataIndex: 'start_assessment_date',
-    //   ...getColumnSearchProps('status', 'Status Poin Penilaian'),
-    // },
+    {
+      title: 'Tanggal Mulai Dibuka Akses',
+      dataIndex: 'start_assessment_date',
+      ...getColumnSearchProps('status', 'Status Poin Penilaian'),
+    },
     {
       title: 'Aksi',
       width: '5%',
@@ -337,11 +348,18 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
                 shape="circle"
                 style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
                 onClick={() => {
-                  console.log(record.aspect_id, record.status)
+                  console.log(
+                    record.aspect_id,
+                    record.status,
+                    record.aspect_name,
+                    record.start_assessment_date,
+                  )
                   setEId(record.aspect_id)
                   setEPoinPenilaian(record.aspect_name)
                   setEStatus(record.status)
-                  // setEPoinTanggal(record.start_assessment_date)
+                  setEPoinTanggal(record.start_assessment_date)
+                  setCoDate(record.start_assessment_date)
+                  console.log(record.start_assessment_date)
 
                   showModalEdit(record)
                 }}
@@ -431,6 +449,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
         <Form
           form={form}
           name="basic"
+          initialValues={poinPenilaian}
           wrapperCol={{ span: 24 }}
           onFinish={() => handleOkCreate(0)}
           autoComplete="off"
@@ -484,8 +503,9 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
           form={form1}
           name="basic"
           wrapperCol={{ span: 24 }}
-          onFinish={() => editDataHandle(eId,ePoinPenilaian,eStatus,ePoinTanggal)}
+          onFinish={() => editDataHandle(eId, ePoinPenilaian, eStatus, ePoinTanggal)}
           autoComplete="off"
+          initialValues={poinPenilaian}
           fields={[
             {
               name: ['poinpenilaian'],
@@ -509,7 +529,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
             rules={[{ required: true, message: 'Nama poin penilaian tidak boleh kosong!' }]}
           >
             <Input
-              disabled
+              // disabled
               defaultValue={ePoinPenilaian}
               onChange={
                 (e) => setEPoinPenilaian(e.target.value)
@@ -522,25 +542,26 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
             rules={[{ required: true, message: 'Nama Poin Penilaian Tidak Boleh Kosong' }]}
           >
             <Select
-              name="poinstatus"
+              name="statusedit"
               placeholder="Pilih Status Poin Penilaian"
               defaultValue={eStatus}
               onChange={(value) => {
                 setEStatus(value)
-                // console.log(value)
+                console.log(value)
               }}
             >
-              <Option value="active">Active</Option>
-              <Option value="non active">Non Active</Option>
-              <Option value="disabled">Disabled</Option>
+              <Option value={6}>Active</Option>
+              <Option value={7}>Inctive</Option>
+              <Option value={8}>Disabled</Option>
             </Select>
           </Form.Item>
 
           <b>
             Tanggal Poin Penilaian<span style={{ color: 'red' }}> *</span>
           </b>
-          <p>Tanggal Saat Ini : {ePoinTanggal}</p>
+          <p>Tanggal Saat Ini : {coDate}</p>
           <Form.Item
+          name="tanggaledit"
             rules={[
               { required: true, message: 'Nama Poin Penilaian Tidak Boleh Kosong' },
               {
@@ -550,7 +571,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
             ]}
           >
             <DatePicker
-              // value={dayjs(ePoinTanggal, dateFormat)}
+              defaultValue={dayjs(ePoinTanggal, dateFormat)}
               onChange={
                 (date, datestring) => setEPoinTanggal(datestring)
                 // console.log(datestring)
