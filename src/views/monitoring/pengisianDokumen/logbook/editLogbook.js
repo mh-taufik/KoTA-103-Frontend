@@ -83,34 +83,6 @@ const FormEditLogbook = (props) => {
 
 
 
-  const getDataLogbookChosen = async (index) => {
-    enterLoading(index)
-    await axios
-      .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/get/${ID_LOGBOOK}`)
-      .then((response) => {
-        dataLogbook = response.data.data
-        console.log('data', dataLogbook)
-        setLogbookPeserta(response.data.data)
-
-        setLogbookAttributesData(response.data.data.attributes)
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-          history.push('/500')
-        }
-      })
-
-    // console.log('nama proyek awal : ', logbookPeserta.attributes.namaproyek)
-  }
 
   const putLogbookParticipantChanged = async (index) => {
     enterLoading(index)
@@ -163,9 +135,6 @@ const FormEditLogbook = (props) => {
     })
   }
 
-  useEffect(() => {
-    getDataLogbookChosen()
-  }, [history])
 
   //CLICKED SUBMIT BUTTON
   const submitLogbook = () => {
@@ -181,7 +150,7 @@ const FormEditLogbook = (props) => {
         <div className="container">
        
           <h3 align="center" className="title-s">
-            FORM PENGISIAN LOGBOOK
+            FORM PENGISAN LOGBOOK - EDIT LOGBOOK 
           </h3>
 
           <Form>
@@ -192,7 +161,7 @@ const FormEditLogbook = (props) => {
                   <Form.Control
                     type="date"
                     name="tanggallogbook"
-                    value={logbookAttributesData.tanggallogbook}
+                    value={logbookAttributesData.date}
                     placeholder="Tanggal Logbook"
                     disabled
                   />
@@ -205,7 +174,7 @@ const FormEditLogbook = (props) => {
                   <Form.Label>Nama Proyek</Form.Label>
                   <Form.Control
                     type="text"
-                    defaultValue={logbookAttributesData.namaproyek}
+                    defaultValue={logbookAttributesData.project_name}
                     name="namaproyek"
                     placeholder="Nama Proyek"
                     onChange={(e) => setNamaProyek(e.target.value)}
@@ -219,7 +188,7 @@ const FormEditLogbook = (props) => {
                     type="text"
                     placeholder="Project Manager"
                     name="projectmanager"
-                    defaultValue={logbookAttributesData.projectmanager}
+                    defaultValue={logbookAttributesData.project_manager}
                     onChange={(e) => setProjectManager(e.target.value)}
                     required
                   />
@@ -232,7 +201,7 @@ const FormEditLogbook = (props) => {
                     type="text"
                     placeholder="technicalLeader"
                     name="technicalleader"
-                    defaultValue={logbookAttributesData.technicalleader}
+                    defaultValue={logbookAttributesData.technical_leader}
                     onChange={(e) => setTechnicalLeader(e.target.value)}
                     required
                   />
@@ -248,7 +217,7 @@ const FormEditLogbook = (props) => {
                     as="textarea"
                     placeholder="tugas"
                     name="tugas"
-                    defaultValue={logbookAttributesData.tugas}
+                    defaultValue={logbookAttributesData.task}
                     onChange={(e) => setTugasPeserta(e.target.value)}
                   />
                 </Form.Group>
@@ -262,7 +231,7 @@ const FormEditLogbook = (props) => {
                     as="textarea"
                     placeholder="Waktu Dan Kegiatan"
                     name="waktudankegiatan"
-                    defaultValue={logbookAttributesData.waktudankegiatan}
+                    defaultValue={logbookAttributesData.time_and_activity}
                     onChange={(e) => setWaktuDanKegiatanPeserta(e.target.value)}
                   />
                 </Form.Group>
@@ -289,7 +258,7 @@ const FormEditLogbook = (props) => {
                   <Form.Control
                     type="text"
                     name="hasilkerja"
-                    defaultValue={logbookAttributesData.hasilkerja}
+                    defaultValue={logbookAttributesData.work_result}
                     placeholder="Hasil Kerja"
                     onChange={(e) => setHasilKerja(e.target.value)}
                   />
@@ -304,7 +273,7 @@ const FormEditLogbook = (props) => {
                     as="textarea"
                     placeholder="keterangan"
                     name="keterangan"
-                    defaultValue={logbookAttributesData.keterangan}
+                    defaultValue={logbookAttributesData.description}
                     onChange={(e) => setKeterangan(e.target.value)}
                   />
                 </Form.Group>
@@ -313,13 +282,14 @@ const FormEditLogbook = (props) => {
             <Row>
               <Col>
                 <Form.Group className="mb-3" controlId="keterangan">
-                  <Form.Label>Keterangan</Form.Label>
+                  <Form.Label>Kendala</Form.Label>
                   <Form.Control
                     as="textarea"
-                    placeholder="keterangan"
-                    name="keterangan"
-                    defaultValue={logbookAttributesData.keterangan}
-                    onChange={(e) => setKeterangan(e.target.value)}
+                    disabled
+                    placeholder="kendala"
+                    name="kendala"
+                    defaultValue={logbookAttributesData.encountered_problem}
+                    // onChange={(e) => setKeterangan(e.target.value)}
                   />
                 </Form.Group>
               </Col>

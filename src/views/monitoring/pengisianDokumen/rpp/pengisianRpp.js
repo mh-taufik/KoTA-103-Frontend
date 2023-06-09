@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { ArrowLeftOutlined } from '@ant-design/icons'
+import moment from 'moment'
 import {
   Button,
   Col,
@@ -27,18 +28,20 @@ const { TextArea } = Input
 const PengisianRpp = () => {
   dayjs.extend(customParseFormat)
   dayjs.extend(weekOfYear)
-  const dateFormat = 'YYYY/MM/DD';
-const weekFormat = 'MM/DD';
-const monthFormat = 'YYYY/MM';
-const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY', 'DD-MM-YYYY', 'DD-MM-YY'];
-const customFormat = (value) => `custom format: ${value.format(dateFormat)}`;
-const customWeekStartEndFormat = (value) =>
-  `${dayjs(value).startOf('week').format(weekFormat)} ~ ${dayjs(value)
-    .endOf('week')
-    .format(weekFormat)}`;
-
+  const dateFormat = 'YYYY-MM-DD'
+  const weekFormat = 'MM/DD'
+  const monthFormat = 'YYYY/MM'
+  const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY', 'DD-MM-YYYY', 'DD-MM-YY']
+  const customFormat = (value) => `custom format: ${value.format(dateFormat)}`
+  const customWeekStartEndFormat = (value) =>
+    `${dayjs(value).startOf('week').format(weekFormat)} ~ ${dayjs(value)
+      .endOf('week')
+      .format(weekFormat)}`
 
   let history = useHistory()
+  /**LIMIT PANGURANGAN HARI DALAM MINGGU */
+  const [limitMinusDay, setLimitMinusDay] = useState()
+
   const { RangePicker } = DatePicker
   const NIM_PESERTA = localStorage.username
   const [form] = Form.useForm()
@@ -65,8 +68,7 @@ const customWeekStartEndFormat = (value) =>
   const [pageNumber, setPageNumber] = useState(1)
   const [idNewRpp, setIdNewRpp] = useState()
   const [isSuccessInput, setIsSuccessInput] = useState(true)
-  const [submitAccepted, setSubmitAccepted] = useState(false)
-
+  const [submitAccepted, setSubmitAccepted] = useState()
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages)
@@ -124,7 +126,7 @@ const customWeekStartEndFormat = (value) =>
 
   const handleAddRowDeliverables = () => {
     setNoOfRowsDeliverables(noOfRowsDeliverables + 1)
-    let newField = { deliverables: '', duedate: '' }
+    let newField = { deliverables: '', due_date: '' }
     setDeliverables([...deliverables, newField])
   }
 
@@ -161,7 +163,7 @@ const customWeekStartEndFormat = (value) =>
   }
 
   const handleAddRowMilestones = () => {
-    let newField = { deskripsi: ' ', tanggalmulai: ' ', tanggalselesai: ' ' }
+    let newField = {description: '', start_date: '', finish_date: '' }
     setMilestones([...milestones, newField])
     setNoOfRowsMilestones(noOfRowsMilestones + 1)
   }
@@ -199,7 +201,7 @@ const customWeekStartEndFormat = (value) =>
   }
 
   const handleAddRowRencanaCapaianPerminggu = () => {
-    let newField = { tanggalmulai: '', tanggalberakhir: '', rencana: '' }
+    let newField = { start_date: '', finish_date: '', achievement_plan: '' }
     setCapaianPerminggu([...capaianPerminggu, newField])
     setNoOfRowsCapaianPerminggu(noOfRowsCapaianPerminggu + 1)
   }
@@ -236,7 +238,7 @@ const customWeekStartEndFormat = (value) =>
   }
 
   const handleAddRowJadwalPenyelesaianKeseluruhan = () => {
-    let newField = { minggumulai: '', mingguselesai: '', butirpekerjaan: '', jenispekerjaan: '' }
+    let newField = { start_date: '', finish_date: '', task_name: '', task_type: '' }
     SetJadwalPenyelesaianKeseluruhan([...jadwalPenyelesaianKeseluruhan, newField])
     setNoOfRowsJadwalPenyelesaianPekerjaanKeseluruhan(
       noOfRowsJadwalPenyelesaianPekerjaanKeseluruhan + 1,
@@ -318,104 +320,151 @@ const customWeekStartEndFormat = (value) =>
     return current && current < dayjs().endOf('day')
   }
 
-
-
-  const createDataRPP = async() =>{
-    if(submitAccepted){
+  const createDataRPP = async () => {
+    console.log(submitAccepted)
+    if (submitAccepted) {
       const jsonDataDeliverables = JSON.parse(JSON.stringify(deliverables))
-    const jsonDataMilestones = JSON.parse(JSON.stringify(milestones))
-    const jsonDataRencanaPerminggu = JSON.parse(JSON.stringify(capaianPerminggu))
-    const jsonDataJadwalPenyelesaianKeseluruhan = JSON.parse(JSON.stringify(jadwalPenyelesaianKeseluruhan))
+      const jsonDataMilestones = JSON.parse(JSON.stringify(milestones))
+      const jsonDataRencanaPerminggu = JSON.parse(JSON.stringify(capaianPerminggu))
+      const jsonDataJadwalPenyelesaianKeseluruhan = JSON.parse(
+        JSON.stringify(jadwalPenyelesaianKeseluruhan),
+      )
 
-    await axios
-      .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/create`, {
-          'start_date': tanggalMulaiPekerjaan,
-          'finish_date': tanggalBerakhirPekerjaan,
-          'work_title': topikPekerjaan,
-          'task_description': deskripsiTugas,
-          'group_role': peranDalamPekerjaan,
-          "completion_schedules" : jsonDataJadwalPenyelesaianKeseluruhan,
-          "deliverables" : jsonDataDeliverables,
-          "milestones" : jsonDataMilestones,
-          "weekly_achievement_plans" : jsonDataRencanaPerminggu
-         
-      })
-      .then((result) => {
-        notification.success({
-          message:'Data RPP Berhasil Ditambahkan'
+      // console.log(tanggalMulaiPekerjaan, tanggalBerakhirPekerjaan)
+      // console.log(topikPekerjaan)
+      // console.log(deskripsiTugas)
+      // console.log(peranDalamPekerjaan)
+      // console.log(jsonDataDeliverables)
+      // console.log(jsonDataMilestones)
+      // console.log(jsonDataRencanaPerminggu)
+      // console.log(jsonDataJadwalPenyelesaianKeseluruhan)
+
+      await axios
+        .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/create`, {
+          start_date: tanggalMulaiPekerjaan,
+          finish_date: tanggalBerakhirPekerjaan,
+          work_title: topikPekerjaan,
+          task_description: deskripsiTugas,
+          group_role: peranDalamPekerjaan,
+          completion_schedules: jsonDataJadwalPenyelesaianKeseluruhan,
+          deliverables: jsonDataDeliverables,
+          milestones: jsonDataMilestones,
+          weekly_achievement_plans: jsonDataRencanaPerminggu,
         })
-      })
-      .catch(function (error) {
-        setIsSuccessInput(false)
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
+        .then((result) => {
+          notification.success({
+            message: 'Data RPP Berhasil Ditambahkan',
           })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status > 500 && error.toJSON().status <= 500) {
-          history.push('/500')
-        }
-      })
-    }else{
-      notification.warning({message:'Pastikan Semua Data Terisi !!! '})
+        })
+        .catch(function (error) {
+          setIsSuccessInput(false)
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status > 500 && error.toJSON().status <= 500) {
+            history.push('/500')
+          }
+        })
+    } else {
+      notification.warning({ message: 'Pastikan Semua Data Terisi !!! ' })
     }
+    
   }
 
-    /** HANDLE TAMBAH RPP */
-    const handleSubmitRPP = async (data, index) => {
-      if(tanggalMulaiPekerjaan.length<1){
-        notification.warning({message:'Isi Tanggal Mulai Pengerjaan Terlebih Dahulu'})
-        setSubmitAccepted(false)
-      }else{
-        setSubmitAccepted(true)
-      }
+  /** HANDLE TAMBAH RPP */
+  const handleSubmitRPP = async () => {
 
-      if(tanggalBerakhirPekerjaan.length<1){
-        notification.warning({message:'Isi Tanggal Berakhir Pengerjaan Terlebih Dahulu'})
-        setSubmitAccepted(false)
-      }else{
-        setSubmitAccepted(true)
-      }
-      
-
-      if(deliverables.length<1){
-        notification.warning({message:'Isi Deliverables Terlebih Dahulu'})
-        setSubmitAccepted(false)
-      }else{
-        setSubmitAccepted(true)
-      }
-
-      if(milestones.length<1){
-        notification.warning({message:'Isi Milestones Terlebih Dahulu'})
-        setSubmitAccepted(false)
-      }else{
-        setSubmitAccepted(true)
-      }
-
-      if(capaianPerminggu.length<1){
-        notification.warning({message:'Isi Rencana Capaian Perminggu Terlebih Dahulu'})
-        setSubmitAccepted(false)
-      }else{
-        setSubmitAccepted(true)
-      }
+    let accept_to_submit 
 
 
-      if(jadwalPenyelesaianKeseluruhan.length<1){
-        notification.warning({message:'Isi Jadwal Penyelesaian Keseluruhan Terlebih Dahulu'})
-        setSubmitAccepted(false)
-      }else{
-        setSubmitAccepted(true)
-      }
-
-      createDataRPP()
-
-
-  
+    if (deliverables.length < 1) {
+      notification.warning({ message: 'Isi Deliverables Terlebih Dahulu' })
+      setSubmitAccepted(false)
+      accept_to_submit = false
+    } else {
+      setSubmitAccepted(true)
+      accept_to_submit = true
     }
+
+    if (milestones.length < 1) {
+      notification.warning({ message: 'Isi Milestones Terlebih Dahulu' })
+      setSubmitAccepted(false)
+      accept_to_submit = false
+    } else {
+      setSubmitAccepted(true)
+      accept_to_submit = true
+    }
+
+    if (capaianPerminggu.length < 1) {
+      notification.warning({ message: 'Isi Rencana Capaian Perminggu Terlebih Dahulu' })
+      setSubmitAccepted(false)
+      accept_to_submit = false
+    } else {
+      setSubmitAccepted(true)
+      accept_to_submit = true
+    }
+
+    if (jadwalPenyelesaianKeseluruhan.length < 1) {
+      notification.warning({ message: 'Isi Jadwal Penyelesaian Keseluruhan Terlebih Dahulu' })
+      setSubmitAccepted(false)
+      accept_to_submit = false
+    } else {
+      setSubmitAccepted(true)
+      accept_to_submit = true
+    }
+
+    if (accept_to_submit) {
+      const jsonDataDeliverables = JSON.parse(JSON.stringify(deliverables))
+      const jsonDataMilestones = JSON.parse(JSON.stringify(milestones))
+      const jsonDataRencanaPerminggu = JSON.parse(JSON.stringify(capaianPerminggu))
+      const jsonDataJadwalPenyelesaianKeseluruhan = JSON.parse(
+        JSON.stringify(jadwalPenyelesaianKeseluruhan),
+      )
+
+      await axios
+        .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/create`, {
+          start_date: tanggalMulaiPekerjaan,
+          finish_date: tanggalBerakhirPekerjaan,
+          work_title: topikPekerjaan,
+          task_description: deskripsiTugas,
+          group_role: peranDalamPekerjaan,
+          completion_schedules: jsonDataJadwalPenyelesaianKeseluruhan,
+          deliverables: jsonDataDeliverables,
+          milestones: jsonDataMilestones,
+          weekly_achievement_plans: jsonDataRencanaPerminggu,
+        })
+        .then((result) => {
+          console.log(result)
+          notification.success({
+            message: 'Data RPP Berhasil Ditambahkan',
+          })
+          history.push(`/rencanaPenyelesaianProyek`)
+        })
+        .catch(function (error) {
+          setIsSuccessInput(false)
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status > 500 && error.toJSON().status <= 500) {
+            history.push('/500')
+          }
+        })
+    } else {
+      notification.warning({ message: 'Pastikan Semua Data Terisi !!! ' })
+    }
+  }
 
   const showModal = () => {
     setIsModalOpen(true)
@@ -509,18 +558,38 @@ const customWeekStartEndFormat = (value) =>
           onFinish={handleSubmitRPP}
           onFinishFailed={onFinishFailed}
         >
-      
           <div>
             <Form.Item
               labelAlign="left"
               name="tanggalMulaiPekerjaan"
               label="Tanggal Mulai Pengerjaan"
-            
+              // rules={[
+              //   {
+              //     required: true,
+              //     message: 'Masukkan tanggal pengerjaan terlebih dahulu !',
+              //   },
+              //   {
+              //     type: 'datepicker',
+              //     warningOnly: 'true',
+              //   },
+              // ]}
             >
               <Space direction="vertical" size={12}>
                 <RangePicker
-                  format="YYYY-MM-DD "
-                  disabledDate={disabledDate}
+                  format="YYYY-MM-DD"
+                 
+                  disabledDate={(current) => {
+                    if (new Date().getDay() === 0) {
+                      setLimitMinusDay(7)
+                    } else {
+                      setLimitMinusDay(new Date().getDay())
+                    }
+
+                    return (
+                      moment().add(-1, 'days') >= current ||
+                      moment().add(7 - limitMinusDay, 'days') >= current
+                    )
+                  }}
                   onChange={(date, datestring) => handleInputTanggalPengerjaan(datestring)}
                 />
               </Space>
@@ -612,7 +681,18 @@ const customWeekStartEndFormat = (value) =>
                         ]}
                       >
                         <DatePicker
-                          disabledDate={disabledDate}
+                             disabledDate={(current) => {
+                              if (new Date().getDay() === 0) {
+                                setLimitMinusDay(7)
+                              } else {
+                                setLimitMinusDay(new Date().getDay())
+                              }
+          
+                              return (
+                                moment().add(-1, 'days') >= current ||
+                                moment().add(7 - limitMinusDay, 'days') >= current
+                              )
+                            }}
                           style={{ width: '70%' }}
                           value={deliverables.date}
                           onChange={(date, datestring) =>
@@ -693,7 +773,18 @@ const customWeekStartEndFormat = (value) =>
                         name={`tanggalmilestones${index}`}
                         key={index}
                         label="Tanggal"
-                        disabledDate={disabledDate}
+                        disabledDate={(current) => {
+                          if (new Date().getDay() === 0) {
+                            setLimitMinusDay(7)
+                          } else {
+                            setLimitMinusDay(new Date().getDay())
+                          }
+      
+                          return (
+                            moment().add(-1, 'days') >= current ||
+                            moment().add(7 - limitMinusDay, 'days') >= current
+                          )
+                        }}
                         rules={[
                           {
                             required: true,
@@ -707,7 +798,18 @@ const customWeekStartEndFormat = (value) =>
                       >
                         <RangePicker
                           style={{ width: '100%' }}
-                          disabledDate={disabledDate}
+                          disabledDate={(current) => {
+                            if (new Date().getDay() === 0) {
+                              setLimitMinusDay(7)
+                            } else {
+                              setLimitMinusDay(new Date().getDay())
+                            }
+        
+                            return (
+                              moment().add(-1, 'days') >= current ||
+                              moment().add(7 - limitMinusDay, 'days') >= current
+                            )
+                          }}
                           format={dateFormat}
                           onChange={(date, datestring) => {
                             handleDataMilestones(index, datestring[0], 'start_date')
@@ -760,7 +862,6 @@ const customWeekStartEndFormat = (value) =>
                             message: 'Masukkan tanggal milestones terlebih dahulu !',
                           },
                         ]}
-
                       >
                         <TextArea
                           rows={4}
@@ -768,7 +869,11 @@ const customWeekStartEndFormat = (value) =>
                           style={{ width: '100%' }}
                           placeholder="Masukkan rencana perminggu"
                           onChange={(event) => {
-                            handleDataRencanaCapaianPerminggu(index, event.target.value, 'achievement_plan')
+                            handleDataRencanaCapaianPerminggu(
+                              index,
+                              event.target.value,
+                              'achievement_plan',
+                            )
                           }}
                         />
                       </Form.Item>
@@ -792,7 +897,18 @@ const customWeekStartEndFormat = (value) =>
                         <DatePicker
                           picker="week"
                           placeholder="Minggu Ke"
-                          disabledDate={disabledDate}
+                          disabledDate={(current) => {
+                            if (new Date().getDay() === 0) {
+                              setLimitMinusDay(7)
+                            } else {
+                              setLimitMinusDay(new Date().getDay())
+                            }
+        
+                            return (
+                              moment().add(-1, 'days') >= current ||
+                              moment().add(7 - limitMinusDay, 'days') >= current
+                            )
+                          }}
                           size="middle"
                           style={{ width: '100%' }}
                           onChange={(date, datestring) => [
@@ -910,7 +1026,18 @@ const customWeekStartEndFormat = (value) =>
                           <RangePicker
                             picker="week"
                             placeholder="Minggu Ke"
-                            disabledDate={disabledDate}
+                            disabledDate={(current) => {
+                              if (new Date().getDay() === 0) {
+                                setLimitMinusDay(7)
+                              } else {
+                                setLimitMinusDay(new Date().getDay())
+                              }
+          
+                              return (
+                                moment().add(-1, 'days') >= current ||
+                                moment().add(7 - limitMinusDay, 'days') >= current
+                              )
+                            }}
                             size="middle"
                             style={{ width: '100%', paddingLeft: 20 }}
                             onChange={(date, datestring) => {
@@ -963,11 +1090,11 @@ const customWeekStartEndFormat = (value) =>
 
           <Row>
             <Col span={24}>
-             <Popover content={<div>Lakukan pengumpulan RPP</div>}>
-             <Button type="primary" htmlType="submit">
-                SUBMIT RPP
-              </Button>
-             </Popover>
+              <Popover content={<div>Lakukan pengumpulan RPP</div>}>
+                <Button type="primary" htmlType="submit">
+                  SUBMIT RPP
+                </Button>
+              </Popover>
             </Col>
           </Row>
         </Form>

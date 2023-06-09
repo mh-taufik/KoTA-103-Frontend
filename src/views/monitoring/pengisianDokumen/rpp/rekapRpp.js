@@ -131,6 +131,7 @@ const RekapRPP = () => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/get-all/${PESERTA}`)
         .then((result) => {
+          console.log('ES', result.data.data)
           if (result.data.data.length > 0) {
             let temp = []
             let temp1 = result.data.data
@@ -168,12 +169,12 @@ const RekapRPP = () => {
               }
             }
 
-            getDataTempRPP(temp1)
+            getDataTempRPP(result.data.data)
+            console.log('yemp', temp)
             setRppPeserta(temp)
           } else {
             setRppPeserta(result.data.data)
           }
-
           setIsLoading(false)
         })
         .catch(function (error) {
