@@ -31,6 +31,7 @@ const FormEditLogbook = (props) => {
   const [technicalLeader, setTechnicalLeader] = useState()
   const [tugasPeserta, setTugasPeserta] = useState()
   const [waktuDanKegiatanPeserta, setWaktuDanKegiatanPeserta] = useState()
+  const [kendala, setKendala] = useState()
   const [statusPengecekanPembimbing, setStatusPengecekanPembimbing] = useState(0)
   const [submitAccepted, setSubmitAccepted] = useState(1)
   const [logbookPeserta, setLogbookPeserta] = useState([])
@@ -60,6 +61,22 @@ const FormEditLogbook = (props) => {
           console.log('data', dataLogbook)
         
           setLogbookAttributesData(response.data.data)
+          let temp = response.data.data
+          let temp_res = []
+          let getTempRes = function (obj){
+          
+              setNamaProyek(obj.project_name)
+              setProjectManager(obj.project_manager)
+              setTechnicalLeader(obj.technical_leader)
+              setTugasPeserta(obj.task)
+              setWaktuDanKegiatanPeserta(obj.time_and_activity)
+              setTools(obj.tools)
+              setHasilKerja(obj.work_result)
+              setKeterangan(obj.description)
+              setKendala(obj.encountered_problem)
+           
+          }
+          getTempRes(temp)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -85,27 +102,28 @@ const FormEditLogbook = (props) => {
 
 
   const putLogbookParticipantChanged = async (index) => {
-    enterLoading(index)
+    //console.log(namaProyek, tools, hasilKerja, projectManager, keterangan,technicalLeader,tugasPeserta,waktuDanKegiatanPeserta,kendala,ID_LOGBOOK)
     await axios
-      .put(`http://localhost:1337/api/logbooks/${LOGBOOK}`, {
-        data: {
-          'namaproyek': namaProyek,
-          'tools' : tools,
-          'hasilkerja' : hasilKerja,
-          'projectmanager' : projectManager,
-          'keterangan' : keterangan,
-          'technicalleader' : technicalLeader,
-          'tugas' : tugasPeserta,
-          'waktudankegiatan' :  waktuDanKegiatanPeserta,
-          'statuspengecekan' : statusPengecekanPembimbing,
-        },
+      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/update`, {
+          project_name: namaProyek,
+          tools : tools,
+          work_result : hasilKerja,
+          project_manager : projectManager,
+          description : keterangan,
+          technical_leader : technicalLeader,
+          task : tugasPeserta,
+          time_and_activity :  waktuDanKegiatanPeserta,
+          encountered_problem : kendala,
+          id : ID_LOGBOOK
+        
       })
       .then((response) => {
-        refreshData(index)
+        console.log(response)
         notification.success({
           message: 'Logbook berhasil diubah',
         })
         refreshData(index)
+        history.push(`/logbook/detaillogbook/${ID_LOGBOOK}`)
       })
       .catch(function (error) {
         if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -139,9 +157,9 @@ const FormEditLogbook = (props) => {
   //CLICKED SUBMIT BUTTON
   const submitLogbook = () => {
     putLogbookParticipantChanged()
-    console.log('id logbook = ', LOGBOOK)
-    console.log('hasil edit : ', namaProyek)
-    history.push(`/logbook/formEditLogbook/reviewEdit/${LOGBOOK}`)
+    // console.log('id logbook = ', LOGBOOK)
+    // console.log('hasil edit : ', namaProyek)
+    // history.push(`/logbook/formEditLogbook/reviewEdit/${LOGBOOK}`)
   }
 
   return (
@@ -285,16 +303,15 @@ const FormEditLogbook = (props) => {
                   <Form.Label>Kendala</Form.Label>
                   <Form.Control
                     as="textarea"
-                    disabled
                     name="kendala"
                     defaultValue={logbookAttributesData.encountered_problem}
-                    // onChange={(e) => setKeterangan(e.target.value)}
+                    onChange={(e) => setKendala(e.target.value)}
                   />
                 </Form.Group>
               </Col>
             </Row>
 
-            <Button className="form-control btn btn-primary" onClick={submitLogbook}>
+            <Button className="form-control btn btn-primary" onClick={putLogbookParticipantChanged  }>
               Submit Logbook
             </Button>
           </Form>
