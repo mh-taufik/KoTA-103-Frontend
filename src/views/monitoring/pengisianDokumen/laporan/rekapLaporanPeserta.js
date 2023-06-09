@@ -2,25 +2,16 @@ import React, { useState, useEffect } from 'react'
 import 'antd/dist/reset.css'
 import '../rpp/rpp.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPencil, faTrashCan } from '@fortawesome/free-solid-svg-icons'
 import {
   Table,
   Button,
   Row,
   Col,
-  Form,
   Input,
-  Modal,
   Space,
-  notification,
   Spin,
-  Select,
-  Popconfirm,
   Popover,
   Card,
-  Tag,
-  Alert,
   FloatButton,
 } from 'antd'
 import axios from 'axios'
@@ -29,29 +20,20 @@ import Highlighter from 'react-highlight-words'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useHistory, useParams, Router } from 'react-router-dom'
 import { LoadingOutlined } from '@ant-design/icons'
-import { Box } from '@mui/material'
-import moment from 'moment'
-import get from 'lodash.get'
-import isequal from 'lodash.isequal'
 import { message } from 'antd'
 
-const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const RekapLaporanPeserta = () => {
-  var idPeserta = useParams() //ngambil dari params, dimana params untuk menunjukkan detail logbook
+  const params = useParams() //ngambil dari params, dimana params untuk menunjukkan detail logbook
+  const NIM_PESERTA_FROM_PARAMS = params.id
   let searchInput
   const [state, setState] = useState({ searchText: '', searchedColumn: '' })
-  const [logbookPeserta, setLogbookPeserta] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const [wannaCreate, setWannaCreate] = useState(false)
-  const [wannaEdit, setWannaEdit] = useState(false)
-  const [idPengguna, setIdPengguna] = useState(localStorage.username)
+  const  NIM_PESERTA_USER = localStorage.username
   const [dataLaporanPeserta, setDataLaporanPeserta] = useState([])
+  const [dataPeserta, setDataPeserta] = useState([])
   let rolePengguna = localStorage.id_role
   let history = useHistory()
   const [loadings, setLoadings] = useState([])
-  const [statusTerlambat, isStatusTerlambat] = useState(false)
-  const [statusBelumDiNilai, isStatusBelumDinilai] = useState(false)
-  const desc = '*edit logbook yang dipilih'
   axios.defaults.withCredentials = true
   const [messageApi, contextHolder] = message.useMessage()
   const info = (link) => {
@@ -149,11 +131,11 @@ const RekapLaporanPeserta = () => {
   }
 
   const refreshData = async (index) => {
-    let NIM_PESERTA
+    let PESERTA
     if (rolePengguna !== '1') {
-      NIM_PESERTA = parseInt(idPeserta.id)
+      PESERTA = parseInt(NIM_PESERTA_FROM_PARAMS)
     } else {
-      NIM_PESERTA = parseInt(idPengguna)
+      PESERTA = parseInt(NIM_PESERTA_USER)
     }
 
     const convertDate = (date) => {
@@ -179,7 +161,7 @@ const RekapLaporanPeserta = () => {
     }
 
     await axios
-      .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get-all/${NIM_PESERTA}`)
+      .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get-all/${PESERTA}`)
       .then((res) => {
         let temp = res.data.data
         let temp_after = []
@@ -205,14 +187,14 @@ const RekapLaporanPeserta = () => {
   }
 
   useEffect(() => {
-    async function getInformasiDataPeserta() {}
+    
 
     async function getLaporanPeserta(record, index) {
-      let NIM_PESERTA
+      let PESERTA
       if (rolePengguna !== '1') {
-        NIM_PESERTA = parseInt(idPeserta.id)
+        PESERTA = parseInt(NIM_PESERTA_FROM_PARAMS)
       } else {
-        NIM_PESERTA = parseInt(idPengguna)
+        PESERTA = parseInt(NIM_PESERTA_USER)
       }
 
       const convertDate = (date) => {
@@ -238,7 +220,7 @@ const RekapLaporanPeserta = () => {
       }
 
       await axios
-        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get-all/${NIM_PESERTA}`)
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get-all/${PESERTA}`)
         .then((res) => {
           let temp = res.data.data
           let temp_after = []
@@ -266,17 +248,53 @@ const RekapLaporanPeserta = () => {
             })
           } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
             history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+          } else if (error.toJSON().status > 500 && error.toJSON().status <= 500) {
+            history.push('/500')
+          } else if (error.toJSON().status===500){
+            setDataLaporanPeserta(undefined)
+          }
+        })
+    }
+
+    const GetDataInfoPeserta = async (index) => {
+      var PESERTA
+      if (rolePengguna === '1') {
+        PESERTA = parseInt(NIM_PESERTA_USER)
+      } else {
+        PESERTA = parseInt(NIM_PESERTA_FROM_PARAMS)
+      }
+      await axios
+        .post(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-by-id`, {
+          id: [PESERTA],
+        })
+        .then((result) => {
+          setDataPeserta(result.data.data[0])
+          setIsLoading(false)
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
             history.push('/500')
           }
         })
     }
 
+    GetDataInfoPeserta()
+
+
     getLaporanPeserta()
   }, [history])
 
   const actionPenilaianFormPembimbingJurusan = (idLogbook) => {
-    history.push(`/rekapDokumenPeserta/laporan/${idPeserta.id}/nilai/${idLogbook}`)
+    history.push(`/rekapDokumenPeserta/laporan/${NIM_PESERTA_FROM_PARAMS}/nilai/${idLogbook}`)
   }
 
   const AksiKembaliPanitia = () => {
@@ -468,26 +486,36 @@ const RekapLaporanPeserta = () => {
     </Spin>
   ) : (
     <>
-      <div>
-        {contextHolder}
+    <div>
         {rolePengguna !== '1' && (
           <Space
+            className="spacebottom"
             direction="vertical"
             size="middle"
             style={{
               display: 'flex',
             }}
           >
-            <Card title="Informasi Peserta" size="small" style={{ padding: 25 }}>
-              <Row>
+            <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
+              <Row style={{ padding: 5 }}>
                 <Col span={4}>Nama Lengkap</Col>
                 <Col span={2}>:</Col>
-                <Col span={8}>Gina Anifah Choirunnisa</Col>
+                <Col span={8}>{dataPeserta.name}</Col>
               </Row>
-              <Row>
+              <Row style={{ padding: 5 }}>
                 <Col span={4}>NIM</Col>
                 <Col span={2}>:</Col>
-                <Col span={8}>181524003</Col>
+                <Col span={8}>{dataPeserta.nim}</Col>
+              </Row>
+              <Row style={{ padding: 5 }}>
+                <Col span={4}>Sistem Kerja</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.work_system}</Col>
+              </Row>
+              <Row style={{ padding: 5 }}>
+                <Col span={4}>Angkatan</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.year}</Col>
               </Row>
             </Card>
           </Space>

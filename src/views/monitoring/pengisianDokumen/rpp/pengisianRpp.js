@@ -356,7 +356,7 @@ const customWeekStartEndFormat = (value) =>
           })
         } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
           history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+        } else if (error.toJSON().status > 500 && error.toJSON().status <= 500) {
           history.push('/500')
         }
       })

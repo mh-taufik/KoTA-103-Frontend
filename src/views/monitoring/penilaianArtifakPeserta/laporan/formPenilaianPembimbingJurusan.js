@@ -29,6 +29,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
   const params = useParams()
   const NIM_PESERTA = params.nim
   const ID_LAPORAN = params.id
+  const [dataPeserta, setDataPeserta] = useState([])
   const ROLE_PENGGUNA = localStorage.id_role
   const [idPeserta, setIdPeserta] = useState()
   const [isLoading, setIsLoading] = useState(true)
@@ -223,6 +224,34 @@ const FormPenilaianPembimbingJurusan = (props) => {
           // console.log('MOALBOROS',res.data.data[0])
         })
     }
+
+    const GetDataInfoPeserta = async (index) => {
+  
+      await axios
+        .post(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-by-id`, {
+          id: [NIM_PESERTA],
+        })
+        .then((result) => {
+          setDataPeserta(result.data.data[0])
+          setIsLoading(false)
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+            history.push('/500')
+          }
+        })
+    }
+
+    GetDataInfoPeserta()
 
     getDataPoinPenilaianFormPembimbingJurusan()
     getPenilaianPembimbingLaporanIsAvailable()
@@ -458,29 +487,41 @@ const FormPenilaianPembimbingJurusan = (props) => {
   }
   return (
     <>
-       <Space
+      <div>
+       
+          <Space
             className="spacebottom"
             direction="vertical"
-            size="middle"
+            size="small"
             style={{
               display: 'flex',
             }}
           >
-            <Card title="INFORMASI PESERTA" size="small" style={{ padding: 30 }}>
-              <Row>
-                <Col span={4}>Nama</Col>
-                <Col span={4}>Gina Anifah Choirunnisa</Col>
-                <Col span={16}>&nbsp;</Col>
-                <Col span={16}>&nbsp;</Col>
+            <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
+              <Row style={{ padding: 5 }}>
+                <Col span={4}>Nama Lengkap</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.name}</Col>
               </Row>
-              <Row style={{ marginTop: 20 }}>
+              <Row style={{ padding: 5 }}>
                 <Col span={4}>NIM</Col>
-                <Col span={4}>181524003</Col>
-                <Col span={16}>&nbsp;</Col>
-                <Col span={16}>&nbsp;</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.nim}</Col>
+              </Row>
+              <Row style={{ padding: 5 }}>
+                <Col span={4}>Sistem Kerja</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.work_system}</Col>
+              </Row>
+              <Row style={{ padding: 5 }}>
+                <Col span={4}>Angkatan</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.year}</Col>
               </Row>
             </Card>
           </Space>
+      
+      </div>
           <Row gutter={16}>
             <Col span={10}>
               <Card title="INFORMASI LOGBOOK PESERTA" bordered={true}>

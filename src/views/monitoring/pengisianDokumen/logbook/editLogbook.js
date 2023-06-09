@@ -59,7 +59,7 @@ const FormEditLogbook = (props) => {
           dataLogbook = response.data.data
           console.log('data', dataLogbook)
         
-          setLogbookAttributesData(response.data.data.attributes)
+          setLogbookAttributesData(response.data.data)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -81,21 +81,7 @@ const FormEditLogbook = (props) => {
     getDataLogbook()
   }, [history])
 
-  const handleInputLogbookDate = (date) => {
-    // console.log('tanggal', value)
 
-    axios
-      .get(`http://localhost:1337/api/logbooks?filters[tanggallogbook][$eq]=${date}`)
-      .then((result) => {
-        const ress = result.data.data.length
-        if (ress > 0) {
-          notification.warning({
-            message: 'Pilih tanggal lain, logbook sudah tersedia',
-          })
-          setSubmitAccepted(0)
-        }
-      })
-  }
 
   const getDataLogbookChosen = async (index) => {
     enterLoading(index)
@@ -198,7 +184,7 @@ const FormEditLogbook = (props) => {
             FORM PENGISIAN LOGBOOK
           </h3>
 
-          {/* <Form>
+          <Form>
             <Row>
               <Col>
                 <Form.Group controlId="tanggalLogbook">
@@ -208,7 +194,6 @@ const FormEditLogbook = (props) => {
                     name="tanggallogbook"
                     value={logbookAttributesData.tanggallogbook}
                     placeholder="Tanggal Logbook"
-                    onChange={(e) => handleInputLogbookDate(e.target.value)}
                     disabled
                   />
                 </Form.Group>
@@ -343,7 +328,7 @@ const FormEditLogbook = (props) => {
             <Button className="form-control btn btn-primary" onClick={submitLogbook}>
               Submit Logbook
             </Button>
-          </Form> */}
+          </Form>
         </div>
         <FloatButton type='primary' icon={<ArrowLeftOutlined />}  onClick={()=>history.push(`/logbook`)} tooltip={<div>Kembali ke Rekap Logbook</div>} />
 

@@ -21,6 +21,7 @@ import { Button, FloatButton, Popover, Space, Spin } from 'antd'
 const DetailRPP = (props) => {
   var params = useParams()
   let RPP_ID = params.id
+  let NIM_PESERTA = params.nim
   const [isLoading, setIsLoading] = useState(true)
   const [isSpinner, setIsSpinner] = useState(true)
   const [dataRPP, setDataRPP] = useState([])
@@ -181,7 +182,7 @@ const DetailRPP = (props) => {
   }, [history])
 
   const HandleKembali = () => {
-   (rolePengguna === 1)?  history.push(`/rencanaPenyelesaianProyek`): history.push(`/rekapDokumenPeserta/rppPeserta/${params.nim}`)
+   (rolePengguna === '1')?  history.push(`/rencanaPenyelesaianProyek`): history.push(`/rekapDokumenPeserta/rppPeserta/${NIM_PESERTA}`)
   }
 
 
@@ -336,7 +337,7 @@ const DetailRPP = (props) => {
         </TableContainer>
       </div>
            
-                 <FloatButton type='primary' onClick={()=>history.push(`/rencanaPenyelesaianProyek`)} icon={<ArrowLeftOutlined />} tooltip={<div>Kembali ke Rekap RPP</div>} />
+                 <FloatButton type='primary' onClick={HandleKembali} icon={<ArrowLeftOutlined />} tooltip={<div>Kembali ke Rekap RPP</div>} />
                  
         
 

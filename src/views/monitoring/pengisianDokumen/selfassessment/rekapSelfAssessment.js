@@ -4,25 +4,12 @@ import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { faEye, faPencil } from '@fortawesome/free-solid-svg-icons'
-import {
-  Table,
-  Button,
-  Row,
-  Col,
-  Input,
-  Space,
-
-  Spin,
-  Popover,
-  Card,
-  FloatButton,
-} from 'antd'
+import { Table, Button, Row, Col, Input, Space, Spin, Popover, Card, FloatButton } from 'antd'
 import axios from 'axios'
 import { SearchOutlined } from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
-import { useHistory, useParams} from 'react-router-dom'
+import { useHistory, useParams } from 'react-router-dom'
 import { LoadingOutlined } from '@ant-design/icons'
-
 
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const RekapSelfAssessment = () => {
@@ -30,14 +17,13 @@ const RekapSelfAssessment = () => {
   let NIM_PESERTA_FROM_PARAMS = PARAMS.id //ngambil dari params, dimana params untuk menunjukkan detail logbook
   let searchInput
   const [state, setState] = useState({ searchText: '', searchedColumn: '' })
-  const [logbookPeserta, setLogbookPeserta] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const NIM_PESERTA_FROM_USER = localStorage.username
+  const NIM_PESERTA_USER = localStorage.username
   let rolePengguna = localStorage.id_role
   let history = useHistory()
-  const { id } = useParams()
   const [loadings, setLoadings] = useState([])
   const [selfAssessmentPeserta, setSelfAssessmentPeserta] = useState([])
+  const [dataPeserta, setDataPeserta] = useState([])
   const [jumlahSelfAssessmentTidakDikumpulkan, setJumlahSelfAssessmentTidakDikumpulkan] = useState()
   const [jumlahSelfAssessmentDikumpulkan, setJumlahSelfAssessmentDikumpulkan] = useState()
   axios.defaults.withCredentials = true
@@ -50,15 +36,13 @@ const RekapSelfAssessment = () => {
     })
   }
 
-
-
   useEffect(() => {
     console.log('NIM_PESERTA_FROM_PARAMS ==> ', NIM_PESERTA_FROM_PARAMS)
 
-    const  getSelfAssessment= async(index)=> {
+    const getSelfAssessment = async (index) => {
       let PESERTA
       if (rolePengguna === '1') {
-        PESERTA = NIM_PESERTA_FROM_USER
+        PESERTA = NIM_PESERTA_USER
       } else {
         PESERTA = NIM_PESERTA_FROM_PARAMS
       }
@@ -70,51 +54,58 @@ const RekapSelfAssessment = () => {
         .then((result) => {
           console.log(result.data.data)
 
-          // var temp = []
-          // var temp1 = result.data.data
-          
-          // let convertDate = function (date){
-          //   let temp_date_split = date.split('-')
-          //   const month = [
-          //     'Januari',
-          //     'Februari',
-          //     'Maret',
-          //     'April',
-          //     'Mei',
-          //     'Juni',
-          //     'Juli',
-          //     'Agustus',
-          //     'September',
-          //     'Oktober',
-          //     'November',
-          //     'Desember',
-          //   ]
-          //   let date_month = temp_date_split[1]
-          //   let month_of_date = month[parseInt(date_month) - 1]
-          //   // console.log(month_of_date,'isi date monts', month_of_date)
-          //   return  date? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`:null
-          // }
+          let temp = []
+          const len = result.data.data.length
+          const temp1 = JSON.parse(JSON.stringify(result.data.data))
 
-          // if(result.data.data.length>0){
-          //   var getTempSelfAssessment = function (obj) {
-           
-          //     for (var i in obj) {
-          //       temp.push({
-          //         tanggal_mulai: obj[i].start_date,
-          //         tanggal_selesai : obj[i].finish_date,
-          //         id: obj[i].self_assessment_id,
-          //         participant_id : obj[i].participant_id
-          //       })
-          //     }
-          //   }
-         
-          //   getTempSelfAssessment(temp1)
-          //   setSelfAssessmentPeserta(temp)
-          // }else{
+          const convertDate = (date) => {
+            let temp_date_split = date.split('-')
+            const month = [
+              'Januari',
+              'Februari',
+              'Maret',
+              'April',
+              'Mei',
+              'Juni',
+              'Juli',
+              'Agustus',
+              'September',
+              'Oktober',
+              'November',
+              'Desember',
+            ]
+            let date_month = temp_date_split[1]
+            let month_of_date = month[parseInt(date_month) - 1]
+            console.log(month_of_date, 'isi date monts', month_of_date)
+            return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
+          }
+
+          if (result.data.data.length > 0) {
+            console.log('RESY')
+            var getTempSelfAssessment = function (obj) {
+              for (var i in obj) {
+                // console.log(i, len-1, '==', parseInt(i)===(len-1))
+                if (parseInt(i) === len - 1) {
+                  break
+                }
+                temp.push({
+                  start_date: convertDate(obj[i].start_date),
+                  finish_date: convertDate(obj[i].finish_date),
+                  self_assessment_id: obj[i].self_assessment_id,
+                  participant_id: obj[i].participant_id,
+                })
+              }
+            }
+
+            getTempSelfAssessment(temp1)
+            setSelfAssessmentPeserta(temp)
+            setIsLoading(false)
+            return
+          } else {
             setSelfAssessmentPeserta(result.data.data)
-          // }
-          // console.log('data',temp)
-          setIsLoading(false)
+            setIsLoading(false)
+            return
+          }
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -128,12 +119,45 @@ const RekapSelfAssessment = () => {
             history.push('/404')
           } else if (error.toJSON().status > 500 && error.toJSON().status <= 599) {
             history.push('/500')
-          } else if(error.toJSON().status === 500){
+          } else if (error.toJSON().status === 500) {
             setSelfAssessmentPeserta(undefined)
             setIsLoading(false)
           }
         })
     }
+
+    const GetDataInfoPeserta = async (index) => {
+      var PESERTA
+      if (rolePengguna === '1') {
+        PESERTA = parseInt(NIM_PESERTA_USER)
+      } else {
+        PESERTA = parseInt(NIM_PESERTA_FROM_PARAMS)
+      }
+      await axios
+        .post(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-by-id`, {
+          id: [PESERTA],
+        })
+        .then((result) => {
+          setDataPeserta(result.data.data[0])
+          setIsLoading(false)
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+            history.push('/500')
+          }
+        })
+    }
+
+    GetDataInfoPeserta()
 
     getSelfAssessment()
   }, [history])
@@ -220,20 +244,22 @@ const RekapSelfAssessment = () => {
     handleSearch(selectedKeys, confirm, dataIndex, index)
   }
 
-  const refreshData = (index) => {
+  const refreshData = async (index) => {
     var PESERTA
     if (rolePengguna === '1') {
-      PESERTA = NIM_PESERTA_FROM_USER
+      PESERTA = NIM_PESERTA_USER
     } else {
       PESERTA = NIM_PESERTA_FROM_PARAMS
     }
-    axios
-      .get(
-        `http://localhost:1337/api/selfassessments?populate=*&filters[peserta][username]=${PESERTA}`,
-      )
-      .then((response) => {
-        var temp = []
-        var temp1 = response.data.data
+    await axios
+      .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/get-all/${PESERTA}`)
+      .then((result) => {
+        console.log(result.data.data)
+
+        let temp = []
+        const len = result.data.data.length
+        const temp1 = JSON.parse(JSON.stringify(result.data.data))
+
         const convertDate = (date) => {
           let temp_date_split = date.split('-')
           const month = [
@@ -252,24 +278,33 @@ const RekapSelfAssessment = () => {
           ]
           let date_month = temp_date_split[1]
           let month_of_date = month[parseInt(date_month) - 1]
-          // console.log(month_of_date,'isi date monts', month_of_date)
-          return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
+          console.log(month_of_date, 'isi date monts', month_of_date)
+          return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
         }
 
-        var getTempSelfAssessment = function (obj) {
-          for (var i in obj) {
-            temp.push({
-              tanggal_mulai: convertDate(obj[i].attributes.tanggalmulai),
-              tanggal_selesai: convertDate(obj[i].attributes.tanggalselesai),
-              tanggal_pengumpulan: convertDate(obj[i].attributes.tanggal_pengumpulan),
-              id: obj[i].id,
-            })
+        if (result.data.data.length > 0) {
+          console.log('RESY')
+          var getTempSelfAssessment = function (obj) {
+            for (var i in obj) {
+              if (parseInt(i) === len - 1) {
+                break
+              }
+              temp.push({
+                start_date: convertDate(obj[i].start_date),
+                finish_date: convertDate(obj[i].finish_date),
+                self_assessment_id: obj[i].self_assessment_id,
+                participant_id: obj[i].participant_id,
+              })
+            }
           }
+
+          getTempSelfAssessment(temp1)
+          setSelfAssessmentPeserta(temp)
+          setIsLoading(false)
+        } else {
+          setSelfAssessmentPeserta(result.data.data)
+          setIsLoading(false)
         }
-        console.log('SA', response.data.data)
-        getTempSelfAssessment(temp1)
-        setSelfAssessmentPeserta(temp)
-        setLogbookPeserta(response.data.data)
         setLoadings((prevLoadings) => {
           const newLoadings = [...prevLoadings]
           newLoadings[index] = false
@@ -278,22 +313,22 @@ const RekapSelfAssessment = () => {
       })
   }
 
-
   const handleCreateSelfAssessment = () => {
     history.push(`/selfAssessment/formSelfAssessment`)
   }
 
-
-
-
   const lihatDetailSelfAssessment = (idsa) => {
     rolePengguna !== '1'
-      ? history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${NIM_PESERTA_FROM_PARAMS}/detail/${idsa}`)
+      ? history.push(
+          `/rekapDokumenPeserta/selfAssessmentPeserta/${NIM_PESERTA_FROM_PARAMS}/detail/${idsa}`,
+        )
       : history.push(`/selfAssessment/formSelfAssessment/detail/${idsa}`)
   }
 
   const lakukanPenilaianSelfAssessment = (idsa) => {
-    history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${NIM_PESERTA_FROM_PARAMS}/penilaian/${idsa}`)
+    history.push(
+      `/rekapDokumenPeserta/selfAssessmentPeserta/${NIM_PESERTA_FROM_PARAMS}/penilaian/${idsa}`,
+    )
   }
 
   const columnsPanitiaPembimbing = [
@@ -308,15 +343,15 @@ const RekapSelfAssessment = () => {
     },
     {
       title: 'TANGGAL MULAI',
-      dataIndex: 'tanggal_mulai',
-      key: 'tanggal_mulai',
-      ...getColumnSearchProps('tanggal_mulai', 'Tanggal Mulai'),
+      dataIndex: 'start_date',
+      key: 'start_date',
+      ...getColumnSearchProps('start_date', 'Tanggal Mulai'),
     },
     {
       title: 'TANGGAL SELESAI',
-      dataIndex: 'tanggal_selesai',
-      key: 'tanggal_selesai',
-      ...getColumnSearchProps('tanggal_selesai', 'Tanggal Selesai'),
+      dataIndex: 'finish_date',
+      key: 'finish_date',
+      ...getColumnSearchProps('finish_date', 'Tanggal Selesai'),
     },
     {
       title: 'AKSI',
@@ -335,7 +370,7 @@ const RekapSelfAssessment = () => {
                     shape="circle"
                     style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
                     onClick={() => {
-                      lihatDetailSelfAssessment(record.id)
+                      lihatDetailSelfAssessment(record.self_assessment_id)
                     }}
                   >
                     <FontAwesomeIcon icon={faEye} style={{ color: 'black' }} />
@@ -398,15 +433,15 @@ const RekapSelfAssessment = () => {
     },
     {
       title: 'TANGGAL MULAI',
-      dataIndex: 'tanggal_mulai',
-      key: 'tanggal_mulai',
-      ...getColumnSearchProps('tanggal_mulai', 'Tanggal Mulai'),
+      dataIndex: 'start_date',
+      key: 'start_date',
+      ...getColumnSearchProps('start_date', 'Tanggal Mulai'),
     },
     {
       title: 'TANGGAL SELESAI',
-      dataIndex: 'tanggal_selesai',
-      key: 'tanggal_selesai',
-      ...getColumnSearchProps('tanggal_selesai', 'Tanggal Selesai'),
+      dataIndex: 'finish_date',
+      key: 'finish_date',
+      ...getColumnSearchProps('finish_date', 'Tanggal Selesai'),
     },
     {
       title: 'AKSI',
@@ -424,7 +459,7 @@ const RekapSelfAssessment = () => {
                   shape="circle"
                   style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
                   onClick={() => {
-                    lihatDetailSelfAssessment(record.id)
+                    lihatDetailSelfAssessment(record.self_assessment_id)
                   }}
                 >
                   <FontAwesomeIcon icon={faEye} style={{ color: 'black' }} />
@@ -460,29 +495,41 @@ const RekapSelfAssessment = () => {
     <Spin indicator={antIcon} />
   ) : (
     <>
-      {rolePengguna !== '1' && (
-        <Space
-          className="spacebottom"
-          direction="vertical"
-          size="middle"
-          style={{
-            display: 'flex',
-          }}
-        >
-          <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
-            <Row style={{ fontSize: 16 }}>
-              <Col span={4}>Nama Lengkap</Col>
-              <Col span={2}>:</Col>
-              <Col span={8}>Gina Anifah Choirunnisa</Col>
-            </Row>
-            <Row style={{ fontSize: 16 }}>
-              <Col span={4}>NIM</Col>
-              <Col span={2}>:</Col>
-              <Col span={8}>181524003</Col>
-            </Row>
-          </Card>
-        </Space>
-      )}
+      <div>
+        {rolePengguna !== '1' && (
+          <Space
+            className="spacebottom"
+            direction="vertical"
+            size="middle"
+            style={{
+              display: 'flex',
+            }}
+          >
+            <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
+              <Row style={{ padding: 5 }}>
+                <Col span={4}>Nama Lengkap</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.name}</Col>
+              </Row>
+              <Row style={{ padding: 5 }}>
+                <Col span={4}>NIM</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.nim}</Col>
+              </Row>
+              <Row style={{ padding: 5 }}>
+                <Col span={4}>Sistem Kerja</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.work_system}</Col>
+              </Row>
+              <Row style={{ padding: 5 }}>
+                <Col span={4}>Angkatan</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.year}</Col>
+              </Row>
+            </Card>
+          </Space>
+        )}
+      </div>
 
       <CCard className="mb-4">
         {title('REKAP SELF ASSESSMENT PESERTA')}
@@ -501,12 +548,6 @@ const RekapSelfAssessment = () => {
                 </Button>
               </Col>
             </Row>
-          )}
-
-          {rolePengguna !== '1' && (
-            <>
-              <h4 className="justify">REKAP DOKUMEN SELF ASSESSMENT PESERTA</h4>
-            </>
           )}
 
           {rolePengguna === '1' && (

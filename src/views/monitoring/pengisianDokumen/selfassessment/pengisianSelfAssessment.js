@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import 'antd/dist/reset.css'
-import {ArrowLeftOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import {
   Steps,
   Form,
@@ -69,24 +69,12 @@ const FormPengisianSelfAssessment = () => {
       enterLoading(index)
       await axios
         .get(
-          `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/get`,
+          `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/get?type=active`,
         )
         .then((result) => {
           console.log(result.data.data)
 
-         
-          let temp = []
-          let temp1 = result.data.data
-          let getTempPoinPenilaianSelfAssessment = function (obj) {
-            for (var i in obj) {
-              temp.push({
-                aspect_id: obj[i].aspect_id,
-                poinpenilaian: obj[i].aspect_name,
-              })
-            }
-          }
-          getTempPoinPenilaianSelfAssessment(temp1)
-          setKomponenPenilaianSelfAssessment(temp)
+          setKomponenPenilaianSelfAssessment(result.data.data)
           setIsLoading(false)
         })
         .catch(function (error) {
@@ -108,8 +96,8 @@ const FormPengisianSelfAssessment = () => {
     getPoinPenilaianSelfAssessment()
   }, [history])
 
-   /** HANDLE INPUT NILAI DAN KETERANGAN */
-   const handlePengisianNilaiDanKeteranganSelfAssessment = (
+  /** HANDLE INPUT NILAI DAN KETERANGAN */
+  const handlePengisianNilaiDanKeteranganSelfAssessment = (
     index,
     value,
     idSelfAssessment,
@@ -169,40 +157,34 @@ const FormPengisianSelfAssessment = () => {
   }
 
   /**PENGECEKAN DATA TANGGAL */
-  const handleDateIsAvailable = async (tanggalmulai,tanggalselesai) => {
+  const handleDateIsAvailable = async (tanggalmulai, tanggalselesai) => {
     await axios
-      .get(
-        ``,
-      )
+      .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/check`, {
+        date: tanggalmulai,
+      })
       .then((res) => {
         console.log('IS DATA AVAILABLE', res.data.data)
-
-        let result = res.data.data
-        if (result.length > 0) {
+        if (res.data.data) {
           setIsDateAvailable(false)
           notification.warning({
             message: 'Silahkan pilih minggu lain, minggu yang anda pilih telah tersedia !!!',
           })
           return false
         } else {
-          // setIsDateAvailable(true)
-          // return true
           let end = new Date(tanggalselesai)
-          end.setDate(end.getDate()+1) //jika hari lebih dari hari ini
+          end.setDate(end.getDate() + 1) //jika hari lebih dari hari ini(tanggal selesai)
           end = new Date(end)
           let today = new Date()
-          // console.log('are', today <= end, today,end)
-          if(today < end){
+          if (today < end) {
             setIsDateAvailable(true)
             console.log('ses', today, end, today < end)
-          }else if(today > end){
+          } else if (today > end) {
             console.log('ses', today, end, today > end)
             notification.warning({
-              message:'Sudah melewati deadline!!!'
+              message: 'Sudah melewati deadline!!!',
             })
             setIsDateAvailable(false)
           }
-     
         }
       })
       .catch(function (error) {
@@ -224,37 +206,55 @@ const FormPengisianSelfAssessment = () => {
   /**SUBMIT DATA */
   const submitData = async () => {
     // console.log(dataPengisianSelfAssessmentPeserta)
-    setIsDateAvailable(true)
-    // if (isDateAvailable) {
-      if(dataPengisianSelfAssessmentPeserta.length < 1){
-        notification.error({message:'Penambahan self assessment ditolak, karena tidak ada satupun poin yang terisi'})
-      }else{
-      const data = JSON.parse(JSON.stringify(dataPengisianSelfAssessmentPeserta))
-      console.log('hmmm',data)
-      await axios.post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/create`,{
-        'start_date' : tanggalMulaiSelfAssessment,
-        'finish_date' : tanggalBerakhirSelfAssessment,
-        'grade' : data
-      }).then((result)=>{
-        console.log(result)
-      })
-        
+    if (isDateAvailable) {
+      if (dataPengisianSelfAssessmentPeserta.length < 1) {
+        notification.error({
+          message: 'Penambahan self assessment ditolak, karena tidak ada satupun poin yang terisi',
+        })
+        return
+      } else {
+        const data = JSON.parse(JSON.stringify(dataPengisianSelfAssessmentPeserta))
+        console.log('hmmm', data)
+        await axios
+          .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/create`, {
+            start_date: tanggalMulaiSelfAssessment,
+            finish_date: tanggalBerakhirSelfAssessment,
+            grade: data,
+          })
+          .then((result) => {
+            console.log(result)
+            handleSuccessSubmit(result.data.data.id)
+            return
+          }).catch(function (error) {
+            if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+              history.push({
+                pathname: '/login',
+                state: {
+                  session: true,
+                },
+              })
+            } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+              history.push('/404')
+            } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+              history.push('/500')
+            }
+          })
       }
-    // } else {
-    //   notification.error({
-    //     message:
-    //       'Silahkan ubah minggu self assessment terlebih dahulu, untuk bisa melakukan submit !!!',
-    //   })
-    // }
+    } else {
+      notification.error({
+        message:
+          'Silahkan ubah minggu self assessment terlebih dahulu, untuk bisa melakukan submit !!!',
+      })
+      return 
+    }
   }
 
-const handleSuccessSubmit = (idSelfAssessment) =>{
-  notification.success({
-    message: 'Data self assessment berhasil ditambahkan',
-  })
-  history.push(`/selfAssessment/formSelfAssessment/detail/${idSelfAssessment}`)
-}
-
+  const handleSuccessSubmit = (idSelfAssessment) => {
+    notification.success({
+      message: 'Data self assessment berhasil ditambahkan',
+    })
+    history.push(`/selfAssessment/formSelfAssessment/detail/${idSelfAssessment}`)
+  }
 
   useEffect(() => {
     console.log('tanggal berakhir', tanggalBerakhirSelfAssessment)
@@ -265,25 +265,18 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
     alert(date, dateString)
   }
 
-
-
-
   const handleKembaliKeRekapSelfAssessment = () => {
     history.push(`/selfAssessment`)
   }
   return isLoading ? (
     <Spin tip="Loading" size="large">
-    <div className="content" />
-  </Spin>
+      <div className="content" />
+    </Spin>
   ) : (
     <>
-   
-      {/* <Form>
+      <Form>
         {' '}
         <div className="container">
-         
-        
-       
           <h3 className="title-s spacetop">PENGISIAN SELF ASSESSMENT</h3>
           <Box sx={{ color: 'warning.main' }}>
             <ul>
@@ -300,13 +293,16 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
           <Space direction="vertical" size={12}>
             <DatePicker
               picker="week"
-              disabledDate={(current)=>{
-                return moment().add(-1, 'days')  >= current || current.isAfter(moment())
+              disabledDate={(current) => {
+                return moment().add(-1, 'days') >= current || current.isAfter(moment())
               }}
               onChange={(date, datestring) => {
-                // let tanggalmulai = getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4))
-                // let tanggalselesai = getDateOfEndWeek(datestring.slice(5, 7), datestring.slice(0, 4))
-                // let handling = handleDateIsAvailable(tanggalmulai,tanggalselesai)
+                let tanggalmulai = getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4))
+                let tanggalselesai = getDateOfEndWeek(
+                  datestring.slice(5, 7),
+                  datestring.slice(0, 4),
+                )
+                let handling = handleDateIsAvailable(tanggalmulai, tanggalselesai)
                 setTanggalMulaiSelfAssessment(
                   getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
                 )
@@ -321,7 +317,6 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
           <hr className="spacetop" />
 
           <Row>
-
             <Col span={8} style={{ padding: 2 }}>
               <h6>ASPEK PENILAIAN</h6>
             </Col>
@@ -335,67 +330,68 @@ const handleSuccessSubmit = (idSelfAssessment) =>{
           <hr />
 
           {komponenPenilaianSelfAssessment.map((poinSelfAssessment, index) => {
-       
-              return (
-                <>
-                  <Row key={poinSelfAssessment.aspect_id}>
-                    <Col span={8} style={{ padding: 8 }}>
-                      <Text strong>{poinSelfAssessment.poinpenilaian}</Text>
-                    </Col>
-                    <Col span={4} style={{ padding: 8 }}>
-                      <InputNumber
-                        name={`nilai` + index}
-                        placeholder="nilai"
-                        onChange={(e) =>
-                          handlePengisianNilaiDanKeteranganSelfAssessment(
-                            index,
-                            e,
-                            poinSelfAssessment.aspect_id,
-                            'grade',
-                          )
-                        }
-                      />
-                    </Col>
-                    <Col span={12} style={{ padding: 8 }}>
-                      <TextArea
-                        placeholder="maksimal 1000 karakter"
-                        name={`keterangan` + index}
-                        maxLength={1000}
-                        onChange={(e) =>
-                          handlePengisianNilaiDanKeteranganSelfAssessment(
-                            index,
-                            e.target.value,
-                            poinSelfAssessment.aspect_id,
-                            'description',
-                          )
-                        }
-                      />
-                    </Col>
-                  </Row>
-                </>
-              )
-            
+            return (
+              <>
+                <Row key={poinSelfAssessment.aspect_id}>
+                  <Col span={8} style={{ padding: 8 }}>
+                    <Text strong>{poinSelfAssessment.aspect_name}</Text>
+                  </Col>
+                  <Col span={4} style={{ padding: 8 }}>
+                    <InputNumber
+                      name={`nilai` + index}
+                      placeholder="nilai"
+                      onChange={(e) =>
+                        handlePengisianNilaiDanKeteranganSelfAssessment(
+                          index,
+                          e,
+                          poinSelfAssessment.aspect_id,
+                          'grade',
+                        )
+                      }
+                    />
+                  </Col>
+                  <Col span={12} style={{ padding: 8 }}>
+                    <TextArea
+                      placeholder="maksimal 1000 karakter"
+                      name={`keterangan` + index}
+                      maxLength={1000}
+                      onChange={(e) =>
+                        handlePengisianNilaiDanKeteranganSelfAssessment(
+                          index,
+                          e.target.value,
+                          poinSelfAssessment.aspect_id,
+                          'description',
+                        )
+                      }
+                    />
+                  </Col>
+                </Row>
+              </>
+            )
           })}
 
           <Popconfirm
             placement="topLeft"
-            title={'Anda yakin akan submit ? pastikan sudah terisi dengan baik, karena tidak dapat edit kembali '}
+            title={
+              'Anda yakin akan submit ? pastikan sudah terisi dengan baik, karena tidak dapat edit kembali '
+            }
             description={''}
             onConfirm={submitData}
-            okText="Yes"
-            cancelText="No"
+            okText="Ya"
+            cancelText="Tidak"
           >
-            <Button type="primary" htmlType="submit" >
+            <Button type="primary">
               Submit
             </Button>
           </Popconfirm>
         </div>
       </Form>
-      <FloatButton type='primary' onClick={handleKembaliKeRekapSelfAssessment} icon={<ArrowLeftOutlined />} tooltip={<div>Kembali ke Rekap Self Assessment</div>} />
-
-
- */}
-
+      <FloatButton
+        type="primary"
+        onClick={handleKembaliKeRekapSelfAssessment}
+        icon={<ArrowLeftOutlined />}
+        tooltip={<div>Kembali ke Rekap Self Assessment</div>}
+      />
     </>
   )
 }

@@ -186,8 +186,12 @@ const RekapRPP = () => {
             })
           } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
             history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+          } else if (error.toJSON().status > 500 && error.toJSON().status <= 599) {
             history.push('/500')
+          } else if (error.toJSON().status===500){
+            setRppPeserta(undefined)
+            setIsLoading(false)
+            return
           }
         })
     }
