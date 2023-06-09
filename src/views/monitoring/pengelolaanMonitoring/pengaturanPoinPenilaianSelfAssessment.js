@@ -127,13 +127,14 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
   }
 
   const handleOkCreate = async (index) => {
-    enterLoading(index)
-    if (poinTanggalDibuka) {
+
+    // if (poinTanggalDibuka) {
       await axios
         .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/create`, {
           description: poinName,
           name: poinName,
           start_assessment_date: poinTanggalDibuka,
+          status : 6
         })
         .then((response) => {
           refreshData(index)
@@ -157,9 +158,9 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
             message: 'Poin penilaian telah ada!',
           })
         })
-    } else {
-      notification.warning({ message: 'Isi Status Terlebih Dahulu!!!' })
-    }
+    // } else {
+    //   notification.warning({ message: 'Isi Status Terlebih Dahulu!!!' })
+    // }
 
     refreshData()
   }
