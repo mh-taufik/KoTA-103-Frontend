@@ -53,8 +53,8 @@ const PengaturanBobotFormPembimbingJurusan = () => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/aspect/get`)
         .then((result) => {
-          console.log(result.data)
-          console.log('AKHAHDIO', result.data.data)
+        //   console.log(result.data)
+        //   console.log('AKHAHDIO', result.data.data)
           setPoinPenilaianFormPembimbing({
             idNilaiProsesBimbingan: result.data.data[0].id,
             idNilaiLaporan: result.data.data[1].id,
@@ -86,7 +86,7 @@ const PengaturanBobotFormPembimbingJurusan = () => {
             }
           }
           getTempDataPoin(temp)
-          console.log('DATA', temp1)
+        //   console.log('DATA', temp1)
           setDataPoinPenilaian(temp1)
           setIsLoading(false)
         })
@@ -124,9 +124,9 @@ const PengaturanBobotFormPembimbingJurusan = () => {
   }
 
   useEffect(() => {
-    console.log('max_grade', poinPenilaianFormPembimbing.bobotNilaiProsesBimbingan)
+    // console.log('max_grade', poinPenilaianFormPembimbing.bobotNilaiProsesBimbingan)
     let total_bobot = CekTotalBobotInput()
-    console.log('total bobot', total_bobot)
+    // console.log('total bobot', total_bobot)
 
     if (parseInt(total_bobot) > 100) {
       // if(parseInt(total_bobot)>100 || parseInt(total_bobot)<100){
@@ -149,11 +149,11 @@ const PengaturanBobotFormPembimbingJurusan = () => {
   }
 
   useEffect(() => {
-    console.log('DATA POIN PENILAIAN', dataPoinPenilaian)
+    // console.log('DATA POIN PENILAIAN', dataPoinPenilaian)
   }, [dataPoinPenilaian])
 
   const simpanPoinPenilaian = () => {
-    console.log('DATA POIN PENILAIAN', dataPoinPenilaian)
+    // console.log('DATA POIN PENILAIAN', dataPoinPenilaian)
     let total_bobot = CekTotalBobotInput()
     if (parseInt(total_bobot) > 100 || parseInt(total_bobot) < 100) {
       notification.warning({
@@ -165,7 +165,7 @@ const PengaturanBobotFormPembimbingJurusan = () => {
   }
 
   const putBobotPenilaianDanDeskripsi = async (data) => {
-    console.log('NAH GIN', data)
+    // console.log('NAH GIN', data)
     for (var i in data) {
       let aspect_id = data[i].id
       let description_new = data[i].description
@@ -179,7 +179,7 @@ const PengaturanBobotFormPembimbingJurusan = () => {
           "name" : name_new
         })
         .then((res) => {
-          console.log(res)
+        //   console.log(res)
           setIsSuccessUpdateData(true)
           refreshData()
         })
@@ -216,8 +216,8 @@ const PengaturanBobotFormPembimbingJurusan = () => {
     await axios
     .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/aspect/get`)
     .then((result) => {
-      console.log(result.data)
-      console.log('AKHAHDIO', result.data.data)
+    //   console.log(result.data)
+    //   console.log('AKHAHDIO', result.data.data)
       setPoinPenilaianFormPembimbing({
         idNilaiProsesBimbingan: result.data.data[0].id,
         idNilaiLaporan: result.data.data[1].id,
@@ -249,7 +249,7 @@ const PengaturanBobotFormPembimbingJurusan = () => {
         }
       }
       getTempDataPoin(temp)
-      console.log('DATA', temp1)
+   //   console.log('DATA', temp1)
       setDataPoinPenilaian(temp1)
       setIsLoading(false)
       })
