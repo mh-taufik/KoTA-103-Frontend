@@ -17,8 +17,9 @@ import {
   notification,
 } from 'antd'
 import './rpp.css'
+import 'antd/dist/reset.css'
 import { Form, Modal, message } from 'antd'
-import { Refresh, SentimentVeryDissatisfiedOutlined, TextSnippetSharp } from '@mui/icons-material'
+
 import { PoweroffOutlined } from '@ant-design/icons'
 import { Document, Page } from 'react-pdf/dist/esm/entry.webpack'
 import { useHistory } from 'react-router-dom'
@@ -35,6 +36,7 @@ import { faEye, faPencil } from '@fortawesome/free-solid-svg-icons'
 
 const { TextArea } = Input
 const EditRPP = () => {
+  const weekFormat = 'MM-DD';
   const [isLoading, setIsLoading] = useState(true)
   const [, updateState] = React.useState()
   const forceUpdate = React.useCallback(() => updateState({}), [])
@@ -49,6 +51,7 @@ const EditRPP = () => {
   const [formMilestones] = Form.useForm()
   const [formRencanaCapaianMingguan] = Form.useForm()
   const [formJadwalPenyelesaian] = Form.useForm()
+  const [formUbahTanggal] = Form.useForm()
   const [loadings, setLoadings] = useState([])
   const [noOfRows, setNoOfRows] = useState(1)
   const [noOfRowsDeliverables, setNoOfRowsDeliverables] = useState(0)
@@ -65,6 +68,7 @@ const EditRPP = () => {
   const [tanggalBerakhirPekerjaan, setTanggalBerakhirPekerjaan] = useState()
   const [deliverables, setDeliverables] = useState([])
   const [milestones, setMilestones] = useState([])
+  let rolePengguna = localStorage.id_role
   const [capaianPerminggu, setCapaianPerminggu] = useState([])
   const [jadwalPenyelesaianKeseluruhan, SetJadwalPenyelesaianKeseluruhan] = useState([])
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -76,7 +80,7 @@ const EditRPP = () => {
   const [dataDeliverables, setDataDeliverables] = useState([])
   const [dataJadwalPenyelesaianKeseluruhan, setDataJadwalPenyelesaianKeseluruhan] = useState([])
   const [isSuccessInputEdit, setIsSuccessInputEdit] = useState([])
-
+  axios.defaults.withCredentials = true
   /**LIMIT PANGURANGAN HARI DALAM MINGGU */
   const [limitMinusDay, setLimitMinusDay] = useState()
 
@@ -169,25 +173,18 @@ const EditRPP = () => {
   const putDataMilestonesEdit = async () => {
     await axios
       .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/milestone/update`, {
-       
-  "completion_schedule": [
-  
-  ],
-  "deliverables": [
-   
-  ],
-  "milestone": [
-    {
-      "description": dataMilestonesEditDeskripsi,
-      "finish_date": dataMilestonesEditTanggalSelesai,
-      "id": dataMilestonesEdit.id,
-      "start_date": dataMilestonesEditTanggalMulai
-    }
-  ],
-  "rpp_id": parseInt(RPP_ID),
-  "weekly_achievement_plan": [
- 
-  ]
+        completion_schedule: [],
+        deliverables: [],
+        milestone: [
+          {
+            description: dataMilestonesEditDeskripsi,
+            finish_date: dataMilestonesEditTanggalSelesai,
+            id: dataMilestonesEdit.id,
+            start_date: dataMilestonesEditTanggalMulai,
+          },
+        ],
+        rpp_id: parseInt(RPP_ID),
+        weekly_achievement_plan: [],
       })
       .then((res) => {
         console.log(res)
@@ -195,20 +192,20 @@ const EditRPP = () => {
         setIsModalMilestonesEditOpen(false)
         notification.success({ message: 'Data milestones berhasil diubah' })
       })
-      // .catch(function (error) {
-      //   if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-      //     history.push({
-      //       pathname: '/login',
-      //       state: {
-      //         session: true,
-      //       },
-      //     })
-      //   } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-      //     history.push('/404')
-      //   } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
-      //     history.push('/500')
-      //   }
-      // })
+      .catch(function (error) {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+          history.push('/500')
+        }
+      })
     refreshDataRPP()
   }
 
@@ -248,12 +245,14 @@ const EditRPP = () => {
         deliverables: [],
         milestone: [],
         rpp_id: parseInt(RPP_ID),
-        weekly_achievement_plan: [{
-          achievement_plan : dataRencanaCapaianMingguanEditRencana,
-          finish_date : dataRencanaCapaianMingguanEditTanggalBerakhir,
-          id : dataRencanaCapaianMingguanEdit.id,
-          start_date : dataRencanaCapaianMingguanEditTanggalMulai
-        }],
+        weekly_achievement_plan: [
+          {
+            achievement_plan: dataRencanaCapaianMingguanEditRencana,
+            finish_date: dataRencanaCapaianMingguanEditTanggalBerakhir,
+            id: dataRencanaCapaianMingguanEdit.id,
+            start_date: dataRencanaCapaianMingguanEditTanggalMulai,
+          },
+        ],
       })
       .then((res) => {
         // console.log(res)
@@ -300,101 +299,196 @@ const EditRPP = () => {
     setDataJadwalPenyelesaianEditTanggalSelesai(data.finish_date)
     setHandleStatusStartWeekDatePicker(statusDatePickerStart)
     setDataJadwalPenyelesaianEdit(data)
-   
+
     setIsModalJadwalPenyelesaianEditOpen(true)
-    console.log('id', data.id, typeof(data.id))
+    console.log('id', data.id, typeof data.id)
   }
 
   const handleCancelModalJadwalPenyelesaianEdit = () => {
     setIsModalJadwalPenyelesaianEditOpen(false)
   }
 
+  /** HANDLE CHAGES FINISH DATE */
+  /** HANDLE EDIT DELIVEREBLES MODAL AND DATA */
+  const [isModalFinishDateEditOpen, setIsModalFinishDateEditOpen] = useState(false)
+  const [dataFinishDateEdit, setDataFinishDateEdit] = useState()
+
+  /** HANDLE MODAL EDIT DELIVERABLES*/
+  const showModalFinishDateEdit = (data) => {
+    setDataFinishDateEdit({
+      due_date: data.due_date,
+      deliverables: data.deliverables,
+      id: data.id,
+    })
+    setIsModalFinishDateEditOpen(true)
+  }
+
+  const handleCancelModalFinishDateEdit = () => {
+    setIsModalFinishDateEditOpen(false)
+  }
+
+  /** PUT EDIT DELIVERABLES */
+  const putDataFinishDateEdit = async () => {
+    console.log(dataFinishDateEdit)
+    await axios
+      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/deliverable/update`, {})
+      .then((res) => {
+        console.log(res)
+        console.log(res.data.data)
+        setIsModalFinishDateEditOpen(false)
+        notification.success({ message: 'Data deliverables berhasil diubah' })
+      })
+      .catch(function (error) {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+          history.push('/500')
+        }
+      })
+
+    refreshDataRPP()
+  }
+
   /** ADD DATA TO RPP */
   /** HANDLE ADD DELIVERABLES */
-  const postDataDeliverablesAdditional = async (data) => {
-    let id_rpp = parseInt(RPP_ID)
-    console.log('data', data)
-    console.log('id_rpp', id_rpp)
-    // for (var i in data) {
-    //   var iterator = 1
-    //   await axios
-    //     .post(`http://localhost:1337/api/deliverables`, {
-    //       data: {
-    //         deliverables: data[i].deliverables,
-    //         duedate: data[i].date,
-    //         rpp: {
-    //           connect: id_rpp,
-    //         },
-    //       },
-    //     })
-    //     .then((res) => {
-    //       setIsSuccessInputEdit(true)
-    //       console.log(res)
-    //     })
-    //   iterator++
-    //   if (iterator === data.length) {
-    //     notification.success({ message: 'Data Milestones Berhasil Ditambahkan!!!' })
-    //   }
-    // }
+  const postDataDeliverablesAdditional = async () => {
+    let jsonDeliverables = JSON.parse(JSON.stringify(deliverables))
+
+    await axios
+      .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/deliverable/create`, {
+        completion_schedule: [],
+        deliverables: jsonDeliverables,
+        milestone: [],
+        rpp_id: parseInt(RPP_ID),
+        weekly_achievement_plan: [],
+      })
+      .then((res) => {
+        setIsSuccessInputEdit(true)
+        console.log(res)
+      })
+      .catch(function (error) {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+          history.push('/500')
+        }
+      })
+
     refreshDataRPP()
     window.location.reload(false)
-    forceUpdate()
   }
 
   /** HANDLE ADD MILESTONES */
-  const postDataMilestonesAdditional = async (data) => {
-    for (var i in data) {
-      await axios
-        .post(`http://localhost:1337/api/milestones`, {
-          data: {
-            deskripsi: data[i].deskripsi,
-            tanggalmulai: data[i].tanggalmulai,
-            tanggalselesai: data[i].tanggalselesai,
-            rpp: {
-              connect: [parseInt(RPP_ID)],
+  const postDataMilestonesAdditional = async () => {
+    const jsonMilestones = JSON.parse(JSON.stringify(milestones))
+    await axios
+      .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/milestone/create`, {
+        completion_schedule: [],
+        deliverables: [],
+        milestone: jsonMilestones,
+        rpp_id: parseInt(RPP_ID),
+        weekly_achievement_plan: [],
+      })
+      .then((res) => {
+        setIsSuccessInputEdit(true)
+        console.log(res)
+      })
+      .catch(function (error) {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
             },
-          },
-        })
-        .then((res) => {
-          setIsSuccessInputEdit(true)
-          console.log(res)
-        })
-    }
-    refreshDataRPP()
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+          history.push('/500')
+        }
+      })
+
+    window.location.reload(false)
   }
 
-  /** PUT DATA JADWAL PENYELESAIAN */
-  const putDataJadwalPenyelesaianEdit = async () => {
-    // console.log(dataJadwalPenyelesaianEdit.id)
-    // const ids = parseInt(dataJadwalPenyelesaianEdit.id)
+  /** HANDLE ADD RENCANA CAPAIAN PERMINGGU */
+  const postDataRencanaCapaianPermingguAdditional = async () => {
+    let jsonRencanaCapaianPerminggu = JSON.parse(JSON.stringify(capaianPerminggu))
+    console.log(';o', jsonRencanaCapaianPerminggu)
+
     await axios
-      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/completion-schedule/update`,{
+      .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/weekly-achievement/create`,{
         "completion_schedule": [
-          {
-            "finish_date": dataJadwalPenyelesaianEditTanggalSelesai,
-            "id": 4,
-            "start_date": dataJadwalPenyelesaianEditTanggalMulai,
-            "task_name": dataJadwalPenyelesaianEditButirPekerjaan,
-            "task_type": dataJadwalPenyelesaianEditJenisPekerjaan
-          }
+      
         ],
         "deliverables": [
-         
+        
         ],
         "milestone": [
-          
+        
+        ],
+        "rpp_id": parseInt(RPP_ID),
+        "weekly_achievement_plan": jsonRencanaCapaianPerminggu
+      })
+      .then((res) => {
+        setIsSuccessInputEdit(true)
+        console.log('res', res)
+      })
+      .catch(function (error) {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+          history.push('/500')
+        }
+      })
+
+  
+    window.location.reload(false)
+  //  refreshDataRPP()
+  }
+
+  /** HANDLE ADD JADWAL PENYELESAIAN KESELURUHAN */
+  const postDataJadwalPenyelesaianKeseluruhanAdditional = async () => {
+    let jsonJadwalPenyelesaian = JSON.parse(JSON.stringify(jadwalPenyelesaianKeseluruhan))
+    console.log('json', jsonJadwalPenyelesaian)
+    await axios
+      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/completion-schedule/update`, {
+        "completion_schedule": jsonJadwalPenyelesaian,
+        "deliverables": [
+       
+        ],
+        "milestone": [
+       
         ],
         "rpp_id": parseInt(RPP_ID),
         "weekly_achievement_plan": [
-         
+        
         ]
-        },
-      )
+      })
       .then((res) => {
-         console.log(res)
-        // console.log(res.data.data)
-        setIsModalJadwalPenyelesaianEditOpen(false)
-        notification.success({ message: 'Data Jadwal Penyelesaian Keseluruhan Berhasil Diubah' })
+        setIsSuccessInputEdit(true)
+        console.log(res)
       })
       // .catch(function (error) {
       //   if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -406,10 +500,56 @@ const EditRPP = () => {
       //     })
       //   } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
       //     history.push('/404')
-      //   } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+      //   } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
       //     history.push('/500')
       //   }
       // })
+
+
+    // window.location.reload(false)
+    refreshDataRPP()
+  }
+
+  /** PUT DATA JADWAL PENYELESAIAN */
+  const putDataJadwalPenyelesaianEdit = async () => {
+    // console.log(dataJadwalPenyelesaianEdit.id)
+    // const ids = parseInt(dataJadwalPenyelesaianEdit.id)
+    await axios
+      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/completion-schedule/update`, {
+        completion_schedule: [
+          {
+            finish_date: dataJadwalPenyelesaianEditTanggalSelesai,
+            id: 4,
+            start_date: dataJadwalPenyelesaianEditTanggalMulai,
+            task_name: dataJadwalPenyelesaianEditButirPekerjaan,
+            task_type: dataJadwalPenyelesaianEditJenisPekerjaan,
+          },
+        ],
+        deliverables: [],
+        milestone: [],
+        rpp_id: parseInt(RPP_ID),
+        weekly_achievement_plan: [],
+      })
+      .then((res) => {
+        console.log(res)
+        // console.log(res.data.data)
+        setIsModalJadwalPenyelesaianEditOpen(false)
+        notification.success({ message: 'Data Jadwal Penyelesaian Keseluruhan Berhasil Diubah' })
+      })
+    // .catch(function (error) {
+    //   if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+    //     history.push({
+    //       pathname: '/login',
+    //       state: {
+    //         session: true,
+    //       },
+    //     })
+    //   } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+    //     history.push('/404')
+    //   } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+    //     history.push('/500')
+    //   }
+    // })
 
     refreshDataRPP()
   }
@@ -520,7 +660,7 @@ const EditRPP = () => {
 
         temp_jadwalKeseluruhans(temp_jadwalKeseluruhan)
         setDataJadwalPenyelesaianKeseluruhan(temp_jadwalKeseluruhan1)
-        console.log('capaian mingguan', temp_jadwalKeseluruhan1)
+        console.log('jadwal keseluruhan', temp_jadwalKeseluruhan1)
         setIsLoading(false)
       })
       .catch(function (error) {
@@ -649,7 +789,7 @@ const EditRPP = () => {
   }
 
   const handleAddRowRencanaCapaianPerminggu = () => {
-    let newField = { start_date: '', finish_date: '', achievement_plan: '' }
+    let newField = {start_date: '', finish_date: '', achievement_plan: ''}
     setCapaianPerminggu([...capaianPerminggu, newField])
     setNoOfRowsCapaianPerminggu(noOfRowsCapaianPerminggu + 1)
   }
@@ -686,7 +826,7 @@ const EditRPP = () => {
   }
 
   const handleAddRowJadwalPenyelesaianKeseluruhan = () => {
-    let newField = { minggumulai: '', mingguselesai: '', butirpekerjaan: '', jenispekerjaan: '' }
+    let newField = { start_date: '', finish_date: '', task_name: '', task_type: '' , id:0}
     SetJadwalPenyelesaianKeseluruhan([...jadwalPenyelesaianKeseluruhan, newField])
     setNoOfRowsJadwalPenyelesaianPekerjaanKeseluruhan(
       noOfRowsJadwalPenyelesaianPekerjaanKeseluruhan + 1,
@@ -1340,26 +1480,11 @@ const EditRPP = () => {
               </Col>
               <Col span={4}>{dataRPP.finish_date}</Col>
               <Col span={4}>Ubah Tanggal :</Col>
-              <Col span={5}>
-                <DatePicker
-                  picker="date"
-                  disabledDate={(current) => {
-                    if (new Date().getDay() === 0) {
-                      setLimitMinusDay(7)
-                    } else {
-                      setLimitMinusDay(new Date().getDay())
-                    }
-
-                    return (
-                      moment().add(-1, 'days') >= current ||
-                      moment().add(7 - limitMinusDay, 'days') >= current
-                    )
-                  }}
-                />
-              </Col>
-              <Col span={2}>
-                <Popover content={<div>Klik untuk menyimpan perubahan tanggal</div>}>
-                  <Button type="primary">Simpan</Button>
+              <Col span={4}>
+                <Popover content={<div>Klik untuk mengubah tanggal selesai dari RPP</div>}>
+                  <Button type="primary" onClick={showModalFinishDateEdit}>
+                    Ubah Tanggal Selesai
+                  </Button>
                 </Popover>
               </Col>
             </Row>
@@ -1478,8 +1603,7 @@ const EditRPP = () => {
                       htmlType="submit"
                       onClick={() => {
                         console.log(deliverables)
-                        postDataDeliverablesAdditional(deliverables)
-                        //  setNoOfRowsDeliverables(0)
+                        postDataDeliverablesAdditional()
                       }}
                     >
                       Simpan Data
@@ -1594,8 +1718,7 @@ const EditRPP = () => {
                     type="primary"
                     onClick={() => {
                       console.log(milestones)
-                      postDataMilestonesAdditional(milestones)
-                      //setNoOfRowsMilestones(0)
+                      postDataMilestonesAdditional()
                     }}
                   >
                     Simpan Data
@@ -1634,7 +1757,6 @@ const EditRPP = () => {
                       >
                         <TextArea
                           rows={4}
-                          value={capaianPerminggu.achievement_plan}
                           style={{ width: '100%' }}
                           placeholder="Masukkan rencana perminggu"
                           onChange={(event) => {
@@ -1649,7 +1771,7 @@ const EditRPP = () => {
                     </Col>
                     <Col span={8}>
                       <Form.Item
-                        name={`capaian${index}`}
+                        name={`capaian-date${index}`}
                         key={index}
                         style={{ width: '100%' }}
                         label="Tanggal"
@@ -1667,6 +1789,7 @@ const EditRPP = () => {
                         <DatePicker
                           picker="week"
                           placeholder="Minggu Ke"
+                          //format={weekFormat}
                           disabledDate={(current) => {
                             let minusToGetLimit = new Date().getDay()
                             if (minusToGetLimit === 0) {
@@ -1719,8 +1842,8 @@ const EditRPP = () => {
                     <Button
                       type="primary"
                       onClick={() => {
-                        console.log(capaianPerminggu)
-                        setNoOfRowsCapaianPerminggu(0)
+                        console.log('data',capaianPerminggu)
+                        postDataRencanaCapaianPermingguAdditional()
                       }}
                     >
                       Simpan Data
@@ -1785,10 +1908,11 @@ const EditRPP = () => {
                             handleDataJadwalPenyelesaianKeseluruhan(index, value, 'task_type')
                           }
                           options={[
-                            { value: 'exploration', label: 'Exploration' },
-                            { value: 'design', label: 'Design' },
-                            { value: 'implementasi', label: 'Implementation' },
-                            { value: 'testing', label: 'Testing' },
+                            { value: 'Exploration', label: 'Exploration' },
+                            { value: 'Analysis', label: 'Analysis' },
+                            { value: 'Design', label: 'Design' },
+                            { value: 'Implementasi', label: 'Implementation' },
+                            { value: 'Testing', label: 'Testing' },
                           ]}
                         />
                       </Col>
@@ -1856,8 +1980,7 @@ const EditRPP = () => {
                       htmlType="submit"
                       onClick={() => {
                         console.log(jadwalPenyelesaianKeseluruhan)
-                        //   postDataDeliverablesAdditional(deliverables)
-                        setNoOfRowsJadwalPenyelesaianPekerjaanKeseluruhan(0)
+                        postDataJadwalPenyelesaianKeseluruhanAdditional()
                       }}
                     >
                       Simpan Data
@@ -2350,6 +2473,66 @@ const EditRPP = () => {
             />
           </Form.Item>
           <Button type="primary" htmlType="submit" onClick={putDataJadwalPenyelesaianEdit}>
+            Simpan Perubahan
+          </Button>
+        </Form>
+      </Modal>
+
+      {/* MODAL EDIT TANGGAL BERAKHIR*/}
+      <Modal
+        title="Edit Tanggal Berakhir"
+        open={isModalFinishDateEditOpen}
+        onCancel={handleCancelModalFinishDateEdit}
+        footer={false}
+        destroyOnClose
+      >
+        <Form
+          name="form_edit_finish_date"
+          form={formUbahTanggal}
+          labelCol={{
+            span: 8,
+          }}
+          wrapperCol={{
+            span: 16,
+          }}
+          style={{
+            maxWidth: 600,
+          }}
+          initialValues={dataMilestonesEdit}
+          autoComplete="off"
+        >
+          <Form.Item
+            label="Tanggal Mulai"
+            initialValue={dataFinishDateEdit}
+            rules={[
+              {
+                required: true,
+                message: 'Mohon isi Berakhir !!!',
+              },
+              {
+                type: 'date',
+                warningOnly: true,
+              },
+            ]}
+          >
+            <DatePicker
+              onChange={(date, datestring) => setDataFinishDateEdit(datestring)}
+              disabledDate={(current) => {
+                let minusToGetLimit = new Date().getDay()
+                if (minusToGetLimit === 0) {
+                  setLimitMinusDay(7)
+                } else {
+                  setLimitMinusDay(minusToGetLimit)
+                }
+                return (
+                  moment().add(-1, 'days') >= current ||
+                  moment().add(7 - limitMinusDay, 'days') >= current
+                )
+              }}
+            />
+          </Form.Item>
+
+          <Button type="primary" onClick={putDataFinishDateEdit}>
             Simpan Perubahan
           </Button>
         </Form>
