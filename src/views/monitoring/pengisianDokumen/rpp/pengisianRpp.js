@@ -444,7 +444,12 @@ const PengisianRpp = () => {
           notification.success({
             message: 'Data RPP Berhasil Ditambahkan',
           })
-          history.push(`/rencanaPenyelesaianProyek`)
+          history.push({
+            pathname:`/rencanaPenyelesaianProyek`,
+            state :{
+              session:false,
+            }
+          })
         })
         .catch(function (error) {
           setIsSuccessInput(false)
@@ -773,18 +778,6 @@ const PengisianRpp = () => {
                         name={`tanggalmilestones${index}`}
                         key={index}
                         label="Tanggal"
-                        disabledDate={(current) => {
-                          if (new Date().getDay() === 0) {
-                            setLimitMinusDay(7)
-                          } else {
-                            setLimitMinusDay(new Date().getDay())
-                          }
-      
-                          return (
-                            moment().add(-1, 'days') >= current ||
-                            moment().add(7 - limitMinusDay, 'days') >= current
-                          )
-                        }}
                         rules={[
                           {
                             required: true,

@@ -35,9 +35,9 @@ import { faEye, faPencil } from '@fortawesome/free-solid-svg-icons'
 
 const { TextArea } = Input
 const EditRPP = () => {
-const [isLoading, setIsLoading] = useState(true)
-const [, updateState] = React.useState();
-const forceUpdate = React.useCallback(() => updateState({}), []);
+  const [isLoading, setIsLoading] = useState(true)
+  const [, updateState] = React.useState()
+  const forceUpdate = React.useCallback(() => updateState({}), [])
   const dateFormat = 'YYYY-MM-DD'
   let params = useParams()
   let RPP_ID = params.id
@@ -89,9 +89,13 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
 
   /** HANDLE MODAL EDIT DELIVERABLES*/
   const showModalDeliverablesEdit = (data) => {
-    setDataDeliverablesEditChangeDeliverables(undefined)
-    setDataDeliverablesEditChangeDueDate(undefined)
-    setDataDeliverablesEdit({ due_date: data.due_date, deliverables: data.deliverables, id: data.id })
+    setDataDeliverablesEditChangeDeliverables(data.deliverables)
+    setDataDeliverablesEditChangeDueDate(data.due_date)
+    setDataDeliverablesEdit({
+      due_date: data.due_date,
+      deliverables: data.deliverables,
+      id: data.id,
+    })
     setIsModalDeliverablesEditOpen(true)
   }
 
@@ -102,17 +106,38 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
   /** PUT EDIT DELIVERABLES */
   const putDataDeliverablesEdit = async () => {
     await axios
-      .put(`http://localhost:1337/api/deliverables/${dataDeliverablesEdit.id}`, {
-        data: {
-          deliverables: dataDeliverablesEditChangeDeliverables,
-          duedate: dataDeliverablesEditChangeDueDate,
-        },
+      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/deliverable/update`, {
+        completion_schedules: [],
+        deliverables: [
+          {
+            deliverables: dataDeliverablesEditChangeDeliverables,
+            due_date: dataDeliverablesEditChangeDueDate,
+            id: dataDeliverablesEdit.id,
+          },
+        ],
+        milestone: [],
+        rpp_id: parseInt(RPP_ID),
+        weekly_achievement_plan: [],
       })
       .then((res) => {
         console.log(res)
         console.log(res.data.data)
         setIsModalDeliverablesEditOpen(false)
         notification.success({ message: 'Data deliverables berhasil diubah' })
+      })
+      .catch(function (error) {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+          history.push('/500')
+        }
       })
 
     refreshDataRPP()
@@ -128,9 +153,9 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
 
   /** HANDLE MODAL EDIT MILESTONES*/
   const showModalMilestonesEdit = (data, popover) => {
-    setDataMilestonesEditDeskripsi(undefined)
-    setDataMilestonesEditTanggalMulai(undefined)
-    setDataMilestonesEditTanggalSelesai(undefined)
+    setDataMilestonesEditDeskripsi(data.description)
+    setDataMilestonesEditTanggalMulai(data.start_date)
+    setDataMilestonesEditTanggalSelesai(data.finish_date)
     setDataMilestonesEdit(data)
     setPopoverStartDate(popover)
     setIsModalMilestonesEditOpen(true)
@@ -143,12 +168,26 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
   /** PUT DATA MILESTONES */
   const putDataMilestonesEdit = async () => {
     await axios
-      .put(`http://localhost:1337/api/milestones/${dataMilestonesEdit.id}`, {
-        data: {
-          deskripsi: dataMilestonesEditDeskripsi,
-          tanggalmulai: dataMilestonesEditTanggalMulai,
-          tanggalselesai: dataMilestonesEditTanggalSelesai,
-        },
+      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/milestone/update`, {
+       
+  "completion_schedule": [
+  
+  ],
+  "deliverables": [
+   
+  ],
+  "milestone": [
+    {
+      "description": dataMilestonesEditDeskripsi,
+      "finish_date": dataMilestonesEditTanggalSelesai,
+      "id": dataMilestonesEdit.id,
+      "start_date": dataMilestonesEditTanggalMulai
+    }
+  ],
+  "rpp_id": parseInt(RPP_ID),
+  "weekly_achievement_plan": [
+ 
+  ]
       })
       .then((res) => {
         console.log(res)
@@ -156,6 +195,20 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
         setIsModalMilestonesEditOpen(false)
         notification.success({ message: 'Data milestones berhasil diubah' })
       })
+      // .catch(function (error) {
+      //   if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+      //     history.push({
+      //       pathname: '/login',
+      //       state: {
+      //         session: true,
+      //       },
+      //     })
+      //   } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+      //     history.push('/404')
+      //   } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+      //     history.push('/500')
+      //   }
+      // })
     refreshDataRPP()
   }
 
@@ -163,7 +216,8 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
   const [isModalRencanaCapaianMingguanEditOpen, setIsModalRencanaCapaianMingguanEditOpen] =
     useState(false)
   const [dataRencanaCapaianMingguanEdit, setDataRencanaCapaianMingguanEdit] = useState([])
-  const [dataRencanaCapaianMingguanEditRencana, setDataRencanaCapaianMingguanEditRencana] = useState()
+  const [dataRencanaCapaianMingguanEditRencana, setDataRencanaCapaianMingguanEditRencana] =
+    useState()
   const [
     dataRencanaCapaianMingguanEditTanggalMulai,
     setDataRencanaCapaianMingguanEditTanggalMulai,
@@ -175,9 +229,9 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
 
   /** HANDLE MODAL EDIT RENCANA CAPAIAN MINGGUAN*/
   const showModalRencanaCapaianMingguanEdit = (data) => {
-    setDataRencanaCapaianMingguanEditRencana(undefined)
-    setDataRencanaCapaianMingguanEditTanggalMulai(undefined)
-    setDataRencanaCapaianMingguanEditTanggalBerakhir(undefined)
+    setDataRencanaCapaianMingguanEditRencana(data.achievement_plan)
+    setDataRencanaCapaianMingguanEditTanggalMulai(data.start_date)
+    setDataRencanaCapaianMingguanEditTanggalBerakhir(data.finish_date)
     setDataRencanaCapaianMingguanEdit(data)
     setIsModalRencanaCapaianMingguanEditOpen(true)
   }
@@ -189,21 +243,37 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
   /** PUT DATA RENCANA CAPAIAN MINGGUAN */
   const putDataRencanaCapaianMingguanEdit = async () => {
     await axios
-      .put(
-        `http://localhost:1337/api/rencanacapaianmingguans/${dataRencanaCapaianMingguanEdit.id}`,
-        {
-          data: {
-            rencanacapaian: dataRencanaCapaianMingguanEditRencana,
-            tanggalmulai: dataRencanaCapaianMingguanEditTanggalMulai,
-            tanggalberakhir: dataRencanaCapaianMingguanEditTanggalBerakhir,
-          },
-        },
-      )
+      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/weekly-achievement/update`, {
+        completion_schedules: [],
+        deliverables: [],
+        milestone: [],
+        rpp_id: parseInt(RPP_ID),
+        weekly_achievement_plan: [{
+          achievement_plan : dataRencanaCapaianMingguanEditRencana,
+          finish_date : dataRencanaCapaianMingguanEditTanggalBerakhir,
+          id : dataRencanaCapaianMingguanEdit.id,
+          start_date : dataRencanaCapaianMingguanEditTanggalMulai
+        }],
+      })
       .then((res) => {
-        console.log(res)
-        console.log(res.data.data)
+        // console.log(res)
+        // console.log(res.data.data)
         setIsModalRencanaCapaianMingguanEditOpen(false)
         notification.success({ message: 'Data Rencana Capaian Mingguan Berhasil Diubah' })
+      })
+      .catch(function (error) {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+          history.push('/500')
+        }
       })
 
     refreshDataRPP()
@@ -222,15 +292,17 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
   const [dataJadwalPenyelesaianEditTanggalSelesai, setDataJadwalPenyelesaianEditTanggalSelesai] =
     useState()
 
-  /** HANDLE MODAL EDIT RENCANA CAPAIAN MINGGUAN*/
+  /** HANDLE MODAL EDIT JADWAL PENYELESAIAN KESELURUHAN*/
   const showModalJadwalPenyelesaianEdit = (data, statusDatePickerStart) => {
-    setDataJadwalPenyelesaianEditButirPekerjaan(undefined)
-    setDataJadwalPenyelesaianEditJenisPekerjaan(undefined)
-    setDataJadwalPenyelesaianEditTanggalMulai(undefined)
-    setDataJadwalPenyelesaianEditTanggalSelesai(undefined)
+    setDataJadwalPenyelesaianEditButirPekerjaan(data.task_name)
+    setDataJadwalPenyelesaianEditJenisPekerjaan(data.task_type)
+    setDataJadwalPenyelesaianEditTanggalMulai(data.start_date)
+    setDataJadwalPenyelesaianEditTanggalSelesai(data.finish_date)
     setHandleStatusStartWeekDatePicker(statusDatePickerStart)
     setDataJadwalPenyelesaianEdit(data)
+   
     setIsModalJadwalPenyelesaianEditOpen(true)
+    console.log('id', data.id, typeof(data.id))
   }
 
   const handleCancelModalJadwalPenyelesaianEdit = () => {
@@ -239,79 +311,105 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
 
   /** ADD DATA TO RPP */
   /** HANDLE ADD DELIVERABLES */
-  const postDataDeliverablesAdditional = async(data) =>{
+  const postDataDeliverablesAdditional = async (data) => {
     let id_rpp = parseInt(RPP_ID)
     console.log('data', data)
     console.log('id_rpp', id_rpp)
-    for(var i in data){
-      var iterator = 1
-      await axios.post(`http://localhost:1337/api/deliverables`,{
-        'data' : {
-          'deliverables' : data[i].deliverables,
-          'duedate' : data[i].date,
-          'rpp' : {
-            'connect' : id_rpp
-          }
-        }
-      }).then((res)=>{
-        setIsSuccessInputEdit(true)
-        console.log(res)
-      })
-      iterator++
-      if(iterator === data.length){
-        notification.success({message:'Data Milestones Berhasil Ditambahkan!!!'})
-      }
-      
-    }
+    // for (var i in data) {
+    //   var iterator = 1
+    //   await axios
+    //     .post(`http://localhost:1337/api/deliverables`, {
+    //       data: {
+    //         deliverables: data[i].deliverables,
+    //         duedate: data[i].date,
+    //         rpp: {
+    //           connect: id_rpp,
+    //         },
+    //       },
+    //     })
+    //     .then((res) => {
+    //       setIsSuccessInputEdit(true)
+    //       console.log(res)
+    //     })
+    //   iterator++
+    //   if (iterator === data.length) {
+    //     notification.success({ message: 'Data Milestones Berhasil Ditambahkan!!!' })
+    //   }
+    // }
     refreshDataRPP()
-    setNoOfRowsMilestones(0)
-    setMilestones(undefined)
+    window.location.reload(false)
     forceUpdate()
-
-   
   }
 
   /** HANDLE ADD MILESTONES */
-  const postDataMilestonesAdditional = async(data) =>{
-    for(var i in data){
-      await axios.post(`http://localhost:1337/api/milestones`,{
-        'data' : {
-          'deskripsi' : data[i].deskripsi,
-          'tanggalmulai' : data[i].tanggalmulai,
-          'tanggalselesai' : data[i].tanggalselesai,
-          'rpp' : {
-            'connect' : [parseInt( RPP_ID)]
-        }
-      }
-      }).then((res)=>{
-        setIsSuccessInputEdit(true)
-        console.log(res)
-      })
+  const postDataMilestonesAdditional = async (data) => {
+    for (var i in data) {
+      await axios
+        .post(`http://localhost:1337/api/milestones`, {
+          data: {
+            deskripsi: data[i].deskripsi,
+            tanggalmulai: data[i].tanggalmulai,
+            tanggalselesai: data[i].tanggalselesai,
+            rpp: {
+              connect: [parseInt(RPP_ID)],
+            },
+          },
+        })
+        .then((res) => {
+          setIsSuccessInputEdit(true)
+          console.log(res)
+        })
     }
     refreshDataRPP()
   }
 
-
   /** PUT DATA JADWAL PENYELESAIAN */
   const putDataJadwalPenyelesaianEdit = async () => {
+    // console.log(dataJadwalPenyelesaianEdit.id)
+    // const ids = parseInt(dataJadwalPenyelesaianEdit.id)
     await axios
-      .put(
-        `http://localhost:1337/api/jadwalpenyelesaiankeseluruhans/${dataJadwalPenyelesaianEdit.id}`,
-        {
-          data: {
-            butirpekerjaan: dataJadwalPenyelesaianEditButirPekerjaan,
-            jenispekerjaan: dataJadwalPenyelesaianEditJenisPekerjaan,
-            tanggalmulai: dataJadwalPenyelesaianEditTanggalMulai,
-            tanggalselesai: dataJadwalPenyelesaianEditTanggalSelesai,
-          },
+      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/completion-schedule/update`,{
+        "completion_schedule": [
+          {
+            "finish_date": dataJadwalPenyelesaianEditTanggalSelesai,
+            "id": 4,
+            "start_date": dataJadwalPenyelesaianEditTanggalMulai,
+            "task_name": dataJadwalPenyelesaianEditButirPekerjaan,
+            "task_type": dataJadwalPenyelesaianEditJenisPekerjaan
+          }
+        ],
+        "deliverables": [
+         
+        ],
+        "milestone": [
+          
+        ],
+        "rpp_id": parseInt(RPP_ID),
+        "weekly_achievement_plan": [
+         
+        ]
         },
       )
       .then((res) => {
-        console.log(res)
-        console.log(res.data.data)
+         console.log(res)
+        // console.log(res.data.data)
         setIsModalJadwalPenyelesaianEditOpen(false)
         notification.success({ message: 'Data Jadwal Penyelesaian Keseluruhan Berhasil Diubah' })
       })
+      // .catch(function (error) {
+      //   if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+      //     history.push({
+      //       pathname: '/login',
+      //       state: {
+      //         session: true,
+      //       },
+      //     })
+      //   } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+      //     history.push('/404')
+      //   } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+      //     history.push('/500')
+      //   }
+      // })
 
     refreshDataRPP()
   }
@@ -336,48 +434,28 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
   /**REFRESH DATA */
   const refreshDataRPP = async () => {
     await axios
-      .get(`http://localhost:1337/api/rpps?populate=*&filters[id][$eq]=${RPP_ID}`)
+      .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/get/${RPP_ID}`)
       .then((response) => {
         console.log(response.data.data)
+
         setDataRPP({
-          tanggal_mulai: response.data.data[0].attributes.tanggal_mulai,
-          tanggal_selesai: response.data.data[0].attributes.tanggal_selesai,
-          perankelompok: response.data.data[0].attributes.perankelompok,
-          waktupengisian: response.data.data[0].attributes.waktupengisian,
-          judulpekerjaan: response.data.data[0].attributes.judulpekerjaan,
-          deskripsi_tugas: response.data.data[0].attributes.deskripsi_tugas,
-          status: response.data.data[0].status,
+          start_date: response.data.data.start_date,
+          finish_date: response.data.data.finish_date,
+          group_role: response.data.data.group_role,
+          work_title: response.data.data.work_title,
+          task_description: response.data.data.task_description,
         })
 
-        /** SET DATA MILESTONES */
-        var temp_mil = []
-        var temp_mil1 = []
-        temp_mil = response.data.data[0].attributes.milestones.data
-        var temp_milestone = function (obj) {
-          for (var i in obj) {
-            temp_mil1.push({
-              id: obj[i].id,
-              deskripsi: obj[i].attributes.deskripsi,
-              tanggalmulai: obj[i].attributes.tanggalmulai,
-              tanggalselesai: obj[i].attributes.tanggalselesai,
-            })
-          }
-        }
-
-        temp_milestone(temp_mil)
-        setDataMilestones(temp_mil1)
-        console.log('milestones', temp_mil1)
-
         /**SET DATA DELIVERABLES */
-        var temp_del = []
-        var temp_del1 = []
-        temp_del = response.data.data[0].attributes.deliverables.data
-        var temp_deliverables = function (obj) {
+        let temp_del = []
+        let temp_del1 = []
+        temp_del = response.data.data.deliverables
+        let temp_deliverables = function (obj) {
           for (var i in obj) {
             temp_del1.push({
               id: obj[i].id,
-              duedate: obj[i].attributes.duedate,
-              deliverables: obj[i].attributes.deliverables,
+              due_date: obj[i].due_date,
+              deliverables: obj[i].deliverables,
             })
           }
         }
@@ -386,17 +464,36 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
         setDataDeliverables(temp_del1)
         console.log('deliverables', temp_del1)
 
+        /** SET DATA MILESTONES */
+        let temp_mil = []
+        let temp_mil1 = []
+        temp_mil = response.data.data.milestones
+        let temp_milestone = function (obj) {
+          for (var i in obj) {
+            temp_mil1.push({
+              id: obj[i].id,
+              description: obj[i].description,
+              start_date: obj[i].start_date,
+              finish_date: obj[i].finish_date,
+            })
+          }
+        }
+
+        temp_milestone(temp_mil)
+        setDataMilestones(temp_mil1)
+        console.log('milestones', temp_mil1)
+
         /**SET DATA RENCANA CAPAIAN MINGGUAN */
-        var temp_rcm = []
-        var temp_rcm1 = []
-        temp_rcm = response.data.data[0].attributes.rencanacapaianmingguans.data
-        var temp_rencanaCapaianMingguan = function (obj) {
+        let temp_rcm = []
+        let temp_rcm1 = []
+        temp_rcm = response.data.data.weekly_achievement_plans
+        let temp_rencanaCapaianMingguan = function (obj) {
           for (var i in obj) {
             temp_rcm1.push({
               id: obj[i].id,
-              rencanacapaian: obj[i].attributes.rencanacapaian,
-              tanggalmulai: obj[i].attributes.tanggalmulai,
-              tanggalberakhir: obj[i].attributes.tanggalberakhir,
+              achievement_plan: obj[i].achievement_plan,
+              start_date: obj[i].start_date,
+              finish_date: obj[i].finish_date,
             })
           }
         }
@@ -408,16 +505,15 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
         /** JADWAL PENYELESAIAN KESELURUHAN */
         let temp_jadwalKeseluruhan = []
         let temp_jadwalKeseluruhan1 = []
-        temp_jadwalKeseluruhan =
-          response.data.data[0].attributes.jadwalpenyelesaiankeseluruhans.data
+        temp_jadwalKeseluruhan = response.data.data.completion_schedules
         let temp_jadwalKeseluruhans = function (obj) {
           for (var i in obj) {
             temp_jadwalKeseluruhan1.push({
               id: obj[i].id,
-              jenispekerjaan: obj[i].attributes.jenispekerjaan,
-              butirpekerjaan: obj[i].attributes.butirpekerjaan,
-              tanggalmulai: obj[i].attributes.tanggalmulai,
-              tanggalselesai: obj[i].attributes.tanggalselesai,
+              task_type: obj[i].task_type,
+              task_name: obj[i].task_name,
+              start_date: obj[i].start_date,
+              finish_date: obj[i].finish_date,
             })
           }
         }
@@ -425,6 +521,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
         temp_jadwalKeseluruhans(temp_jadwalKeseluruhan)
         setDataJadwalPenyelesaianKeseluruhan(temp_jadwalKeseluruhan1)
         console.log('capaian mingguan', temp_jadwalKeseluruhan1)
+        setIsLoading(false)
       })
       .catch(function (error) {
         if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -552,7 +649,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
   }
 
   const handleAddRowRencanaCapaianPerminggu = () => {
-    let newField = { start_date: '',finish_date:'', achievement_plan: '' }
+    let newField = { start_date: '', finish_date: '', achievement_plan: '' }
     setCapaianPerminggu([...capaianPerminggu, newField])
     setNoOfRowsCapaianPerminggu(noOfRowsCapaianPerminggu + 1)
   }
@@ -698,7 +795,6 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
         .then((response) => {
           console.log(response.data.data)
 
-
           setDataRPP({
             start_date: response.data.data.start_date,
             finish_date: response.data.data.finish_date,
@@ -707,23 +803,23 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
             task_description: response.data.data.task_description,
           })
 
-              /**SET DATA DELIVERABLES */
-              let temp_del = []
-              let temp_del1 = []
-              temp_del = response.data.data.deliverables
-              let temp_deliverables = function (obj) {
-                for (var i in obj) {
-                  temp_del1.push({
-                    id: obj[i].id,
-                    due_date: obj[i].due_date,
-                    deliverables: obj[i].deliverables,
-                  })
-                }
-              }
-    
-              temp_deliverables(temp_del)
-              setDataDeliverables(temp_del1)
-              console.log('deliverables', temp_del1)
+          /**SET DATA DELIVERABLES */
+          let temp_del = []
+          let temp_del1 = []
+          temp_del = response.data.data.deliverables
+          let temp_deliverables = function (obj) {
+            for (var i in obj) {
+              temp_del1.push({
+                id: obj[i].id,
+                due_date: obj[i].due_date,
+                deliverables: obj[i].deliverables,
+              })
+            }
+          }
+
+          temp_deliverables(temp_del)
+          setDataDeliverables(temp_del1)
+          console.log('deliverables', temp_del1)
 
           /** SET DATA MILESTONES */
           let temp_mil = []
@@ -743,8 +839,6 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
           temp_milestone(temp_mil)
           setDataMilestones(temp_mil1)
           console.log('milestones', temp_mil1)
-
-      
 
           /**SET DATA RENCANA CAPAIAN MINGGUAN */
           let temp_rcm = []
@@ -1096,7 +1190,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
         // console.log(recDueDate, dateLimit, '---', recDueDate > dateLimit)
 
         if (limitDateGetMondayDateBasedOnFinishDate > limitDateToEdit) {
-          if (record.tanggalmulai > limitDateToEdit) {
+          if (record.start_date > limitDateToEdit) {
             statusDatePickerStart = false //jika belum limit , disable nya di false,(tidak di disable)
           } else {
             statusDatePickerStart = true
@@ -1142,9 +1236,11 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
     },
   ]
 
-  return isLoading?( <Spin tip="Loading" size="large">
-  <div className="content" />
-</Spin>):(
+  return isLoading ? (
+    <Spin tip="Loading" size="large">
+      <div className="content" />
+    </Spin>
+  ) : (
     <>
       <div className="container">
         {/* <button
@@ -1231,7 +1327,6 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
           autoComplete="off"
           onFinishFailed={onFinishFailed}
         >
-       
           <div className="spacetop">
             <Row>
               <Col style={{ paddingBottom: 20 }} span={8}>
@@ -1243,9 +1338,9 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
               <Col style={{ paddingBottom: 20 }} span={8}>
                 Tanggal Selesai
               </Col>
-              <Col span={6}>{dataRPP.finish_date}</Col>
+              <Col span={4}>{dataRPP.finish_date}</Col>
               <Col span={4}>Ubah Tanggal :</Col>
-              <Col span={6}>
+              <Col span={5}>
                 <DatePicker
                   picker="date"
                   disabledDate={(current) => {
@@ -1261,6 +1356,11 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                     )
                   }}
                 />
+              </Col>
+              <Col span={2}>
+                <Popover content={<div>Klik untuk menyimpan perubahan tanggal</div>}>
+                  <Button type="primary">Simpan</Button>
+                </Popover>
               </Col>
             </Row>
 
@@ -1323,26 +1423,41 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                       </Form.Item>
                     </Col>
                     <Col span={8}>
-                      <DatePicker
-                        disabledDate={(current) => {
-                          let minusToGetLimit = new Date().getDay()
-                          if (minusToGetLimit === 0) {
-                            setLimitMinusDay(7)
-                          } else {
-                            setLimitMinusDay(minusToGetLimit)
-                          }
+                      <Form.Item
+                        name={`tanggaldeliverables${index}`}
+                        key={index}
+                        label="Tanggal"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Masukkan tanggal deliverables terlebih dahulu !',
+                          },
+                          {
+                            type: 'date',
+                            warningOnly: 'true',
+                          },
+                        ]}
+                      >
+                        <DatePicker
+                          disabledDate={(current) => {
+                            if (new Date().getDay() === 0) {
+                              setLimitMinusDay(7)
+                            } else {
+                              setLimitMinusDay(new Date().getDay())
+                            }
 
-                          return (
-                            moment().add(-1, 'days') >= current ||
-                            moment().add(7 - limitMinusDay, 'days') >= current
-                          )
-                        }}
-                        style={{ width: '70%' }}
-                        value={deliverables.date}
-                        onChange={(date, datestring) =>
-                          handleDataDeliverables(index, datestring, 'due_date')
-                        }
-                      />
+                            return (
+                              moment().add(-1, 'days') >= current ||
+                              moment().add(7 - limitMinusDay, 'days') >= current
+                            )
+                          }}
+                          style={{ width: '70%' }}
+                          value={deliverables.date}
+                          onChange={(date, datestring) =>
+                            handleDataDeliverables(index, datestring, 'due_date')
+                          }
+                        />
+                      </Form.Item>
                     </Col>
                   </Row>
                 </div>
@@ -1357,15 +1472,19 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                   <Button type="primary" danger onClick={() => handleDropRowDeliverables()}>
                     Hapus Baris Terakhir
                   </Button>
-                  <Button
-                    type="primary"
-                    onClick={() => {
-                      console.log(deliverables)
-                      postDataDeliverablesAdditional(deliverables)
-                    }}
-                  >
-                    Simpan Data
-                  </Button>
+                  <Popover content={<div>Klik untuk menambahkan deliverables</div>}>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      onClick={() => {
+                        console.log(deliverables)
+                        postDataDeliverablesAdditional(deliverables)
+                        //  setNoOfRowsDeliverables(0)
+                      }}
+                    >
+                      Simpan Data
+                    </Button>
+                  </Popover>
                 </>
               )}
             </Col>
@@ -1421,26 +1540,42 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                       </Form.Item>
                     </Col>
                     <Col span={8}>
-                      <RangePicker
-                        style={{ width: '100%' }}
-                        disabledDate={(current) => {
-                          let minusToGetLimit = new Date().getDay()
-                          if (minusToGetLimit === 0) {
-                            setLimitMinusDay(7)
-                          } else {
-                            setLimitMinusDay(minusToGetLimit)
-                          }
+                      <Form.Item
+                        name={`tanggalmilestones${index}`}
+                        key={index}
+                        label="Tanggal"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Masukkan tanggal milestones terlebih dahulu !',
+                          },
+                          {
+                            type: 'datepicker',
+                            warningOnly: 'true',
+                          },
+                        ]}
+                      >
+                        <RangePicker
+                          style={{ width: '100%' }}
+                          disabledDate={(current) => {
+                            let minusToGetLimit = new Date().getDay()
+                            if (minusToGetLimit === 0) {
+                              setLimitMinusDay(7)
+                            } else {
+                              setLimitMinusDay(minusToGetLimit)
+                            }
 
-                          return (
-                            moment().add(-1, 'days') >= current ||
-                            moment().add(7 - limitMinusDay, 'days') >= current
-                          )
-                        }}
-                        onChange={(date, datestring) => {
-                          handleDataMilestones(index, datestring[0], 'start_date')
-                          handleDataMilestones(index, datestring[1], 'finish_date')
-                        }}
-                      />
+                            return (
+                              moment().add(-1, 'days') >= current ||
+                              moment().add(7 - limitMinusDay, 'days') >= current
+                            )
+                          }}
+                          onChange={(date, datestring) => {
+                            handleDataMilestones(index, datestring[0], 'start_date')
+                            handleDataMilestones(index, datestring[1], 'finish_date')
+                          }}
+                        />
+                      </Form.Item>
                     </Col>
                   </Row>
                 </div>
@@ -1460,6 +1595,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                     onClick={() => {
                       console.log(milestones)
                       postDataMilestonesAdditional(milestones)
+                      //setNoOfRowsMilestones(0)
                     }}
                   >
                     Simpan Data
@@ -1502,7 +1638,11 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                           style={{ width: '100%' }}
                           placeholder="Masukkan rencana perminggu"
                           onChange={(event) => {
-                            handleDataRencanaCapaianPerminggu(index, event.target.value, 'achievement_plan')
+                            handleDataRencanaCapaianPerminggu(
+                              index,
+                              event.target.value,
+                              'achievement_plan',
+                            )
                           }}
                         />
                       </Form.Item>
@@ -1575,14 +1715,17 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                     Hapus Baris Terakhir
                   </Button>
 
-                  <Button
-                    type="primary"
-                    onClick={() => {
-                      console.log(capaianPerminggu)
-                    }}
-                  >
-                    Simpan Data
-                  </Button>
+                  <Popover content={<div>Klik untuk menambahkan rencana capaian perminggu</div>}>
+                    <Button
+                      type="primary"
+                      onClick={() => {
+                        console.log(capaianPerminggu)
+                        setNoOfRowsCapaianPerminggu(0)
+                      }}
+                    >
+                      Simpan Data
+                    </Button>
+                  </Popover>
                 </>
               )}
             </Col>
@@ -1707,14 +1850,19 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
                     Hapus Baris Terakhir
                   </Button>
 
-                  <Button
-                    type="primary"
-                    onClick={() => {
-                      console.log(jadwalPenyelesaianKeseluruhan)
-                    }}
-                  >
-                    Simpan Data
-                  </Button>
+                  <Popover>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      onClick={() => {
+                        console.log(jadwalPenyelesaianKeseluruhan)
+                        //   postDataDeliverablesAdditional(deliverables)
+                        setNoOfRowsJadwalPenyelesaianPekerjaanKeseluruhan(0)
+                      }}
+                    >
+                      Simpan Data
+                    </Button>
+                  </Popover>
                 </>
               )}
             </Col>
@@ -2045,7 +2193,7 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
         </Form>
       </Modal>
 
-      {/* MODAL JADWAL PENYELESAIAN KESELURUHAN */}
+      {/* MODAL EDIT JADWAL PENYELESAIAN KESELURUHAN */}
       <Modal
         title="Edit Penyelesaian Keseluruhan"
         open={isModalJadwalPenyelesaianEditOpen}
@@ -2114,11 +2262,11 @@ const forceUpdate = React.useCallback(() => updateState({}), []);
             <Select
               defaultValue={dataJadwalPenyelesaianEdit.task_type}
               options={[
-                { value: 'exploration', label: 'exploration' },
-                { value: 'analysis', label: 'analysis' },
-                { value: 'design', label: 'design' },
-                { value: 'implementation', label: 'implementation' },
-                { value: 'testing', label: 'testing' },
+                { value: 'Exploration', label: 'Exploration' },
+                { value: 'Analysis', label: 'Analysis' },
+                { value: 'Design', label: 'Design' },
+                { value: 'Implementation', label: 'Implementation' },
+                { value: 'Testing', label: 'Testing' },
               ]}
               onChange={(e) => setDataJadwalPenyelesaianEditJenisPekerjaan(e)}
             />

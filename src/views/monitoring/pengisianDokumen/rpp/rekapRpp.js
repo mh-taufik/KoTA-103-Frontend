@@ -165,6 +165,7 @@ const RekapRPP = () => {
                   work_title: obj[i].work_title,
                   start_date: convertDate(obj[i].start_date),
                   finish_date: convertDate(obj[i].finish_date),
+                  end_date_rpp: obj[i].finish_date,
                 })
               }
             }
@@ -189,7 +190,7 @@ const RekapRPP = () => {
             history.push('/404')
           } else if (error.toJSON().status > 500 && error.toJSON().status <= 599) {
             history.push('/500')
-          } else if (error.toJSON().status===500){
+          } else if (error.toJSON().status === 500) {
             setRppPeserta(undefined)
             setIsLoading(false)
             return
@@ -416,6 +417,38 @@ const RekapRPP = () => {
     },
   ]
 
+  const getWeekBasedOnDate = (date) => {
+    var year = new Date(date.getFullYear(), 0, 1)
+    var days = Math.floor((date - year) / (24 * 60 * 60 * 1000))
+    var week = Math.ceil((date.getDay() + 1 + days) / 7)
+
+    return week
+  }
+
+  function formatDate(date) {
+    var d = new Date(date),
+      month = '' + (d.getMonth() + 1),
+      day = '' + d.getDate(),
+      year = d.getFullYear()
+
+    if (month.length < 2) month = '0' + month
+    if (day.length < 2) day = '0' + day
+
+    return [year, month, day].join('-')
+  }
+
+  function getDateOfISOWeek(w, y) {
+    var simple = new Date(y, 0, 1 + (w - 1) * 7)
+    var dow = simple.getDay()
+    var ISOweekStart = simple
+    if (dow <= 4) {
+      ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1)
+    } else {
+      ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay())
+    }
+    return formatDate(ISOweekStart.toDateString())
+  }
+
   /** KOLOM PESERTA */
   const columns = [
     {
@@ -450,49 +483,85 @@ const RekapRPP = () => {
       width: '10%',
       align: 'center',
       dataIndex: 'action',
-      render: (text, record) => (
-        <>
-          <Row>
-            <Col span={12} style={{ textAlign: 'center' }}>
-              <Popconfirm
-                placement="topRight"
-                title="Yakin akan melakukan edit RPP?"
-                description={desc}
-                onConfirm={confirmToEdit}
-                okText="Yes"
-                cancelText="No"
-              >
-                <Button
-                  id="button-pencil"
-                  htmlType="submit"
-                  shape="circle"
-                  style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
-                  onClick={() => {
-                    setWannaEdit(record)
-                  }}
-                >
-                  <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
-                </Button>
-              </Popconfirm>
-            </Col>
-            <Col span={12} style={{ textAlign: 'center' }}>
-              <Popover content={<div>Lihat detail RPP</div>}>
-                <Button
-                  id="button-eye"
-                  htmlType="submit"
-                  shape="circle"
-                  style={{ backgroundColor: '#bae0ff', borderColor: '#bae0ff' }}
-                  onClick={() => {
-                    history.push(`/rencanaPenyelesaianProyek/detail/${record.rpp_id}`)
-                  }}
-                >
-                  <FontAwesomeIcon icon={faEye} style={{ color: 'black' }} />
-                </Button>
-              </Popover>
-            </Col>
-          </Row>
-        </>
-      ),
+      render: (text, record) => {
+        let isDisableButton
+        let today = formatDate(new Date())
+        let rec_end_date = new Date(record.end_date_rpp)
+        let week_end_date = getWeekBasedOnDate(rec_end_date) - 1
+        let year_end_date = record.end_date_rpp.slice(0, 4)
+        let limit_date_for_edit_rpp = getDateOfISOWeek(week_end_date, year_end_date)
+
+        if (limit_date_for_edit_rpp > today) {
+          isDisableButton = false
+        } else {
+          isDisableButton = true
+        }
+
+        return (
+          <>
+            <Row>
+              <Col span={12} style={{ textAlign: 'center' }}>
+                {isDisableButton && (
+                  <Popover content={<div>Pengeditan tidak diizinkan</div>}>
+                    <Button
+                      id="button-pencil"
+                      htmlType="submit"
+                      disabled={isDisableButton}
+                      shape="circle"
+                      style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
+                      onClick={() => {
+                        setWannaEdit(record)
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+                    </Button>
+                  </Popover>
+                )}
+
+                {!isDisableButton && (
+                  <Popconfirm
+                    placement="topRight"
+                    title="Yakin akan melakukan edit RPP?"
+                    description={desc}
+                    onConfirm={confirmToEdit}
+                    okText="Yes"
+                    cancelText="No"
+                  >
+                    <Button
+                      id="button-pencil"
+                      htmlType="submit"
+                      disabled={isDisableButton}
+                      shape="circle"
+                      style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
+                      onClick={() => {
+                        setWannaEdit(record)
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+                    </Button>
+                  </Popconfirm>
+                )}
+              </Col>
+              <Col span={12} style={{ textAlign: 'center' }}>
+                <Popover content={<div>Lihat detail RPP</div>}>
+                  <Button
+                    id="button-eye"
+                    htmlType="submit"
+                    shape="circle"
+                    style={{ backgroundColor: '#bae0ff', borderColor: '#bae0ff' }}
+                    onClick={() => {
+                      // history.push(`/rencanaPenyelesaianProyek/detail/${record.rpp_id}`)
+                      // console.log(limit_date_for_edit_rpp , today,  limit_date_for_edit_rpp > today)
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faEye} style={{ color: 'black' }} />
+                  </Button>
+                </Popover>
+              </Col>
+            </Row>
+          </>
+        )
+      },
     },
   ]
 

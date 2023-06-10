@@ -152,7 +152,7 @@ const FormPengisianSelfAssessment = () => {
       ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay())
     }
 
-    ISOweekStart.setDate(ISOweekStart.getDate() + 4)
+    ISOweekStart.setDate(ISOweekStart.getDate() + 8) //4
     return formatDate(ISOweekStart.toDateString())
   }
 
@@ -223,8 +223,8 @@ const FormPengisianSelfAssessment = () => {
           })
           .then((result) => {
             console.log(result)
-            handleSuccessSubmit(result.data.data.id)
-            return
+            // handleSuccessSubmit(result.data.data.id)
+            // return
           }).catch(function (error) {
             if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
               history.push({
