@@ -30,6 +30,7 @@ const PengisianRpp = () => {
   dayjs.extend(weekOfYear)
   const dateFormat = 'YYYY-MM-DD'
   const weekFormat = 'MM/DD'
+  axios.defaults.withCredentials = true
   const monthFormat = 'YYYY/MM'
   const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY', 'DD-MM-YYYY', 'DD-MM-YY']
   const customFormat = (value) => `custom format: ${value.format(dateFormat)}`
@@ -444,28 +445,23 @@ const PengisianRpp = () => {
           notification.success({
             message: 'Data RPP Berhasil Ditambahkan',
           })
-          history.push({
-            pathname:`/rencanaPenyelesaianProyek`,
-            state :{
-              session:false,
-            }
-          })
+       
         })
-        .catch(function (error) {
-          setIsSuccessInput(false)
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
-              },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status > 500 && error.toJSON().status <= 500) {
-            history.push('/500')
-          }
-        })
+        // .catch(function (error) {
+        //   setIsSuccessInput(false)
+        //   if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+        //     history.push({
+        //       pathname: '/login',
+        //       state: {
+        //         session: true,
+        //       },
+        //     })
+        //   } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+        //     history.push('/404')
+        //   } else if (error.toJSON().status > 500 && error.toJSON().status <= 500) {
+        //     history.push('/500')
+        //   }
+        // })
     } else {
       notification.warning({ message: 'Pastikan Semua Data Terisi !!! ' })
     }
@@ -995,7 +991,7 @@ const PengisianRpp = () => {
                             { value: 'Exploration', label: 'Exploration' },
                             { value: 'Analysis', label: 'Analysis' },
                             { value: 'Design', label: 'Design' },
-                            { value: 'Implementasi', label: 'Implementation' },
+                            { value: 'Implementation', label: 'Implementation' },
                             { value: 'Testing', label: 'Testing' },
                           ]}
                         />

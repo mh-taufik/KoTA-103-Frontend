@@ -19,6 +19,7 @@ const RekapPenilaianLogbook = () => {
   let searchInput
   const [state, setState] = useState({ searchText: '', searchedColumn: '' })
   const history = useHistory()
+  axios.defaults.withCredentials = true
   const [isLoading, setIsLoading] = useState(true)
   const unamePeserta = params.id
   const [dataNilaiLogbookPeserta, setDataNilaiLogbookPeserta] = useState([])

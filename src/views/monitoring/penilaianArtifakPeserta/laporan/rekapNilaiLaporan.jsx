@@ -32,6 +32,7 @@ const RekapPenilaianLogbook = () => {
   const [dataNilaiLaporanPeserta,setDataNilaiLaporanPeserta] = useState([])
   const usernamePengguna = localStorage.username
   let rolePengguna = localStorage.id_role
+  axios.defaults.withCredentials = true
   const title = (judul) => {
     return (
       <>

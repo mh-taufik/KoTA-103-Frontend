@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useHistory, useParams } from 'react-router-dom'
 import { CCard, CCardBody, CCardHeader, CCol, CContainer, CRow } from '@coreui/react'
-import {ArrowLeftOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, FileOutlined } from '@ant-design/icons'
 import Chart, {
   CommonSeriesSettings,
   Legend,
@@ -26,6 +26,7 @@ import {
   Modal,
   Pagination,
   Popover,
+  Result,
   Row,
   Select,
   Space,
@@ -69,14 +70,16 @@ const PenilaianSelfAssessment = () => {
   const [penilaianBefore, setPenilaianBefore] = useState()
   const [idLogbookChoosen, setIdLogbookChoosen] = useState()
   const [nilai, setNilai] = useState()
+  const [listAspectSelfAssessment, setListAspectSelfAssessment] = useState([])
   const [selfAssessmentPeserta, setSelfAssessmentPeserta] = useState([])
   const [logbookPeserta, setLogbookPeserta] = useState([])
   const [nilaiSelfAssessment, setNilaiSelfAssessment] = useState([])
   const [pages, setPages] = useState(1)
   const [currentLogbook, setCurrentLogbook] = useState(0)
-  const [pagesSelfAssessment, setPagesSelfAssessment] = useState()
-  const [currentSelfAssessment, setCurrentSelfAssessment] = useState()
-  const [allIdSelfAssessmentPeserta, setAllIdSelfAssessmentPeserta] = useState([])
+
+  const [isRppAvailable, setIsRppAvailable] = useState()
+  const [isLogbookAvailable, setIsLogbookAvailable] = useState()
+  const [isSelfAssessmentAvailable, setIsSelfAssessmentAvailable] = useState()
 
   /** PAGINATION LOGBOOK */
   const handleChange = (value) => {
@@ -86,23 +89,18 @@ const PenilaianSelfAssessment = () => {
     setPages(value)
   }
 
-  const handleChangeSelfAssessmentPages = (value) => {
-    var page = value - 1
-    setCurrentSelfAssessment(page)
-    console.log('page', value)
-    setPagesSelfAssessment(value)
-  }
-
   /** HANDLE SAAT NILAI SA DI UBAH */
-  const handleChangeNilaiSelfAssessment = (idS, index, nilaiS, keyData) => {
+  const handleChangeNilaiSelfAssessment = (index,keyData, sa_grade, sa_desc,sa_aspect_id, sa_grade_id) => {
     if (nilaiSelfAssessment[index]) {
       console.log('ya')
-      nilaiSelfAssessment[index][keyData] = nilaiS
+      nilaiSelfAssessment[index][keyData] = sa_grade
     } else {
       console.log('no')
       nilaiSelfAssessment[index] = {
-        id: idS,
-        [keyData]: nilaiS,
+        aspect_id: sa_aspect_id,
+        [keyData] : sa_grade,
+        description : sa_desc,
+        grade_id : sa_grade_id
       }
 
       setNilaiSelfAssessment(nilaiSelfAssessment)
@@ -132,48 +130,17 @@ const PenilaianSelfAssessment = () => {
     return data
   }
 
-  const GetDataInfoPeserta = async (index) => {
-    var PESERTA
-    if (rolePengguna === '1') {
-      PESERTA = idPengguna
-    } else {
-      PESERTA = idPeserta.id
-    }
-    await axios
-      .get(`http://localhost:1337/api/pesertas?filters[username][$eq]=${PESERTA}`)
-      .then((result) => {
-        setInfoDataPeserta(result.data.data[0].attributes)
-        console.log('res', result)
-        console.log('data peserta', result.data.data[0].attributes)
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
-          history.push('/500')
-        }
-      })
-  }
-
-
   /** SHOW EDIT PENILAIAN LOGBOOK */
   const showModalEdit = (record) => {
     setIsModalEditVisible(true)
     setChoose(record)
     setIdLogbookChoosen(record.id)
-    setNilai(record.nilai)
-    if (record.nilai === null) {
-      setPenilaianBefore('Belum Diberi Penilaian')
-    } else {
-      setPenilaianBefore(record.nilai)
-    }
+    setNilai(record.grade)
+    // if (record.nilai === null) {
+    //   setPenilaianBefore('Belum Diberi Penilaian')
+    // } else {
+    //   setPenilaianBefore(record.nilai)
+    // }
   }
 
   /** MENGAMBIL DATA TIMELINE */
@@ -188,9 +155,7 @@ const PenilaianSelfAssessment = () => {
         obj = result.data.data
 
         var findObjectByLabel = function (obj) {
-  
           for (var i in obj) {
-         
             console.log(obj[i])
             content.push({
               id: obj[i].id,
@@ -226,212 +191,119 @@ const PenilaianSelfAssessment = () => {
     setTimeline(content)
   }
 
-  /** MENGAMBIL DATA LOGBOOK PESERTA */
-  const getLogbook = async () => {
-    await axios
-      .get('http://localhost:1337/api/logbooks')
-      .then((response) => {
-        console.log(response)
-        console.log('data logbook', response.data.data)
-        var temp = []
-        var temp1 = response.data.data
-        var getDataTemp = function (obj) {
-          for (var i in obj) {
-            temp.push({
-              id: obj[i].id,
-              waktudankegiatan: obj[i].attributes.waktudankegiatan,
-              namaproyek: obj[i].attributes.namaproyek,
-              projectmanager: obj[i].attributes.projectmanager,
-              hasilkerja: obj[i].attributes.hasilkerja,
-              keterangan: obj[i].attributes.keterangan,
-              nilai: obj[i].attributes.nilai,
-              statuspengecekan: obj[i].attributes.statuspengecekan,
-              statuspengumpulan: obj[i].attributes.statuspengumpulan,
-              tanggallogbook: obj[i].attributes.tanggallogbook,
-              technicalleader: obj[i].attributes.technicalleader,
-              tools: obj[i].attributes.tools,
-              tugas: obj[i].attributes.tugas,
-            })
-          }
-        }
-        getDataTemp(temp1)
-        setLogbookPeserta(temp)
-        console.log('temp1', temp)
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-          history.push('/500')
-        }
-      })
-  }
+  /** POST DATA PENILAIAN LOGBOOK PESERTA */
+  const penilaianLogbookPeserta = async (idLogbook, index) => {
 
- /** POST DATA PENILAIAN LOGBOOK PESERTA */
-  const AksiPenilaianPeserta = async (idLogbook, index) => {
     await axios
-      .put(`http://localhost:1337/api/logbooks/${idLogbook}`, {
-        data: {
-          nilai: nilai,
-          statuspengecekan:true
-        },
+      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/grade`, {
+        grade: nilai,
+        id: parseInt(idLogbook),
       })
       .then((response) => {
-        console.log(response)
+        console.log('res', response)
         setIsModalEditVisible(false)
         notification.success({
           message: 'Penilaian Logbook Berhasil Diubah',
         })
 
-        refreshDataLogbook(idLogbook, index)
+        refreshData()
       })
-      .catch((error) => {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
-          history.push('/500')
-        }
-      })
-  }
-
-  /** GET DATA SELF ASSESSMENT */
-  const getDataSelfAssessmentTerkait = async (index) => {
-    await axios
-      .get(`http://localhost:1337/api/pesertas?populate=*&filters[username][$eq]=${NIM_PESERTA}`)
-      .then((response) => {
-        console.log('data self', response.data.data)
-        setAllIdSelfAssessmentPeserta(response.data.data[0].attributes.selfassessments.data)
-      })
-      .catch((error) => {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
-          history.push('/500')
-        }
-      })
-
-    // console.log('data SA', allIdSelfAssessmentPeserta)
+    // .catch((error) => {
+    //   if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+    //     history.push({
+    //       pathname: '/login',
+    //       state: {
+    //         session: true,
+    //       },
+    //     })
+    //   } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+    //     history.push('/404')
+    //   } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+    //     history.push('/500')
+    //   }
+    // })
   }
 
   /** HANDLING PERUBAHAN NILAI SELF ASSESSMENT */
-  const putNilaiSelfAssessment = async (idx) => {
-    let data = nilaiSelfAssessment
-    for (var i in data){
-     console.log(i, ' ', data[i])
-     await axios.put(`http://localhost:1337/api/selfasspoins/${data[i].id}`,{
-      'data' :{
-        'nilai' : data[i].nilai
-      }
-     
-     }).then((res)=>{
-      console.log(res)
-      notification.success({
-        message:'Penilaian self assessment berhasil diubah'
-      })
-
-      refreshDataSelfAssessment(allIdSelfAssessmentPeserta,idx)
-     })
-    }
-  }
-
-
-/**REFRESH SELF ASSESSMENT AFTER CHANGE NILAI */
-  const refreshDataSelfAssessment = async(data,idx) =>{
-    // console.log('idnyak',data)
-    let tempDataSelfAssessmentDetail = []
-
- 
-    for (let i in data) {
-      console.log('id NYA', typeof(data[i].id), typeof(parseInt(ID_SELFASSESSMENT)))
-
-      await axios.get(`http://localhost:1337/api/selfasspoins?populate=*&filters[selfassessment][id]=${data[i].id}`)
-        .then((res) => {
-          console.log('[', data[i].id, ']', res.data.data)
-
-          tempDataSelfAssessmentDetail.push({
-            id_self_assessment: data[i].id,
-            data: res.data.data,
-          })
-        })
-       
-    }
-
-   let tempPage = idx+1
-    setPagesSelfAssessment(tempPage)
-    setCurrentSelfAssessment(idx)
-    console.log('resultssssss', tempDataSelfAssessmentDetail)
- 
-    setSelfAssessmentPeserta(tempDataSelfAssessmentDetail)
-  }
-
-  useEffect(() => {
-    console.log('data SA', allIdSelfAssessmentPeserta)
-    getNilaiKeteranganPoinPenilaianSelfAssessment(allIdSelfAssessmentPeserta)
-  }, [allIdSelfAssessmentPeserta])
-
-  /** GET NILAI DAN KETERANGAN DARI PENILAIAN SELF ASSESSMENT */
-  const getNilaiKeteranganPoinPenilaianSelfAssessment = async (data) => {
-    // console.log('idnyak',data)
-    let tempDataSelfAssessmentDetail = []
-
-    let a = 0
-    let b = 1
-    let curr 
-    let pgs
-    for (let i in data) {
-      console.log('id NYA', typeof(data[i].id), typeof(parseInt(ID_SELFASSESSMENT)))
-      if(data[i].id === (parseInt(ID_SELFASSESSMENT))){
-        curr = a
-        pgs = b
-      }
-      await axios.get(`http://localhost:1337/api/selfasspoins?populate=*&filters[selfassessment][id]=${data[i].id}`)
-        .then((res) => {
-          console.log('[', data[i].id, ']', res.data.data)
-
-          tempDataSelfAssessmentDetail.push({
-            id_self_assessment: data[i].id,
-            data: res.data.data,
-          })
-        })
-        a++
-        b++
-    }
-
-    console.log('PGS',pgs)
-    console.log('CURR',curr)
-    setPagesSelfAssessment(pgs)
-    setCurrentSelfAssessment(curr)
-    console.log('resultssssss', tempDataSelfAssessmentDetail)
- 
-    setSelfAssessmentPeserta(tempDataSelfAssessmentDetail)
+  const putNilaiSelfAssessment = async () => {
+   await axios.put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/update`,{
+    
+   })
   }
 
   /** USE EFFECT */
   useEffect(() => {
-    getTimeline()
-    getLogbook()
-    getDataSelfAssessmentTerkait()
+    const getDataBasedOnSelfAssessment = async () => {
+      await axios
+        .get(
+          `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/associated/self-assessment?participant_id=${NIM_PESERTA}&self_assessment_id=${ID_SELFASSESSMENT}`,
+        )
+        .then((response) => {
+          const data_rpp = response.data.data.rpp
+          const data_logbook = response.data.data.logbook
+          const data_self_assessment = response.data.data.selfAssessment
+          let content = []
+
+          if (data_rpp === null) {
+            setIsRppAvailable(false)
+          } else {
+            setIsRppAvailable(true)
+          }
+
+          if (data_logbook === null) {
+            setIsLogbookAvailable(false)
+          } else {
+            setIsLogbookAvailable(true)
+            console.log('logbook', data_logbook)
+            setLogbookPeserta(data_logbook)
+          }
+
+          if (data_self_assessment === null) {
+            setIsSelfAssessmentAvailable(false)
+          } else {
+            setIsSelfAssessmentAvailable(true)
+            setSelfAssessmentPeserta(data_self_assessment)
+            setListAspectSelfAssessment(data_self_assessment.aspect_list)
+          }
+
+          if (data_rpp !== null) {
+            if (data_rpp.completion_schedules !== null) {
+              var findObjectByLabel = function (obj) {
+                for (var i in obj) {
+                  content.push({
+                    id: obj[i].id,
+                    name: obj[i].task_type,
+                    description: obj[i].task_name,
+                    start_date: obj[i].start_date,
+                    end_date: obj[i].finish_date,
+                  })
+                }
+              }
+
+              findObjectByLabel(data_rpp.completion_schedules)
+              setTimeline(content)
+            }
+          }
+
+          setIsLoading(false)
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+            history.push('/500')
+          }
+        })
+    }
+
+    getDataBasedOnSelfAssessment()
   }, [history])
 
   /** HANDLING TIMELINE */
@@ -452,10 +324,10 @@ const PenilaianSelfAssessment = () => {
     return (
       <>
         <div>
-          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius:2 }}>
+          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius: 2 }}>
             <Col span={24}>
               <b>
-                <h4 style={{color:'#f6ffed', marginLeft:30, marginTop:6}}>{judul}</h4>
+                <h4 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h4>
               </b>
             </Col>
           </Row>
@@ -465,9 +337,7 @@ const PenilaianSelfAssessment = () => {
     )
   }
 
-
-
- /** PENYESUAIAN WARNA TEKS PADA STATUS PENGUMPULAN */
+  /** PENYESUAIAN WARNA TEKS PADA STATUS PENGUMPULAN */
   const colorTextStatusPengumpulan = (teks) => {
     if (teks === 'terlambat') {
       return <text style={{ color: '#a8071a' }}>{teks}</text>
@@ -533,47 +403,59 @@ const PenilaianSelfAssessment = () => {
   }, [showArrow, arrowAtCenter])
 
   /** REFRESH DATA LOGBOOK SETELAH DI UPDATE PENILAIAN */
-  const refreshDataLogbook = async(id, index) => {
+  const refreshData= async (id, index) => {
     await axios
-    .get('http://localhost:1337/api/logbooks')
+    .get(
+      `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/associated/self-assessment?participant_id=${NIM_PESERTA}&self_assessment_id=${ID_SELFASSESSMENT}`,
+    )
     .then((response) => {
-      var temp = []
-      var temp1 = response.data.data
-      var pgs
-      var curr
-      var a = 0
-      var getDataTemp = function (obj) {
-        for (var i in obj) {
-          if (obj[i].id === id) {
-            //pages dimulai dari 1
-            pgs = a + 1
-            curr = a
+      const data_rpp = response.data.data.rpp
+      const data_logbook = response.data.data.logbook
+      const data_self_assessment = response.data.data.selfAssessment
+      let content = []
+
+      if (data_rpp === null) {
+        setIsRppAvailable(false)
+      } else {
+        setIsRppAvailable(true)
+      }
+
+      if (data_logbook === null) {
+        setIsLogbookAvailable(false)
+      } else {
+        setIsLogbookAvailable(true)
+        console.log('logbook', data_logbook)
+        setLogbookPeserta(data_logbook)
+      }
+
+      if (data_self_assessment === null) {
+        setIsSelfAssessmentAvailable(false)
+      } else {
+        setIsSelfAssessmentAvailable(true)
+        setSelfAssessmentPeserta(data_self_assessment)
+        setListAspectSelfAssessment(data_self_assessment.aspect_list)
+      }
+
+      if (data_rpp !== null) {
+        if (data_rpp.completion_schedules !== null) {
+          var findObjectByLabel = function (obj) {
+            for (var i in obj) {
+              content.push({
+                id: obj[i].id,
+                name: obj[i].task_type,
+                description: obj[i].task_name,
+                start_date: obj[i].start_date,
+                end_date: obj[i].finish_date,
+              })
+            }
           }
 
-          temp.push({
-            id: obj[i].id,
-            waktudankegiatan: obj[i].attributes.waktudankegiatan,
-            namaproyek: obj[i].attributes.namaproyek,
-            projectmanager: obj[i].attributes.projectmanager,
-            hasilkerja: obj[i].attributes.hasilkerja,
-            keterangan: obj[i].attributes.keterangan,
-            nilai: obj[i].attributes.nilai,
-            statuspengecekan: obj[i].attributes.statuspengecekan,
-            statuspengumpulan: obj[i].attributes.statuspengumpulan,
-            tanggallogbook: obj[i].attributes.tanggallogbook,
-            technicalleader: obj[i].attributes.technicalleader,
-            tools: obj[i].attributes.tools,
-            tugas: obj[i].attributes.tugas,
-          })
-          a++
+          findObjectByLabel(data_rpp.completion_schedules)
+          setTimeline(content)
         }
       }
 
-      getDataTemp(temp1)
-      setPages(pgs)
-      setCurrentLogbook(curr)
-      setLogbookPeserta(temp)
-  
+      setIsLoading(false)
       setLoadings((prevLoadings) => {
         const newLoadings = [...prevLoadings]
         newLoadings[index] = false
@@ -584,16 +466,15 @@ const PenilaianSelfAssessment = () => {
 
   /** HANDLE BUTTON */
   const btnKembali = () => {
-    history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${NIM_PESERTA}`)
+    history.push(`/rekapDokumenPeserta/listAspectSelfAssessment/${NIM_PESERTA}`)
   }
 
   return (
     <>
-      <>
-        <div className="container2">
-       
+      <div className="container2">
+        {title('RENCANA PENGERJAAN PROYEK ( RPP )')}
 
-          {title('RENCANA PENGERJAAN PROYEK ( RPP )')}
+        {isRppAvailable && (
           <div style={{ padding: 10 }}>
             <div style={{ background: '#fff', padding: 24 }}>
               <div style={{ overflowX: 'scroll' }}>
@@ -634,8 +515,90 @@ const PenilaianSelfAssessment = () => {
               </div>
             </div>
           </div>
+        )}
 
-          <div style={{ marginTop: 150 }}>
+        {!isRppAvailable && <Result icon={<FileOutlined />} title="Tidak Ada RPP Yang Terkait" />}
+
+        <div style={{ marginTop: 150 }}>
+          {title('SELF ASSESSMENT')}
+          <button onClick={()=>console.log(nilaiSelfAssessment)}>tes</button>
+
+          {isSelfAssessmentAvailable && (
+            <ul className="list-group mb-4">
+              <div>
+                <div>
+                  <table>
+                    <thead>
+                      <tr>
+                        <td>Tanggal Self Assessment</td>
+                        <td>:</td>
+                        <td>
+                          &nbsp;&nbsp;
+                          {listAspectSelfAssessment.start_date} &nbsp; s/d &nbsp;
+                          {listAspectSelfAssessment.finish_date}
+                        </td>
+                      </tr>
+                    </thead>
+                  </table>
+                  <div className="spacetop"></div>
+                  <Table striped="columns">
+                    <thead>
+                      <tr>
+                        <td>
+                          <b>NO</b>
+                        </td>
+                        <td>
+                          <b>POIN SELF ASSESSMENT</b>
+                        </td>
+                        <td width={'10%'}>
+                          <b>NILAI</b>
+                        </td>
+                        <td width={'50%'}>
+                          <b>KETERANGAN</b>
+                        </td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {listAspectSelfAssessment.map((data, index) => {
+                        return (
+                          <tr key={data.aspect_id}>
+                            <td>{index + 1}</td>
+                            <td>{data.aspect_name}</td>
+                            <td width={'10%'}>
+                              <Input
+                                onChange={(e) =>
+                                  handleChangeNilaiSelfAssessment(
+                                    index,'grade',e.target.value,data.description,data.aspect_id,data.grade_id
+                                  )
+                                }
+                                defaultValue={data.grade}
+                                type="number"
+                                placeholder="Input a number"
+                                maxLength={2}
+                              ></Input>
+                            </td>
+                            <td>{data.description}</td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </Table>
+                </div>
+                <Button type="primary" onClick={putNilaiSelfAssessment} variant="contained">
+                  Simpan Nilai
+                </Button>
+              </div>
+              <br />
+            </ul>
+          )}
+
+          {!isSelfAssessmentAvailable && (
+            <Result icon={<FileOutlined />} title="Tidak Ada Self Assessment Yang Terkait" />
+          )}
+        </div>
+
+        
+        <div style={{ marginTop: 150 }}>
             {title('LOGBOOK')}
 
             <div>
@@ -649,21 +612,21 @@ const PenilaianSelfAssessment = () => {
                           <td>:</td>
                           <td>
                             <b>
-                              {colorTextStatusPengumpulan(
+                              {/* {colorTextStatusPengumpulan(
                                 logbookPeserta[currentLogbook].statuspengumpulan,
-                              )}
+                              )} */}
                             </b>
                           </td>
                         </tr>
                         <tr>
                           <td>Penilaian</td>
                           <td>:</td>
-                          <td>{logbookPeserta[currentLogbook].nilai}</td>
+                          <td>{logbookPeserta[currentLogbook].grade}</td>
                         </tr>
                         <tr>
                           <td>Tanggal Logbook</td>
                           <td>:</td>
-                          <td>{logbookPeserta[currentLogbook].tanggallogbook}</td>
+                          <td>{logbookPeserta[currentLogbook].date}</td>
                         </tr>
                       </table>
                       <div className="spacetop"></div>
@@ -673,37 +636,37 @@ const PenilaianSelfAssessment = () => {
                             <td>
                               <b>Tanggal</b>
                             </td>
-                            <td>{logbookPeserta[currentLogbook].tanggallogbook}</td>
+                            <td>{logbookPeserta[currentLogbook].date}</td>
                           </tr>
                           <tr>
                             <td>
                               <b>Nama Proyek</b>
                             </td>
-                            <td>{logbookPeserta[currentLogbook].namaproyek}</td>
+                            <td>{logbookPeserta[currentLogbook].project_name}</td>
                           </tr>
                           <tr>
                             <td>
                               <b>Proyek Manager</b>
                             </td>
-                            <td>{logbookPeserta[currentLogbook].projectmanager}</td>
+                            <td>{logbookPeserta[currentLogbook].project_manager}</td>
                           </tr>
                           <tr>
                             <td>
                               <b>Technical leader</b>
                             </td>
-                            <td>{logbookPeserta[currentLogbook].technicalleader}</td>
+                            <td>{logbookPeserta[currentLogbook].technical_leader}</td>
                           </tr>
                           <tr>
                             <td>
                               <b>Tugas</b>
                             </td>
-                            <td>{logbookPeserta[currentLogbook].tugas}</td>
+                            <td>{logbookPeserta[currentLogbook].task}</td>
                           </tr>
                           <tr>
                             <td>
                               <b>Waktu dan Kegiatan Harian</b>
                             </td>
-                            <td>{logbookPeserta[currentLogbook].waktudankegiatan}</td>
+                            <td>{logbookPeserta[currentLogbook].time_and_activity}</td>
                           </tr>
                           <tr>
                             <td>
@@ -715,13 +678,13 @@ const PenilaianSelfAssessment = () => {
                             <td>
                               <b>Hasil Kerja</b>
                             </td>
-                            <td>{logbookPeserta[currentLogbook].hasilkerja}</td>
+                            <td>{logbookPeserta[currentLogbook].work_result}</td>
                           </tr>
                           <tr>
                             <td>
                               <b>Keterangan</b>
                             </td>
-                            <td>{logbookPeserta[currentLogbook].keterangan}</td>
+                            <td>{logbookPeserta[currentLogbook].description}</td>
                           </tr>
                         </tbody>
                       </Table>
@@ -747,120 +710,9 @@ const PenilaianSelfAssessment = () => {
               })}
             </div>
           </div>
+      </div>
 
-          <div style={{ marginTop: 150 }}>
-            {title('SELF ASSESSMENT')}
-
-            <ul className="list-group mb-4">
-              {selfAssessmentPeserta.map((sa, index) => {
-                if (index === currentSelfAssessment) {
-                  // console.log('SA', index, 'curr', currentSelfAssessment )
-                  return (
-                    <>
-                      <div>
-                        <div>
-                          <table>
-                            <tr>
-                              <td>Penilaian</td>
-                              <td>:</td>
-                              <td>
-                                {selfAssessmentPeserta[currentSelfAssessment].id_self_assessment}
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>Tanggal Self Assessment</td>
-                              <td>:</td>
-                              <td>
-                                {
-                                  selfAssessmentPeserta[currentSelfAssessment].data[0].attributes
-                                    .selfassessment.data.attributes.tanggalmulai
-                                }{' '}
-                                &nbsp; s/d &nbsp;
-                                {
-                                  selfAssessmentPeserta[currentSelfAssessment].data[0].attributes
-                                    .selfassessment.data.attributes.tanggalselesai
-                                }
-                              </td>
-                            </tr>
-                          </table>
-                          <div className="spacetop"></div>
-                          <Table striped="columns">
-                            <thead>
-                              <tr>
-                                <td>
-                                  <b>NO</b>
-                                </td>
-                                <td>
-                                  <b>POIN SELF ASSESSMENT</b>
-                                </td>
-                                <td width={'10%'}>
-                                  <b>NILAI</b>
-                                </td>
-                                <td width={'50%'}>
-                                  <b>KETERANGAN</b>
-                                </td>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {selfAssessmentPeserta[currentSelfAssessment].data.map(
-                                (data, index) => {
-                                  return (
-                                    <tr key={data.id}>
-                                      <td>{index + 1}</td>
-                                      <td>
-                                        {
-                                          data.attributes.poinpenilaianselfassessment.data
-                                            .attributes.poinpenilaian
-                                        }
-                                      </td>
-                                      <td width={'10%'}>
-                                        <Input
-                                          onChange={(e) =>
-                                            handleChangeNilaiSelfAssessment(
-                                              data.id,
-                                              index,
-                                              e.target.value,
-                                              'nilai'
-                                            )
-                                          }
-                                          defaultValue={data.attributes.nilai}
-                                          type="number"
-                                          placeholder="Input a number"
-                                          maxLength={2}
-                                        ></Input>
-                                      </td>
-                                      <td>{data.attributes.keterangan}</td>
-                                    </tr>
-                                  )
-                                },
-                              )}
-                            </tbody>
-                          </Table>
-                        </div>
-                        <Button type="primary" onClick={()=>putNilaiSelfAssessment(index)} variant="contained">
-                          Simpan Nilai
-                        </Button>
-                      </div>
-                      <br />
-
-                      <Pagination
-                        defaultCurrent={pagesSelfAssessment}
-                        defaultPageSize={1}
-                        onChange={handleChangeSelfAssessmentPages}
-                        total={selfAssessmentPeserta.length}
-                      />
-                    </>
-                  )
-                }
-              })}
-            </ul>
-          </div>
-        </div>
-
-        {/* <Button type="primary" onClick={showModal}>
-        Modal
-      </Button> */}
-        <Modal
+      <Modal
           title="Penilaian Logbook Peserta"
           visible={isModaleditVisible}
           onOk={form1.submit}
@@ -877,12 +729,12 @@ const PenilaianSelfAssessment = () => {
             </Button>,
           ]}
         >
-          <h6>Penilaian saat ini : {penilaianBefore}</h6>
+          <h6>Penilaian dipilih : {nilai}</h6>
           <Form
             form={form1}
             name="basic"
             wrapperCol={{ span: 24 }}
-            onFinish={() => AksiPenilaianPeserta(idLogbookChoosen)}
+            onFinish={() => penilaianLogbookPeserta(idLogbookChoosen)}
             autoComplete="off"
             fields={[
               {
@@ -901,7 +753,7 @@ const PenilaianSelfAssessment = () => {
                     content={contentPenilaianSangatBaik}
                     arrow={mergedArrow}
                   >
-                    <Button primary onClick={() => setNilai(90)}>
+                    <Button primary onClick={() => setNilai('SANGAT_BAIK')}>
                       Sangat Baik
                     </Button>
                   </Popover>
@@ -912,7 +764,7 @@ const PenilaianSelfAssessment = () => {
                     content={contentPenilaianBaik}
                     arrow={mergedArrow}
                   >
-                    <Button primary onClick={() => setNilai(80)}>
+                    <Button primary onClick={() => setNilai('BAIK')}>
                       Baik
                     </Button>
                   </Popover>
@@ -923,7 +775,7 @@ const PenilaianSelfAssessment = () => {
                     content={contentPenilaianCukup}
                     arrow={mergedArrow}
                   >
-                    <Button primary onClick={() => setNilai(70)}>
+                    <Button primary onClick={() => setNilai('CUKUP')}>
                       Cukup
                     </Button>
                   </Popover>
@@ -934,7 +786,7 @@ const PenilaianSelfAssessment = () => {
                     content={contentPenilaianKurang}
                     arrow={mergedArrow}
                   >
-                    <Button primary onClick={() => setNilai(60)}>
+                    <Button primary onClick={() => setNilai('KURANG')}>
                       Kurang
                     </Button>
                   </Popover>
@@ -943,12 +795,13 @@ const PenilaianSelfAssessment = () => {
             </Form.Item>
           </Form>
         </Modal>
-      </>
-      <FloatButton type='primary'  onClick={btnKembali} icon={<ArrowLeftOutlined />} tooltip={<div>Kembali ke Rekap Self Assessment Peserta</div>} />
 
-
-
-
+      <FloatButton
+        type="primary"
+        onClick={btnKembali}
+        icon={<ArrowLeftOutlined />}
+        tooltip={<div>Kembali ke Rekap Self Assessment Peserta</div>}
+      />
     </>
   )
 }

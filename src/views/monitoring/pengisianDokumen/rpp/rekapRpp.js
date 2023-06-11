@@ -396,7 +396,7 @@ const RekapRPP = () => {
           )}
 
           {/* ROLE PEMBIMBING JURUSAN */}
-          {rolePengguna === '4' && (
+          {/* {rolePengguna === '4' && (
             <Row>
               <Col span={6} style={{ textAlign: 'center' }}>
                 <Popover content={hoverButtonLihatDetail}>
@@ -411,7 +411,7 @@ const RekapRPP = () => {
                 </Popover>
               </Col>
             </Row>
-          )}
+          )} */}
         </>
       ),
     },
@@ -550,7 +550,7 @@ const RekapRPP = () => {
                     shape="circle"
                     style={{ backgroundColor: '#bae0ff', borderColor: '#bae0ff' }}
                     onClick={() => {
-                      // history.push(`/rencanaPenyelesaianProyek/detail/${record.rpp_id}`)
+                      history.push(`/rencanaPenyelesaianProyek/detail/${record.rpp_id}`)
                       // console.log(limit_date_for_edit_rpp , today,  limit_date_for_edit_rpp > today)
                     }}
                   >

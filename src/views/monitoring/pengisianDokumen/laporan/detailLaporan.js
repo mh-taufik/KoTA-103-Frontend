@@ -25,6 +25,7 @@ export default function UploadLaporan() {
   const [form1] = Form.useForm()
   const NIM_PESERTA = localStorage.username
   const history = useHistory()
+  axios.defaults.withCredentials = true
   const [idPeserta, setIdPeserta] = useState()
   const [isiDetailLaporan, setIsiDetailLaporan] = useState([])
   const params = useParams()

@@ -24,7 +24,7 @@ const options = {
 export default function UploadLaporan() {
   const [file, setFile] = useState('./sample.pdf')
   const [form1] = Form.useForm()
- 
+  axios.defaults.withCredentials = true
   const [numPages, setNumPages] = useState(null)
   const [hiddenScroll, setHiddenScroll] = useState('upload-dokumen-laporan')
   const [fileData, setFileData] = useState()

@@ -1,23 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
-import {
-  Tabs,
-  Table,
-  Button,
-  Row,
-  Col,
-  Input,
-  Space,
-  Spin,
-  Popover,
-} from 'antd'
+import { Tabs, Table, Button, Row, Col, Input, Space, Spin, Popover } from 'antd'
 import axios from 'axios'
 import { useHistory } from 'react-router-dom'
 import { SearchOutlined } from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
 import { LoadingOutlined } from '@ant-design/icons'
-
 
 const DaftarPeserta = () => {
   let searchInput
@@ -29,7 +18,7 @@ const DaftarPeserta = () => {
   axios.defaults.withCredentials = true
   const [peserta, setPeserta] = useState([])
   var rolePengguna = localStorage.id_role
-  axios.defaults.withCredentials = true;
+  const [isNotNullParticipantSupervisor, setIsNotNullParticipantSupervisor] = useState()
 
   const getColumnSearchProps = (dataIndex, name) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -121,90 +110,93 @@ const DaftarPeserta = () => {
   }
 
   const refreshData = async (index) => {
-    await axios
-    .get(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-all`)
-    .then((res) => {
-      console.log('response', res.data.data)
-      let temp = res.data.data
-      let temp1 = []
-      let setProdi = (prodi)=>{return (prodi===0)?'D3':'D4'}
-      let getTemp = function (obj) {
-        for (var i in obj) {
-          temp1.push({
-            id_participant: obj[i].id_participant,
-            name: obj[i].name,
-            work_system: obj[i].work_system,
-            nim : obj[i].nim,
-            prodi : setProdi(obj[i].id_prodi),
-            id_prodi : obj[i].id_prodi
-          })
+    let api_get_peserta
+    axios.defaults.withCredentials = true
+    if (rolePengguna !== '4') {
+      api_get_peserta = `${process.env.REACT_APP_API_GATEWAY_URL}participant/get-all?type=comitte`
+    } else {
+      await axios
+      .get('http://localhost:8080/monitoring/supervisor-mapping/get-all?type=supervisor')
+      .then((res) => {
+        console.log('response', res.data.data[0].participant)
+        if(res.data.data !== null){
+          if(res.data.data[0].participant !== null){
+            setPeserta(res.data.data[0].participant)
+          }else{
+            setPeserta(undefined)
+            setIsNotNullParticipantSupervisor(false)
+          }
         }
-      }
-
-      getTemp(temp)
-      setPeserta(temp1)
-      setIsLoading(false)
-
-      setLoadings((prevLoadings) => {
-        const newLoadings = [...prevLoadings]
-        newLoadings[index] = false
-        return newLoadings
+    
+        setIsLoading(false)
       })
-    })
+      .catch(function (error) {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+          history.push('/500')
+        }
+      })
+    }
+   
+
+        setLoadings((prevLoadings) => {
+          const newLoadings = [...prevLoadings]
+          newLoadings[index] = false
+          return newLoadings
+        })
+    
   }
 
   useEffect(() => {
     const getAllPeserta = async () => {
-      //var APIGETPESERTA
-      axios.defaults.withCredentials = true;
-
-      //GET DATA PESERTA BASED ON ROLE, PANITIA OR PEMBIMBING
-      //(rolePengguna ==='1')?  APIGETPESERTA = `${process.env.REACT_APP_API_GATEWAY_URL}participant/get-all` :  APIGETPESERTA = 'localhost:8080/participant/get-all'
-      await axios
-        .get(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-all`)
-        .then((res) => {
-          console.log('response', res.data.data)
-          let temp = res.data.data
-          let temp1 = []
-          let setProdi = (prodi)=>{return (prodi===0)?'D3':'D4'}
-          let getTemp = function (obj) {
-            for (var i in obj) {
-              temp1.push({
-                id_participant: obj[i].id_participant,
-                name: obj[i].name,
-                work_system: obj[i].work_system,
-                nim : obj[i].nim,
-                prodi : setProdi(obj[i].id_prodi),
-                id_prodi : obj[i].id_prodi
-              })
+      let api_get_peserta
+      axios.defaults.withCredentials = true
+      if (rolePengguna !== '4') {
+        api_get_peserta = `${process.env.REACT_APP_API_GATEWAY_URL}participant/get-all?type=comitte`
+      }
+      else if (rolePengguna === '4') {
+        await axios
+          .get('http://localhost:8080/monitoring/supervisor-mapping/get-all?type=supervisor')
+          .then((res) => {
+            console.log('response', res.data.data[0].participant)
+            if(res.data.data !== null){
+              if(res.data.data[0].participant !== null){
+                setPeserta(res.data.data[0].participant)
+              }else{
+                setPeserta(undefined)
+                setIsNotNullParticipantSupervisor(false)
+              }
             }
-          }
-
-          getTemp(temp)
-          setPeserta(temp1)
-          setIsLoading(false)
-        })
-        .catch(function (error) {
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
-              },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-            history.push('/500')
-          }
-        })
+        
+            setIsLoading(false)
+          })
+          .catch(function (error) {
+            if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+              history.push({
+                pathname: '/login',
+                state: {
+                  session: true,
+                },
+              })
+            } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+              history.push('/404')
+            } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+              history.push('/500')
+            }
+          })
+      }
     }
 
     getAllPeserta()
-
   }, [history])
-
-  
 
   const columns = [
     {
@@ -248,8 +240,63 @@ const DaftarPeserta = () => {
         <>
           <Row>
             <Col span={24} style={{ textAlign: 'center' }}>
-              <Popover content={ <div>Klik tombol, untuk melihat detail dashboard peserta</div>}>
-                <Button type="primary" size="small" onClick={()=>history.push(`/daftarPeserta/dashboardPeserta/${record.id_participant}`)}>
+              <Popover content={<div>Klik tombol, untuk melihat detail dashboard peserta</div>}>
+                <Button
+                  type="primary"
+                  size="small"
+                  onClick={() =>
+                    history.push(`/daftarPeserta/dashboardPeserta/${record.id_participant}`)
+                  }
+                >
+                  Monitoring Peserta
+                </Button>
+              </Popover>
+            </Col>
+          </Row>
+        </>
+      ),
+    },
+  ]
+
+  
+  const supervisor_columns = [
+    {
+      title: 'NO',
+      dataIndex: 'no',
+      width: '5%',
+      align: 'center',
+      render: (value, item, index) => {
+        return index + 1
+      },
+    },
+    {
+      title: 'NIM',
+      dataIndex: 'id',
+      width: '10%',
+      ...getColumnSearchProps('id', 'NIM'),
+    },
+    {
+      title: 'NAMA PESERTA',
+      dataIndex: 'name',
+      width: '40%',
+      ...getColumnSearchProps('name', 'Nama'),
+    },
+    {
+      title: 'AKSI',
+      dataIndex: 'action',
+      align: 'center',
+      render: (text, record) => (
+        <>
+          <Row>
+            <Col span={24} style={{ textAlign: 'center' }}>
+              <Popover content={<div>Klik tombol, untuk melihat detail dashboard peserta</div>}>
+                <Button
+                  type="primary"
+                  size="small"
+                  onClick={() =>
+                    history.push(`/daftarPeserta/dashboardPeserta/${record.id_participant}`)
+                  }
+                >
                   Monitoring Peserta
                 </Button>
               </Popover>
@@ -280,30 +327,45 @@ const DaftarPeserta = () => {
     )
   }
 
-  const items = [{
-    key :'1',
-    label :'PESERTA',
-    children :  
-    <Table
-    scroll={{ x: 'max-content' }}
-    columns={columns}
-    dataSource={peserta}
-    rowKey={peserta.id} 
-    bordered
-    pagination={true}
-  />
-  }]
-  
-  return (isLoading)? <Spin tip="Loading" size="large">
-  <div className="content" />
-</Spin>:(
+  const getColumnBasedOnRole =() =>{
+if(rolePengguna === '4'){
+  return supervisor_columns
+}
+  }
+
+  const items = [
+    {
+      key: '1',
+      label: 'PESERTA',
+      children: (
+        <Table
+          scroll={{ x: 'max-content' }}
+          columns={getColumnBasedOnRole()}
+          dataSource={peserta}
+          rowKey={peserta.id}
+          bordered
+          pagination={true}
+        />
+      ),
+    },
+  ]
+
+  return isLoading ? (
+    <Spin tip="Loading" size="large">
+      <div className="content" />
+    </Spin>
+  ) : (
     <>
       <CCard className="mb-4" key={1}>
-        {title('DAFTAR PESERTA - DASHBOARD PESERTA KP (D3) DAN PKL (D4)')}
+        {rolePengguna==='4' && (
+          <>
+          {title('DAFTAR PESERTA BIMBINGAN')}
+          </>
+        )}
         <CCardBody>
           <CRow>
             <CCol sm={12}>
-              <Tabs type="card" defaultActiveKey='1' items={items} onChange={onChange}></Tabs>
+              <Tabs type="card" defaultActiveKey="1" items={items} onChange={onChange}></Tabs>
             </CCol>
           </CRow>
         </CCardBody>

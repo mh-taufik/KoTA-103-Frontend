@@ -43,6 +43,7 @@ const FormPengisianSelfAssessment = () => {
   const params = useParams()
   const [loadings, setLoadings] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  axios.defaults.withCredentials = true
   let history = useHistory()
   const [komponenPenilaianSelfAssessment, setKomponenPenilaianSelfAssessment] = useState([])
   const [dataPengisianSelfAssessmentPeserta, setDataPengisianSelfAssessmentPeserta] = useState([])
@@ -221,10 +222,11 @@ const FormPengisianSelfAssessment = () => {
             finish_date: tanggalBerakhirSelfAssessment,
             grade: data,
           })
-          .then((result) => {
-            console.log(result)
-            // handleSuccessSubmit(result.data.data.id)
-            // return
+          .then((response) => {
+           let id = response.data.data.id
+            notification.success({message:'Self assessment berhasil ditambahkan'})
+            history.push(`/selfAssessment/formSelfAssessment/detail/${id}`)
+          
           }).catch(function (error) {
             if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
               history.push({

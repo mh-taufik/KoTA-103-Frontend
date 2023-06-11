@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useHistory, useParams } from 'react-router-dom'
 import { CCard, CCardBody, CCardHeader, CCol, CContainer, CRow } from '@coreui/react'
-import {ArrowLeftOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, FileOutlined } from '@ant-design/icons'
+
 import Chart, {
   CommonSeriesSettings,
   Legend,
@@ -26,6 +27,7 @@ import {
   Modal,
   Pagination,
   Popover,
+  Result,
   Row,
   Select,
   Space,
@@ -77,6 +79,13 @@ const PenilaianLogbook = () => {
   const [pagesSelfAssessment, setPagesSelfAssessment] = useState(1)
   const [currentSelfAssessment, setCurrentSelfAssessment] = useState(0)
   const [allIdSelfAssessmentPeserta, setAllIdSelfAssessmentPeserta] = useState([])
+  const [messageRpp, setMessageRpp] = useState()
+  const [messageLogbook, setMessageLogbook] = useState()
+  const [messageSelfAssessment, setMessageSelfAssessment] = useState()
+  const [isRppAvailable, setIsRppAvailable] = useState()
+  const [isLogbookAvailable, setIsLogbookAvailable] = useState()
+  const [isSelfAssessmentAvailable, setIsSelfAssessmentAvailable] = useState()
+  const [rppComplete, setRppComplete] = useState()
 
   /** PAGINATION LOGBOOK */
   const handleChange = (value) => {
@@ -130,244 +139,61 @@ const PenilaianLogbook = () => {
     return data
   }
 
-  const GetDataInfoPeserta = async (index) => {
-    var PESERTA
-    if (rolePengguna === '1') {
-      PESERTA = idPengguna
-    } else {
-      PESERTA = idPeserta.id
-    }
-    await axios
-      .get(`http://localhost:1337/api/pesertas?filters[username][$eq]=${PESERTA}`)
-      .then((result) => {
-        setInfoDataPeserta(result.data.data[0].attributes)
-        console.log('res', result)
-        console.log('data peserta', result.data.data[0].attributes)
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
-          history.push('/500')
-        }
-      })
-  }
-
-
   const showModalEdit = (record) => {
     setIsModalEditVisible(true)
     setChoose(record)
     setIdLogbookChoosen(record.id)
-    setNilai(record.nilai)
-    if (record.nilai === null) {
-      setPenilaianBefore('Belum Diberi Penilaian')
-    } else {
-      setPenilaianBefore(record.nilai)
-    }
   }
 
-  const getTimeline = async () => {
-    var obj = []
-    var content = []
-
+  const SimpanPenilaianLogbook = async (penilaian) => {
+    console.log(penilaian, typeof(penilaian))
     await axios
-      .get(`http://localhost:1337/api/jadwalpenyelesaiankeseluruhans`)
-      .then((result) => {
-        console.log('HASIL PENYELESAIAN KESELURUHAN', result.data.data)
-        obj = result.data.data
-
-        var findObjectByLabel = function (obj) {
-  
-          for (var i in obj) {
-         
-            console.log(obj[i])
-            content.push({
-              id: obj[i].id,
-              name: obj[i].attributes.jenispekerjaan,
-              description: obj[i].attributes.butirpekerjaan,
-              start_date: obj[i].attributes.tanggalmulai,
-              end_date: obj[i].attributes.tanggalselesai,
-            })
-          }
-        }
-
-        findObjectByLabel(obj)
-        setTimeline(content)
-
-        setIsLoading(false)
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
-          history.push('/500')
-        }
-      })
-
-    console.log('content', content)
-    setTimeline(content)
-  }
-
-  const getLogbook = async () => {
-    await axios
-      .get('http://localhost:1337/api/logbooks')
-      .then((response) => {
-        console.log(response)
-
-        console.log('data logbook', response.data.data)
-        var temp = []
-        var temp1 = response.data.data
-        var pgs
-        var curr
-        var a = 0
-        var nimPeserta = parseInt(LOGBOOK_PESERTA)
-        var getDataTemp = function (obj) {
-          for (var i in obj) {
-            console.log('if', typeof obj[i].id, 'dan', typeof LOGBOOK_PESERTA)
-            if (obj[i].id === nimPeserta) {
-              //pages dimulai dari 1
-              pgs = a + 1
-              curr = a
-            }
-
-            temp.push({
-              id: obj[i].id,
-              waktudankegiatan: obj[i].attributes.waktudankegiatan,
-              namaproyek: obj[i].attributes.namaproyek,
-              projectmanager: obj[i].attributes.projectmanager,
-              hasilkerja: obj[i].attributes.hasilkerja,
-              keterangan: obj[i].attributes.keterangan,
-              nilai: obj[i].attributes.nilai,
-              statuspengecekan: obj[i].attributes.statuspengecekan,
-              statuspengumpulan: obj[i].attributes.statuspengumpulan,
-              tanggallogbook: obj[i].attributes.tanggallogbook,
-              technicalleader: obj[i].attributes.technicalleader,
-              tools: obj[i].attributes.tools,
-              tugas: obj[i].attributes.tugas,
-            })
-            a++
-          }
-        }
-
-        getDataTemp(temp1)
-        console.log('pages ==> ', pgs)
-        setPages(pgs)
-        setCurrentLogbook(curr)
-        setLogbookPeserta(temp)
-        console.log('temp1', temp)
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-          history.push('/500')
-        }
-      })
-  }
-
-  //AKSI PENILAIAN LOGBOOK PESERTA
-  const AksiPenilaianPeserta = async (idLogbook, index) => {
-    await axios
-      .put(`http://localhost:1337/api/logbooks/${idLogbook}`, {
-        data: {
-          nilai: nilai,
-          statuspengecekan:true
-        },
+      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/grade`, {
+        grade: penilaian,
+        id: parseInt(LOGBOOK_PESERTA),
       })
       .then((response) => {
-        console.log(response)
+        console.log('res', response)
         setIsModalEditVisible(false)
         notification.success({
           message: 'Penilaian Logbook Berhasil Diubah',
         })
 
-        refreshDataLogbook(idLogbook, index)
+        refreshDataLogbook()
       })
-      .catch((error) => {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
-          history.push('/500')
-        }
-      })
-  }
-
-  /** GET DATA SELF ASSESSMENT */
-  const getDataSelfAssessmentTerkait = async (index) => {
-    await axios
-      .get(`http://localhost:1337/api/pesertas?populate=*&filters[username][$eq]=${NIM_PESERTA}`)
-      .then((response) => {
-        console.log('data self', response.data.data)
-        setAllIdSelfAssessmentPeserta(response.data.data[0].attributes.selfassessments.data)
-      })
-      .catch((error) => {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
-          history.push('/500')
-        }
-      })
-
-    // console.log('data SA', allIdSelfAssessmentPeserta)
+    .catch((error) => {
+      if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+        history.push({
+          pathname: '/login',
+          state: {
+            session: true,
+          },
+        })
+      } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+        history.push('/404')
+      } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+        history.push('/500')
+      }
+    })
   }
 
   const putNilaiSelfAssessment = async () => {
     let data = nilaiSelfAssessment
-    for (var i in data){
-     console.log(i, ' ', data[i])
-     await axios.put(`http://localhost:1337/api/selfasspoins/${data[i].id}`,{
-      'data' :{
-        'nilai' : data[i].nilai
-      }
-     
-     }).then((res)=>{
-      console.log(res)
-      notification.success({
-        message:'Penilaian self assessment berhasil diubah'
-      })
-
-      refreshDataSelfAssessment()
-     })
+    for (var i in data) {
+      console.log(i, ' ', data[i])
+      await axios
+        .put(`http://localhost:1337/api/selfasspoins/${data[i].id}`, {
+          data: {
+            nilai: data[i].nilai,
+          },
+        })
+        .then((res) => {
+          console.log(res)
+          notification.success({
+            message: 'Penilaian self assessment berhasil diubah',
+          })
+        })
     }
-  }
-
-  const refreshDataSelfAssessment = () =>{
-    getDataSelfAssessmentTerkait()
   }
 
   useEffect(() => {
@@ -400,11 +226,81 @@ const PenilaianLogbook = () => {
   }
 
   useEffect(() => {
-    getTimeline()
-    getLogbook()
-    getDataSelfAssessmentTerkait()
+    const getAssociatedLogbookRppSelfAssessmentBasedOnLogbook = async () => {
+      axios.defaults.withCredentials = true
+      let content = []
 
-    // console.log('LOGBOOK PESERTA', LOGBOOK_PESERTA)
+      await axios
+        .get(
+          `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/associated/logbook?logbook_id=${LOGBOOK_PESERTA}&participant_id=${NIM_PESERTA}`,
+        )
+        .then((result) => {
+          const data_rpp = result.data.data.rpp
+          const data_logbook = result.data.data.logbook
+          const data_self_assessment = result.data.data.selfAssessment
+
+          if (data_rpp === null) {
+            setIsRppAvailable(false)
+          } else {
+            setIsRppAvailable(true)
+          }
+
+          if (data_logbook === null) {
+            setIsLogbookAvailable(false)
+          } else {
+            setIsLogbookAvailable(true)
+            setLogbookPeserta(data_logbook)
+          }
+
+          if (data_self_assessment === null) {
+            setIsSelfAssessmentAvailable(false)
+          } else {
+            setIsSelfAssessmentAvailable(true)
+            setSelfAssessmentPeserta(data_self_assessment.aspect_list)
+          }
+
+          if (data_rpp !== null) {
+            if (data_rpp.completion_schedules !== null) {
+              var findObjectByLabel = function (obj) {
+                for (var i in obj) {
+                  // console.log(obj[i])
+                  content.push({
+                    id: obj[i].id,
+                    name: obj[i].task_type,
+                    description: obj[i].task_name,
+                    start_date: obj[i].start_date,
+                    end_date: obj[i].finish_date,
+                  })
+                }
+              }
+
+              findObjectByLabel(data_rpp.completion_schedules)
+              setTimeline(content)
+            }
+          }
+
+          setIsLoading(false)
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+            history.push('/500')
+          }
+        })
+
+      console.log('content', content)
+      setTimeline(content)
+    }
+
+    getAssociatedLogbookRppSelfAssessmentBasedOnLogbook()
   }, [history])
 
   const customizeTooltip = (arg) => {
@@ -423,10 +319,10 @@ const PenilaianLogbook = () => {
     return (
       <>
         <div>
-          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius:2 }}>
+          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius: 2 }}>
             <Col span={24}>
               <b>
-                <h4 style={{color:'#f6ffed', marginLeft:30, marginTop:6}}>{judul}</h4>
+                <h4 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h4>
               </b>
             </Col>
           </Row>
@@ -435,8 +331,6 @@ const PenilaianLogbook = () => {
       </>
     )
   }
-
-
 
   //PENYESUAIAN WARNA TEKS SESUAI DENGAN STATUS PENGUMPULAN
   const colorTextStatusPengumpulan = (teks) => {
@@ -503,53 +397,67 @@ const PenilaianLogbook = () => {
     return showArrow
   }, [showArrow, arrowAtCenter])
 
-  const refreshDataLogbook = async(id, index) => {
+  const refreshDataLogbook = async (index) => {
+    axios.defaults.withCredentials = true
+    var content = []
+
     await axios
-    .get('http://localhost:1337/api/logbooks')
-    .then((response) => {
-      var temp = []
-      var temp1 = response.data.data
-      var pgs
-      var curr
-      var a = 0
-      var getDataTemp = function (obj) {
-        for (var i in obj) {
-          if (obj[i].id === id) {
-            //pages dimulai dari 1
-            pgs = a + 1
-            curr = a
-          }
+      .get(
+        `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/associated/logbook?logbook_id=${LOGBOOK_PESERTA}&participant_id=${NIM_PESERTA}`,
+      )
+      .then((result) => {
+        const data_rpp = result.data.data.rpp
+        const data_logbook = result.data.data.logbook
+        const data_self_assessment = result.data.data.selfAssessment
 
-          temp.push({
-            id: obj[i].id,
-            waktudankegiatan: obj[i].attributes.waktudankegiatan,
-            namaproyek: obj[i].attributes.namaproyek,
-            projectmanager: obj[i].attributes.projectmanager,
-            hasilkerja: obj[i].attributes.hasilkerja,
-            keterangan: obj[i].attributes.keterangan,
-            nilai: obj[i].attributes.nilai,
-            statuspengecekan: obj[i].attributes.statuspengecekan,
-            statuspengumpulan: obj[i].attributes.statuspengumpulan,
-            tanggallogbook: obj[i].attributes.tanggallogbook,
-            technicalleader: obj[i].attributes.technicalleader,
-            tools: obj[i].attributes.tools,
-            tugas: obj[i].attributes.tugas,
-          })
-          a++
+        if (data_rpp === null) {
+          setIsRppAvailable(false)
+        } else {
+          setIsRppAvailable(true)
         }
-      }
 
-      getDataTemp(temp1)
-      setPages(pgs)
-      setCurrentLogbook(curr)
-      setLogbookPeserta(temp)
+        if (data_logbook === null) {
+          setIsLogbookAvailable(false)
+        } else {
+          setIsLogbookAvailable(true)
+          setLogbookPeserta(data_logbook)
+        }
+
+        if (data_self_assessment === null) {
+          setIsSelfAssessmentAvailable(false)
+        } else {
+          setIsSelfAssessmentAvailable(true)
+          setSelfAssessmentPeserta(data_self_assessment.aspect_list)
+        }
+
+        if (data_rpp !== null) {
+          if (data_rpp.completion_schedules !== null) {
+            var findObjectByLabel = function (obj) {
+              for (var i in obj) {
+                // console.log(obj[i])
+                content.push({
+                  id: obj[i].id,
+                  name: obj[i].task_type,
+                  description: obj[i].task_name,
+                  start_date: obj[i].start_date,
+                  end_date: obj[i].finish_date,
+                })
+              }
+            }
+
+            findObjectByLabel(data_rpp.completion_schedules)
+            setTimeline(content)
+          }
+        }
+
   
-      setLoadings((prevLoadings) => {
-        const newLoadings = [...prevLoadings]
-        newLoadings[index] = false
-        return newLoadings
+
+        setLoadings((prevLoadings) => {
+          const newLoadings = [...prevLoadings]
+          newLoadings[index] = false
+          return newLoadings
+        })
       })
-    })
   }
 
   /** HANDLE BUTTON */
@@ -559,11 +467,10 @@ const PenilaianLogbook = () => {
 
   return (
     <>
-      <>
-        <div className="container2">
-      
+      <div className="container2">
+        {title('RENCANA PENGERJAAN PROYEK ( RPP )')}
 
-          {title('RENCANA PENGERJAAN PROYEK ( RPP )')}
+        {isRppAvailable && (
           <div style={{ padding: 10 }}>
             <div style={{ background: '#fff', padding: 24 }}>
               <div style={{ overflowX: 'scroll' }}>
@@ -604,322 +511,283 @@ const PenilaianLogbook = () => {
               </div>
             </div>
           </div>
+        )}
 
-          <div style={{ marginTop: 150 }}>
-            {title('LOGBOOK')}
+        {!isRppAvailable && <Result icon={<FileOutlined />} title="Tidak Ada RPP Yang Terkait" />}
 
-            <div>
-              {logbookPeserta.map((currElement, index) => {
-                if (index === currentLogbook) {
-                  return (
-                    <>
-                      <table>
-                        <tr>
-                          <td>Status Pengumpulan</td>
-                          <td>:</td>
-                          <td>
-                            <b>
-                              {colorTextStatusPengumpulan(
-                                logbookPeserta[currentLogbook].statuspengumpulan,
-                              )}
-                            </b>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Penilaian</td>
-                          <td>:</td>
-                          <td>{logbookPeserta[currentLogbook].nilai}</td>
-                        </tr>
-                        <tr>
-                          <td>Tanggal Logbook</td>
-                          <td>:</td>
-                          <td>{logbookPeserta[currentLogbook].tanggallogbook}</td>
-                        </tr>
-                      </table>
-                      <div className="spacetop"></div>
-                      <Table striped="columns">
-                        <tbody>
-                          <tr>
-                            <td>
-                              <b>Tanggal</b>
-                            </td>
-                            <td>{logbookPeserta[currentLogbook].tanggallogbook}</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Nama Proyek</b>
-                            </td>
-                            <td>{logbookPeserta[currentLogbook].namaproyek}</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Proyek Manager</b>
-                            </td>
-                            <td>{logbookPeserta[currentLogbook].projectmanager}</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Technical leader</b>
-                            </td>
-                            <td>{logbookPeserta[currentLogbook].technicalleader}</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Tugas</b>
-                            </td>
-                            <td>{logbookPeserta[currentLogbook].tugas}</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Waktu dan Kegiatan Harian</b>
-                            </td>
-                            <td>{logbookPeserta[currentLogbook].waktudankegiatan}</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Tools yang digunakan</b>
-                            </td>
-                            <td>{logbookPeserta[currentLogbook].tools}</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Hasil Kerja</b>
-                            </td>
-                            <td>{logbookPeserta[currentLogbook].hasilkerja}</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Keterangan</b>
-                            </td>
-                            <td>{logbookPeserta[currentLogbook].keterangan}</td>
-                          </tr>
-                        </tbody>
-                      </Table>
-                      <br />
-                      <br />
-                      <Button
-                        type="primary"
-                        onClick={() => showModalEdit(logbookPeserta[currentLogbook])}
-                      >
-                        Nilai
-                      </Button>
-                      <br />
-                      <br />
-                      <Pagination
-                        defaultCurrent={pages}
-                        defaultPageSize={1}
-                        onChange={handleChange}
-                        total={logbookPeserta.length}
-                      />
-                    </>
-                  )
-                }
-              })}
-            </div>
-          </div>
-
-          <div style={{ marginTop: 150 }}>
-            {title('SELF ASSESSMENT')}
-
-            <ul className="list-group mb-4">
-              {selfAssessmentPeserta.map((sa, index) => {
-                if (index === currentSelfAssessment) {
-                  // console.log('SA', index, 'curr', currentSelfAssessment )
-                  return (
-                    <>
-                      <div>
-                        <div>
-                          <table>
-                            <tr>
-                              <td>Penilaian</td>
-                              <td>:</td>
-                              <td>
-                                {selfAssessmentPeserta[currentSelfAssessment].id_self_assessment}
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>Tanggal Self Assessment</td>
-                              <td>:</td>
-                              <td>
-                                {
-                                  selfAssessmentPeserta[currentSelfAssessment].data[0].attributes
-                                    .selfassessment.data.attributes.tanggalmulai
-                                }{' '}
-                                &nbsp; s/d &nbsp;
-                                {
-                                  selfAssessmentPeserta[currentSelfAssessment].data[0].attributes
-                                    .selfassessment.data.attributes.tanggalselesai
-                                }
-                              </td>
-                            </tr>
-                          </table>
-                          <div className="spacetop"></div>
-                          <Table striped="columns">
-                            <thead>
-                              <tr>
-                                <td>
-                                  <b>NO</b>
-                                </td>
-                                <td>
-                                  <b>POIN SELF ASSESSMENT</b>
-                                </td>
-                                <td width={'10%'}>
-                                  <b>NILAI</b>
-                                </td>
-                                <td width={'50%'}>
-                                  <b>KETERANGAN</b>
-                                </td>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {selfAssessmentPeserta[currentSelfAssessment].data.map(
-                                (data, index) => {
-                                  return (
-                                    <tr key={data.id}>
-                                      <td>{index + 1}</td>
-                                      <td>
-                                        {
-                                          data.attributes.poinpenilaianselfassessment.data
-                                            .attributes.poinpenilaian
-                                        }
-                                      </td>
-                                      <td width={'10%'}>
-                                        <Input
-                                          onChange={(e) =>
-                                            handleChangeNilaiSelfAssessment(
-                                              data.id,
-                                              index,
-                                              e.target.value,
-                                              'nilai'
-                                            )
-                                          }
-                                          defaultValue={data.attributes.nilai}
-                                          type="number"
-                                          placeholder="Input a number"
-                                          maxLength={2}
-                                        ></Input>
-                                      </td>
-                                      <td>{data.attributes.keterangan}</td>
-                                    </tr>
-                                  )
-                                },
-                              )}
-                            </tbody>
-                          </Table>
-                        </div>
-                        <Button type="primary" onClick={putNilaiSelfAssessment} variant="contained">
-                          Simpan Nilai
-                        </Button>
-                      </div>
-                      <br />
-
-                      <Pagination
-                        defaultCurrent={pagesSelfAssessment}
-                        defaultPageSize={1}
-                        onChange={handleChangeSelfAssessmentPages}
-                        total={selfAssessmentPeserta.length}
-                      />
-                    </>
-                  )
-                }
-              })}
-            </ul>
-          </div>
+        <div style={{ marginTop: 150 }}>
+          {title('LOGBOOK')}
+          {isLogbookAvailable && (
+            <>
+              <table>
+                <tr>
+                  <td>Status Pengumpulan</td>
+                  <td>:</td>
+                  <td>
+                    <b>
+                      {/* {colorTextStatusPengumpulan(
+                                logbookPeserta.status.status
+                              )} */}
+                    </b>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Penilaian</td>
+                  <td>:</td>
+                  <td>{logbookPeserta.grade}</td>
+                </tr>
+                <tr>
+                  <td>Tanggal Logbook</td>
+                  <td>:</td>
+                  <td>{logbookPeserta.date}</td>
+                </tr>
+              </table>
+              <div className="spacetop"></div>
+              <Table striped="columns">
+                <tbody>
+                  <tr>
+                    <td>
+                      <b>Tanggal</b>
+                    </td>
+                    <td>{logbookPeserta.date}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <b>Nama Proyek</b>
+                    </td>
+                    <td>{logbookPeserta.project_name}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <b>Proyek Manager</b>
+                    </td>
+                    <td>{logbookPeserta.project_manager}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <b>Technical leader</b>
+                    </td>
+                    <td>{logbookPeserta.technical_leader}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <b>Tugas</b>
+                    </td>
+                    <td>{logbookPeserta.task}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <b>Waktu dan Kegiatan Harian</b>
+                    </td>
+                    <td>{logbookPeserta.time_and_activity}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <b>Tools yang digunakan</b>
+                    </td>
+                    <td>{logbookPeserta.tools}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <b>Hasil Kerja</b>
+                    </td>
+                    <td>{logbookPeserta.work_result}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <b>Keterangan</b>
+                    </td>
+                    <td>{logbookPeserta.description}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <b>Kendala</b>
+                    </td>
+                    <td>
+                      {logbookPeserta.encountered_problem !== null && (
+                        <p>{logbookPeserta.encountered_problem}</p>
+                      )}
+                      {logbookPeserta.encountered_problem === null && <p>Tidak Ada Kendala</p>}
+                    </td>
+                  </tr>
+                </tbody>
+              </Table>
+              <Button type="primary" onClick={() => showModalEdit(logbookPeserta)}>
+                Nilai
+              </Button>
+            </>
+          )}
         </div>
+ 
+        <div style={{ marginTop: 150 }}>
+          {title('SELF ASSESSMENT')}
 
-        {/* <Button type="primary" onClick={showModal}>
-        Modal
-      </Button> */}
-        <Modal
-          title="Penilaian Logbook Peserta"
-          visible={isModaleditVisible}
-          onOk={form1.submit}
-          onCancel={handleCancelEdit}
-          width={600}
-          zIndex={99}
-          enforceFocus={true}
-          footer={[
-            <Button key="back" onClick={handleCancelEdit}>
-              Batal
-            </Button>,
-            <Button loading={loadings[1]} key="submit" type="primary" onClick={form1.submit}>
-              Simpan
-            </Button>,
+          {isSelfAssessmentAvailable && (
+            <ul className="list-group mb-4">
+              <div>
+                <div>
+                  <table>
+                    <tr>
+                      <td>Tanggal Self Assessment</td>
+                      <td>:</td>
+                      <td>
+                        &nbsp;&nbsp;
+                        {selfAssessmentPeserta.start_date} &nbsp; s/d &nbsp;
+                        {selfAssessmentPeserta.finish_date}
+                      </td>
+                    </tr>
+                  </table>
+                  <div className="spacetop"></div>
+                  <Table striped="columns">
+                    <thead>
+                      <tr>
+                        <td>
+                          <b>NO</b>
+                        </td>
+                        <td>
+                          <b>POIN SELF ASSESSMENT</b>
+                        </td>
+                        <td width={'10%'}>
+                          <b>NILAI</b>
+                        </td>
+                        <td width={'50%'}>
+                          <b>KETERANGAN</b>
+                        </td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selfAssessmentPeserta.map((data, index) => {
+                        return (
+                          <tr key={data.aspect_id}>
+                            <td>{index + 1}</td>
+                            <td>{data.aspect_name}</td>
+                            <td width={'10%'}>
+                              <Input
+                                onChange={(e) =>
+                                  handleChangeNilaiSelfAssessment(
+                                    data.aspect_id,
+                                    index,
+                                    e.target.value,
+                                    'nilai',
+                                  )
+                                }
+                                defaultValue={data.grade}
+                                type="number"
+                                placeholder="Input a number"
+                                maxLength={2}
+                              ></Input>
+                            </td>
+                            <td>{data.description}</td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </Table>
+                </div>
+                <Button type="primary" onClick={putNilaiSelfAssessment} variant="contained">
+                  Simpan Nilai
+                </Button>
+              </div>
+              <br />
+            </ul>
+          )}
+
+          {!isSelfAssessmentAvailable && (
+            <Result icon={<FileOutlined />} title="Tidak Ada Self Assessment Yang Terkait" />
+          )}
+        </div>
+      </div>
+
+      <Modal
+        title="Penilaian Logbook Peserta"
+        visible={isModaleditVisible}
+        onOk={form1.submit}
+        onCancel={handleCancelEdit}
+        width={600}
+        zIndex={99}
+        enforceFocus={true}
+        footer={[
+          <Button key="back" onClick={handleCancelEdit}>
+            Batal
+          </Button>,
+          <Button loading={loadings[1]} key="submit" type="primary" onClick={form1.submit}>
+            Simpan
+          </Button>,
+        ]}
+      >
+        {/* <h6>Penilaian saat ini : {penilaianBefore}</h6> */}
+        <Form
+          form={form1}
+          name="basic"
+          wrapperCol={{ span: 24 }}
+          onFinish={() => SimpanPenilaianLogbook(nilai)}
+          autoComplete="off"
+          fields={[
+            {
+              name: 'namapembimbing',
+              // value: pembimbingChoosen,
+            },
           ]}
         >
-          <h6>Penilaian saat ini : {penilaianBefore}</h6>
-          <Form
-            form={form1}
-            name="basic"
-            wrapperCol={{ span: 24 }}
-            onFinish={() => AksiPenilaianPeserta(idLogbookChoosen)}
-            autoComplete="off"
-            fields={[
-              {
-                name: 'namapembimbing',
-                // value: pembimbingChoosen,
-              },
-            ]}
-          >
-            <Form.Item label="Pilih Nilai" rules={[{ required: true, message: 'Penilaian' }]}>
-              <Form.Item>
-                <Space wrap>
-                  <Popover
-                    className="indexing"
-                    placement="topRight"
-                    title={textSangatBaik}
-                    content={contentPenilaianSangatBaik}
-                    arrow={mergedArrow}
-                  >
-                    <Button primary onClick={() => setNilai(90)}>
-                      Sangat Baik
-                    </Button>
-                  </Popover>
-                  <Popover
-                    className="indexing"
-                    placement="topRight"
-                    title={textSangatBaik}
-                    content={contentPenilaianBaik}
-                    arrow={mergedArrow}
-                  >
-                    <Button primary onClick={() => setNilai(80)}>
-                      Baik
-                    </Button>
-                  </Popover>
-                  <Popover
-                    className="indexing"
-                    placement="topRight"
-                    title={textSangatBaik}
-                    content={contentPenilaianCukup}
-                    arrow={mergedArrow}
-                  >
-                    <Button primary onClick={() => setNilai(70)}>
-                      Cukup
-                    </Button>
-                  </Popover>
-                  <Popover
-                    className="indexing"
-                    placement="topRight"
-                    title={textSangatBaik}
-                    content={contentPenilaianKurang}
-                    arrow={mergedArrow}
-                  >
-                    <Button primary onClick={() => setNilai(60)}>
-                      Kurang
-                    </Button>
-                  </Popover>
-                </Space>
-              </Form.Item>
+          <Form.Item label="Pilih Nilai" rules={[{ required: true, message: 'Penilaian' }]}>
+            <Form.Item>
+              <Space wrap>
+                <Popover
+                  className="indexing"
+                  placement="topRight"
+                  title={textSangatBaik}
+                  content={contentPenilaianSangatBaik}
+                  arrow={mergedArrow}
+                >
+                  <Button primary className='active' onClick={() => setNilai('SANGAT_BAIK')}>
+                    Sangat Baik
+                  </Button>
+                </Popover>
+                <Popover
+                  className="indexing"
+                  placement="topRight"
+                  title={textSangatBaik}
+                  content={contentPenilaianBaik}
+                  arrow={mergedArrow}
+                >
+                  <Button primary onClick={() => setNilai('BAIK')}>
+                    Baik
+                  </Button>
+                </Popover>
+                <Popover
+                  className="indexing"
+                  placement="topRight"
+                  title={textSangatBaik}
+                  content={contentPenilaianCukup}
+                  arrow={mergedArrow}
+                >
+                  <Button primary onClick={() => setNilai('CUKUP')}>
+                    Cukup
+                  </Button>
+                </Popover>
+                <Popover
+                  className="indexing"
+                  placement="topRight"
+                  title={textSangatBaik}
+                  content={contentPenilaianKurang}
+                  arrow={mergedArrow}
+                >
+                  <Button primary onClick={() => setNilai('KURANG')}>
+                    Kurang
+                  </Button>
+                </Popover>
+              </Space>
             </Form.Item>
-          </Form>
-        </Modal>
-      </>
-      
-      <FloatButton type='primary' icon={<ArrowLeftOutlined />}  onClick={btnKembali} tooltip={<div>Kembali ke Rekap Logbook Peserta</div>} />
+          </Form.Item>
+        </Form>
+      </Modal>
 
-
-
-
+      <FloatButton
+        type="primary"
+        icon={<ArrowLeftOutlined />}
+        onClick={btnKembali}
+        tooltip={<div>Kembali ke Rekap Logbook Peserta</div>}
+      />
     </>
   )
 }

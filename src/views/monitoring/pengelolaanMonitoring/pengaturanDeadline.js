@@ -32,6 +32,7 @@ const { RangePicker } = DatePicker
 
 
 const PengelolaanDeadline = () => {
+  axios.defaults.withCredentials = true
   const dateFormat = 'YYYY-MM-DD'
   const [dataDeadline, setDataDeadline] = useState([])
   const [isModaleditVisible, setIsModalEditVisible] = useState(false)

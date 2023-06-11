@@ -415,9 +415,8 @@ const RekapLogbook = () => {
                 <Popover content={<div>Lihat isi detail dokumen logbook</div>}>
                   <Button
                     size="small"
-                    shape='round'
+                    type='primary'
                     onClick={() => actionLihatDetailPenilaianLogbook(record.id)}
-                    style={{ backgroundColor: '#91caff' }}
                   >
                     Lihat Detail
                   </Button>
@@ -427,8 +426,9 @@ const RekapLogbook = () => {
                 <Popover content={<div>Lihat penilaian logbook</div>}>
                   <Button
                     size="small"
+               
                     onClick={() => actionPenilaianLogbook(record.id)}
-                    style={{ backgroundColor: '#ffd666' }}
+                    style={{ backgroundColor: '#ffa940',      color:'white' }}
                   >
                     &nbsp;&nbsp; &nbsp;&nbsp; Nilai &nbsp;&nbsp;&nbsp;&nbsp;
                   </Button>

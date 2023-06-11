@@ -37,6 +37,7 @@ const PembobotanPenilaianFormPembimbing = () => {
   const [poinPenilaianFormPembimbing, setPoinPenilaianFormPembimbing] = useState({})
   const [dataPoinPenilaian, setDataPoinPenilaian] = useState([])
   const [isSuccessUpdateData, setIsSuccessUpdateData] = useState(true)
+  axios.defaults.withCredentials = true
 
   const enterLoading = (index) => {
     setLoadings((prevLoadings) => {
