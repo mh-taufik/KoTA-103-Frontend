@@ -315,11 +315,7 @@ const EditRPP = () => {
 
   /** HANDLE MODAL EDIT DELIVERABLES*/
   const showModalFinishDateEdit = (data) => {
-    setDataFinishDateEdit({
-      due_date: data.due_date,
-      deliverables: data.deliverables,
-      id: data.id,
-    })
+    setDataFinishDateEdit(dataRPP.finish_date)
     setIsModalFinishDateEditOpen(true)
   }
 
@@ -327,16 +323,19 @@ const EditRPP = () => {
     setIsModalFinishDateEditOpen(false)
   }
 
-  /** PUT EDIT DELIVERABLES */
+  /** PUT EDIT FINISH DATE */
   const putDataFinishDateEdit = async () => {
     console.log(dataFinishDateEdit)
     await axios
-      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/deliverable/update`, {})
+      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/update/simple`, {
+        finish_date : dataFinishDateEdit,
+        rpp_id : parseInt(RPP_ID)
+      })
       .then((res) => {
         console.log(res)
         console.log(res.data.data)
         setIsModalFinishDateEditOpen(false)
-        notification.success({ message: 'Data deliverables berhasil diubah' })
+        notification.success({ message: 'Data tanggal selesai RPP berhasil diubah' })
       })
       .catch(function (error) {
         if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -490,30 +489,28 @@ const EditRPP = () => {
         setIsSuccessInputEdit(true)
         console.log(res)
       })
-      // .catch(function (error) {
-      //   if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-      //     history.push({
-      //       pathname: '/login',
-      //       state: {
-      //         session: true,
-      //       },
-      //     })
-      //   } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-      //     history.push('/404')
-      //   } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-      //     history.push('/500')
-      //   }
-      // })
+      .catch(function (error) {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+          history.push('/500')
+        }
+      })
 
 
-    // window.location.reload(false)
+    window.location.reload(false)
     refreshDataRPP()
   }
 
   /** PUT DATA JADWAL PENYELESAIAN */
   const putDataJadwalPenyelesaianEdit = async () => {
-    // console.log(dataJadwalPenyelesaianEdit.id)
-    // const ids = parseInt(dataJadwalPenyelesaianEdit.id)
     await axios
       .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/completion-schedule/update`, {
         completion_schedule: [
@@ -536,20 +533,20 @@ const EditRPP = () => {
         setIsModalJadwalPenyelesaianEditOpen(false)
         notification.success({ message: 'Data Jadwal Penyelesaian Keseluruhan Berhasil Diubah' })
       })
-    // .catch(function (error) {
-    //   if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-    //     history.push({
-    //       pathname: '/login',
-    //       state: {
-    //         session: true,
-    //       },
-    //     })
-    //   } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-    //     history.push('/404')
-    //   } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
-    //     history.push('/500')
-    //   }
-    // })
+    .catch(function (error) {
+      if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+        history.push({
+          pathname: '/login',
+          state: {
+            session: true,
+          },
+        })
+      } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+        history.push('/404')
+      } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+        history.push('/500')
+      }
+    })
 
     refreshDataRPP()
   }

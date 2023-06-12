@@ -440,28 +440,32 @@ const PengisianRpp = () => {
           milestones: jsonDataMilestones,
           weekly_achievement_plans: jsonDataRencanaPerminggu,
         })
-        .then((result) => {
-          console.log(result)
+        .then((response) => {
+          console.log(response.data.data)
+          console.log(response.data.data.id)
+          let id_new = response.data.data.id
           notification.success({
             message: 'Data RPP Berhasil Ditambahkan',
           })
+          setTimeout(1200)
+          history.push(`/rencanaPenyelesaianProyek/detail/${id_new}`)
        
         })
-        // .catch(function (error) {
-        //   setIsSuccessInput(false)
-        //   if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-        //     history.push({
-        //       pathname: '/login',
-        //       state: {
-        //         session: true,
-        //       },
-        //     })
-        //   } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-        //     history.push('/404')
-        //   } else if (error.toJSON().status > 500 && error.toJSON().status <= 500) {
-        //     history.push('/500')
-        //   }
-        // })
+        .catch(function (error) {
+          setIsSuccessInput(false)
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status > 500 && error.toJSON().status <= 500) {
+            history.push('/500')
+          }
+        })
     } else {
       notification.warning({ message: 'Pastikan Semua Data Terisi !!! ' })
     }
@@ -475,18 +479,11 @@ const PengisianRpp = () => {
     setIsModalOpen(false)
   }
 
-  const handleCancel = () => {
-    setIsModalOpen(false)
-  }
-
   const aksiLihatLebihJelasRPP = () => {
     history.push(`/rencanaPenyelesaianProyek/peserta/formPengisianRPP/contohPengisianRPP`)
   }
 
-  const handleButtonKembali = () => {
-    history.push(`/rencanaPenyelesaianProyek`)
-  }
-
+ 
   return (
     <>
       <div className="container">

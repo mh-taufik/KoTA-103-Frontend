@@ -168,7 +168,7 @@ const PenilaianLogbook = () => {
           message: 'Penilaian Logbook Berhasil Diubah',
         })
 
-        refreshDataLogbook()
+        refreshData()
       })
       .catch((error) => {
         if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -186,52 +186,26 @@ const PenilaianLogbook = () => {
       })
   }
 
-  const putNilaiSelfAssessment = async () => {
-    console.log(selfAssessmentPeserta.finish_date, selfAssessmentPeserta.start_date, selfAssessmentPeserta.id,)
-
-    await axios
-      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/update`, {
-        "finish_date": selfAssessmentPeserta.finish_date,
-        "grade": nilaiSelfAssessment,
-        "id": selfAssessmentPeserta.self_assessment_id,
-        "participant_id": parseInt(NIM_PESERTA),
-        "start_date":  selfAssessmentPeserta.start_date
-      })
-      .then((res) => {
-        console.log(res)
-        notification.success({
-          message: 'Penilaian self assessment berhasil diubah',
-        })
-      })
-  }
-
-  useEffect(() => {
-    console.log('data SA', allIdSelfAssessmentPeserta)
-    getNilaiKeteranganPoinPenilaianSelfAssessment(allIdSelfAssessmentPeserta)
-  }, [allIdSelfAssessmentPeserta])
-
-  const getNilaiKeteranganPoinPenilaianSelfAssessment = async (data) => {
-    // console.log('idnyak',data)
-    let tempDataSelfAssessmentDetail = []
-
-    for (let i in data) {
-      console.log('id', data[i].id)
+  const SimpanPenilaianSelfAssessment = async () => {
+    if (nilaiSelfAssessment.length > 0) {
       await axios
-        .get(
-          `http://localhost:1337/api/selfasspoins?populate=*&filters[selfassessment][id]=${data[i].id}`,
-        )
-        .then((res) => {
-          console.log('[', data[i].id, ']', res.data.data)
-
-          tempDataSelfAssessmentDetail.push({
-            id_self_assessment: data[i].id,
-            data: res.data.data,
-          })
+        .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/update`, {
+          finish_date: selfAssessmentPeserta.finish_date,
+          grade: nilaiSelfAssessment,
+          id: selfAssessmentPeserta.self_assessment_id,
+          participant_id: parseInt(NIM_PESERTA),
+          start_date: selfAssessmentPeserta.start_date,
         })
+        .then((res) => {
+          console.log(res)
+          notification.success({
+            message: 'Penilaian self assessment berhasil diubah',
+          })
+          refreshData()
+        })
+    } else {
+      notification.warning({ message: 'Tidak ada penilaian yang diubah !!! ' })
     }
-
-    console.log('resultssssss', tempDataSelfAssessmentDetail)
-    setSelfAssessmentPeserta(tempDataSelfAssessmentDetail)
   }
 
   useEffect(() => {
@@ -266,7 +240,7 @@ const PenilaianLogbook = () => {
           } else {
             setIsSelfAssessmentAvailable(true)
             setSelfAssessmentPeserta(data_self_assessment)
-            console.log('sa',data_self_assessment)
+            console.log('sa', data_self_assessment)
             setAspectGradeSelfAssessmentPeserta(data_self_assessment.aspect_list)
           }
 
@@ -408,7 +382,7 @@ const PenilaianLogbook = () => {
     return showArrow
   }, [showArrow, arrowAtCenter])
 
-  const refreshDataLogbook = async (index) => {
+  const refreshData = async (index) => {
     axios.defaults.withCredentials = true
     var content = []
 
@@ -438,7 +412,8 @@ const PenilaianLogbook = () => {
           setIsSelfAssessmentAvailable(false)
         } else {
           setIsSelfAssessmentAvailable(true)
-          setSelfAssessmentPeserta(data_self_assessment.aspect_list)
+          setSelfAssessmentPeserta(data_self_assessment)
+          setAspectGradeSelfAssessmentPeserta(data_self_assessment.aspect_list)
         }
 
         if (data_rpp !== null) {
@@ -621,9 +596,11 @@ const PenilaianLogbook = () => {
                   </tr>
                 </tbody>
               </Table>
-              <Button type="primary" onClick={() => showModalEdit(logbookPeserta)}>
+            {rolePengguna === '4' && (
+                <Button type="primary" onClick={() => showModalEdit(logbookPeserta)}>
                 Nilai
               </Button>
+            )}
             </>
           )}
         </div>
@@ -671,22 +648,44 @@ const PenilaianLogbook = () => {
                             <td>{index + 1}</td>
                             <td>{data.aspect_name}</td>
                             <td width={'10%'}>
-                              <Input
-                                onChange={(e) =>
-                                  handleChangeNilaiSelfAssessment(
-                                    index,
-                                    'grade',
-                                    data.aspect_id,
-                                    data.description,
-                                    e.target.value,
-                                    data.grade_id,
-                                  )
-                                }
-                                defaultValue={data.grade}
-                                type="number"
-                                placeholder="Input a number"
-                                maxLength={2}
-                              ></Input>
+                             {rolePengguna==='4' && (
+                               <Input
+                               onChange={(e) =>
+                                 handleChangeNilaiSelfAssessment(
+                                   index,
+                                   'grade',
+                                   data.aspect_id,
+                                   data.description,
+                                   e.target.value,
+                                   data.grade_id,
+                                 )
+                               }
+                               defaultValue={data.grade}
+                               type="number"
+                               placeholder="Input a number"
+                               maxLength={2}
+                             ></Input>
+                             )}
+
+                             {rolePengguna !=='4' && (
+                               <Input
+                               disabled
+                               onChange={(e) =>
+                                 handleChangeNilaiSelfAssessment(
+                                   index,
+                                   'grade',
+                                   data.aspect_id,
+                                   data.description,
+                                   e.target.value,
+                                   data.grade_id,
+                                 )
+                               }
+                               defaultValue={data.grade}
+                               type="number"
+                               placeholder="Input a number"
+                               maxLength={2}
+                             ></Input>
+                             )}
                             </td>
                             <td>{data.description}</td>
                           </tr>
@@ -695,10 +694,15 @@ const PenilaianLogbook = () => {
                     </tbody>
                   </Table>
                 </div>
-                <Button type="primary" onClick={putNilaiSelfAssessment} variant="contained">
-                  Simpan Nilai
-                </Button>
-                <Button onClick={() => console.log(aspectGradeSelfAssessmentPeserta)}>tes</Button>
+                {rolePengguna === '4' && (
+                  <Button
+                    type="primary"
+                    onClick={SimpanPenilaianSelfAssessment}
+                    variant="contained"
+                  >
+                    Simpan Nilai
+                  </Button>
+                )}
               </div>
               <br />
             </ul>

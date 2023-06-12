@@ -18,8 +18,9 @@ const RekapSelfAssessment = () => {
   const [komponenPenilaianSelfAssessment, setKomponenPenilaianSelfAssessment] = useState([])
   let rolePengguna = localStorage.id_role
   let history = useHistory()
+  axios.defaults.withCredentials = true
   const [selfAssessmentPeserta, setSelfAssessmentPeserta] = useState([])
- 
+  const [aspectGradeSelfAssessmentPeserta, setAspectGradeSelfAssessmentPeserta] = useState([])
   const [anchorEl, setAnchorEl] = React.useState(null)
   const [data, setData] = React.useState()
   const handlePopoverOpen = (event, data) => {
@@ -93,68 +94,69 @@ const RekapSelfAssessment = () => {
         })
     }
 
-    const getSelfAssessment = async (index) => {
+    const getSelfAssessmentPeserta = async (index) => {
    
       await axios
         .get(
           `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/get-all/${ID_PARTICIPANT}`,
         )
         .then((result) => {
-          console.log(result.data.data)
+          console.log('sa', result.data.data)
+          setSelfAssessmentPeserta(result.data.data)
 
-          let temp = []
-          const len = result.data.data.length
-          const temp1 = JSON.parse(JSON.stringify(result.data.data))
+          // let temp = []
+          // const len = result.data.data.length
+          // const temp1 = JSON.parse(JSON.stringify(result.data.data))
 
-          const convertDate = (date) => {
-            let temp_date_split = date.split('-')
-            const month = [
-              'Januari',
-              'Februari',
-              'Maret',
-              'April',
-              'Mei',
-              'Juni',
-              'Juli',
-              'Agustus',
-              'September',
-              'Oktober',
-              'November',
-              'Desember',
-            ]
-            let date_month = temp_date_split[1]
-            let month_of_date = month[parseInt(date_month) - 1]
-            console.log(month_of_date, 'isi date monts', month_of_date)
-            return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
-          }
+          // const convertDate = (date) => {
+          //   let temp_date_split = date.split('-')
+          //   const month = [
+          //     'Januari',
+          //     'Februari',
+          //     'Maret',
+          //     'April',
+          //     'Mei',
+          //     'Juni',
+          //     'Juli',
+          //     'Agustus',
+          //     'September',
+          //     'Oktober',
+          //     'November',
+          //     'Desember',
+          //   ]
+          //   let date_month = temp_date_split[1]
+          //   let month_of_date = month[parseInt(date_month) - 1]
+          //   console.log(month_of_date, 'isi date monts', month_of_date)
+          //   return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
+          // }
 
-          if (result.data.data.length > 0) {
-            console.log('RESY')
-            var getTempSelfAssessment = function (obj) {
-              for (var i in obj) {
-                // console.log(i, len-1, '==', parseInt(i)===(len-1))
-                if (parseInt(i) === len - 1) {
-                  break
-                }
-                temp.push({
-                  start_date: convertDate(obj[i].start_date),
-                  finish_date: convertDate(obj[i].finish_date),
-                  self_assessment_id: obj[i].self_assessment_id,
-                  participant_id: obj[i].participant_id,
-                  grade : obj[i].grade
-                })
-              }
-            }
+          // if (result.data.data.length > 0) {
+          //   console.log('RESY')
+            // var getTempSelfAssessment = function (obj) {
+            //   for (var i in obj) {
+            //     // console.log(i, len-1, '==', parseInt(i)===(len-1))
+            //     if (parseInt(i) === len - 1) {
+            //       break
+            //     }
+            //     temp.push({
+            //       start_date: convertDate(obj[i].start_date),
+            //       finish_date: convertDate(obj[i].finish_date),
+            //       self_assessment_id: obj[i].self_assessment_id,
+            //       participant_id: obj[i].participant_id,
+            //       grade : obj[i].grade
+            //     })
+            //   }
+            // }
 
-            getTempSelfAssessment(temp1)
-            setSelfAssessmentPeserta(temp)
-            setIsLoading(false)
-            return
-          } else {
-            setSelfAssessmentPeserta(result.data.data)
-            setIsLoading(false)
-            return
-          }
+          //   getTempSelfAssessment(temp1)
+          //   setSelfAssessmentPeserta(result.data.data)
+          //   setIsLoading(false)
+          //   return
+          // } else {
+          //   setSelfAssessmentPeserta(result.data.data)
+          //   setIsLoading(false)
+          //   return
+          // }
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -177,6 +179,7 @@ const RekapSelfAssessment = () => {
 
 
     getDataInformasiPeserta() 
+    getSelfAssessmentPeserta()
  
   }, [history])
 
@@ -316,8 +319,8 @@ const RekapSelfAssessment = () => {
               <th>Total</th>
             </tr>
           </thead>
-          {/* <tbody>
-            {selfAssessmentPeserta.map((sa, index) => (
+           <tbody>
+            {/* {selfAssessmentPeserta.map((sa, index) => (
               <tr key={sa.id}>
                 <td>{index + 1}</td>
                 <td>{sa.tanggalmulai}</td>
@@ -332,41 +335,9 @@ const RekapSelfAssessment = () => {
                   <Tooltip >89</Tooltip>
                 </td>
               </tr>
-            ))}
-            <tr>
-              <td>#</td>
-              <td>Performansi Terbaik</td>
-              <td>
-              <Tooltip >89</Tooltip>
-              </td>
-              <td>
-                 <Tooltip >89</Tooltip>
-              </td>
-              <td>
-                 <Tooltip >89</Tooltip>
-              </td>
-              <td>
-                 <Tooltip >89</Tooltip>
-              </td>
-              <td>
-                 <Tooltip >89</Tooltip>
-              </td>
-              <td>
-                 <Tooltip >89</Tooltip>
-              </td>
-              <td>
-                 <Tooltip >89</Tooltip>
-              </td>
-            </tr>
-            <tr>
-              <td colSpan={6}>
-                <b>NILAI AKHIR SELF ASSESSMENT</b>
-              </td>
-              <td colSpan={3}>
-                <b>88</b>
-              </td>
-            </tr>
-          </tbody> */}
+            ))} */}
+            </tbody>
+          
         </Table>
         <Popover
           id="mouse-over-popover"

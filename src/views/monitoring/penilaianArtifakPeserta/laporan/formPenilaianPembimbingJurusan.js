@@ -31,9 +31,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
   const ID_LAPORAN = params.id
   const [dataPeserta, setDataPeserta] = useState([])
   const ROLE_PENGGUNA = localStorage.id_role
-  const [idPeserta, setIdPeserta] = useState()
   const [isLoading, setIsLoading] = useState(true)
-  const [isSpinner, setIsSpinner] = useState(true)
   const [loadings, setLoadings] = useState([])
   const [poinPenilaianForm, setPoinPenilaianForm] = useState([])
   const [idPenilaianPembimbing, setIdPenilaianPembimbing] = useState()
@@ -49,7 +47,22 @@ const FormPenilaianPembimbingJurusan = (props) => {
   const [dataPenilaianSebelumnya, setdataPenilaianSebelumnya] = useState([])
   const [idPenilaianPembimbingSebelumnya, setIdPenilaianPembimbingSebelumnya] = useState()
   const [nilaiPembimbingJurusanEdit, setNilaiPembimbingJurusanEdit] = useState([])
-  const [dataStatistik, setDataStatistik] = useState([])
+  const [dataLaporanPeserta, setDataLaporanPeserta] = useState([])
+  const [statistikLogbookSubmitted, setStatistikLogbookSubmitted] = useState([{}])
+  const [statistikLogbookMissing, setStatistikLogbookMissing] = useState([])
+  const [statistikLogbookOnTime, setStatistikLogbookOnTime] = useState([])
+  const [statistikLogbookLate, setStatistikLogbookLate] = useState([])
+  const [statistikLogbookMatch, setStatistikLogbookMatch] = useState([])
+  const [statistikLogbookNotMatch, setStatistikLogbookNotMatch] = useState([])
+  const [statistikLogbookNilaiSangatBaik, setStatistikLogbookNilaiSangatBaik] = useState([])
+  const [statistikLogbookNilaiBaik, setStatistikLogbookNilaiBaik] = useState([])
+  const [statistikLogbookNilaiCukup, setStatistikLogbookNilaiCukup] = useState([])
+  const [statistikLogbookNilaiKurang, setStatistikLogbookNilaiKurang] = useState([])
+  const [statistikSelfAssessmentSubmitted, setStatistikSelfAssessmentSubmitted] = useState([])
+  const [statistikSelfAssessmentMissing, setStatistikSelfAssessmentMissing] = useState([])
+
+
+
   const [isSuccessEdit, setIsSuccessEdit] = useState()
 
   axios.defaults.withCredentials = true
@@ -64,13 +77,13 @@ const FormPenilaianPembimbingJurusan = (props) => {
   }
 
   /** HANDLE INPUT */
-  const handleInputNilai = (ids, nilaiS, index, keyData) => {
+  const handleInputNilai = (aspectId, grade_sa, index, keyData) => {
     if (nilaiPembimbingJurusan[index]) {
-      nilaiPembimbingJurusan[index][keyData] = nilaiS
+      nilaiPembimbingJurusan[index][keyData] = grade_sa
     } else {
       nilaiPembimbingJurusan[index] = {
-        id: ids,
-        [keyData]: nilaiS,
+        aspect_id : aspectId,
+        [keyData]: grade_sa,
       }
     }
 
@@ -78,7 +91,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
 
     var data = [...nilaiCounter]
     data[index] = {
-      nilai: nilaiS,
+      nilai: grade_sa,
     }
     setNilaiCounter(data)
   }
@@ -232,8 +245,19 @@ const FormPenilaianPembimbingJurusan = (props) => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/statistic/${NIM_PESERTA}`)
         .then((result) => {
-          console.log('STATISTIK',result.data.data)
-          setDataStatistik(result.data.data)
+          console.log('STATISTIK',result.data.data.logbook_late)
+          setStatistikLogbookSubmitted(JSON.parse(JSON.stringify(result.data.data.logbook_submitted)))
+          setStatistikLogbookMissing(JSON.parse(JSON.stringify(result.data.data.logbook_missing)))
+          setStatistikLogbookOnTime(JSON.parse(JSON.stringify(result.data.data.logbook_on_time)))
+          setStatistikLogbookLate(JSON.parse(JSON.stringify(result.data.data.logbook_late)))
+          setStatistikLogbookMatch(JSON.parse(JSON.stringify(result.data.data.logbook_match)))
+          setStatistikLogbookNotMatch(JSON.parse(JSON.stringify(result.data.data.logbook_not_match)))
+          setStatistikLogbookNilaiSangatBaik(JSON.parse(JSON.stringify(result.data.data.logbook_nilai_sangat_baik)))
+          setStatistikLogbookNilaiBaik(JSON.parse(JSON.stringify(result.data.data.logbook_nilai_baik)))
+          setStatistikLogbookNilaiCukup(JSON.parse(JSON.stringify(result.data.data.logbook_nilai_cukup)))
+          setStatistikLogbookNilaiKurang(JSON.parse(JSON.stringify(result.data.data.logbook_nilai_kurang)))
+          setStatistikSelfAssessmentSubmitted(JSON.parse(JSON.stringify(result.data.data.self_assessment_submitted)))
+          setStatistikSelfAssessmentMissing(JSON.parse(JSON.stringify(result.data.data.self_assessment_missing)))
           setIsLoading(false)
         })
         .catch(function (error) {
@@ -252,9 +276,36 @@ const FormPenilaianPembimbingJurusan = (props) => {
         })
     }
 
+    const GetDataLaporanPeserta = async() =>{
+      await axios
+      .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get/${ID_LAPORAN}`, {
+       
+      })
+      .then((response) => {
+        setDataLaporanPeserta(response.data.data)
+        console.log('data laporan', response.data.data)
+        setIsLoading(false)
+      })
+      .catch(function (error) {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+          history.push('/500')
+        }
+      })
+    }
+
 
 
     GetDataInfoPeserta()
+    GetDataLaporanPeserta()
     GetDataStatistik()
     getDataPoinPenilaianFormPembimbingJurusan()
     getPenilaianPembimbingLaporanIsAvailable()
@@ -402,13 +453,11 @@ const FormPenilaianPembimbingJurusan = (props) => {
       }
 
       await axios
-        .post(`http://localhost:1337/api/penilaianpembimbings`, {
-          data: {
-            tanggal_penilaian: formatDate(new Date().toDateString()),
-            laporan: {
-              connect: [ID_LAPORAN],
-            },
-          },
+        .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/create`, {
+            date: formatDate(new Date().toDateString()),
+            grade_list:nilaiPembimbingJurusan,
+            participant_id : parseInt(NIM_PESERTA),
+            phase:dataLaporanPeserta.phase
         })
         .then((res) => {
           console.log(res)
@@ -416,20 +465,20 @@ const FormPenilaianPembimbingJurusan = (props) => {
           setIdPenilaianPembimbing(res.data.data.id)
           postDataNilaiPembimbing(nilaiPembimbingJurusan, res.data.data.id)
         })
-        .catch(function (error) {
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
-              },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-            history.push('/500')
-          }
-        })
+        // .catch(function (error) {
+        //   if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+        //     history.push({
+        //       pathname: '/login',
+        //       state: {
+        //         session: true,
+        //       },
+        //     })
+        //   } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+        //     history.push('/404')
+        //   } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+        //     history.push('/500')
+        //   }
+        // })
     } else {
       notification.warning({
         message: 'pastikan semua nilai setiap poin sudah terisi !!!',
@@ -538,9 +587,9 @@ const FormPenilaianPembimbingJurusan = (props) => {
                     Tepat Waktu
                   </Col>
                   <Col span={2}>
-                    <Progress percent={50} status="active" />
+                    <Progress percent={statistikLogbookOnTime.percent} format={(percent) => `${percent}`}  status="active" />
                   </Col>
-                  <Col span={14}>18 (dokumen)</Col>
+                  <Col span={14}>{statistikLogbookOnTime.count} (dokumen)</Col>
                 </Row>
                 <Row>
                   <Col span={6} style={{ marginLeft: 35 }}>
@@ -548,9 +597,9 @@ const FormPenilaianPembimbingJurusan = (props) => {
                   </Col>
                   <Col span={2}>
                     {' '}
-                    <Progress percent={20} status="active" />
+                    <Progress percent={statistikLogbookLate.percent} format={(percent) => `${percent}`}  status="active" />
                   </Col>
-                  <Col span={14}>18 (dokumen)</Col>
+                  <Col span={14}>{statistikLogbookLate.count} (dokumen)</Col>
                 </Row>
                 <Row>
                   <Col span={6} style={{ marginLeft: 35 }}>
@@ -558,9 +607,9 @@ const FormPenilaianPembimbingJurusan = (props) => {
                   </Col>
                   <Col span={2}>
                     {' '}
-                    <Progress percent={10} status="active" />
+                    <Progress percent={statistikLogbookMissing.percent} format={(percent) => `${percent}`}  status="active" />
                   </Col>
-                  <Col span={14}>18 (dokumen)</Col>
+                  <Col span={14}>{statistikLogbookMissing.count} (dokumen)</Col>
                 </Row>
                 <hr />
                 <Row>
@@ -573,36 +622,36 @@ const FormPenilaianPembimbingJurusan = (props) => {
                     Sangat Baik
                   </Col>
                   <Col span={2}>
-                    <Progress percent={70} status="active" />
+                    <Progress percent={statistikLogbookNilaiSangatBaik.percent} format={(percent) => `${percent}`}  status="active" />
                   </Col>
-                  <Col span={14}>18 (dokumen)</Col>
+                  <Col span={14}>{statistikLogbookNilaiSangatBaik.count} (dokumen)</Col>
                 </Row>
                 <Row>
                   <Col span={6} style={{ marginLeft: 35 }}>
                     Baik
                   </Col>
                   <Col span={2}>
-                    <Progress percent={10} status="active" />
+                    <Progress percent={statistikLogbookNilaiBaik.percent} format={(percent) => `${percent}`}  status="active" />
                   </Col>
-                  <Col span={14}>18 (dokumen)</Col>
+                  <Col span={14}>{statistikLogbookNilaiBaik.count} (dokumen)</Col>
                 </Row>
                 <Row>
                   <Col span={6} style={{ marginLeft: 35 }}>
                     Cukup
                   </Col>
                   <Col span={2}>
-                    <Progress percent={10} status="active" />
+                    <Progress percent={statistikLogbookNilaiCukup.percent} format={(percent) => `${percent}`}  status="active" />
                   </Col>
-                  <Col span={14}>18 (dokumen)</Col>
+                  <Col span={14}>{statistikLogbookNilaiCukup.count} (dokumen)</Col>
                 </Row>
                 <Row>
                   <Col span={6} style={{ marginLeft: 35 }}>
                     Kurang Baik
                   </Col>
                   <Col span={2}>
-                    <Progress percent={10} status="active" />
+                    <Progress percent={statistikLogbookNilaiKurang.percent} format={(percent) => `${percent}`}  status="active" />
                   </Col>
-                  <Col span={14}>18 (dokumen)</Col>
+                  <Col span={14}>{statistikLogbookNilaiKurang.count} (dokumen)</Col>
                 </Row>
                 <hr />
                 <Row>
@@ -621,12 +670,12 @@ const FormPenilaianPembimbingJurusan = (props) => {
                 </Row>
                 <Row>
                   <Col span={6} style={{ marginLeft: 35 }}>
-                    Tepat Waktu
+                    Mnegumpulkan
                   </Col>
                   <Col span={2}>
-                    <Progress percent={50} status="active" />
+                    <Progress percent={statistikSelfAssessmentSubmitted.percent} format={(percent) => `${percent}`}  status="active" />
                   </Col>
-                  <Col span={14}>18 (dokumen)</Col>
+                  <Col span={14}>{statistikSelfAssessmentSubmitted.count} (dokumen)</Col>
                 </Row>
                 <Row>
                   <Col span={6} style={{ marginLeft: 35 }}>
@@ -634,9 +683,9 @@ const FormPenilaianPembimbingJurusan = (props) => {
                   </Col>
                   <Col span={2}>
                     {' '}
-                    <Progress percent={10} status="active" />
+                    <Progress percent={statistikSelfAssessmentMissing.percent} format={(percent) => `${percent}`}  status="active" />
                   </Col>
-                  <Col span={14}>18 (dokumen)</Col>
+                  <Col span={14}>{statistikSelfAssessmentMissing.count} (dokumen)</Col>
                 </Row>
                 <hr />
                 <Row>
@@ -649,7 +698,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
                     Sangat Baik (85-100)
                   </Col>
                   <Col span={2}>
-                    <Progress percent={80} status="active" />
+                    <Progress percent={80} format={(percent) => `${percent}`}  status="active" />
                   </Col>
                   <Col span={14}>18 (dokumen)</Col>
                 </Row>
@@ -658,7 +707,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
                     Baik (75-84)
                   </Col>
                   <Col span={2}>
-                    <Progress percent={10} status="active" />
+                    <Progress percent={10} format={(percent) => `${percent}`}  status="active" />
                   </Col>
                   <Col span={14}>18 (dokumen)</Col>
                 </Row>
@@ -667,7 +716,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
                     Cukup (65-83)
                   </Col>
                   <Col span={2}>
-                    <Progress percent={5} status="active" />
+                    <Progress percent={5} format={(percent) => `${percent}`}  status="active" />
                   </Col>
                   <Col span={14}>18 (dokumen)</Col>
                 </Row>
@@ -676,7 +725,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
                     Kurang Baik (0-64)
                   </Col>
                   <Col span={2}>
-                    <Progress percent={5} status="active" />
+                    <Progress percent={5} format={(percent) => `${percent}`}  status="active" />
                   </Col>
                   <Col span={14}>18 (dokumen)</Col>
                 </Row>
@@ -749,7 +798,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
                             value={nilaiPembimbingJurusan.nilai}
                             onChange={(value) => {
                               // if (value) {
-                              handleInputNilai(data.id, value, index, 'nilai')
+                              handleInputNilai(data.id, value, index, 'grade')
                               // } else {
                               //   notification.error({
                               //     message: 'Harap isi semua nilai',
