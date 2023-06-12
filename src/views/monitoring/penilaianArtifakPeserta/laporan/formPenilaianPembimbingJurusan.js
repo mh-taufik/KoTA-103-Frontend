@@ -318,32 +318,32 @@ const FormPenilaianPembimbingJurusan = (props) => {
     const getDetailPenilaianSebelumnya = async () => {
       await axios
         .get(
-          `http://localhost:1337/api/detailpenilaianpembimbings?populate=*&filters[penilaianpembimbing][id][$eq]=${idPenilaianPembimbingSebelumnya}`,
+          `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/${ID_LAPORAN}`,
         )
         .then((res) => {
           console.log('DETAIL PENILAIAN', res.data.data)
-          let temp = res.data.data
-          let temp1 = []
-          let temps = []
-          let getTemp = function (obj) {
-            let idx = 0
-            for (var i in obj) {
-              temps[idx] = obj[i].attributes.nilai
-              temp1.push({
-                nilai: obj[i].attributes.nilai,
-                id: obj[i].id,
-                idpoin: obj[i].attributes.pembobotanformpembimbing.data.id,
-                poinpenilaian: obj[i].attributes.pembobotanformpembimbing.data.attributes.poin,
-                deskripsi: obj[i].attributes.pembobotanformpembimbing.data.attributes.deskripsi,
-                bobot: obj[i].attributes.pembobotanformpembimbing.data.attributes.bobot,
-              })
-              idx++
-            }
-            setNilaiCounterEdit(temps)
-          }
-          getTemp(temp)
-          console.log('IYA', temp1)
-          setdataPenilaianSebelumnya(temp1)
+          // let temp = res.data.data
+          // let temp1 = []
+          // let temps = []
+          // let getTemp = function (obj) {
+          //   let idx = 0
+          //   for (var i in obj) {
+          //     temps[idx] = obj[i].attributes.nilai
+          //     temp1.push({
+          //       nilai: obj[i].attributes.nilai,
+          //       id: obj[i].id,
+          //       idpoin: obj[i].attributes.pembobotanformpembimbing.data.id,
+          //       poinpenilaian: obj[i].attributes.pembobotanformpembimbing.data.attributes.poin,
+          //       deskripsi: obj[i].attributes.pembobotanformpembimbing.data.attributes.deskripsi,
+          //       bobot: obj[i].attributes.pembobotanformpembimbing.data.attributes.bobot,
+          //     })
+          //     idx++
+          //   }
+          //   setNilaiCounterEdit(temps)
+          // }
+          // getTemp(temp)
+          // console.log('IYA', temp1)
+          // setdataPenilaianSebelumnya(temp1)
         })
     }
     getDetailPenilaianSebelumnya()
@@ -440,21 +440,11 @@ const FormPenilaianPembimbingJurusan = (props) => {
   const postPenilaian = async (data) => {
     console.log('ID LAPORAN', ID_LAPORAN)
     if (nilaiPembimbingJurusan.length > 2) {
-      function formatDate(date) {
-        var d = new Date(date),
-          month = '' + (d.getMonth() + 1),
-          day = '' + d.getDate(),
-          year = d.getFullYear()
-
-        if (month.length < 2) month = '0' + month
-        if (day.length < 2) day = '0' + day
-
-        return [year, month, day].join('-')
-      }
+    
 
       await axios
         .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/create`, {
-            date: formatDate(new Date().toDateString()),
+        
             grade_list:nilaiPembimbingJurusan,
             participant_id : parseInt(NIM_PESERTA),
             phase:dataLaporanPeserta.phase

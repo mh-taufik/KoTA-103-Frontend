@@ -2,21 +2,17 @@ import React, { useState, useEffect } from 'react'
 import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEye, faPencil, faTrashCan } from '@fortawesome/free-solid-svg-icons'
-import { ArrowLeftOutlined } from '@ant-design/icons'
-import { FloatButton } from 'antd'
+import { faEye, faPencil } from '@fortawesome/free-solid-svg-icons'
+import { ArrowLeftOutlined,SmileOutlined } from '@ant-design/icons'
+import { FloatButton, Result } from 'antd'
 import {
   Table,
   Button,
   Row,
   Col,
-  Form,
   Input,
-  Modal,
   Space,
-  notification,
   Spin,
-  Select,
   Popconfirm,
   Popover,
   Card,
@@ -26,29 +22,26 @@ import { SearchOutlined } from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
 import { useHistory, useParams, Router } from 'react-router-dom'
 import { LoadingOutlined } from '@ant-design/icons'
-import { Option } from 'antd/lib/mentions'
 import './rpp.css'
-import moment from 'moment'
+
 
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const RekapRPP = () => {
   const PARAMS = useParams()
   const NIM_PESERTA_FROM_PARAMS = PARAMS.id
-  //ngambil dari params, dimana params untuk menunjukkan detail logbook
   let searchInput
   const [state, setState] = useState({ searchText: '', searchedColumn: '' })
   const [rppPeserta, setRppPeserta] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [wannaEdit, setWannaEdit] = useState(false)
   const [wannaDetail, setWannaDetail] = useState(false)
-  const [NIM_PESERTA_AS_USER, setNIM_PESERTA_AS_USER] = useState(localStorage.username)
+  const NIM_PESERTA_AS_USER = localStorage.username
   let rolePengguna = localStorage.id_role
   let history = useHistory()
   const [loadings, setLoadings] = useState([])
   const [dataPeserta, setDataPeserta] = useState([])
-
+  const [isParticipantAllowedToAccessThisPage, setIsParticipantAllowedToAccessThisPage] = useState()
   const desc = '*edit RPP yang dipilih'
-  const descdetail = '*detail RPP yang dipilih'
   axios.defaults.withCredentials = true
 
   const enterLoading = (index) => {
@@ -229,7 +222,35 @@ const RekapRPP = () => {
         })
     }
 
+    async function GetDateSubmissionRPPOpened(){
+      
+      await axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=6`).then((response)=>{
+        function formatDate(date) {
+          var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear()
+      
+          if (month.length < 2) month = '0' + month
+          if (day.length < 2) day = '0' + day
+      
+          return [year, month, day].join('-')
+        }
+       let start_date = response.data.data.start_assignment_date
+       let finish_date = response.data.data.finish_assignment_date
+       let today = formatDate(new Date())
+       console.log('===', start_date,today)
+       if(start_date <= today ){
+        setIsParticipantAllowedToAccessThisPage(true)
+       }else{
+        setIsParticipantAllowedToAccessThisPage(false)
+       }
+        // setFinishDateThisPageAllowedToAccess(response.data.data.finish_assignment_date)
+      })
+    }
+
     GetDataInfoPeserta()
+    GetDateSubmissionRPPOpened()
     getRppPeserta()
   }, [history])
 
@@ -633,8 +654,15 @@ const RekapRPP = () => {
       <div className="spacetop">
         <CCard className="mb-4">
           {title('REKAP RENCANA PENYELESAIAN PROYEK PESERTA')}
+          {(rolePengguna === '1' && !isParticipantAllowedToAccessThisPage) && (
+              <Result
+              icon={<SmileOutlined />}
+              title="Maaf Akses Untuk Halaman Ini Belum Dibuka"
+              // extra={<Button type="primary">Next</Button>}
+            />
+          )}
           <CCardBody>
-            {rolePengguna === '1' && (
+            {(rolePengguna === '1' && isParticipantAllowedToAccessThisPage ) && (
               <Row>
                 <Col span={24} style={{ textAlign: 'right' }}>
                   <Button
@@ -650,7 +678,7 @@ const RekapRPP = () => {
               </Row>
             )}
 
-            {rolePengguna === '1' && (
+            {(rolePengguna === '1' && isParticipantAllowedToAccessThisPage )&& (
               <CRow>
                 <CCol sm={12}>
                   <hr></hr>

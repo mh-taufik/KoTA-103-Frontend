@@ -36,9 +36,9 @@ const FormPengisianLogbook = (props) => {
 
   const NIM_PESERTA_BY_PARAMS = params.id
   const NIM_PESERTA_BY_PESERTA_AS_USER = localStorage.username
+  const [rangeDayDeadline, setRangeDayDeadline] = useState()
   const [idPeserta, setIdPeserta] = useState()
   const [isLoading, setIsLoading] = useState(true)
-  const [isSpinner, setIsSpinner] = useState(true)
   const [tanggalLogbook, setTanggalLogbook] = useState()
   const [loadings, setLoadings] = useState([])
   const [tools, setTools] = useState()
@@ -51,7 +51,6 @@ const FormPengisianLogbook = (props) => {
   const [waktuDanKegiatanPeserta, setWaktuDanKegiatanPeserta] = useState()
   const [statusPengecekanPembimbing, setStatusPengecekanPembimbing] = useState(0)
   const [submitAccepted, setSubmitAccepted] = useState(1)
-  const [usernamePeserta, setUsernamePeserta] = useState()
   const [isSesuaiRpp, setIsSesuaiRpp] = useState('')
   const [kendala, setKendala] = useState('')
   axios.defaults.withCredentials = true
@@ -63,9 +62,6 @@ const FormPengisianLogbook = (props) => {
   const [numPages, setNumPages] = useState(null)
   const [pageNumber, setPageNumber] = useState(1)
 
-  const onFinish = () => {
-    message.success('Submit success!')
-  }
   const onFinishFailed = () => {
     message.error('Submit Gagal, Pastikan Semua Data Sudah Terisi !!!')
   }
@@ -118,9 +114,62 @@ const FormPengisianLogbook = (props) => {
     })
   }
 
+  function formatDate(date) {
+    var d = new Date(date),
+      month = '' + (d.getMonth() + 1),
+      day = '' + d.getDate(),
+      year = d.getFullYear()
+
+    if (month.length < 2) month = '0' + month
+    if (day.length < 2) day = '0' + day
+
+    return [year, month, day].join('-')
+  }
+
+  useEffect(()=>{
+    async function GetDayRange() {
+      await axios
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=1`)
+        .then((response) => {
+           setRangeDayDeadline(response.data.data.day_range)
+          // let day_range = response.data.data.day_range
+          // let date = new Date()
+          // date.setDate(date.getDate()+day_range)
+          // setRangeDayDeadline(formatDate(date.toDateString()))
+          // console.log(formatDate(date.toDateString()))
+        }).catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+            history.push('/500')
+          }
+        })
+    }
+    GetDayRange()
+  },[history])
+
 
   const handleInputLogbookDate = async (date) => {
-    await axios
+    // console.log(rangeDayDeadline, date)
+    let dateLimit = new Date(date)
+    dateLimit.setDate(dateLimit.getDate()+rangeDayDeadline)
+    let dateLimitResult = formatDate(dateLimit.toDateString())
+    let today = formatDate(new Date())
+    console.log(dateLimitResult, today)
+    
+    if(dateLimitResult < today){
+      notification.warning({message:'Tanggal yang dipilih melebihi batas deadline, tidak menerima pengumpulan lagi !!!'})
+      setSubmitAccepted(false)
+    
+    }else{
+      await axios
       .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/check`,{
         'date' : date
       })
@@ -132,18 +181,20 @@ const FormPengisianLogbook = (props) => {
             message: 'Pilih tanggal lain, logbook sudah tersedia',
           })
           setSubmitAccepted(false)
-          // console.log('tidak bisa')
         } else {
-          // console.log('bisa')
           setSubmitAccepted(true)
           setTanggalLogbook(date)
         }
       })
+    }
+
+  
+
+     
+    
+    
   }
 
-  useEffect(() => {
-    setUsernamePeserta(params.id)
-  }, [history])
 
   const submitLogbook = (sesuai, kendala) => {
     if (!submitAccepted) {
@@ -244,7 +295,7 @@ const FormPengisianLogbook = (props) => {
                   max={moment().format('YYYY-MM-DD')}
                   onChange={(date, dateString) => {
                     handleInputLogbookDate(dateString)
-                    console.log('a', dateString)
+                    //console.log('a', dateString)
                   }}
                 />
               </Form.Item>

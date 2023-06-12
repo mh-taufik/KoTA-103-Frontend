@@ -154,7 +154,7 @@ const FormPengisianSelfAssessment = () => {
       ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay())
     }
 
-    ISOweekStart.setDate(ISOweekStart.getDate() + 8) //4
+    ISOweekStart.setDate(ISOweekStart.getDate() + 4) //4
     return formatDate(ISOweekStart.toDateString())
   }
 

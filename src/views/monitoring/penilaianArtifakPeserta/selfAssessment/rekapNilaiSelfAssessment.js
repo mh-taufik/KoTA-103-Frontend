@@ -48,7 +48,7 @@ const RekapSelfAssessment = () => {
         `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/get?type=active`,
       )
       .then((result) => {
-        console.log(result.data.data)
+        console.log('komponen', result.data.data)
 
         setKomponenPenilaianSelfAssessment(result.data.data)
         setIsLoading(false)
@@ -68,6 +68,10 @@ const RekapSelfAssessment = () => {
         }
       })
     }
+
+    getSelfAssessmentAspect ()
+
+
     async function getDataInformasiPeserta() {
       await axios
         .post(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-by-id`, {
@@ -102,7 +106,22 @@ const RekapSelfAssessment = () => {
         )
         .then((result) => {
           console.log('sa', result.data.data)
-          setSelfAssessmentPeserta(result.data.data)
+          // setSelfAssessmentPeserta()
+          let temp = result.data.data
+          let temp1 = []
+
+          let getTempData = function (obj) {
+           for(var i in obj){
+            temp1.push({
+              finish_date : obj[i].finish_date,
+              start_date : obj[i].start_date,
+              grade : obj[i].grade,
+              self_assessment_id : obj[i].self_assessment_id
+
+
+            })
+           }
+          }
 
           // let temp = []
           // const len = result.data.data.length
@@ -198,6 +217,17 @@ const RekapSelfAssessment = () => {
           </Row>
         </div>
       </>
+    )
+  }
+
+  const getRowGradeaDesc = (data) =>{
+    return(
+       data.map((nilaipoin, index) => (
+                  <td key={nilaipoin.grade_id}>
+                    <Tooltip title={nilaipoin.description}>{nilaipoin.grade}</Tooltip>
+                  </td>
+                  
+                ))
     )
   }
 
@@ -313,33 +343,35 @@ const RekapSelfAssessment = () => {
             <tr>
               <th>#</th>
               <th>Tanggal Mulai</th>
-              {selfAssessmentPeserta.map((data, index) => (
-                <th key={data.id}>{data.aspect_name}</th>
+              {komponenPenilaianSelfAssessment.map((data, index) => (
+                <th key={data.aspect_id}>{data.aspect_name}</th>
               ))}
               <th>Total</th>
             </tr>
           </thead>
            <tbody>
-            {/* {selfAssessmentPeserta.map((sa, index) => (
-              <tr key={sa.id}>
+            {selfAssessmentPeserta.map((sa, index) => (
+              <tr key={sa.self_assessment_id}>
                 <td>{index + 1}</td>
-                <td>{sa.tanggalmulai}</td>
-                {sa.grade.map((nilaipoin, index) => (
-                  <td key={nilaipoin.id}>
-                    {' '}
-                    <Tooltip title={nilaipoin.keterangan}>{nilaipoin.nilai}</Tooltip>
-                  </td>
-                ))}
+                <td>{sa.start_date}</td>
+                {getRowGradeaDesc(sa.grade)}
+                
+                {/* {sa.grade.map((nilaipoin, index) => (
+                  // <td key={nilaipoin.grade_id}>
+                  //   <Tooltip title={nilaipoin.description}>{nilaipoin.grade}</Tooltip>
+                  // </td>
+                  <></>
+                ))} */}
                 <td>
                   {' '}
-                  <Tooltip >89</Tooltip>
+                  {/* <Tooltip >89</Tooltip> */}
                 </td>
               </tr>
-            ))} */}
+            ))}
             </tbody>
           
         </Table>
-        <Popover
+        {/* <Popover
           id="mouse-over-popover"
           sx={{
             pointerEvents: 'none',
@@ -358,7 +390,7 @@ const RekapSelfAssessment = () => {
           disableRestoreFocus
         >
           {handlePopOverData()}
-        </Popover>
+        </Popover> */}
       </div>
       <FloatButton
         type="primary"
