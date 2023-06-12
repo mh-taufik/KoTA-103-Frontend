@@ -430,6 +430,12 @@ const RekapLogbook = () => {
       ...getColumnSearchProps('date', 'Tanggal Logbook'),
     },
     {
+      title: 'NAMA PROYEK',
+      dataIndex: 'project_name',
+      key: 'project_name',
+      ...getColumnSearchProps('project_name', 'Nama Proyek'),
+    },
+    {
       title: 'STATUS PENGUMPULAN',
       dataIndex: 'status',
       key: 'status',
@@ -541,6 +547,12 @@ const RekapLogbook = () => {
       ...getColumnSearchProps('date', 'Tanggal Logbook'),
     },
     {
+      title: 'NAMA PROYEK',
+      dataIndex: 'project_name',
+      key: 'project_name',
+      ...getColumnSearchProps('project_name', 'Nama Proyek'),
+    },
+    {
       title: 'STATUS PENGUMPULAN',
       dataIndex: 'status',
       key: 'status',
@@ -636,7 +648,7 @@ const RekapLogbook = () => {
     return (
       <>
         <div>
-          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius: 2 }}>
+          <Row style={{ backgroundColor: '#00474f', padding: 3, borderRadius: 2 }}>
             <Col span={24}>
               <b>
                 <h5 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h5>
@@ -692,7 +704,7 @@ const RekapLogbook = () => {
       {rolePengguna === '1' && (
         <Alert
           className="spacebottom2"
-          message="Informasi Pengisian Logbook"
+          message="Informasi Pengumpulan Logbook"
           description={
             <div>
               <ul>
@@ -769,7 +781,8 @@ const RekapLogbook = () => {
             <Result
               icon={<SmileOutlined />}
               title="Maaf Akses Untuk Halaman Ini Belum Dibuka"
-              // extra={<Button type="primary">Next</Button>}
+              subTitle="Anda dapat melakukan akses setelah memasuki tanggal yang telah ditentukan"
+            
             />
           )}
 

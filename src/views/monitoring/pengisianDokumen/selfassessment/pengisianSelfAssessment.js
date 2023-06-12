@@ -38,6 +38,7 @@ const { RangePicker } = DatePicker
 
 const FormPengisianSelfAssessment = () => {
   dayjs.extend(customParseFormat)
+  const [dayRangeDeadlineSelfAssessment, setDayRangeDeadlineSelfAssessment] = useState()
   const NIM_PESERTA = localStorage.username
   const [idPeserta, setIdPeserta] = useState()
   const params = useParams()
@@ -166,15 +167,15 @@ const FormPengisianSelfAssessment = () => {
       })
       .then((res) => {
         console.log('IS DATA AVAILABLE', res.data.data)
-        if (res.data.data) {
+        if(res.data.data) {
           setIsDateAvailable(false)
           notification.warning({
             message: 'Silahkan pilih minggu lain, minggu yang anda pilih telah tersedia !!!',
           })
-          return false
+        
         } else {
           let end = new Date(tanggalselesai)
-          end.setDate(end.getDate() + 1) //jika hari lebih dari hari ini(tanggal selesai)
+          end.setDate(end.getDate() + 1 + dayRangeDeadlineSelfAssessment) //jika hari lebih dari hari ini(tanggal selesai)
           end = new Date(end)
           let today = new Date()
           if (today < end) {
@@ -252,21 +253,41 @@ const FormPengisianSelfAssessment = () => {
     }
   }
 
-  const handleSuccessSubmit = (idSelfAssessment) => {
-    notification.success({
-      message: 'Data self assessment berhasil ditambahkan',
-    })
-    history.push(`/selfAssessment/formSelfAssessment/detail/${idSelfAssessment}`)
-  }
+  // const handleSuccessSubmit = (idSelfAssessment) => {
+  //   notification.success({
+  //     message: 'Data self assessment berhasil ditambahkan',
+  //   })
+  //   history.push(`/selfAssessment/formSelfAssessment/detail/${idSelfAssessment}`)
+  // }
 
   useEffect(() => {
     console.log('tanggal berakhir', tanggalBerakhirSelfAssessment)
   }, [tanggalBerakhirSelfAssessment])
+ 
+  useEffect(()=>{
+    async function GetDayRange() {
+      await axios
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=1`)
+        .then((response) => {
+          setDayRangeDeadlineSelfAssessment(response.data.data.day_range)
+        }).catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+            history.push('/500')
+          }
+        })
+    }
+    GetDayRange()
 
-  const onChange = (date, dateString) => {
-    console.log(date, dateString)
-    alert(date, dateString)
-  }
+  },[history])
 
   const handleKembaliKeRekapSelfAssessment = () => {
     history.push(`/selfAssessment`)
@@ -305,7 +326,7 @@ const FormPengisianSelfAssessment = () => {
                   datestring.slice(5, 7),
                   datestring.slice(0, 4),
                 )
-                let handling = handleDateIsAvailable(tanggalmulai, tanggalselesai)
+                handleDateIsAvailable(tanggalmulai, tanggalselesai)
                 setTanggalMulaiSelfAssessment(
                   getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
                 )

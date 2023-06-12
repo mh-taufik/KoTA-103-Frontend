@@ -4,7 +4,7 @@ import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faPencil } from '@fortawesome/free-solid-svg-icons'
 import { ArrowLeftOutlined,SmileOutlined } from '@ant-design/icons'
-import { FloatButton, Result } from 'antd'
+import { Alert, FloatButton, Result } from 'antd'
 import {
   Table,
   Button,
@@ -41,6 +41,7 @@ const RekapRPP = () => {
   const [loadings, setLoadings] = useState([])
   const [dataPeserta, setDataPeserta] = useState([])
   const [isParticipantAllowedToAccessThisPage, setIsParticipantAllowedToAccessThisPage] = useState()
+  const [dataDeadlineRPP, setDataDeadlineRPP] = useState([])
   const desc = '*edit RPP yang dipilih'
   axios.defaults.withCredentials = true
 
@@ -52,40 +53,20 @@ const RekapRPP = () => {
     })
   }
 
-  const refreshData = (index) => {
+  const refreshData = async(index) => {
     let PESERTA
     if (rolePengguna === '1') {
       PESERTA = NIM_PESERTA_AS_USER
     } else {
       PESERTA = NIM_PESERTA_FROM_PARAMS
     }
-    axios
+    enterLoading(index)
+    await axios
       .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/get-all/${PESERTA}`)
       .then((result) => {
+        console.log('ES', result.data.data)
         if (result.data.data.length > 0) {
           let temp = []
-          let temp1 = result.data.data
-          const convertDate = (date) => {
-            let temp_date_split = date.split('-')
-            const month = [
-              'Januari',
-              'Februari',
-              'Maret',
-              'April',
-              'Mei',
-              'Juni',
-              'Juli',
-              'Agustus',
-              'September',
-              'Oktober',
-              'November',
-              'Desember',
-            ]
-            let date_month = temp_date_split[1]
-            let month_of_date = month[parseInt(date_month) - 1]
-            return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
-          }
-
           let getDataTempRPP = function (obj) {
             for (var i in obj) {
               temp.push({
@@ -93,16 +74,17 @@ const RekapRPP = () => {
                 work_title: obj[i].work_title,
                 start_date: convertDate(obj[i].start_date),
                 finish_date: convertDate(obj[i].finish_date),
+                end_date_rpp: obj[i].finish_date,
               })
             }
           }
 
-          getDataTempRPP(temp1)
+          getDataTempRPP(result.data.data)
           setRppPeserta(temp)
         } else {
           setRppPeserta(result.data.data)
         }
-
+        setIsLoading(false)
         setIsLoading(false)
         setLoadings((prevLoadings) => {
           const newLoadings = [...prevLoadings]
@@ -110,6 +92,28 @@ const RekapRPP = () => {
           return newLoadings
         })
       })
+  }
+
+  const convertDate = (date) => {
+    let temp_date_split = date.split('-')
+    const month = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ]
+    let date_month = temp_date_split[1]
+    let month_of_date = month[parseInt(date_month) - 1]
+    console.log(month_of_date, 'isi date monts', month_of_date)
+    return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
   }
 
   useEffect(() => {
@@ -127,30 +131,7 @@ const RekapRPP = () => {
           console.log('ES', result.data.data)
           if (result.data.data.length > 0) {
             let temp = []
-            let temp1 = result.data.data
-            const convertDate = (date) => {
-              let temp_date_split = date.split('-')
-              const month = [
-                'Januari',
-                'Februari',
-                'Maret',
-                'April',
-                'Mei',
-                'Juni',
-                'Juli',
-                'Agustus',
-                'September',
-                'Oktober',
-                'November',
-                'Desember',
-              ]
-              let date_month = temp_date_split[1]
-              let month_of_date = month[parseInt(date_month) - 1]
-              return date
-                ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
-                : null
-            }
-
+          
             let getDataTempRPP = function (obj) {
               for (var i in obj) {
                 temp.push({
@@ -164,7 +145,6 @@ const RekapRPP = () => {
             }
 
             getDataTempRPP(result.data.data)
-            console.log('yemp', temp)
             setRppPeserta(temp)
           } else {
             setRppPeserta(result.data.data)
@@ -222,7 +202,7 @@ const RekapRPP = () => {
         })
     }
 
-    async function GetDateSubmissionRPPOpened(){
+    async function GetDataDeadlineAndPageOpened(){
       
       await axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=6`).then((response)=>{
         function formatDate(date) {
@@ -236,21 +216,29 @@ const RekapRPP = () => {
       
           return [year, month, day].join('-')
         }
+
        let start_date = response.data.data.start_assignment_date
        let finish_date = response.data.data.finish_assignment_date
+       let range = response.data.data.day_range
+       let data_deadline = {
+        start_date : convertDate(start_date),
+        finish_date : convertDate(finish_date),
+        day_range : range
+       }
+
+       setDataDeadlineRPP(data_deadline)
+
        let today = formatDate(new Date())
-       console.log('===', start_date,today)
        if(start_date <= today ){
         setIsParticipantAllowedToAccessThisPage(true)
        }else{
         setIsParticipantAllowedToAccessThisPage(false)
        }
-        // setFinishDateThisPageAllowedToAccess(response.data.data.finish_assignment_date)
       })
     }
 
     GetDataInfoPeserta()
-    GetDateSubmissionRPPOpened()
+    GetDataDeadlineAndPageOpened()
     getRppPeserta()
   }, [history])
 
@@ -337,32 +325,26 @@ const RekapRPP = () => {
     handleSearch(selectedKeys, confirm, dataIndex, index)
   }
 
-  /** TOMBOL EDIT RPP */
+
   const confirmToEdit = () => {
     history.push(`/rencanaPenyelesaianProyek/edit/${wannaEdit.rpp_id}`)
   }
 
-  /** TOMBOL DETAIL RPP */
-  const confirmToDetail = (idMhs) => {
-    rolePengguna !== '1'
-      ? history.push(`/rencanaPenyelesaianProyek/DetailRPP/${wannaDetail.id}/${idMhs}`)
-      : history.push(`/rencanaPenyelesaianProyek/detail/${wannaDetail.id}`)
-  }
 
-  /** TOMBOL CREATE RPP BARU */
+
   const handleCreateRPP = () => {
     history.push(`/rencanaPenyelesaianProyek/peserta/formPengisianRPP`)
   }
 
-  /** TOMBOL DETAIL RPP PESERTA (PEMBIMBING DAN PANITIA) */
+
   const actionLihatRPPPeserta = (idRPP) => {
     history.push(`/rekapDokumenPeserta/rppPeserta/${NIM_PESERTA_FROM_PARAMS}/detail/${idRPP}`)
   }
 
-  /** HOVER BUTTON */
+
   const hoverButtonLihatDetail = <div>Klik tombol, untuk melihat isi RPP peserta</div>
 
-  /** KOLOM UNTUK PANITIA DAN PEMBIMBING JURUSAN */
+
   const columnsPanitiaPembimbing = [
     {
       title: 'NO',
@@ -416,23 +398,6 @@ const RekapRPP = () => {
             </Row>
           )}
 
-          {/* ROLE PEMBIMBING JURUSAN */}
-          {/* {rolePengguna === '4' && (
-            <Row>
-              <Col span={6} style={{ textAlign: 'center' }}>
-                <Popover content={hoverButtonLihatDetail}>
-                  <Button
-                    type="primary"
-                    shape="round"
-                    size="small"
-                    onClick={() => actionLihatRPPPeserta(record.rpp_id)}
-                  >
-                    Lihat Detail
-                  </Button>
-                </Popover>
-              </Col>
-            </Row>
-          )} */}
         </>
       ),
     },
@@ -509,7 +474,8 @@ const RekapRPP = () => {
         let today = formatDate(new Date())
         let rec_end_date = new Date(record.end_date_rpp)
         let week_end_date = getWeekBasedOnDate(rec_end_date) - 1
-        let year_end_date = record.end_date_rpp.slice(0, 4)
+        let year_end_date = record.end_date_rpp
+        year_end_date = year_end_date.slice(0, 4)
         let limit_date_for_edit_rpp = getDateOfISOWeek(week_end_date, year_end_date)
 
         if (limit_date_for_edit_rpp > today) {
@@ -586,9 +552,7 @@ const RekapRPP = () => {
     },
   ]
 
-  // isLoading ? (
-  //   <Spin indicator={antIcon} />
-  // ) :
+
   const buttonKembaliKeListHandling = () => {
     history.push(`/rekapDokumenPeserta`)
   }
@@ -615,7 +579,8 @@ const RekapRPP = () => {
 
   return (
     <>
-      <div>
+      
+
         {rolePengguna !== '1' && (
           <Space
             className="spacebottom"
@@ -649,15 +614,32 @@ const RekapRPP = () => {
             </Card>
           </Space>
         )}
-      </div>
-      <div className="spacetop"></div>
-      <div className="spacetop">
+
+      {rolePengguna === '1'&& (
+        <Alert
+        className='spacebottom2'
+        message="Informasi Pengumpulan RPP"
+        description={
+          <div>
+          <ul>
+          <li>Akses Pengumpulan RPP dimulai dari tanggal &nbsp;&nbsp; <b>{dataDeadlineRPP.start_date}</b> &nbsp;&nbsp; dan akses akan ditutup pada tanggal &nbsp;&nbsp; <b>{dataDeadlineRPP.finish_date}</b></li>
+          <li>Peserta dapat melakukan pengeditan RPP selama tanggal yang sedang berlangsung belum memasuki minggu dari tanggal berakhir RPP</li>
+          <li>Isilah data RPP sedetail mungkin</li>
+          </ul>
+          </div>
+        }
+        type="info"
+        showIcon
+      />
+      )}
+      <div>
         <CCard className="mb-4">
           {title('REKAP RENCANA PENYELESAIAN PROYEK PESERTA')}
           {(rolePengguna === '1' && !isParticipantAllowedToAccessThisPage) && (
               <Result
               icon={<SmileOutlined />}
               title="Maaf Akses Untuk Halaman Ini Belum Dibuka"
+              subTitle="Anda dapat melakukan akses setelah memasuki tanggal yang telah ditentukan"
               // extra={<Button type="primary">Next</Button>}
             />
           )}

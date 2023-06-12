@@ -4,12 +4,12 @@ import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { faEye, faPencil } from '@fortawesome/free-solid-svg-icons'
-import { Table, Button, Row, Col, Input, Space, Spin, Popover, Card, FloatButton } from 'antd'
+import { Table, Button, Row, Col, Input, Space, Spin, Popover, Card, FloatButton, Alert, Result } from 'antd'
 import axios from 'axios'
 import { SearchOutlined } from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
 import { useHistory, useParams } from 'react-router-dom'
-import { LoadingOutlined } from '@ant-design/icons'
+import { LoadingOutlined,SmileOutlined  } from '@ant-design/icons'
 
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const RekapSelfAssessment = () => {
@@ -24,8 +24,9 @@ const RekapSelfAssessment = () => {
   const [loadings, setLoadings] = useState([])
   const [selfAssessmentPeserta, setSelfAssessmentPeserta] = useState([])
   const [dataPeserta, setDataPeserta] = useState([])
-  const [jumlahSelfAssessmentTidakDikumpulkan, setJumlahSelfAssessmentTidakDikumpulkan] = useState()
-  const [jumlahSelfAssessmentDikumpulkan, setJumlahSelfAssessmentDikumpulkan] = useState()
+  const [dataDeadlineSelfAssessment, setDataDeadlineSelfAssessment] = useState([])
+  const [isParticipantAllowedToAccessThisPage, setIsParticipantAllowedToAccessThisPage] = useState()
+  const [isFinishDateToAssignSelfAssessment, setIsFinishDateToAssignSelfAssessment] = useState()
   axios.defaults.withCredentials = true
 
   const enterLoading = (index) => {
@@ -36,8 +37,30 @@ const RekapSelfAssessment = () => {
     })
   }
 
+  const convertDate = (date) => {
+    let temp_date_split = date.split('-')
+    const month = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ]
+    let date_month = temp_date_split[1]
+    let month_of_date = month[parseInt(date_month) - 1]
+    console.log(month_of_date, 'isi date monts', month_of_date)
+    return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
+  }
+
   useEffect(() => {
-    console.log('NIM_PESERTA_FROM_PARAMS ==> ', NIM_PESERTA_FROM_PARAMS)
+   // console.log('NIM_PESERTA_FROM_PARAMS ==> ', NIM_PESERTA_FROM_PARAMS)
 
     const getSelfAssessment = async (index) => {
       let PESERTA
@@ -58,33 +81,12 @@ const RekapSelfAssessment = () => {
           const len = result.data.data.length
           const temp1 = JSON.parse(JSON.stringify(result.data.data))
 
-          const convertDate = (date) => {
-            let temp_date_split = date.split('-')
-            const month = [
-              'Januari',
-              'Februari',
-              'Maret',
-              'April',
-              'Mei',
-              'Juni',
-              'Juli',
-              'Agustus',
-              'September',
-              'Oktober',
-              'November',
-              'Desember',
-            ]
-            let date_month = temp_date_split[1]
-            let month_of_date = month[parseInt(date_month) - 1]
-            console.log(month_of_date, 'isi date monts', month_of_date)
-            return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
-          }
+          
 
           if (result.data.data.length > 0) {
             console.log('RESY')
             var getTempSelfAssessment = function (obj) {
               for (var i in obj) {
-                // console.log(i, len-1, '==', parseInt(i)===(len-1))
                 if (parseInt(i) === len - 1) {
                   break
                 }
@@ -157,7 +159,50 @@ const RekapSelfAssessment = () => {
         })
     }
 
+    
+    async function GetDataDeadlineAndPageOpened(){
+      
+      await axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=2`).then((response)=>{
+        function formatDate(date) {
+          var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear()
+      
+          if (month.length < 2) month = '0' + month
+          if (day.length < 2) day = '0' + day
+      
+          return [year, month, day].join('-')
+        }
+
+       let start_date = response.data.data.start_assignment_date
+       let finish_date = response.data.data.finish_assignment_date
+       let range = response.data.data.day_range
+       let data_deadline = {
+        start_date : convertDate(start_date),
+        finish_date : convertDate(finish_date),
+        day_range : range
+       }
+
+       setDataDeadlineSelfAssessment(data_deadline)
+
+       let today = formatDate(new Date())
+       if(start_date <= today ){
+        setIsParticipantAllowedToAccessThisPage(true)
+       }else{
+        setIsParticipantAllowedToAccessThisPage(false)
+       }
+
+       if(finish_date <= today){
+        setIsFinishDateToAssignSelfAssessment(true)
+       }else{
+        setIsFinishDateToAssignSelfAssessment(false)
+       }
+      })
+    }
+
     GetDataInfoPeserta()
+    GetDataDeadlineAndPageOpened()
 
     getSelfAssessment()
   }, [history])
@@ -325,7 +370,7 @@ const RekapSelfAssessment = () => {
       : history.push(`/selfAssessment/formSelfAssessment/detail/${idsa}`)
   }
 
-  const lakukanPenilaianSelfAssessment = (idsa) => {
+  const actionGradeSelfAssessment = (idsa) => {
     history.push(
       `/rekapDokumenPeserta/selfAssessmentPeserta/${NIM_PESERTA_FROM_PARAMS}/penilaian/${idsa}`,
     )
@@ -407,8 +452,7 @@ const RekapSelfAssessment = () => {
                     shape="circle"
                     style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
                     onClick={() => {
-                      lakukanPenilaianSelfAssessment(record.self_assessment_id)
-                      //console.log(record.self_assessment_id)
+                      actionGradeSelfAssessment(record.self_assessment_id)
                     }}
                   >
                     <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
@@ -481,10 +525,10 @@ const RekapSelfAssessment = () => {
     return (
       <>
         <div>
-          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius: 2 }}>
+          <Row style={{ backgroundColor: '#00474f', padding: 3, borderRadius: 2 }}>
             <Col span={24}>
               <b>
-                <h4 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h4>
+                <h5 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h5>
               </b>
             </Col>
           </Row>
@@ -532,14 +576,34 @@ const RekapSelfAssessment = () => {
           </Space>
         )}
       </div>
+      {rolePengguna === '1'&& (
+        <Alert
+        className='spacebottom2'
+        message="Informasi Pengumpulan Self Assessment"
+        description={
+          <div>
+          <ul>
+          <li>Akses Pengumpulan Self Assessment dimulai dari tanggal &nbsp;&nbsp; <b>{dataDeadlineSelfAssessment.start_date}</b> &nbsp;&nbsp; dan akses akan ditutup pada tanggal &nbsp;&nbsp; <b>{dataDeadlineSelfAssessment.finish_date}</b></li>
+          <li>Peserta tidak dapat melakukan pengeditan self assessment</li>
+          <li>Self Assessment dikumpulkan seminggu sekali</li>
+          <li>Batas pengumpulan setiap self assessment adalah &nbsp;&nbsp;<b>{5+dataDeadlineSelfAssessment.day_range}</b>&nbsp;&nbsp; hari terhitung dari senin</li>
+          <li>Isilah field <b>keterangan</b> pada self assessement sedetail mungkin</li>
+          </ul>
+          </div>
+        }
+        type="info"
+        showIcon
+      />
+      )}
 
       <CCard className="mb-4">
         {title('REKAP SELF ASSESSMENT PESERTA')}
         <CCardBody>
-          {rolePengguna === '1' && (
+          {(rolePengguna === '1' && isParticipantAllowedToAccessThisPage)&& (
             <Row>
               <Col span={24} style={{ textAlign: 'right' }}>
-                <Button
+                {(!isFinishDateToAssignSelfAssessment) && (
+                  <Button
                   id="create-logbook"
                   size="sm"
                   shape="round"
@@ -548,11 +612,26 @@ const RekapSelfAssessment = () => {
                 >
                   Tambahkan Self Assessment Baru
                 </Button>
+                )}
+                {isFinishDateToAssignSelfAssessment &&( 
+               <Popover content={<div>Pengumpulan sudah tidak dizinkan</div>}>
+                 <Button
+                  id="create-logbook"
+                  size="sm"
+                  disabled
+                  shape="round"
+                  style={{ color: 'white', background: '#339900', marginBottom: 16 }}
+                  onClick={handleCreateSelfAssessment}
+                >
+                  Tambahkan Self Assessment Baru
+                </Button>
+               </Popover>
+                )}
               </Col>
             </Row>
           )}
 
-          {rolePengguna === '1' && (
+          {(rolePengguna === '1' && isParticipantAllowedToAccessThisPage) && (
             <CRow>
               <CCol sm={12}>
                 <hr />
@@ -565,6 +644,15 @@ const RekapSelfAssessment = () => {
                 />
               </CCol>
             </CRow>
+          )}
+
+          {(rolePengguna === '1' && !isParticipantAllowedToAccessThisPage) && (
+            <Result
+            icon={<SmileOutlined />}
+            title="Maaf Akses Untuk Halaman Ini Belum Dibuka"
+            subTitle="Anda dapat melakukan akses setelah memasuki tanggal yang telah ditentukan"
+          
+          />
           )}
 
           {rolePengguna !== '1' && (
