@@ -469,7 +469,9 @@ const PenilaianSelfAssessment = () => {
     history.push(`/rekapDokumenPeserta/listAspectSelfAssessment/${NIM_PESERTA}`)
   }
 
-  return (
+  return isLoading?( <Spin tip="Loading" size="large">
+  <div className="content" />
+</Spin>):(
     <>
       <div className="container2">
         {title('RENCANA PENGERJAAN PROYEK ( RPP )')}
@@ -534,8 +536,8 @@ const PenilaianSelfAssessment = () => {
                         <td>:</td>
                         <td>
                           &nbsp;&nbsp;
-                          {listAspectSelfAssessment.start_date} &nbsp; s/d &nbsp;
-                          {listAspectSelfAssessment.finish_date}
+                          {selfAssessmentPeserta.start_date} &nbsp; s/d &nbsp;
+                          {selfAssessmentPeserta.finish_date}
                         </td>
                       </tr>
                     </thead>
@@ -608,8 +610,8 @@ const PenilaianSelfAssessment = () => {
                     <>
                       <table>
                         <tr>
-                          <td>Status Pengumpulan</td>
-                          <td>:</td>
+                          {/* <td>Status Pengumpulan</td> */}
+                          {/* <td>:</td> */}
                           <td>
                             <b>
                               {/* {colorTextStatusPengumpulan(
@@ -714,7 +716,7 @@ const PenilaianSelfAssessment = () => {
 
       <Modal
           title="Penilaian Logbook Peserta"
-          visible={isModaleditVisible}
+          open={isModaleditVisible}
           onOk={form1.submit}
           onCancel={handleCancelEdit}
           width={600}

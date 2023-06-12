@@ -45,7 +45,8 @@ const FormPengisianSelfAssessment = () => {
   const [isLoading, setIsLoading] = useState(true)
   axios.defaults.withCredentials = true
   let history = useHistory()
-  const [komponenPenilaianSelfAssessment, setKomponenPenilaianSelfAssessment] = useState([])
+  const [komponenPenilaianSelfAssessment, setKomponenPenilaianSelfAssessment]= useState([])
+
   const [dataPengisianSelfAssessmentPeserta, setDataPengisianSelfAssessmentPeserta] = useState([])
   const [indexUpdate, setIndexUpdate] = useState()
   const [tanggalMulaiSelfAssessment, setTanggalMulaiSelfAssessment] = useState()

@@ -27,6 +27,7 @@ const ListDokumenPeserta = () => {
   var rolePengguna = localStorage.id_role
   const [searchText, setSearchText] = useState('')
   const [searchedColumn, setSearchedColumn] = useState('')
+  const [isNotNullSupervisorParticipant, setIsNotNullSupervisorParticipant] = useState()
   const searchInput = useRef(null)
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm()
@@ -146,36 +147,41 @@ const ListDokumenPeserta = () => {
 
   useEffect(() => {
     const getAllListPeserta = async (record, index) => {
-      await axios
-        .get(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-all`)
-        .then((res) => {
-          let tempData = res.data.data
-          let tempRes = []
-          function getProdi(prodi) {
-            return prodi === 0 ? 'D3' : 'D4'
-          }
-          let funcTempRes = function (obj) {
-            for (var i in tempData) {
-              tempRes.push({
-                nim: obj[i].nim,
-                name: obj[i].name,
-                year: obj[i].year,
-                id_participant: obj[i].id_participant,
-                IPK: obj[i].IPK,
-                work_system: obj[i].work_system,
-                status_cv: obj[i].status_cv,
-                status_interest: obj[i].status_interest,
-                id_account: obj[i].id_account,
-                id_cv: obj[i].id_cv,
-                id_prodi: getProdi(obj[i].id_prodi),
-              })
-            }
-          }
-          funcTempRes(tempData)
-          setDataPeserta(tempRes)
+      axios.defaults.withCredentials = true
+      if (rolePengguna !== '4') {
+        await axios
+          .get(
+            `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all?type=comitte`,
+          )
+          .then((res) => {
+            if (res.data.data !== null) {
+              setIsNotNullSupervisorParticipant(true)
+              let participant_supervisor = []
 
-          setIsLoading(false)
-        })
+              let getParticipantSupervisor = function (data) {
+                for (var iterate_data in data) {
+                  let data_company = data[iterate_data].company_name
+                  let data_supervisor = data[iterate_data].lecturer_name
+                  let participant = data[iterate_data].participant
+                  //console.log()
+                  for (var iterate_participant in participant) {
+                    participant_supervisor.push({
+                      id: participant[iterate_participant].id,
+                      name: participant[iterate_participant].name,
+                      supervisor: data_supervisor,
+                      company: data_company,
+                    })
+                  }
+                }
+              }
+
+              getParticipantSupervisor(res.data.data)
+              setDataPeserta(participant_supervisor)
+            }else{
+              setIsNotNullSupervisorParticipant(false)
+            }
+            setIsLoading(false)
+          })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
             history.push({
@@ -190,6 +196,55 @@ const ListDokumenPeserta = () => {
             history.push('/500')
           }
         })
+      } else if (rolePengguna === '4') {
+        await axios
+          .get(
+            `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all?type=supervisor`,
+          )
+          .then((res) => {
+            if (res.data.data !== null) {
+              let participant_supervisor = []
+
+              let getParticipantSupervisor = function (data) {
+                for (var iterate_data in data) {
+                  let data_company = data[iterate_data].company_name
+                  let data_supervisor = data[iterate_data].lecturer_name
+                  let participant = data[iterate_data].participant
+                  //console.log()
+                  for (var iterate_participant in participant) {
+                    participant_supervisor.push({
+                      id: participant[iterate_participant].id,
+                      name: participant[iterate_participant].name,
+                      supervisor: data_supervisor,
+                      company: data_company,
+                    })
+                  }
+                }
+              }
+
+              getParticipantSupervisor(res.data.data)
+              setDataPeserta(participant_supervisor)
+            }else{
+
+            }
+            setIsLoading(false)
+
+          })
+          .catch(function (error) {
+            if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+              history.push({
+                pathname: '/login',
+                state: {
+                  session: true,
+                },
+              })
+            } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+              history.push('/404')
+            } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+              history.push('/500')
+            }
+          })
+      }
     }
 
     getAllListPeserta()
@@ -207,31 +262,21 @@ const ListDokumenPeserta = () => {
     },
     {
       title: 'NIM',
-      dataIndex: 'nim',
-      width: '5%',
-      key: 'username',
-      ...getColumnSearchProps('nim'),
-    },
-    {
-      title: 'PRODI',
-      dataIndex: 'id_prodi',
-      width: '7%',
-      key: 'id_prodi',
-      ...getColumnSearchProps('id_prodi'),
+      dataIndex: 'id',
+      width: '10%',
+      ...getColumnSearchProps('id', 'NIM'),
     },
     {
       title: 'NAMA PESERTA',
       dataIndex: 'name',
-      width: '40%',
-      key: 'nama',
-      ...getColumnSearchProps('name'),
+      width: '30%',
+      ...getColumnSearchProps('name', 'Nama'),
     },
     {
-      title: 'SISTEM KERJA',
-      dataIndex: 'work_system',
-      width: '15%',
-      key: 'work_system',
-      ...getColumnSearchProps('work_system'),
+      title: 'PERUSAHAAN',
+      dataIndex: 'company',
+      width: '25%',
+      ...getColumnSearchProps('company', 'Perusahaan'),
     },
     {
       title: 'AKSI',
@@ -245,7 +290,7 @@ const ListDokumenPeserta = () => {
                 <Button
                   type="primary"
                   style={{ borderColor: 'white' }}
-                  onClick={() => actionSeeListRPPParticipant(record.nim)}
+                  onClick={() => actionSeeListRPPParticipant(record.id)}
                   size="small"
                 >
                   <Text style={{ fontSize: '3', color: 'white' }}>Lihat Detail</Text>
@@ -270,31 +315,21 @@ const ListDokumenPeserta = () => {
     },
     {
       title: 'NIM',
-      dataIndex: 'nim',
-      width: '5%',
-      key: 'username',
-      ...getColumnSearchProps('nim'),
+      dataIndex: 'id',
+      width: '10%',
+      ...getColumnSearchProps('id', 'NIM'),
     },
     {
-      title: 'PRODI',
-      dataIndex: 'id_prodi',
-      width: '7%',
-      key: 'id_prodi',
-      ...getColumnSearchProps('id_prodi'),
-    },
-    {
-      title: 'Nama Peserta',
+      title: 'NAMA PESERTA',
       dataIndex: 'name',
-      width: '40%',
-      key: 'nama',
-      ...getColumnSearchProps('name'),
+      width: '30%',
+      ...getColumnSearchProps('name', 'Nama'),
     },
     {
-      title: 'Sistem Kerja',
-      dataIndex: 'work_system',
-      width: '15%',
-      key: 'work_system',
-      ...getColumnSearchProps('work_system'),
+      title: 'PERUSAHAAN',
+      dataIndex: 'company',
+      width: '25%',
+      ...getColumnSearchProps('company', 'Perusahaan'),
     },
 
     {
@@ -311,7 +346,7 @@ const ListDokumenPeserta = () => {
                   style={{ borderColor: 'white' }}
                   onClick={() => {
                     console.log('logbook dari peserta : ', record)
-                    actionSeeListLogbookParticipant(record.nim)
+                    actionSeeListLogbookParticipant(record.id)
                   }}
                   size="small"
                 >
@@ -337,31 +372,21 @@ const ListDokumenPeserta = () => {
     },
     {
       title: 'NIM',
-      dataIndex: 'nim',
-      width: '5%',
-      key: 'username',
-      ...getColumnSearchProps('nim'),
-    },
-    {
-      title: 'PRODI',
-      dataIndex: 'id_prodi',
-      width: '7%',
-      key: 'id_prodi',
-      ...getColumnSearchProps('id_prodi'),
+      dataIndex: 'id',
+      width: '10%',
+      ...getColumnSearchProps('id', 'NIM'),
     },
     {
       title: 'NAMA PESERTA',
       dataIndex: 'name',
-      width: '40%',
-      key: 'nama',
-      ...getColumnSearchProps('name'),
+      width: '30%',
+      ...getColumnSearchProps('name', 'Nama'),
     },
     {
-      title: 'SISTEM KERJA',
-      dataIndex: 'work_system',
-      width: '15%',
-      key: 'work_system',
-      ...getColumnSearchProps('work_system'),
+      title: 'PERUSAHAAN',
+      dataIndex: 'company',
+      width: '25%',
+      ...getColumnSearchProps('company', 'Perusahaan'),
     },
     {
       title: 'AKSI',
@@ -379,7 +404,7 @@ const ListDokumenPeserta = () => {
                   type="primary"
                   style={{ borderColor: 'white' }}
                   size="small"
-                  onClick={() => actionSeeListSelfAssessmentPeserta(record.nim)}
+                  onClick={() => actionSeeListSelfAssessmentPeserta(record.id)}
                 >
                   <Text style={{ fontSize: '3', color: 'white' }}>Lihat Detail</Text>
                 </Button>
@@ -403,31 +428,21 @@ const ListDokumenPeserta = () => {
     },
     {
       title: 'NIM',
-      dataIndex: 'nim',
-      width: '5%',
-      key: 'username',
-      ...getColumnSearchProps('nim'),
-    },
-    {
-      title: 'PRODI',
-      dataIndex: 'id_prodi',
-      width: '7%',
-      key: 'id_prodi',
-      ...getColumnSearchProps('id_prodi'),
+      dataIndex: 'id',
+      width: '10%',
+      ...getColumnSearchProps('id', 'NIM'),
     },
     {
       title: 'NAMA PESERTA',
       dataIndex: 'name',
-      width: '40%',
-      key: 'nama',
-      ...getColumnSearchProps('name'),
+      width: '30%',
+      ...getColumnSearchProps('name', 'Nama'),
     },
     {
-      title: 'SISTEM KERJA',
-      dataIndex: 'work_system',
-      width: '15%',
-      key: 'work_system',
-      ...getColumnSearchProps('work_system'),
+      title: 'PERUSAHAAN',
+      dataIndex: 'company',
+      width: '25%',
+      ...getColumnSearchProps('company', 'Perusahaan'),
     },
     {
       title: 'AKSI',
@@ -444,7 +459,7 @@ const ListDokumenPeserta = () => {
                     <div>(form penilaian pembimbing)</div>
                   </>
                 }
-                onClick={() => actionSeeListLaporan(record.nim)}
+                onClick={() => actionSeeListLaporan(record.id)}
               >
                 <Button type="primary" style={{ borderColor: 'white' }} size="small">
                   <Text style={{ fontSize: '3', color: 'white' }}>Lihat Detail</Text>
@@ -804,6 +819,8 @@ const ListDokumenPeserta = () => {
         </CCardBody>
       </CCard>
     </>
+    
+   
   )
 }
 

@@ -11,16 +11,15 @@ import { Card, Col, FloatButton, Progress, Row, Space, Tooltip } from 'antd'
 
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const RekapSelfAssessment = () => {
-  var idPeserta = useParams()
+  const params = useParams()
+  const ID_PARTICIPANT = params.id
+  const [dataPeserta, setDataPeserta]=useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const [komponenPenilaianSelfAssessment, setKomponenPenilaianSelfAssessment] = useState([])
   let rolePengguna = localStorage.id_role
   let history = useHistory()
   const [selfAssessmentPeserta, setSelfAssessmentPeserta] = useState([])
-  const [poinPenilaianSelfAssessment, setPoinPenilaianSelfAssessment] = useState([])
-  const [dataSelfAssessmentNilaiDanKeterangan, setDataSelfAssessmentNilaiDanKeterangan] = useState(
-    [],
-  )
-  const [newDat, setNewDat] = useState([])
+ 
   const [anchorEl, setAnchorEl] = React.useState(null)
   const [data, setData] = React.useState()
   const handlePopoverOpen = (event, data) => {
@@ -39,38 +38,44 @@ const RekapSelfAssessment = () => {
 
   const open = Boolean(anchorEl)
 
-  //   isLoading ? (
-  //     <Spin indicator={antIcon} />
-  //   ) :
-
-  /** API */
-  function tes() {
-    console.log(dataSelfAssessmentNilaiDanKeterangan)
-  }
 
   useEffect(() => {
-    const getPoinPenilaianSelfAssessment = async () => {
+
+    async function getSelfAssessmentAspect (){
       await axios
-        .get(
-          'http://localhost:1337/api/poinpenilaianselfassessments?filters[$or][0][status][$eq]=non active&filters[$or][1][status][$eq]=active',
-        )
-        .then((res) => {
-          console.log(res.data.data)
-          let temp = res.data.data
-          let newTemp = []
+      .get(
+        `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/get?type=active`,
+      )
+      .then((result) => {
+        console.log(result.data.data)
 
-          let funcTemp = function (obj) {
-            for (var i in obj) {
-              newTemp.push({
-                id: obj[i].id,
-                poinpenilaian: obj[i].attributes.poinpenilaian,
-                tanggalmulaipengisian: obj[i].attributes.tanggalmulaipengisian,
-              })
-            }
-          }
-
-          funcTemp(temp)
-          setPoinPenilaianSelfAssessment(newTemp)
+        setKomponenPenilaianSelfAssessment(result.data.data)
+        setIsLoading(false)
+      })
+      .catch(function (error) {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+          history.push('/500')
+        }
+      })
+    }
+    async function getDataInformasiPeserta() {
+      await axios
+        .post(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-by-id`, {
+          id: [ID_PARTICIPANT],
+        })
+        .then((result) => {
+           setDataPeserta(result.data.data[0])
+         
+          
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -82,64 +87,74 @@ const RekapSelfAssessment = () => {
             })
           } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
             history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
             history.push('/500')
           }
         })
     }
 
-    const getSelfAssessmentPeserta = async () => {
+    const getSelfAssessment = async (index) => {
+   
       await axios
         .get(
-          'http://localhost:1337/api/selfassessments?populate=*&filters[peserta][username]=181524003',
+          `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/get-all/${ID_PARTICIPANT}`,
         )
-        .then((res) => {
-          console.log('DATA SELF ASSESSMENT', res.data.data)
-          let temp = res.data.data
-          let dataTemp = []
+        .then((result) => {
+          console.log(result.data.data)
 
-          let funcTemp = function (data) {
-            let b = 0
-            for (var i in data) {
-              let newTemp = []
-              console.log(data[i].id, ']]]]]]')
-              axios
-                .get(
-                  `http://localhost:1337/api/selfasspoins?populate=*&filters[selfassessment][id]=${data[i].id}&filters[poinpenilaianselfassessment][status][$eq]=active&filters[poinpenilaianselfassessment][status][$eq]=non active&sort[1]=[poinpenilaianselfassessment][id]`,
-                )
-                .then((result) => {
-                  let temp = result.data.data
-                  console.log('RES', temp)
-                  let i = 0
-                  let funcTemp = function (obj) {
-                    for (var a in obj) {
-                      newTemp[i] = {
-                        nilai: obj[a].attributes.nilai,
-                        id: obj[a].id,
-                        keterangan: obj[a].attributes.keterangan,
-                      }
-                      i++
-                    }
-                  }
+          let temp = []
+          const len = result.data.data.length
+          const temp1 = JSON.parse(JSON.stringify(result.data.data))
 
-                  funcTemp(temp)
+          const convertDate = (date) => {
+            let temp_date_split = date.split('-')
+            const month = [
+              'Januari',
+              'Februari',
+              'Maret',
+              'April',
+              'Mei',
+              'Juni',
+              'Juli',
+              'Agustus',
+              'September',
+              'Oktober',
+              'November',
+              'Desember',
+            ]
+            let date_month = temp_date_split[1]
+            let month_of_date = month[parseInt(date_month) - 1]
+            console.log(month_of_date, 'isi date monts', month_of_date)
+            return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
+          }
+
+          if (result.data.data.length > 0) {
+            console.log('RESY')
+            var getTempSelfAssessment = function (obj) {
+              for (var i in obj) {
+                // console.log(i, len-1, '==', parseInt(i)===(len-1))
+                if (parseInt(i) === len - 1) {
+                  break
+                }
+                temp.push({
+                  start_date: convertDate(obj[i].start_date),
+                  finish_date: convertDate(obj[i].finish_date),
+                  self_assessment_id: obj[i].self_assessment_id,
+                  participant_id: obj[i].participant_id,
+                  grade : obj[i].grade
                 })
-              console.log('NEWTEMP', newTemp)
-              dataTemp[b] = {
-                newTemp,
-                id: data[i].id,
               }
-              newDat[b] = newTemp
-
-              b++
             }
+
+            getTempSelfAssessment(temp1)
+            setSelfAssessmentPeserta(temp)
+            setIsLoading(false)
+            return
+          } else {
+            setSelfAssessmentPeserta(result.data.data)
+            setIsLoading(false)
+            return
           }
-          funcTemp(temp)
-          setDataSelfAssessmentNilaiDanKeterangan(dataTemp)
-          console.log('TEMP0', dataTemp[0])
-          // for(const key of dataTemp[0].newTemp.keys()){
-          //   console.log('key ==> ', key)
-          // }
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -151,189 +166,21 @@ const RekapSelfAssessment = () => {
             })
           } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
             history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+          } else if (error.toJSON().status > 500 && error.toJSON().status <= 599) {
             history.push('/500')
+          } else if (error.toJSON().status === 500) {
+            setSelfAssessmentPeserta(undefined)
+            setIsLoading(false)
           }
         })
     }
 
-    getPoinPenilaianSelfAssessment()
-    getSelfAssessmentPeserta()
+
+    getDataInformasiPeserta() 
+ 
   }, [history])
 
-  const dataPoinPenilaian = [
-    {
-      id: 1,
-      poinpenilaian: 'Apresiasi Perusahaan',
-    },
-    {
-      id: 2,
-      poinpenilaian: 'Lingkungan Perusahaan',
-    },
-    {
-      id: 3,
-      poinpenilaian: 'Karyawan Perusahaan',
-    },
-    {
-      id: 4,
-      poinpenilaian: 'Budaya Perusahaan',
-    },
-    {
-      id: 5,
-      poinpenilaian: 'Sikap Karyawan',
-    },
-    {
-      id: 6,
-      poinpenilaian: 'Aturan Kerja',
-    },
-  ]
-
-  const dataPoinDanKeterangan = [
-    {
-      id: 1,
-      tanggalmulai: '23 Mei 2023',
-      data: [
-        {
-          nilai: 89,
-          keterangan: 'Bagus banget',
-          idpoin: 1,
-        },
-        {
-          nilai: 90,
-          keterangan: 'Bagus lah',
-          idpoin: 2,
-        },
-        {
-          nilai: 79,
-          keterangan: 'Menurut aku sih yes',
-          idpoin: 3,
-        },
-        {
-          nilai: 89,
-          keterangan: 'Bagus banget',
-          idpoin: 4,
-        },
-        {
-          nilai: 90,
-          keterangan: 'Bagus lah',
-          idpoin: 5,
-        },
-        {
-          nilai: 79,
-          keterangan: 'Menurut aku sih yes',
-          idpoin: 6,
-        },
-      ],
-    },
-    {
-      id: 1,
-      tanggalmulai: '29 Mei 2023',
-      data: [
-        {
-          nilai: 89,
-          keterangan: 'Bagus banget',
-          idpoin: 1,
-        },
-        {
-          nilai: 90,
-          keterangan: 'Bagus lah',
-          idpoin: 2,
-        },
-        {
-          nilai: 79,
-          keterangan: 'Menurut aku sih yes',
-          idpoin: 3,
-        },
-        {
-          nilai: 89,
-          keterangan: 'Bagus banget',
-          idpoin: 4,
-        },
-        {
-          nilai: 90,
-          keterangan: 'Bagus lah',
-          idpoin: 5,
-        },
-        {
-          nilai: 79,
-          keterangan: 'Menurut aku sih yes',
-          idpoin: 6,
-        },
-      ],
-    },
-    {
-      id: 1,
-      tanggalmulai: '30 Mei 2023',
-      data: [
-        {
-          nilai: 89,
-          keterangan: 'Bagus banget',
-          idpoin: 1,
-        },
-        {
-          nilai: 90,
-          keterangan: 'Bagus lah',
-          idpoin: 2,
-        },
-        {
-          nilai: 79,
-          keterangan: 'Menurut aku sih yes',
-          idpoin: 3,
-        },
-        {
-          nilai: 89,
-          keterangan: 'Bagus banget',
-          idpoin: 4,
-        },
-        {
-          nilai: 90,
-          keterangan: 'Bagus lah',
-          idpoin: 5,
-        },
-        {
-          nilai: 79,
-          keterangan: 'Menurut aku sih yes',
-          idpoin: 6,
-        },
-      ],
-    },
-    {
-      id: 1,
-      tanggalmulai: '07 Juni 2023',
-      data: [
-        {
-          nilai: 89,
-          keterangan: 'Bagus banget',
-          idpoin: 1,
-        },
-        {
-          nilai: 90,
-          keterangan: 'Bagus lah',
-          idpoin: 2,
-        },
-        {
-          nilai: 79,
-          keterangan: 'Menurut aku sih yes',
-          idpoin: 3,
-        },
-        {
-          nilai: 89,
-          keterangan: 'Bagus banget',
-          idpoin: 4,
-        },
-        {
-          nilai: 90,
-          keterangan: 'Bagus lah',
-          idpoin: 5,
-        },
-        {
-          nilai: 79,
-          keterangan: 'Menurut aku sih yes',
-          idpoin: 6,
-        },
-      ],
-    },
-  ]
+ 
 
   const title = (judul) => {
     return (
@@ -418,30 +265,41 @@ const RekapSelfAssessment = () => {
           </Row>
         </Card>
       </Space>
-      {rolePengguna !== '1' && (
-        <Space
-          className="spacetop"
-          direction="vertical"
-          size="middle"
-          style={{
-            display: 'flex',
-          }}
-        >
-          <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
-            <Row>
-              <Col span={4}>Nama Lengkap</Col>
-              <Col span={2}>:</Col>
-              <Col span={8}>Gina Anifah Choirunnisa</Col>
-            </Row>
-            <Row>
-              <Col span={4}>NIM</Col>
-              <Col span={2}>:</Col>
-              <Col span={8}>201511009</Col>
-            </Row>
-          </Card>
-        </Space>
-      )}
-
+      <div>
+    
+    <Space
+      className="spacebottom"
+      direction="vertical"
+      size="middle"
+      style={{
+        display: 'flex',
+      }}
+    >
+      <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
+        <Row style={{ padding: 5 }}>
+          <Col span={4}>Nama Lengkap</Col>
+          <Col span={2}>:</Col>
+          <Col span={8}>{dataPeserta.name}</Col>
+        </Row>
+        <Row style={{ padding: 5 }}>
+          <Col span={4}>NIM</Col>
+          <Col span={2}>:</Col>
+          <Col span={8}>{dataPeserta.nim}</Col>
+        </Row>
+        <Row style={{ padding: 5 }}>
+          <Col span={4}>Sistem Kerja</Col>
+          <Col span={2}>:</Col>
+          <Col span={8}>{dataPeserta.work_system}</Col>
+        </Row>
+        <Row style={{ padding: 5 }}>
+          <Col span={4}>Angkatan</Col>
+          <Col span={2}>:</Col>
+          <Col span={8}>{dataPeserta.year}</Col>
+        </Row>
+      </Card>
+    </Space>
+  </div>
+   
       {title('REKAP PENILAIAN SELF ASSESSMENT PESERTA')}
 
       <div className="container2">
@@ -452,18 +310,18 @@ const RekapSelfAssessment = () => {
             <tr>
               <th>#</th>
               <th>Tanggal Mulai</th>
-              {dataPoinPenilaian.map((data, index) => (
-                <th key={data.id}>{data.poinpenilaian}</th>
+              {selfAssessmentPeserta.map((data, index) => (
+                <th key={data.id}>{data.aspect_name}</th>
               ))}
               <th>Total</th>
             </tr>
           </thead>
-          <tbody>
-            {dataPoinDanKeterangan.map((sa, index) => (
+          {/* <tbody>
+            {selfAssessmentPeserta.map((sa, index) => (
               <tr key={sa.id}>
                 <td>{index + 1}</td>
                 <td>{sa.tanggalmulai}</td>
-                {sa.data.map((nilaipoin, index) => (
+                {sa.grade.map((nilaipoin, index) => (
                   <td key={nilaipoin.id}>
                     {' '}
                     <Tooltip title={nilaipoin.keterangan}>{nilaipoin.nilai}</Tooltip>
@@ -508,7 +366,7 @@ const RekapSelfAssessment = () => {
                 <b>88</b>
               </td>
             </tr>
-          </tbody>
+          </tbody> */}
         </Table>
         <Popover
           id="mouse-over-popover"

@@ -49,6 +49,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
   const [dataPenilaianSebelumnya, setdataPenilaianSebelumnya] = useState([])
   const [idPenilaianPembimbingSebelumnya, setIdPenilaianPembimbingSebelumnya] = useState()
   const [nilaiPembimbingJurusanEdit, setNilaiPembimbingJurusanEdit] = useState([])
+  const [dataStatistik, setDataStatistik] = useState([])
   const [isSuccessEdit, setIsSuccessEdit] = useState()
 
   axios.defaults.withCredentials = true
@@ -144,36 +145,11 @@ const FormPenilaianPembimbingJurusan = (props) => {
     return parseInt
   }
 
-  /** API */
-  const getIdPeserta = async (data, index) => {
-    enterLoading(index)
-    await axios
-      .get(`http://localhost:1337/api/pesertas?filters[username][$eq]=${NIM_PESERTA}`)
-      .then((response) => {
-        console.log(response)
-        console.log('id Peserta', response.data.data[0].id)
-        setIdPeserta(response.data.data[0].id)
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-          history.push('/500')
-        }
-      })
-  }
 
   useEffect(() => {
     const getDataPoinPenilaianFormPembimbingJurusan = async (index) => {
       await axios
-        .get('http://localhost:1337/api/pembobotanformpembimbings')
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/aspect/get`)
         .then((response) => {
           var temp = []
           var temp1 = response.data.data
@@ -181,9 +157,9 @@ const FormPenilaianPembimbingJurusan = (props) => {
             for (var i in obj) {
               temp.push({
                 id: obj[i].id,
-                poin: obj[i].attributes.poin,
-                deskripsi: obj[i].attributes.deskripsi,
-                bobot: obj[i].attributes.bobot,
+                poin: obj[i].name,
+                deskripsi: obj[i].description,
+                bobot: obj[i].max_grade,
               })
             }
           }
@@ -251,8 +227,35 @@ const FormPenilaianPembimbingJurusan = (props) => {
         })
     }
 
-    GetDataInfoPeserta()
+    const GetDataStatistik = async (index) => {
+  
+      await axios
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/statistic/${NIM_PESERTA}`)
+        .then((result) => {
+          console.log('STATISTIK',result.data.data)
+          setDataStatistik(result.data.data)
+          setIsLoading(false)
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+            history.push('/500')
+          }
+        })
+    }
 
+
+
+    GetDataInfoPeserta()
+    GetDataStatistik()
     getDataPoinPenilaianFormPembimbingJurusan()
     getPenilaianPembimbingLaporanIsAvailable()
     if (penilaianIsDone) {
@@ -844,152 +847,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
         </>
       )}
 
-      {ROLE_PENGGUNA !== '4' && (
-        <>
-          {/* <button onClick={() => console.log(nilaiPembimbingJurusanEdit)}>tes</button> */}
-       
-          <div className=" container">
-            <FloatButton
-              type="primary"
-              onClick={buttonKembaliKeListHandling}
-              icon={<ArrowLeftOutlined />}
-              tooltip={<div>Kembali ke Rekap Laporan Peserta</div>}
-            />
-            <h3 align="center" className="title-s">
-              FORM PENILAIAN PEMBIMBING JURUSAN
-            </h3>
-
-            <hr />
-            <Row style={{ paddingBottom: 5, paddingTop: 4 }}>
-              <Col style={{ textAlign: 'center' }} span={2}>
-                NO
-              </Col>
-              <Col style={{ textAlign: 'center' }} span={14}>
-                KOMPONEN PENILAIAN
-              </Col>
-              <Col style={{ textAlign: 'center' }} span={4}>
-                NILAI MAKSIMUM
-              </Col>
-              <Col style={{ textAlign: 'center' }} span={4}>
-                NILAI
-              </Col>
-            </Row>
-            <hr />
-            {!penilaianIsDone && (
-              <Form>
-                {poinPenilaianForm.map((data, index) => {
-                  return (
-                    <>
-                      <Row key={data.id} style={{ paddingBottom: 20, paddingTop: 20 }}>
-                        <Col style={{ textAlign: 'center' }} span={2}>
-                          {index + 1}
-                        </Col>
-                        <Col span={14}>
-                          <div>
-                            <b>{data.poin}</b>
-                          </div>
-                          <div>{data.deskripsi}</div>
-                        </Col>
-                        <Col style={{ textAlign: 'center' }} span={4}>
-                          {data.bobot}
-                        </Col>
-                        <Col style={{ textAlign: 'center' }} span={4}>
-                          {nilaiPembimbingJurusan.nilai}
-                          {/* <InputNumber
-                            placeholder="Nilai"
-                            size={'large'}
-                            maxLength={2}
-                            value={nilaiPembimbingJurusan.nilai}
-                            onChange={(value) => {
-                              handleInputNilai(data.id, value, index, 'nilai')
-                            }}
-                            max={data.bobot}
-                            disabled
-                            keyboard={true}
-                            minLength={1}
-                            required
-                          /> */}
-                        </Col>
-                      </Row>
-                      <hr />
-                    </>
-                  )
-                })}
-                <Row>
-                  <Col span={16} style={{ fontSize: 20 }}>
-                    <b>TOTAL</b>
-                  </Col>
-                  <Col span={8}>
-                    <b>{total()}</b>
-                  </Col>
-                </Row>
-
-                <Button
-                  onClick={postPenilaian}
-                  className="form-control btn btn-primary"
-                  htmlType="submit"
-                >
-                  Simpan Penilaian
-                </Button>
-              </Form>
-            )}
-
-            {penilaianIsDone && (
-              <Form>
-                {dataPenilaianSebelumnya.map((data, index) => {
-                  return (
-                    <>
-                      <Row key={data.id} style={{ paddingBottom: 20, paddingTop: 20 }}>
-                        <Col style={{ textAlign: 'center' }} span={2}>
-                          {index + 1}
-                        </Col>
-                        <Col span={14}>
-                          <div>
-                            <b>{data.poinpenilaian}</b>
-                          </div>
-                          <div>{data.deskripsi}</div>
-                        </Col>
-                        <Col style={{ textAlign: 'center' }} span={4}>
-                          {data.bobot}
-                        </Col>
-                        <Col style={{ textAlign: 'center' }} span={4}>
-                          {console.log('PENIALIAN', dataPenilaianSebelumnya[index])}
-                          <b>{data.nilai}</b>
-                          {/* <InputNumber
-                            placeholder="Nilai"
-                            size={'large'}
-                            defaultValue={data.nilai}
-                            maxLength={2}
-                            disabled
-                            onChange={(e) => {
-                              handleEditChange(data.idpoin, e, index, 'nilai')
-                            }}
-                            max={data.bobot}
-                            keyboard={true}
-                            minLength={1}
-                            required
-                          /> */}
-                        </Col>
-                      </Row>
-                      <hr />
-                    </>
-                  )
-                })}
-                <Row>
-                  <Col span={16} style={{ fontSize: 20 }}>
-                    <b>TOTAL</b>
-                  </Col>
-                  <Col span={8}>
-                    <b>{totalEdit()}</b>
-                  </Col>
-                </Row>
-
-              
-              </Form>
-            )}
-          </div>
-        </>
-      )}
+      
     </>
   )
 }

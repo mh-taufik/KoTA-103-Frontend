@@ -17,8 +17,11 @@ const DaftarPeserta = () => {
   const [loadings, setLoadings] = useState([])
   axios.defaults.withCredentials = true
   const [peserta, setPeserta] = useState([])
-  var rolePengguna = localStorage.id_role
+  const rolePengguna = localStorage.id_role
+
   const [isNotNullParticipantSupervisor, setIsNotNullParticipantSupervisor] = useState()
+  const [dataColumn, setDataColumn] = useState()
+
 
   const getColumnSearchProps = (dataIndex, name) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -116,67 +119,122 @@ const DaftarPeserta = () => {
       api_get_peserta = `${process.env.REACT_APP_API_GATEWAY_URL}participant/get-all?type=comitte`
     } else {
       await axios
-      .get('http://localhost:8080/monitoring/supervisor-mapping/get-all?type=supervisor')
-      .then((res) => {
-        console.log('response', res.data.data[0].participant)
-        if(res.data.data !== null){
-          if(res.data.data[0].participant !== null){
-            setPeserta(res.data.data[0].participant)
-          }else{
-            setPeserta(undefined)
-            setIsNotNullParticipantSupervisor(false)
+        .get('http://localhost:8080/monitoring/supervisor-mapping/get-all?type=supervisor')
+        .then((res) => {
+          console.log('response', res.data.data[0].participant)
+          if (res.data.data !== null) {
+            if (res.data.data[0].participant !== null) {
+              setPeserta(res.data.data[0].participant)
+            } else {
+              setPeserta(undefined)
+              setIsNotNullParticipantSupervisor(false)
+            }
           }
-        }
-    
-        setIsLoading(false)
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-          history.push('/500')
-        }
-      })
-    }
-   
 
-        setLoadings((prevLoadings) => {
-          const newLoadings = [...prevLoadings]
-          newLoadings[index] = false
-          return newLoadings
+          setIsLoading(false)
         })
-    
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+            history.push('/500')
+          }
+        })
+    }
+
+    setLoadings((prevLoadings) => {
+      const newLoadings = [...prevLoadings]
+      newLoadings[index] = false
+      return newLoadings
+    })
   }
 
   useEffect(() => {
-    const getAllPeserta = async () => {
-      let api_get_peserta
+    const getAllParticipant = async () => {
       axios.defaults.withCredentials = true
       if (rolePengguna !== '4') {
-        api_get_peserta = `${process.env.REACT_APP_API_GATEWAY_URL}participant/get-all?type=comitte`
-      }
-      else if (rolePengguna === '4') {
         await axios
-          .get('http://localhost:8080/monitoring/supervisor-mapping/get-all?type=supervisor')
+          .get(
+            `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all?type=comitte`,
+          )
           .then((res) => {
-            console.log('response', res.data.data[0].participant)
-            if(res.data.data !== null){
-              if(res.data.data[0].participant !== null){
-                setPeserta(res.data.data[0].participant)
-              }else{
-                setPeserta(undefined)
-                setIsNotNullParticipantSupervisor(false)
+            if (res.data.data !== null) {
+              let participant_supervisor = []
+
+              let getParticipantSupervisor = function (data) {
+                for (var iterate_data in data) {
+                  let data_company = data[iterate_data].company_name
+                  let data_supervisor = data[iterate_data].lecturer_name
+                  let participant = data[iterate_data].participant
+                  //console.log()
+                  for (var iterate_participant in participant) {
+                    participant_supervisor.push({
+                      id: participant[iterate_participant].id,
+                      name: participant[iterate_participant].name,
+                      supervisor: data_supervisor,
+                      company: data_company,
+                    })
+                  }
+                }
               }
+
+              getParticipantSupervisor(res.data.data)
+              setPeserta(participant_supervisor)
             }
-        
             setIsLoading(false)
+          })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+            history.push('/500')
+          }
+        })
+      } else if (rolePengguna === '4') {
+        await axios
+          .get(
+            `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all?type=supervisor`,
+          )
+          .then((res) => {
+            if (res.data.data !== null) {
+              let participant_supervisor = []
+
+              let getParticipantSupervisor = function (data) {
+                for (var iterate_data in data) {
+                  let data_company = data[iterate_data].company_name
+                  let data_supervisor = data[iterate_data].lecturer_name
+                  let participant = data[iterate_data].participant
+                  //console.log()
+                  for (var iterate_participant in participant) {
+                    participant_supervisor.push({
+                      id: participant[iterate_participant].id,
+                      name: participant[iterate_participant].name,
+                      supervisor: data_supervisor,
+                      company: data_company,
+                    })
+                  }
+                }
+              }
+
+              getParticipantSupervisor(res.data.data)
+              setPeserta(participant_supervisor)
+            }
+            setIsLoading(false)
+
           })
           .catch(function (error) {
             if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -195,7 +253,7 @@ const DaftarPeserta = () => {
       }
     }
 
-    getAllPeserta()
+    getAllParticipant()
   }, [history])
 
   const columns = [
@@ -210,27 +268,27 @@ const DaftarPeserta = () => {
     },
     {
       title: 'NIM',
-      dataIndex: 'nim',
+      dataIndex: 'id',
       width: '10%',
-      ...getColumnSearchProps('nim', 'NIM'),
-    },
-    {
-      title: 'PRODI',
-      dataIndex: 'prodi',
-      width: '5%',
-      ...getColumnSearchProps('prodi', 'NIM'),
+      ...getColumnSearchProps('id', 'NIM'),
     },
     {
       title: 'NAMA PESERTA',
       dataIndex: 'name',
-      width: '40%',
+      width: '25%',
       ...getColumnSearchProps('name', 'Nama'),
     },
     {
-      title: 'WORK SYSTEM',
-      dataIndex: 'work_system',
-      width: '15%',
-      ...getColumnSearchProps('work_system', 'Nama'),
+      title: 'PEMBIMBING JURUSAN',
+      dataIndex: 'supervisor',
+      width: '25%',
+      ...getColumnSearchProps('supervisor', 'Pembimbing Jurusan'),
+    },
+    {
+      title: 'PERUSAHAAN',
+      dataIndex: 'company',
+      width: '25%',
+      ...getColumnSearchProps('company', 'Perusahaan'),
     },
     {
       title: 'AKSI',
@@ -245,7 +303,7 @@ const DaftarPeserta = () => {
                   type="primary"
                   size="small"
                   onClick={() =>
-                    history.push(`/daftarPeserta/dashboardPeserta/${record.id_participant}`)
+                    history.push(`/daftarPeserta/dashboardPeserta/${record.id}`)
                   }
                 >
                   Monitoring Peserta
@@ -258,7 +316,6 @@ const DaftarPeserta = () => {
     },
   ]
 
-  
   const supervisor_columns = [
     {
       title: 'NO',
@@ -278,8 +335,14 @@ const DaftarPeserta = () => {
     {
       title: 'NAMA PESERTA',
       dataIndex: 'name',
-      width: '40%',
+      width: '30%',
       ...getColumnSearchProps('name', 'Nama'),
+    },
+    {
+      title: 'PERUSAHAAN',
+      dataIndex: 'company',
+      width: '25%',
+      ...getColumnSearchProps('company', 'Perusahaan'),
     },
     {
       title: 'AKSI',
@@ -294,7 +357,8 @@ const DaftarPeserta = () => {
                   type="primary"
                   size="small"
                   onClick={() =>
-                    history.push(`/daftarPeserta/dashboardPeserta/${record.id_participant}`)
+               //  console.log(record.id)
+               history.push(`/daftarPeserta/dashboardPeserta/${record.id}`)
                   }
                 >
                   Monitoring Peserta
@@ -327,12 +391,6 @@ const DaftarPeserta = () => {
     )
   }
 
-  const getColumnBasedOnRole =() =>{
-if(rolePengguna === '4'){
-  return supervisor_columns
-}
-  }
-
   const items = [
     {
       key: '1',
@@ -340,7 +398,24 @@ if(rolePengguna === '4'){
       children: (
         <Table
           scroll={{ x: 'max-content' }}
-          columns={getColumnBasedOnRole()}
+          columns={columns}
+          dataSource={peserta}
+          rowKey={peserta.id}
+          bordered
+          pagination={true}
+        />
+      ),
+    },
+  ]
+
+  const supervisor_items = [
+    {
+      key: '1',
+      label: 'PESERTA',
+      children: (
+        <Table
+          scroll={{ x: 'max-content' }}
+          columns={supervisor_columns}
           dataSource={peserta}
           rowKey={peserta.id}
           bordered
@@ -357,15 +432,23 @@ if(rolePengguna === '4'){
   ) : (
     <>
       <CCard className="mb-4" key={1}>
-        {rolePengguna==='4' && (
-          <>
-          {title('DAFTAR PESERTA BIMBINGAN')}
-          </>
-        )}
+        {rolePengguna === '4' && <>{title('LIST DASHBOARD PESERTA BIMBINGAN')}</>}
+        {rolePengguna !== '4' && <>{title('LIST DASHBOARD  PESERTA KP dan PKL')}</>}
         <CCardBody>
           <CRow>
             <CCol sm={12}>
-              <Tabs type="card" defaultActiveKey="1" items={items} onChange={onChange}></Tabs>
+              {rolePengguna !== '4' && (
+                <Tabs type="card" defaultActiveKey="1" items={items} onChange={onChange}></Tabs>
+              )}
+
+              {rolePengguna === '4' && (
+                <Tabs
+                  type="card"
+                  defaultActiveKey="1"
+                  items={supervisor_items}
+                  onChange={onChange}
+                ></Tabs>
+              )}
             </CCol>
           </CRow>
         </CCardBody>

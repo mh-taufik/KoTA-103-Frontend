@@ -86,7 +86,7 @@ const PenilaianLogbook = () => {
   const [isLogbookAvailable, setIsLogbookAvailable] = useState()
   const [isSelfAssessmentAvailable, setIsSelfAssessmentAvailable] = useState()
   const [rppComplete, setRppComplete] = useState()
-
+  const [aspectGradeSelfAssessmentPeserta, setAspectGradeSelfAssessmentPeserta] = useState([])
   /** PAGINATION LOGBOOK */
   const handleChange = (value) => {
     var page = value - 1
@@ -102,15 +102,24 @@ const PenilaianLogbook = () => {
     setPagesSelfAssessment(value)
   }
 
-  const handleChangeNilaiSelfAssessment = (idS, index, nilaiS, keyData) => {
+  const handleChangeNilaiSelfAssessment = (
+    index,
+    keyData,
+    aspectId,
+    desc_sa,
+    grade_sa,
+    gradeId,
+  ) => {
     if (nilaiSelfAssessment[index]) {
       console.log('ya')
-      nilaiSelfAssessment[index][keyData] = nilaiS
+      nilaiSelfAssessment[index][keyData] = grade_sa
     } else {
       console.log('no')
       nilaiSelfAssessment[index] = {
-        id: idS,
-        [keyData]: nilaiS,
+        aspect_id: aspectId,
+        description: desc_sa,
+        [keyData]: grade_sa,
+        grade_id: gradeId,
       }
 
       setNilaiSelfAssessment(nilaiSelfAssessment)
@@ -146,7 +155,7 @@ const PenilaianLogbook = () => {
   }
 
   const SimpanPenilaianLogbook = async (penilaian) => {
-    console.log(penilaian, typeof(penilaian))
+    console.log(penilaian, typeof penilaian)
     await axios
       .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/grade`, {
         grade: penilaian,
@@ -161,39 +170,39 @@ const PenilaianLogbook = () => {
 
         refreshDataLogbook()
       })
-    .catch((error) => {
-      if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-        history.push({
-          pathname: '/login',
-          state: {
-            session: true,
-          },
-        })
-      } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-        history.push('/404')
-      } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
-        history.push('/500')
-      }
-    })
+      .catch((error) => {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+          history.push('/500')
+        }
+      })
   }
 
   const putNilaiSelfAssessment = async () => {
-    let data = nilaiSelfAssessment
-    for (var i in data) {
-      console.log(i, ' ', data[i])
-      await axios
-        .put(`http://localhost:1337/api/selfasspoins/${data[i].id}`, {
-          data: {
-            nilai: data[i].nilai,
-          },
+    console.log(selfAssessmentPeserta.finish_date, selfAssessmentPeserta.start_date, selfAssessmentPeserta.id,)
+
+    await axios
+      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/update`, {
+        "finish_date": selfAssessmentPeserta.finish_date,
+        "grade": nilaiSelfAssessment,
+        "id": selfAssessmentPeserta.self_assessment_id,
+        "participant_id": parseInt(NIM_PESERTA),
+        "start_date":  selfAssessmentPeserta.start_date
+      })
+      .then((res) => {
+        console.log(res)
+        notification.success({
+          message: 'Penilaian self assessment berhasil diubah',
         })
-        .then((res) => {
-          console.log(res)
-          notification.success({
-            message: 'Penilaian self assessment berhasil diubah',
-          })
-        })
-    }
+      })
   }
 
   useEffect(() => {
@@ -256,7 +265,9 @@ const PenilaianLogbook = () => {
             setIsSelfAssessmentAvailable(false)
           } else {
             setIsSelfAssessmentAvailable(true)
-            setSelfAssessmentPeserta(data_self_assessment.aspect_list)
+            setSelfAssessmentPeserta(data_self_assessment)
+            console.log('sa',data_self_assessment)
+            setAspectGradeSelfAssessmentPeserta(data_self_assessment.aspect_list)
           }
 
           if (data_rpp !== null) {
@@ -450,8 +461,6 @@ const PenilaianLogbook = () => {
           }
         }
 
-  
-
         setLoadings((prevLoadings) => {
           const newLoadings = [...prevLoadings]
           newLoadings[index] = false
@@ -618,7 +627,7 @@ const PenilaianLogbook = () => {
             </>
           )}
         </div>
- 
+
         <div style={{ marginTop: 150 }}>
           {title('SELF ASSESSMENT')}
 
@@ -656,7 +665,7 @@ const PenilaianLogbook = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {selfAssessmentPeserta.map((data, index) => {
+                      {aspectGradeSelfAssessmentPeserta.map((data, index) => {
                         return (
                           <tr key={data.aspect_id}>
                             <td>{index + 1}</td>
@@ -665,10 +674,12 @@ const PenilaianLogbook = () => {
                               <Input
                                 onChange={(e) =>
                                   handleChangeNilaiSelfAssessment(
-                                    data.aspect_id,
                                     index,
+                                    'grade',
+                                    data.aspect_id,
+                                    data.description,
                                     e.target.value,
-                                    'nilai',
+                                    data.grade_id,
                                   )
                                 }
                                 defaultValue={data.grade}
@@ -687,6 +698,7 @@ const PenilaianLogbook = () => {
                 <Button type="primary" onClick={putNilaiSelfAssessment} variant="contained">
                   Simpan Nilai
                 </Button>
+                <Button onClick={() => console.log(aspectGradeSelfAssessmentPeserta)}>tes</Button>
               </div>
               <br />
             </ul>
@@ -739,7 +751,7 @@ const PenilaianLogbook = () => {
                   content={contentPenilaianSangatBaik}
                   arrow={mergedArrow}
                 >
-                  <Button primary className='active' onClick={() => setNilai('SANGAT_BAIK')}>
+                  <Button primary className="active" onClick={() => setNilai('SANGAT_BAIK')}>
                     Sangat Baik
                   </Button>
                 </Popover>

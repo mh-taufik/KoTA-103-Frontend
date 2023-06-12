@@ -268,14 +268,24 @@ const RekapLogbook = () => {
           }
 
 
+          function setKeyIfNull(index, id) {
+            return id?id:index
+          }
+
+         
+
+          function setProjectNameIfNull(project_name){
+            return project_name?project_name:'-'
+          }
 
           let getTempRes = function (obj) {
             for (var i in obj) {
               temp_res.push({
-                id: obj[i].id,
+                id: setKeyIfNull(parseInt(i),obj[i].id),
                 date: convertDate(obj[i].date),
                 grade: obj[i].grade,
-                status: obj[i].status
+                status: obj[i].status,
+                project_name : setProjectNameIfNull(obj[i].project_name)
               })
             }
           }

@@ -21,7 +21,8 @@ const RekapPenilaianLogbook = () => {
   const history = useHistory()
   axios.defaults.withCredentials = true
   const [isLoading, setIsLoading] = useState(true)
-  const unamePeserta = params.id
+  const ID_PARTICIPANT = params.id
+  const [dataPeserta, setDataPeserta] = useState([])
   const [dataNilaiLogbookPeserta, setDataNilaiLogbookPeserta] = useState([])
   const usernamePengguna = localStorage.username
   let rolePengguna = localStorage.id_role
@@ -42,60 +43,94 @@ const RekapPenilaianLogbook = () => {
   }
 
   useEffect(() => {
-    const getDataLogbookPeserta = async () => {
+    async function getDataInformasiPeserta() {
       await axios
-        .get(
-          `http://localhost:1337/api/logbooks?populate=*&filters[peserta][username]=${unamePeserta}`,
-        )
-        .then((res) => {
-          console.log(res.data.data)
-          const convertDate = (date) => {
-            let temp_date_split = date.split('-')
-            const month = [
-              'Januari',
-              'Februari',
-              'Maret',
-              'April',
-              'Mei',
-              'Juni',
-              'Juli',
-              'Agustus',
-              'September',
-              'Oktober',
-              'November',
-              'Desember',
-            ]
-            let date_month = temp_date_split[1]
-            let month_of_date = month[parseInt(date_month) - 1]
-            // console.log(month_of_date,'isi date monts', month_of_date)
-            return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
+        .post(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-by-id`, {
+          id: [ID_PARTICIPANT],
+        })
+        .then((result) => {
+           setDataPeserta(result.data.data[0])
+         
+          
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+            history.push('/500')
           }
-
-          const getStatusPenilaian = (nilai)=>{
-            return nilai?'sudah dinilai':'belum dinilai'
-          }
-
-          let temp = res.data.data
-          let temp1 = []
-
-          let functTemp = function (data) {
-            for (var i in data) {
-              temp1.push({
-                nilai: data[i].attributes.nilai,
-                tanggallogbook: data[i].attributes.tanggallogbook,
-                namaproyek: data[i].attributes.namaproyek,
-                statuspengumpulan: data[i].attributes.statuspengumpulan,
-                statuspenilaian : getStatusPenilaian(data[i].attributes.nilai),
-                id: data[i].id,
-              })
-            }
-          }
-
-          functTemp(temp)
-          setDataNilaiLogbookPeserta(temp1)
-          setIsLoading(false)
         })
     }
+    const getDataLogbookPeserta = async () => {
+      await axios
+      .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/get-all/${ID_PARTICIPANT}`)
+      .then((result) => {
+       if(result.data.data.length>0){
+        console.log(result.data.data)
+        var temp = result.data.data
+        var temp_res = []
+        const convertDate = (date) => {
+          let temp_date_split = date.split('-')
+          const month = [
+            'Januari',
+            'Februari',
+            'Maret',
+            'April',
+            'Mei',
+            'Juni',
+            'Juli',
+            'Agustus',
+            'September',
+            'Oktober',
+            'November',
+            'Desember',
+          ]
+          let date_month = temp_date_split[1]
+          let month_of_date = month[parseInt(date_month) - 1]
+          return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
+        }
+
+
+        
+        function setKeyIfNull(index, id) {
+          return id?id:index
+        }
+
+       
+
+        function setProjectNameIfNull(project_name){
+          return project_name?project_name:'-'
+        }
+
+        let getTempRes = function (obj) {
+          for (var i in obj) {
+            temp_res.push({
+              id: setKeyIfNull(parseInt(i),obj[i].id),
+              date: convertDate(obj[i].date),
+              grade: obj[i].grade,
+              status: obj[i].status,
+              project_name : setProjectNameIfNull(obj[i].project_name)
+            })
+          }
+        }
+
+        getTempRes(temp)
+        setDataNilaiLogbookPeserta(temp_res)
+       }else{
+        setDataNilaiLogbookPeserta(result.data.data)
+       }
+        setIsLoading(false)
+        })
+    }
+
+    getDataInformasiPeserta()
     getDataLogbookPeserta()
   }, [history])
 
@@ -109,7 +144,7 @@ const RekapPenilaianLogbook = () => {
     }
   }
 
-  const tagColorStatusPenilaianHandling = (status) => {
+  const tagColorLogbookGradeHandling = (status) => {
     if (status === 'sudah dinilai') {
       return 'green'
     } else if (status === 'belum dinilai') {
@@ -122,26 +157,40 @@ const RekapPenilaianLogbook = () => {
     <>
       {title('REKAP PENILAIAN LOGBOOK')}
 
-      <Space
-        direction="vertical"
-        size="middle"
-        style={{
-          display: 'flex',
-        }}
-      >
-        <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
-          <Row style={{ fontSize: 16 }}>
-            <Col span={4}>Nama Lengkap</Col>
-            <Col span={2}>:</Col>
-            <Col span={8}>Gina Anifah Choirunnisa</Col>
-          </Row>
-          <Row style={{ fontSize: 16 }}>
-            <Col span={4}>NIM</Col>
-            <Col span={2}>:</Col>
-            <Col span={8}>181524003</Col>
-          </Row>
-        </Card>
-      </Space>
+      <div>
+    
+          <Space
+            className="spacebottom"
+            direction="vertical"
+            size="middle"
+            style={{
+              display: 'flex',
+            }}
+          >
+            <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
+              <Row style={{ padding: 5 }}>
+                <Col span={4}>Nama Lengkap</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.name}</Col>
+              </Row>
+              <Row style={{ padding: 5 }}>
+                <Col span={4}>NIM</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.nim}</Col>
+              </Row>
+              <Row style={{ padding: 5 }}>
+                <Col span={4}>Sistem Kerja</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.work_system}</Col>
+              </Row>
+              <Row style={{ padding: 5 }}>
+                <Col span={4}>Angkatan</Col>
+                <Col span={2}>:</Col>
+                <Col span={8}>{dataPeserta.year}</Col>
+              </Row>
+            </Card>
+          </Space>
+        </div>
 
       <div className="container2">
         <h5>INFORMASI DOKUMEN PESERTA</h5>
@@ -163,17 +212,17 @@ const RekapPenilaianLogbook = () => {
               return (
                 <tr key={data.id}>
                   <td>{idx + 1}</td>
-                  <td>{data.tanggallogbook}</td>
-                  <td>{data.namaproyek}</td>
-                  <td><Tag color={tagColorStatusPenilaianHandling(data.statuspenilaian)}>
-                      {data.statuspenilaian}
+                  <td>{data.date}</td>
+                  <td>{data.project_name}</td>
+                  <td><Tag color={tagColorLogbookGradeHandling(data.status)}>
+                      {data.status}
                     </Tag></td>
                   <td>
-                    <Tag color={tagColorStatusHandling(data.statuspengumpulan)}>
+                    {/* <Tag color={tagColorStatusHandling(data.statuspengumpulan)}>
                       {data.statuspengumpulan}
-                    </Tag>
+                    </Tag> */}
                   </td>
-                  <td>{data.nilai}</td>
+                  <td>{data.grade}</td>
                 </tr>
               )
             })}
