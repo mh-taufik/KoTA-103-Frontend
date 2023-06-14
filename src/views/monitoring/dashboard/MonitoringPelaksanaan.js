@@ -1,10 +1,44 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, Card, Col, Progress, Row, Space } from 'antd'
 import { ClockCircleOutlined } from '@ant-design/icons'
 import { Timeline } from 'antd'
 import '../pengisianDokumen/rpp/rpp.css'
 import Title from 'antd/es/typography/Title'
+import axios from 'axios'
+import { useHistory } from 'react-router-dom/cjs/react-router-dom.min'
 const MonitoringPelaksanaan = () => {
+  const history = useHistory
+  const [dataDashboard, setDataDashboard] = useState([])
+  axios.defaults.withCredentials = true
+
+
+useEffect(()=>{
+  const getDataDashboard = async (index) => {
+    await axios
+      .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/dashboard`)
+      .then((result) => {
+        console.log(result.data.data)
+        setDataDashboard(result.data.data)
+      })
+      .catch(function (error) {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+          history.push('/500')
+        }
+      })
+  }
+  getDataDashboard()
+
+},[history])
+
   const title = (judul) => {
     return (
       <>
@@ -40,9 +74,6 @@ const MonitoringPelaksanaan = () => {
                   </Col>
                   <Col>Peserta Sudah Mempunyai RPP</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
 
@@ -59,9 +90,6 @@ const MonitoringPelaksanaan = () => {
                   </Col>
                   <Col>Peserta Memiliki Dokumen Lengkap</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
 
@@ -78,9 +106,6 @@ const MonitoringPelaksanaan = () => {
                   </Col>
                   <Col>Peserta Memiliki Dokumen Lengkap</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
 
@@ -97,9 +122,6 @@ const MonitoringPelaksanaan = () => {
                   </Col>
                   <Col>Peserta Memiliki Dokumen Lengkap</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
           </Row>
@@ -119,9 +141,6 @@ const MonitoringPelaksanaan = () => {
                   </Col>
                   <Col>Peserta Belum Mempunyai RPP</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
             <Col span={6}>
@@ -137,9 +156,6 @@ const MonitoringPelaksanaan = () => {
                   </Col>
                   <Col>Peserta Dokumen Tidak Lengkap</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
 
@@ -156,9 +172,6 @@ const MonitoringPelaksanaan = () => {
                   </Col>
                   <Col>Peserta Dokumen Tidak Lengkap</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
 
@@ -175,9 +188,6 @@ const MonitoringPelaksanaan = () => {
                   </Col>
                   <Col>Peserta Dokumen Tidak Lengkap</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
           </Row>

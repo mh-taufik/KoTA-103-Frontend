@@ -13,6 +13,7 @@ import {
   Popover,
   Card,
   FloatButton,
+  Alert,
 } from 'antd'
 import axios from 'axios'
 import { SearchOutlined } from '@ant-design/icons'
@@ -35,6 +36,8 @@ const RekapLaporanPeserta = () => {
   let history = useHistory()
   const [loadings, setLoadings] = useState([])
   axios.defaults.withCredentials = true
+  const [tanggalLaporanDibuka, setTanggalLaporanDibuka] = useState()
+  const [isStartDateToAccessThisPage, setIsStartDateToAccessThisPage] = useState()
   const [messageApi, contextHolder] = message.useMessage()
   const info = (link) => {
     navigator.clipboard.writeText(link)
@@ -138,28 +141,6 @@ const RekapLaporanPeserta = () => {
       PESERTA = parseInt(NIM_PESERTA_USER)
     }
 
-    const convertDate = (date) => {
-      let temp_date_split = date.split('-')
-      const month = [
-        'Januari',
-        'Februari',
-        'Maret',
-        'April',
-        'Mei',
-        'Juni',
-        'Juli',
-        'Agustus',
-        'September',
-        'Oktober',
-        'November',
-        'Desember',
-      ]
-      let date_month = temp_date_split[1]
-      let month_of_date = month[parseInt(date_month) - 1]
-      // console.log(month_of_date,'isi date monts', month_of_date)
-      return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
-    }
-
     await axios
       .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get-all/${PESERTA}`)
       .then((res) => {
@@ -186,6 +167,27 @@ const RekapLaporanPeserta = () => {
       })
   }
 
+  const convertDate = (date) => {
+    var temp_date_split = date.split('-')
+    const month = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ]
+    var date_month = temp_date_split[1]
+    var month_of_date = month[parseInt(date_month) - 1]
+    return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
+  }
+
   useEffect(() => {
     
 
@@ -197,32 +199,11 @@ const RekapLaporanPeserta = () => {
         PESERTA = parseInt(NIM_PESERTA_USER)
       }
 
-      const convertDate = (date) => {
-        let temp_date_split = date.split('-')
-        const month = [
-          'Januari',
-          'Februari',
-          'Maret',
-          'April',
-          'Mei',
-          'Juni',
-          'Juli',
-          'Agustus',
-          'September',
-          'Oktober',
-          'November',
-          'Desember',
-        ]
-        let date_month = temp_date_split[1]
-        let month_of_date = month[parseInt(date_month) - 1]
-        // console.log(month_of_date,'isi date monts', month_of_date)
-        return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
-      }
-
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get-all/${PESERTA}`)
         .then((res) => {
           let temp = res.data.data
+         if(temp !== null && temp.length>0){
           let temp_after = []
           let funcGetTempAfter = function (obj) {
             for (var i in obj) {
@@ -235,8 +216,13 @@ const RekapLaporanPeserta = () => {
             }
           }
           funcGetTempAfter(temp)
-          setIsLoading(false)
+        
           setDataLaporanPeserta(temp_after)
+         }else{
+          setDataLaporanPeserta(undefined)
+         }
+
+         setIsLoading(false)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -287,8 +273,27 @@ const RekapLaporanPeserta = () => {
         })
     }
 
-    GetDataInfoPeserta()
+    async function GetDataDeadline () {
+      await axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=3`).then((response)=>{
+        setTanggalLaporanDibuka(convertDate(response.data.data.start_assignment_date))
+      }).catch(function (error) {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+          history.push('/500')
+        }
+      })
+    }
 
+    GetDataInfoPeserta()
+    GetDataDeadline ()
 
     getLaporanPeserta()
   }, [history])
@@ -317,28 +322,6 @@ const RekapLaporanPeserta = () => {
       width: '10%',
       ...getColumnSearchProps('upload_date', 'Tanggal Pengumpulan'),
     },
-    // {
-    //   title: 'Deadline Pengumpulan',
-    //   dataIndex: ['attributes', 'deadlinen'],
-    //   width: '7%',
-    //   ...getColumnSearchProps(['attributes', 'deadlinen'], 'Deadline'),
-    // },
-    // {
-    //   title: 'Status',
-    //   dataIndex: ['attributes', 'status'],
-    //   width: '7%',
-    //   ...getColumnSearchProps(['attributes', 'status'], 'Status'),
-    //   render: (text, record) => {
-    //     var color = ''
-    //     if (record.attributes.status === 'terlambat') {
-    //       color = 'volcano'
-    //     } else if (record.attributes.status === 'tepat waktu') {
-    //       color = 'green'
-    //     }
-
-    //     return <Tag color={color}>{record.attributes.status}</Tag>
-    //   },
-    // },
     {
       title: 'Link Drive',
       dataIndex: 'uri',
@@ -406,28 +389,7 @@ const RekapLaporanPeserta = () => {
       width: '10%',
       ...getColumnSearchProps('upload_date', 'Tanggal Pengumpulan'),
     },
-    // {
-    //   title: 'Deadline Pengumpulan',
-    //   dataIndex: ['attributes', 'deadlinen'],
-    //   width: '10%',
-    //   ...getColumnSearchProps(['attributes', 'deadlinen'], 'Deadline'),
-    // },
-    // {
-    //   title: 'Status',
-    //   width: '10%',
-    //   dataIndex: ['attributes', 'status'],
-    //   ...getColumnSearchProps(['attributes', 'status'], 'Status'),
-    //   render: (text, record) => {
-    //     var color = ''
-    //     if (record.attributes.status === 'terlambat') {
-    //       color = 'volcano'
-    //     } else if (record.attributes.status === 'tepat waktu') {
-    //       color = 'green'
-    //     }
-
-    //     return <Tag color={color}>{record.attributes.status}</Tag>
-    //   },
-    // },
+  
     {
       title: 'Link Drive',
       dataIndex: 'uri',
@@ -467,10 +429,10 @@ const RekapLaporanPeserta = () => {
     return (
       <>
         <div>
-          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius: 2 }}>
+          <Row style={{ backgroundColor: '#00474f', padding: 3, borderRadius: 2 }}>
             <Col span={24}>
               <b>
-                <h4 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h4>
+                <h5 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h5>
               </b>
             </Col>
           </Row>
@@ -521,8 +483,47 @@ const RekapLaporanPeserta = () => {
           </Space>
         )}
       </div>
+      {rolePengguna === '1' && (
+        <Alert
+          className="spacebottom2"
+          message="Informasi Pengumpulan Laporan"
+          description={
+            <div>
+              <ul>
+                <li>
+                  Pengisian dapat dilakukan mulai &nbsp;&nbsp; <b>{tanggalLaporanDibuka}</b>&nbsp;&nbsp;
+                </li>
+                <li>Peserta dapat melakukan edit link laporan selama masih memiliki akses untuk pengeditan</li>
+                <li>Laporan dikumpulkan dalam bentuk link</li>
+              </ul>
+            </div>
+          }
+          type="info"
+          showIcon
+        />
+      )}
+
       <CCard className="mb-4">
         {title('REKAP LAPORAN PESERTA')}
+    {rolePengguna === '1' && (
+          <Row>
+          <Col span={24} style={{ textAlign: 'right' }}>
+          
+              <Button
+                id="create-logbook"
+              
+                size="sm"
+                shape="round"
+                style={{ color: 'white', background: '#339900', marginBottom: 16, margin:5 }}
+                onClick={()=>history.push(`/laporan/submissionLaporan`)}
+              >
+                Tambahkan Laporan
+              </Button>
+        
+          
+          </Col>
+        </Row>
+    )}
         <CCardBody>
           {rolePengguna !== '1' && (
             <FloatButton

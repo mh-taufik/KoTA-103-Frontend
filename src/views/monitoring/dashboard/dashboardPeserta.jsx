@@ -1,43 +1,50 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Card, Col, Progress, Row, Space } from 'antd'
-import { ClockCircleOutlined } from '@ant-design/icons'
+import { Button, Card, Col, FloatButton, Progress, Row, Space } from 'antd'
+import { ClockCircleOutlined,ArrowLeftOutlined  } from '@ant-design/icons'
 import { Timeline } from 'antd'
 import '../pengisianDokumen/rpp/rpp.css'
 import Title from 'antd/es/typography/Title'
-import { useHistory } from 'react-router-dom/cjs/react-router-dom.min'
+import { useHistory, useParams } from 'react-router-dom/cjs/react-router-dom.min'
 import axios from 'axios'
 const DashboardPeserta = () => {
+  const params = useParams()
+  const NIM_PESERTA = params.nim
+  const rolePengguna = localStorage.id_role
   const history = useHistory()
   const [dataDashboardPeserta, setDataDashboardPeserta] = useState([])
   axios.defaults.withCredentials = true
 
-
-useEffect(()=>{
-  const getDataDashboard = async (index) => {
-    await axios
-      .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/dashboard`)
-      .then((result) => {
-        console.log(result.data.data)
-        setDataDashboardPeserta(result.data.data)
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-          history.push('/500')
-        }
-      })
-  }
-  getDataDashboard()
-
-},[history])
+  useEffect(() => {
+    const getDataDashboard = async (index) => {
+      let api_get_dashboard
+      if (rolePengguna === '1') {
+        api_get_dashboard = `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/dashboard`
+      } else {
+        api_get_dashboard = `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/dashboard?participant_id=${NIM_PESERTA}`
+      }
+      await axios
+        .get(api_get_dashboard)
+        .then((result) => {
+          console.log(result.data.data)
+          setDataDashboardPeserta(result.data.data)
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+            history.push('/500')
+          }
+        })
+    }
+    getDataDashboard()
+  }, [history])
   const title = (judul) => {
     return (
       <>
@@ -75,7 +82,6 @@ useEffect(()=>{
               children: 'Mengerjakan logbook harian ( setiap hari )',
             },
             {
-              // color: 'red',
               children: 'Mengerjakan self assessment per minggu ',
               color: 'green',
             },
@@ -114,9 +120,6 @@ useEffect(()=>{
                   </Col>
                   <Col>Dokumen Sudah Dikumpulkan</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
 
@@ -133,9 +136,6 @@ useEffect(()=>{
                   </Col>
                   <Col>Dokumen Sudah Dikumpulkan</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
 
@@ -152,9 +152,6 @@ useEffect(()=>{
                   </Col>
                   <Col>Dokumen Sudah Dikumpulkan</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
 
@@ -171,9 +168,6 @@ useEffect(()=>{
                   </Col>
                   <Col>Dokumen Sudah Dikumpulkan</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
           </Row>
@@ -193,9 +187,6 @@ useEffect(()=>{
                   </Col>
                   <Col>Dokumen Belum Dilengkapi</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
 
@@ -212,9 +203,6 @@ useEffect(()=>{
                   </Col>
                   <Col>Dokumen Belum Dilengkapi</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
 
@@ -231,17 +219,18 @@ useEffect(()=>{
                   </Col>
                   <Col>Dokumen Belum Dilengkapi</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
           </Row>
         </div>
       </div>
+      <FloatButton
+          type="primary"
+          onClick={()=>{history.push(`/daftarPeserta`)}}
+          icon={<ArrowLeftOutlined />}
+          tooltip={<div>Kembali ke Rekap Dokumen Peserta</div>}
+        />
 
-      {title('TIMELINE DOKUMEN PESERTA ')}
-      <div className='container2'></div>
     </>
   )
 }

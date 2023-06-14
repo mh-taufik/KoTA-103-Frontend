@@ -423,7 +423,7 @@ const _nav = [
   {
     component: CNavItem,
     name: 'Monitoring Dashboard',
-    to: '/monitoringPelaksanaan',
+    to: '/dashboardPanitia',
     icon: <FontAwesomeIcon icon={faScaleUnbalancedFlip} size="lg" />,
     role: '0',
     index: 51,

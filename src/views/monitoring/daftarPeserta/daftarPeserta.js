@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
-import { Tabs, Table, Button, Row, Col, Input, Space, Spin, Popover } from 'antd'
+import { Tabs, Table, Button, Row, Col, Input, Space, Spin, Popover, Result } from 'antd'
 import axios from 'axios'
 import { useHistory } from 'react-router-dom'
 import { SearchOutlined } from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
-import { LoadingOutlined } from '@ant-design/icons'
+import { SmileOutlined} from '@ant-design/icons'
 
 const DaftarPeserta = () => {
   let searchInput
@@ -18,9 +18,8 @@ const DaftarPeserta = () => {
   axios.defaults.withCredentials = true
   const [peserta, setPeserta] = useState([])
   const rolePengguna = localStorage.id_role
-
   const [isNotNullParticipantSupervisor, setIsNotNullParticipantSupervisor] = useState()
-  const [dataColumn, setDataColumn] = useState()
+
 
 
   const getColumnSearchProps = (dataIndex, name) => ({
@@ -121,7 +120,6 @@ const DaftarPeserta = () => {
       await axios
         .get('http://localhost:8080/monitoring/supervisor-mapping/get-all?type=supervisor')
         .then((res) => {
-          console.log('response', res.data.data[0].participant)
           if (res.data.data !== null) {
             if (res.data.data[0].participant !== null) {
               setPeserta(res.data.data[0].participant)
@@ -173,15 +171,21 @@ const DaftarPeserta = () => {
                   let data_company = data[iterate_data].company_name
                   let data_supervisor = data[iterate_data].lecturer_name
                   let participant = data[iterate_data].participant
-                  //console.log()
-                  for (var iterate_participant in participant) {
-                    participant_supervisor.push({
-                      id: participant[iterate_participant].id,
-                      name: participant[iterate_participant].name,
-                      supervisor: data_supervisor,
-                      company: data_company,
-                    })
-                  }
+                  
+              
+                 if(participant !== null){
+                    for (var iterate_participant in participant) {
+                      participant_supervisor.push({
+                        id: participant[iterate_participant].id,
+                        name: participant[iterate_participant].name,
+                        supervisor: data_supervisor,
+                        company: data_company,
+                      })
+                    }
+                    setIsNotNullParticipantSupervisor(true)
+                  }else{
+                    setIsNotNullParticipantSupervisor(false)
+                 }
                 }
               }
 
@@ -218,14 +222,18 @@ const DaftarPeserta = () => {
                   let data_company = data[iterate_data].company_name
                   let data_supervisor = data[iterate_data].lecturer_name
                   let participant = data[iterate_data].participant
-                  //console.log()
-                  for (var iterate_participant in participant) {
-                    participant_supervisor.push({
-                      id: participant[iterate_participant].id,
-                      name: participant[iterate_participant].name,
-                      supervisor: data_supervisor,
-                      company: data_company,
-                    })
+                  if(participant !== null){
+                    for (var iterate_participant in participant) {
+                      participant_supervisor.push({
+                        id: participant[iterate_participant].id,
+                        name: participant[iterate_participant].name,
+                        supervisor: data_supervisor,
+                        company: data_company,
+                      })
+                    }
+                    setIsNotNullParticipantSupervisor(true)
+                  }else{
+                    setIsNotNullParticipantSupervisor(false)
                   }
                 }
               }
@@ -306,7 +314,7 @@ const DaftarPeserta = () => {
                     history.push(`/daftarPeserta/dashboardPeserta/${record.id}`)
                   }
                 >
-                  Monitoring Peserta
+                  Dashboard Peserta
                 </Button>
               </Popover>
             </Col>
@@ -357,11 +365,10 @@ const DaftarPeserta = () => {
                   type="primary"
                   size="small"
                   onClick={() =>
-               //  console.log(record.id)
                history.push(`/daftarPeserta/dashboardPeserta/${record.id}`)
                   }
                 >
-                  Monitoring Peserta
+                  Dashboard Peserta
                 </Button>
               </Popover>
             </Col>
@@ -441,13 +448,22 @@ const DaftarPeserta = () => {
                 <Tabs type="card" defaultActiveKey="1" items={items} onChange={onChange}></Tabs>
               )}
 
-              {rolePengguna === '4' && (
+              {(rolePengguna === '4'  && isNotNullParticipantSupervisor)&& (
                 <Tabs
                   type="card"
                   defaultActiveKey="1"
                   items={supervisor_items}
                   onChange={onChange}
                 ></Tabs>
+              )}
+
+              {(rolePengguna === '4' && !isNotNullParticipantSupervisor)&&(
+                  <Result
+                  icon={<SmileOutlined />}
+                  title="Maaf Akses Untuk Halaman Ini Belum Dibuka"
+                  subTitle="Anda belum memiliki peserta bimbingan"
+                
+                />
               )}
             </CCol>
           </CRow>

@@ -549,7 +549,7 @@ const RekapPenilaianPeserta = () => {
                           
                           <TabPane tab="Logbook" key="1.1">
                             <CCard className="mb-4" style={{ padding: '20px' }}>
-                              <CRow>
+                              {/* <CRow>
                                 <CCol sm={6}>
                                   <CCard className="mb-4" id="card-filter">
                                     <CCardBody>
@@ -609,7 +609,7 @@ const RekapPenilaianPeserta = () => {
                                     </CCardBody>
                                   </CCard>
                                 </CCol>
-                              </CRow>
+                              </CRow> */}
                               <CCard className="mb-4">
                                 <CCardBody>
                                   <CRow>
@@ -629,7 +629,7 @@ const RekapPenilaianPeserta = () => {
                           </TabPane>
                           <TabPane tab="Self Assessment" key="1.2">
                           <CCard className="mb-4" style={{ padding: '20px' }}>
-                              <CRow>
+                              {/* <CRow>
                                 <CCol sm={6}>
                                   <CCard className="mb-4" id="card-filter">
                                     <CCardBody>
@@ -689,7 +689,7 @@ const RekapPenilaianPeserta = () => {
                                     </CCardBody>
                                   </CCard>
                                 </CCol>
-                              </CRow>
+                              </CRow> */}
                               <CCard className="mb-4">
                                 <CCardBody>
                                   <CRow>
@@ -709,7 +709,7 @@ const RekapPenilaianPeserta = () => {
                           </TabPane>
                           <TabPane tab="Form Penilaian Pembimbing Jurusan" key="1.3">
                           <CCard className="mb-4" style={{ padding: '20px' }}>
-                              <CRow>
+                              {/* <CRow>
                                 <CCol sm={6}>
                                   <CCard className="mb-4" id="card-filter">
                                     <CCardBody>
@@ -769,7 +769,7 @@ const RekapPenilaianPeserta = () => {
                                     </CCardBody>
                                   </CCard>
                                 </CCol>
-                              </CRow>
+                              </CRow> */}
                               <CCard className="mb-4">
                                 <CCardBody>
                                   <CRow>

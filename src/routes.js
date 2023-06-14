@@ -56,6 +56,7 @@ const pengelolaanPertanyaanFeedback = lazyWithRetry(() => import('./views/pengel
 
 //Monitoring
 const MonitoringPelaksanaan = lazyWithRetry(() => import('./views/monitoring/dashboard/MonitoringPelaksanaan'))
+const DashboardPanitia = lazyWithRetry(() => import('./views/monitoring/dashboard/dashboardPanitia'))
 const DaftarPeserta = lazyWithRetry(() => import('./views/monitoring/daftarPeserta/daftarPeserta')) 
 const PemetaanPembimbingJurusan = lazyWithRetry(() => import('./views/monitoring/pemetaanPembimbing/PemetaanPembimbingJurusan'))
 const DashboardPeserta = lazyWithRetry(() => import('./views/monitoring/dashboard/dashboardPeserta'))
@@ -76,6 +77,7 @@ const FormEditRPP =  lazyWithRetry(() => import('./views/monitoring/pengisianDok
 const RekapSelfAssessment = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/selfassessment/rekapSelfAssessment')) 
 const DetailSelfAssessment = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/selfassessment/detailSelfAssessment')) 
 const UploadLaporan = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/laporan/uploadLaporan'))
+const TambahLaporan= lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/laporan/tambahLaporan'))
 const RekapLogbook = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/logbook/rekapLogbook'))
 const PenilaianLogbook = lazyWithRetry(() => import('./views/monitoring/penilaianArtifakPeserta/logbook/penilaianLogbook'))
 const PembobotanSelfAssessment = lazyWithRetry(() => import('./views/monitoring/pengelolaanMonitoring/pengaturanPoinPenilaianSelfAssessment')) 
@@ -188,6 +190,7 @@ const routes = [
   //MONITORING
   { path: '/dashboardPeserta', name: 'Dashboard Peserta', component: DashboardPeserta, exact:true },
   { path: '/monitoringPelaksanaan', name: 'Monitoring Pelaksanaan', component: MonitoringPelaksanaan, exact:true },
+  { path: '/dashboardPanitia', name: 'Monitoring Panitia', component: DashboardPanitia, exact:true },
   { path: '/daftarPeserta', name: 'Daftar Peserta', component: DaftarPeserta, exact:true },
   { path: '/daftarPeserta/dashboardPeserta/:nim', name: ':nim', component: DashboardPeserta, exact:true },
 
@@ -217,6 +220,7 @@ const routes = [
 
   /** LAPORAN */
   { path: '/laporan', name: 'Laporan', component:  RekapLaporan, exact:true},
+  { path: '/laporan/submissionLaporan', name: 'Pengumpulan Laporan', component:  TambahLaporan, exact:true},
   { path: '/laporan/submissionLaporan/:id', name: ':id', component:  UploadLaporan, exact:true},
 
   //DOKUMEN PESERTA (PANITIA DAN PEMBIMBING)

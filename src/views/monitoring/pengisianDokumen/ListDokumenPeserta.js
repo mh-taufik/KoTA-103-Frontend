@@ -29,6 +29,16 @@ const ListDokumenPeserta = () => {
   const [searchedColumn, setSearchedColumn] = useState('')
   const [isNotNullSupervisorParticipant, setIsNotNullSupervisorParticipant] = useState()
   const searchInput = useRef(null)
+  const contoller_abort = new AbortController();
+  const [totalRppSubmitted, setTotalRppSubmitted] = useState()
+  const [totalRppMissing,setTotalRppMissing] = useState()
+  const [totalLogbookSubmitted, setTotalLogbookSubmitted] = useState()
+  const [totalLogbookMissing,setTotalLogbookMissing] = useState()
+  const [totalSelfAssessmentSubmitted, setTotalSelfAssessmentSubmitted] = useState()
+  const [totalSelfAssessmentMissing,setTotalSelfAssessmentMissing] = useState()
+  const [totalLaporanSubmitted, setTotalLaporanSubmitted] = useState()
+  const [totalLaporanMissing,setTotalLaporanMissing] = useState()
+  const [totalCountingDocument,setTotalCountingDocument] = useState()
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm()
     setSearchText(selectedKeys[0])
@@ -146,10 +156,11 @@ const ListDokumenPeserta = () => {
   }
 
   useEffect(() => {
-    const getAllListPeserta = async (record, index) => {
-      axios.defaults.withCredentials = true
+    const getAllListPeserta = async(record, index) => {
+   
+    axios.defaults.withCredentials = true
       if (rolePengguna !== '4') {
-        await axios
+    await  axios
           .get(
             `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all?type=comitte`,
           )
@@ -181,6 +192,7 @@ const ListDokumenPeserta = () => {
               setIsNotNullSupervisorParticipant(false)
             }
             setIsLoading(false)
+            return () => contoller_abort.abort();
           })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -195,9 +207,11 @@ const ListDokumenPeserta = () => {
           } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
             history.push('/500')
           }
+         
         })
+        return () => contoller_abort.abort();
       } else if (rolePengguna === '4') {
-        await axios
+    await  axios
           .get(
             `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all?type=supervisor`,
           )
@@ -210,7 +224,6 @@ const ListDokumenPeserta = () => {
                   let data_company = data[iterate_data].company_name
                   let data_supervisor = data[iterate_data].lecturer_name
                   let participant = data[iterate_data].participant
-                  //console.log()
                   for (var iterate_participant in participant) {
                     participant_supervisor.push({
                       id: participant[iterate_participant].id,
@@ -228,6 +241,7 @@ const ListDokumenPeserta = () => {
 
             }
             setIsLoading(false)
+            return () => contoller_abort.abort();
 
           })
           .catch(function (error) {
@@ -244,11 +258,50 @@ const ListDokumenPeserta = () => {
               history.push('/500')
             }
           })
+
+          return () => contoller_abort.abort();
+        
       }
+      return () => contoller_abort.abort();
     }
 
+function getInformationOfDocument(){
+ axios
+  .get(
+    `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/dashboard`,
+  )
+  .then((response) => {
+    setTotalCountingDocument(response.data.data)
+    console.log()
+   
+    setIsLoading(false)
+
+  })
+  .catch(function (error) {
+    if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+      history.push({
+        pathname: '/login',
+        state: {
+          session: true,
+        },
+      })
+    } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+      history.push('/404')
+    } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+      history.push('/500')
+    }
+    return () => contoller_abort.abort();
+
+  })
+  return () => contoller_abort.abort();
+
+}
+
     getAllListPeserta()
-  }, [history])
+    getInformationOfDocument()
+    return () => contoller_abort.abort();
+  },[history])
+
 
   const columnsRpp = [
     {
@@ -529,8 +582,8 @@ const ListDokumenPeserta = () => {
                                 </Button>
                               </Col>
                               <Col span={18} style={{ paddingTop: '10px' }}>
-                                <h6>Sudah Mengumpulkan RPP</h6>
-                                <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
+                                <h6>RPP Sudah Dikumpulkan</h6>
+                                <h5 style={{ color: '#339900' }}>{totalCountingDocument.rpp_submitted} Dokumen</h5>
                               </Col>
                             </Row>
                           </CCardBody>
@@ -557,8 +610,8 @@ const ListDokumenPeserta = () => {
                                 </Button>
                               </Col>
                               <Col span={18} style={{ paddingTop: '10px' }}>
-                                <h6>Belum memiliki RPP</h6>
-                                <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
+                                <h6>RPP Belum Dikumpulkan</h6>
+                                <h5 style={{ color: '#CC0033' }}>{totalCountingDocument.rpp_missing} Dokumen</h5>
                               </Col>
                             </Row>
                           </CCardBody>
@@ -606,8 +659,8 @@ const ListDokumenPeserta = () => {
                                 </Button>
                               </Col>
                               <Col span={18} style={{ paddingTop: '10px' }}>
-                                <h6>Sudah Mengumpulkan Semua Logbook</h6>
-                                <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
+                                <h6>Logbook Dikumpulkan</h6>
+                                <h5 style={{ color: '#339900' }}>{totalCountingDocument.logbook_submitted} Dokumen</h5>
                               </Col>
                             </Row>
                           </CCardBody>
@@ -634,8 +687,8 @@ const ListDokumenPeserta = () => {
                                 </Button>
                               </Col>
                               <Col span={18} style={{ paddingTop: '10px' }}>
-                                <h6>Logbook Masih Belum Lengkap</h6>
-                                <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
+                                <h6>Logbook Belum Dikumpulkan</h6>
+                                <h5 style={{ color: '#CC0033' }}>{totalCountingDocument.logbook_missing} Dokumen</h5>
                               </Col>
                             </Row>
                           </CCardBody>
@@ -683,8 +736,8 @@ const ListDokumenPeserta = () => {
                                 </Button>
                               </Col>
                               <Col span={18} style={{ paddingTop: '10px' }}>
-                                <h6>Self Assesment Lengkap</h6>
-                                <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
+                                <h6>Self Assessment Dikumpulkan</h6>
+                                <h5 style={{ color: '#339900' }}>{totalCountingDocument.self_assessment_submitted} Dokumen </h5>
                               </Col>
                             </Row>
                           </CCardBody>
@@ -711,8 +764,8 @@ const ListDokumenPeserta = () => {
                                 </Button>
                               </Col>
                               <Col span={18} style={{ paddingTop: '10px' }}>
-                                <h6>Self Assessment Tidak Lengkap</h6>
-                                <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
+                                <h6>Self Assessment Belum Dikumpulkan</h6>
+                                <h5 style={{ color: '#CC0033' }}>{totalCountingDocument.self_assessment_missing} Dokumen</h5>
                               </Col>
                             </Row>
                           </CCardBody>
@@ -760,8 +813,8 @@ const ListDokumenPeserta = () => {
                                 </Button>
                               </Col>
                               <Col span={18} style={{ paddingTop: '10px' }}>
-                                <h6>Laporan Lengkap</h6>
-                                <h5 style={{ color: '#339900' }}>45 Mahasiswa</h5>
+                                <h6>Laporan Dikumpulkan</h6>
+                                <h5 style={{ color: '#339900' }}>{totalCountingDocument.laporan_submitted} Dokumen</h5>
                               </Col>
                             </Row>
                           </CCardBody>
@@ -788,8 +841,8 @@ const ListDokumenPeserta = () => {
                                 </Button>
                               </Col>
                               <Col span={18} style={{ paddingTop: '10px' }}>
-                                <h6>Laporan Tidak Lengkap</h6>
-                                <h5 style={{ color: '#CC0033' }}>56 Mahasiswa</h5>
+                                <h6>Laporan Belum Dikumpulkan</h6>
+                                <h5 style={{ color: '#CC0033' }}>{totalCountingDocument.laporan_missing} Dokumen</h5>
                               </Col>
                             </Row>
                           </CCardBody>

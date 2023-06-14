@@ -1,30 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import 'antd/dist/reset.css'
-import { CCard, CCardBody, CCardHeader, CCol, CRow } from '@coreui/react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPencil, faTrashCan } from '@fortawesome/free-solid-svg-icons'
+import { CCard, CCardBody, CCardHeader} from '@coreui/react'
 import {
-  Table,
   Button,
   Row,
   Col,
   Form,
   Input,
-  Modal,
-  Space,
   notification,
   Spin,
-  Select,
-  InputNumber,
-  message,
   Popover,
 } from 'antd'
 import axios from 'axios'
-import { SearchOutlined } from '@ant-design/icons'
-import Highlighter from 'react-highlight-words'
 import { useHistory } from 'react-router-dom'
-import { LoadingOutlined } from '@ant-design/icons'
-import { Option } from 'antd/lib/mentions'
 import '../pengisianDokumen/rpp/rpp.css'
 import TextArea from 'antd/lib/input/TextArea'
 import { Box } from '@mui/material'
@@ -32,20 +20,12 @@ import { Box } from '@mui/material'
 const PengaturanBobotFormPembimbingJurusan = () => {
   const [form] = Form.useForm()
   let history = useHistory()
-  const [loadings, setLoadings] = useState([])
   axios.defaults.withCredentials = true
   const [isLoading, setIsLoading] = useState(true)
   const [poinPenilaianFormPembimbing, setPoinPenilaianFormPembimbing] = useState({})
   const [dataPoinPenilaian, setDataPoinPenilaian] = useState([])
   const [isSuccessUpdateData, setIsSuccessUpdateData] = useState(true)
 
-  const enterLoading = (index) => {
-    setLoadings((prevLoadings) => {
-      const newLoadings = [...prevLoadings]
-      newLoadings[index] = true
-      return newLoadings
-    })
-  }
 
   
   useEffect(() => {
@@ -53,8 +33,6 @@ const PengaturanBobotFormPembimbingJurusan = () => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/aspect/get`)
         .then((result) => {
-        //   console.log(result.data)
-        //   console.log('AKHAHDIO', result.data.data)
           setPoinPenilaianFormPembimbing({
             idNilaiProsesBimbingan: result.data.data[0].id,
             idNilaiLaporan: result.data.data[1].id,
@@ -86,7 +64,6 @@ const PengaturanBobotFormPembimbingJurusan = () => {
             }
           }
           getTempDataPoin(temp)
-        //   console.log('DATA', temp1)
           setDataPoinPenilaian(temp1)
           setIsLoading(false)
         })
@@ -106,7 +83,14 @@ const PengaturanBobotFormPembimbingJurusan = () => {
         })
     }
 
+
+
+
+
     getDataPoinPenilaianFormPembimbing()
+
+
+
   }, [history])
 
 
@@ -124,12 +108,8 @@ const PengaturanBobotFormPembimbingJurusan = () => {
   }
 
   useEffect(() => {
-    // console.log('max_grade', poinPenilaianFormPembimbing.bobotNilaiProsesBimbingan)
     let total_bobot = CekTotalBobotInput()
-    // console.log('total bobot', total_bobot)
-
     if (parseInt(total_bobot) > 100) {
-      // if(parseInt(total_bobot)>100 || parseInt(total_bobot)<100){
       notification.warning({
         message: 'Maksimal total bobot 100, silahkan ubah untuk dapat melakukan update data',
       })
@@ -148,12 +128,8 @@ const PengaturanBobotFormPembimbingJurusan = () => {
     setDataPoinPenilaian(dataPoinPenilaian)
   }
 
-  useEffect(() => {
-    // console.log('DATA POIN PENILAIAN', dataPoinPenilaian)
-  }, [dataPoinPenilaian])
 
   const simpanPoinPenilaian = () => {
-    // console.log('DATA POIN PENILAIAN', dataPoinPenilaian)
     let total_bobot = CekTotalBobotInput()
     if (parseInt(total_bobot) > 100 || parseInt(total_bobot) < 100) {
       notification.warning({
@@ -165,7 +141,6 @@ const PengaturanBobotFormPembimbingJurusan = () => {
   }
 
   const putBobotPenilaianDanDeskripsi = async (data) => {
-    // console.log('NAH GIN', data)
     for (var i in data) {
       let aspect_id = data[i].id
       let description_new = data[i].description
@@ -179,7 +154,6 @@ const PengaturanBobotFormPembimbingJurusan = () => {
           "name" : name_new
         })
         .then((res) => {
-        //   console.log(res)
           setIsSuccessUpdateData(true)
           refreshData()
         })
@@ -212,12 +186,9 @@ const PengaturanBobotFormPembimbingJurusan = () => {
   }
 
   const refreshData = async (index) => {
-    // enterLoading(index)
     await axios
     .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/aspect/get`)
     .then((result) => {
-    //   console.log(result.data)
-    //   console.log('AKHAHDIO', result.data.data)
       setPoinPenilaianFormPembimbing({
         idNilaiProsesBimbingan: result.data.data[0].id,
         idNilaiLaporan: result.data.data[1].id,
@@ -249,7 +220,6 @@ const PengaturanBobotFormPembimbingJurusan = () => {
         }
       }
       getTempDataPoin(temp)
-   //   console.log('DATA', temp1)
       setDataPoinPenilaian(temp1)
       setIsLoading(false)
       })

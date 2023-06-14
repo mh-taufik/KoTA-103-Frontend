@@ -75,27 +75,33 @@ const RekapSelfAssessment = () => {
           `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/get-all/${PESERTA}`,
         )
         .then((result) => {
-          console.log(result.data.data)
+          let len = result.data.data.length-2
+          console.log('len', len, 'act',result.data.data.length)
 
           let temp = []
-          const len = result.data.data.length
+         
           const temp1 = JSON.parse(JSON.stringify(result.data.data))
 
           
 
-          if (result.data.data.length > 0) {
+          if (result.data.data.length > 1) {
             console.log('RESY')
             var getTempSelfAssessment = function (obj) {
               for (var i in obj) {
-                if (parseInt(i) === len - 1) {
+                console.log(i, len)
+                if (parseInt(i)===parseInt(len)) {
                   break
+
+                }else{
+                  console.log('ya')
+                  temp.push({
+                    start_date: convertDate(obj[i].start_date),
+                    finish_date: convertDate(obj[i].finish_date),
+                    self_assessment_id: obj[i].self_assessment_id,
+                    participant_id: obj[i].participant_id,
+                  })
                 }
-                temp.push({
-                  start_date: convertDate(obj[i].start_date),
-                  finish_date: convertDate(obj[i].finish_date),
-                  self_assessment_id: obj[i].self_assessment_id,
-                  participant_id: obj[i].participant_id,
-                })
+              
               }
             }
 

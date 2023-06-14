@@ -13,15 +13,16 @@ const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const RekapSelfAssessment = () => {
   const params = useParams()
   const ID_PARTICIPANT = params.id
-  const [dataPeserta, setDataPeserta]=useState([])
+  const [dataPeserta, setDataPeserta] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [komponenPenilaianSelfAssessment, setKomponenPenilaianSelfAssessment] = useState([])
   let rolePengguna = localStorage.id_role
   let history = useHistory()
   axios.defaults.withCredentials = true
   const [selfAssessmentPeserta, setSelfAssessmentPeserta] = useState([])
-  const [aspectGradeSelfAssessmentPeserta, setAspectGradeSelfAssessmentPeserta] = useState([])
+  const [isNotNullDataSelfAssessment, setIsNotNullDataSelfAssessment] = useState()
   const [anchorEl, setAnchorEl] = React.useState(null)
+  const contoller_abort = new AbortController();
   const [data, setData] = React.useState()
   const handlePopoverOpen = (event, data) => {
     setAnchorEl(event.currentTarget)
@@ -39,38 +40,36 @@ const RekapSelfAssessment = () => {
 
   const open = Boolean(anchorEl)
 
-
   useEffect(() => {
-
-    async function getSelfAssessmentAspect (){
+    async function getSelfAssessmentAspect() {
       await axios
-      .get(
-        `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/get?type=active`,
-      )
-      .then((result) => {
-        console.log('komponen', result.data.data)
+        .get(
+          `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/get`,
+        )
+        .then((result) => {
+          console.log('komponen', result.data.data)
 
-        setKomponenPenilaianSelfAssessment(result.data.data)
-        setIsLoading(false)
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
-          history.push('/500')
-        }
-      })
+          setKomponenPenilaianSelfAssessment(result.data.data)
+          setIsLoading(false)
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+            history.push('/500')
+          }
+        })
+        return () => contoller_abort.abort();
     }
 
-    getSelfAssessmentAspect ()
-
+    getSelfAssessmentAspect()
 
     async function getDataInformasiPeserta() {
       await axios
@@ -78,9 +77,7 @@ const RekapSelfAssessment = () => {
           id: [ID_PARTICIPANT],
         })
         .then((result) => {
-           setDataPeserta(result.data.data[0])
-         
-          
+          setDataPeserta(result.data.data[0])
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -99,83 +96,42 @@ const RekapSelfAssessment = () => {
     }
 
     const getSelfAssessmentPeserta = async (index) => {
-   
       await axios
         .get(
           `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/get-all/${ID_PARTICIPANT}`,
         )
         .then((result) => {
-          console.log('sa', result.data.data)
-          // setSelfAssessmentPeserta()
+          console.log('sa', result.data.data.length)
+          if(result.data.data !== null){
+            
           let temp = result.data.data
           let temp1 = []
+          let last_index_data = temp.length - 1
 
           let getTempData = function (obj) {
-           for(var i in obj){
-            temp1.push({
-              finish_date : obj[i].finish_date,
-              start_date : obj[i].start_date,
-              grade : obj[i].grade,
-              self_assessment_id : obj[i].self_assessment_id
+            for (var i in obj) {
+              console.log(i, last_index_data)
+              if (last_index_data === parseInt(i)) {
+                 break
+              } else {
+                temp1.push({
+                  finish_date: obj[i].finish_date,
+                  start_date: obj[i].start_date,
+                  grade: obj[i].grade,
+                  self_assessment_id: obj[i].self_assessment_id,
+                })
+              }
+            }
+          } 
 
-
-            })
-           }
+          getTempData(result.data.data)
+          setIsNotNullDataSelfAssessment(true)
+          setSelfAssessmentPeserta(temp1)
+          }else{
+            setIsNotNullDataSelfAssessment(false)
           }
+  
 
-          // let temp = []
-          // const len = result.data.data.length
-          // const temp1 = JSON.parse(JSON.stringify(result.data.data))
-
-          // const convertDate = (date) => {
-          //   let temp_date_split = date.split('-')
-          //   const month = [
-          //     'Januari',
-          //     'Februari',
-          //     'Maret',
-          //     'April',
-          //     'Mei',
-          //     'Juni',
-          //     'Juli',
-          //     'Agustus',
-          //     'September',
-          //     'Oktober',
-          //     'November',
-          //     'Desember',
-          //   ]
-          //   let date_month = temp_date_split[1]
-          //   let month_of_date = month[parseInt(date_month) - 1]
-          //   console.log(month_of_date, 'isi date monts', month_of_date)
-          //   return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
-          // }
-
-          // if (result.data.data.length > 0) {
-          //   console.log('RESY')
-            // var getTempSelfAssessment = function (obj) {
-            //   for (var i in obj) {
-            //     // console.log(i, len-1, '==', parseInt(i)===(len-1))
-            //     if (parseInt(i) === len - 1) {
-            //       break
-            //     }
-            //     temp.push({
-            //       start_date: convertDate(obj[i].start_date),
-            //       finish_date: convertDate(obj[i].finish_date),
-            //       self_assessment_id: obj[i].self_assessment_id,
-            //       participant_id: obj[i].participant_id,
-            //       grade : obj[i].grade
-            //     })
-            //   }
-            // }
-
-          //   getTempSelfAssessment(temp1)
-          //   setSelfAssessmentPeserta(result.data.data)
-          //   setIsLoading(false)
-          //   return
-          // } else {
-          //   setSelfAssessmentPeserta(result.data.data)
-          //   setIsLoading(false)
-          //   return
-          // }
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -196,13 +152,10 @@ const RekapSelfAssessment = () => {
         })
     }
 
-
-    getDataInformasiPeserta() 
+    getDataInformasiPeserta()
     getSelfAssessmentPeserta()
- 
+    return () => contoller_abort.abort();
   }, [history])
-
- 
 
   const title = (judul) => {
     return (
@@ -220,119 +173,55 @@ const RekapSelfAssessment = () => {
     )
   }
 
-  const getRowGradeaDesc = (data) =>{
-    return(
-       data.map((nilaipoin, index) => (
-                  <td key={nilaipoin.grade_id}>
-                    <Tooltip title={nilaipoin.description}>{nilaipoin.grade}</Tooltip>
-                  </td>
-                  
-                ))
-    )
+
+
+  const getRowGradeaDesc = (data) => {
+    return data.map((nilaipoin, index) => (
+      <td key={nilaipoin.grade_id}>
+        <Tooltip title={nilaipoin.description}>{nilaipoin.grade}</Tooltip>
+      </td>
+    ))
   }
 
   return (
     <>
-      <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
-        <Card title="INFORMASI SELF ASSESSMENT " size="small">
-          <Row style={{ padding: 10 }}>
-            <Col span={8}>
-              <b>Hasil Penilaian Self Assessment</b>
-            </Col>
-          </Row>
-          <Row style={{ padding: 10 }}>
-            <Col>&nbsp;&nbsp;</Col>
-            <Col span={4}>Sangat Baik (84-100) </Col>
-            <Col span={8}>
-              {' '}
-              <Progress
-                percent={99.9}
-                strokeColor={{
-                  '0%': '#108ee9',
-                  '100%': '#87d068',
-                }}
-              />
-            </Col>
-          </Row>
-          <Row style={{ padding: 10 }}>
-            <Col>&nbsp;&nbsp;</Col>
-            <Col span={4}>Baik (74-83) </Col>
-            <Col span={8}>
-              {' '}
-              <Progress
-                percent={99.9}
-                strokeColor={{
-                  '0%': '#108ee9',
-                  '100%': '#87d068',
-                }}
-              />
-            </Col>
-          </Row>
-          <Row style={{ padding: 10 }}>
-            <Col>&nbsp;&nbsp;</Col>
-            <Col span={4}>Cukup (60-73) </Col>
-            <Col span={8}>
-              {' '}
-              <Progress
-                percent={99.9}
-                strokeColor={{
-                  '0%': '#108ee9',
-                  '100%': '#87d068',
-                }}
-              />
-            </Col>
-          </Row>
-          <Row style={{ padding: 10 }}>
-            <Col>&nbsp;&nbsp;</Col>
-            <Col span={4}>Kurang (0-59) </Col>
-            <Col span={8}>
-              {' '}
-              <Progress
-                percent={99.9}
-                strokeColor={{
-                  '0%': '#108ee9',
-                  '100%': '#87d068',
-                }}
-              />
-            </Col>
-          </Row>
-        </Card>
-      </Space>
-      <div>
-    
-    <Space
-      className="spacebottom"
-      direction="vertical"
-      size="middle"
-      style={{
-        display: 'flex',
-      }}
-    >
-      <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
-        <Row style={{ padding: 5 }}>
-          <Col span={4}>Nama Lengkap</Col>
-          <Col span={2}>:</Col>
-          <Col span={8}>{dataPeserta.name}</Col>
-        </Row>
-        <Row style={{ padding: 5 }}>
-          <Col span={4}>NIM</Col>
-          <Col span={2}>:</Col>
-          <Col span={8}>{dataPeserta.nim}</Col>
-        </Row>
-        <Row style={{ padding: 5 }}>
-          <Col span={4}>Sistem Kerja</Col>
-          <Col span={2}>:</Col>
-          <Col span={8}>{dataPeserta.work_system}</Col>
-        </Row>
-        <Row style={{ padding: 5 }}>
-          <Col span={4}>Angkatan</Col>
-          <Col span={2}>:</Col>
-          <Col span={8}>{dataPeserta.year}</Col>
-        </Row>
-      </Card>
-    </Space>
-  </div>
    
+     {isNotNullDataSelfAssessment && (
+      <>
+       <div>
+        <Space
+          className="spacebottom"
+          direction="vertical"
+          size="middle"
+          style={{
+            display: 'flex',
+          }}
+        >
+          <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
+            <Row style={{ padding: 5 }}>
+              <Col span={4}>Nama Lengkap</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>{dataPeserta.name}</Col>
+            </Row>
+            <Row style={{ padding: 5 }}>
+              <Col span={4}>NIM</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>{dataPeserta.nim}</Col>
+            </Row>
+            <Row style={{ padding: 5 }}>
+              <Col span={4}>Sistem Kerja</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>{dataPeserta.work_system}</Col>
+            </Row>
+            <Row style={{ padding: 5 }}>
+              <Col span={4}>Angkatan</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>{dataPeserta.year}</Col>
+            </Row>
+          </Card>
+        </Space>
+      </div>
+
       {title('REKAP PENILAIAN SELF ASSESSMENT PESERTA')}
 
       <div className="container2">
@@ -346,30 +235,18 @@ const RekapSelfAssessment = () => {
               {komponenPenilaianSelfAssessment.map((data, index) => (
                 <th key={data.aspect_id}>{data.aspect_name}</th>
               ))}
-              <th>Total</th>
+              {/* <th>Total</th> */}
             </tr>
           </thead>
-           <tbody>
+          <tbody>
             {selfAssessmentPeserta.map((sa, index) => (
               <tr key={sa.self_assessment_id}>
                 <td>{index + 1}</td>
                 <td>{sa.start_date}</td>
                 {getRowGradeaDesc(sa.grade)}
-                
-                {/* {sa.grade.map((nilaipoin, index) => (
-                  // <td key={nilaipoin.grade_id}>
-                  //   <Tooltip title={nilaipoin.description}>{nilaipoin.grade}</Tooltip>
-                  // </td>
-                  <></>
-                ))} */}
-                <td>
-                  {' '}
-                  {/* <Tooltip >89</Tooltip> */}
-                </td>
               </tr>
             ))}
-            </tbody>
-          
+          </tbody>
         </Table>
         {/* <Popover
           id="mouse-over-popover"
@@ -392,6 +269,8 @@ const RekapSelfAssessment = () => {
           {handlePopOverData()}
         </Popover> */}
       </div>
+      </>
+     )}
       <FloatButton
         type="primary"
         icon={<ArrowLeftOutlined />}

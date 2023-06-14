@@ -25,6 +25,7 @@ const { TabPane } = Tabs;
 const PengelolaanKompetensi = () => {
     let searchInput;
     const [state, setState] = useState({ searchText: '', searchedColumn: '', })
+    const contoller_abort = new AbortController();
     const [dataKompetensi, setDataKompetensi] = useState([])
     const [dataJobscope, setDataJobscope] = useState([])
     const [tipeKompetensi, setTipeKompetensi] = useState([])
@@ -180,8 +181,10 @@ const PengelolaanKompetensi = () => {
                         history.push("/500");
                     }
                 });
+                return () => contoller_abort.abort();
         }
         getDataCompetence()
+        return () => contoller_abort.abort();
     }, [history, prodi]);
 
     const handleSearch = (selectedKeys, confirm, dataIndex, index) => {

@@ -37,6 +37,8 @@ const FormPenilaianPembimbingJurusan = (props) => {
   const [idPenilaianPembimbing, setIdPenilaianPembimbing] = useState()
   const [nilaiPembimbingJurusan, setNilaiPembimbingJurusan] = useState([])
   const [nilaiTotal, setNilaiTotal] = useState([])
+  const [fasePenilaian, setFasePenilaian] = useState()
+  const [idSupervisorGrade, setIdSupervisorGrade] = useState()
   const [nilaiCounter, setNilaiCounter] = useState([{ nilai: 0 }, { nilai: 0 }, { nilai: 0 }])
   const [nilaiCounterEdit, setNilaiCounterEdit] = useState([
     { nilai: 0 },
@@ -63,7 +65,6 @@ const FormPenilaianPembimbingJurusan = (props) => {
 
 
 
-  const [isSuccessEdit, setIsSuccessEdit] = useState()
 
   axios.defaults.withCredentials = true
   let history = useHistory()
@@ -76,33 +77,15 @@ const FormPenilaianPembimbingJurusan = (props) => {
     })
   }
 
-  /** HANDLE INPUT */
-  const handleInputNilai = (aspectId, grade_sa, index, keyData) => {
-    if (nilaiPembimbingJurusan[index]) {
-      nilaiPembimbingJurusan[index][keyData] = grade_sa
-    } else {
-      nilaiPembimbingJurusan[index] = {
-        aspect_id : aspectId,
-        [keyData]: grade_sa,
-      }
-    }
 
-    setNilaiPembimbingJurusan(nilaiPembimbingJurusan)
-
-    var data = [...nilaiCounter]
-    data[index] = {
-      nilai: grade_sa,
-    }
-    setNilaiCounter(data)
-  }
 
   /**HANDLE EDIT NILAI */
-  const handleEditChange = (idpoin, nilai, index, keyData) => {
+  const handleEditChange = (id_aspect, nilai, index, keyData) => {
     if (nilaiPembimbingJurusanEdit[index]) {
       nilaiPembimbingJurusanEdit[index][keyData] = nilai
     } else {
       nilaiPembimbingJurusanEdit[index] = {
-        id: idpoin,
+        aspect_id: id_aspect,
         [keyData]: nilai,
       }
     }
@@ -111,9 +94,10 @@ const FormPenilaianPembimbingJurusan = (props) => {
     var data = [...nilaiCounterEdit]
     data[index] = nilai
     setNilaiCounterEdit(data)
+    console.log('datas', data)
   }
   useEffect(() => {
-    console.log('HASIL NILAI', nilaiCounter)
+    // console.log('HASIL NILAI', nilaiCounter)
     var temp1 = function (obj) {
       for (var i in obj) {
         setNilaiTotal({
@@ -126,21 +110,13 @@ const FormPenilaianPembimbingJurusan = (props) => {
     temp1(nilaiCounter)
   }, [nilaiCounter])
 
-  // const tes = () => {
-  //   console.log(nilaiPembimbingJurusan)
-  // }
+
 
   const isNilaiKosong = (nilai) => {
     return nilai ? nilai : 0
   }
 
-  const total = () => {
-    return (
-      parseInt(isNilaiKosong(nilaiTotal.nilaipoinsatu)) +
-      parseInt(isNilaiKosong(nilaiTotal.nilaipoindua)) +
-      parseInt(isNilaiKosong(nilaiTotal.nilaipointiga))
-    )
-  }
+
 
   const totalEdit = () => {
     return (
@@ -195,24 +171,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
         })
     }
 
-    const getPenilaianPembimbingLaporanIsAvailable = async () => {
-      await axios
-        .get(
-          `http://localhost:1337/api/penilaianpembimbings?populate=*&filters[laporan][id][$eq]=${ID_LAPORAN}`,
-        )
-        .then((res) => {
-          console.log('HASIL', res.data.data[0])
-          let temp = res.data.data
-          if (temp.length > 0) {
-            setPenilaianIsDone(true)
-            setIdPenilaianPembimbingSebelumnya(res.data.data[0].id)
-          } else if (temp.length < 1) {
-            setPenilaianIsDone(false)
-          }
 
-          // console.log('MOALBOROS',res.data.data[0])
-        })
-    }
 
     const GetDataInfoPeserta = async (index) => {
   
@@ -276,15 +235,74 @@ const FormPenilaianPembimbingJurusan = (props) => {
         })
     }
 
-    const GetDataLaporanPeserta = async() =>{
+    const GatDataPenilaianPeserta = async() =>{
       await axios
       .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get/${ID_LAPORAN}`, {
        
       })
       .then((response) => {
-        setDataLaporanPeserta(response.data.data)
-        console.log('data laporan', response.data.data)
-        setIsLoading(false)
+        setFasePenilaian(response.data.data.phase)
+        setIdSupervisorGrade(response.data.data.supervisorGrade)
+       let idSupervisorGrade = response.data.data.supervisorGrade
+       axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/aspect/get`).then((result)=>{
+        
+ 
+        const data_poin_penilaian = result.data.data
+        let max_grade_1 = data_poin_penilaian[0].max_grade
+        let max_grade_2 = data_poin_penilaian[1].max_grade
+        let max_grade_3 = data_poin_penilaian[2].max_grade
+        let name_1 = data_poin_penilaian[0].name
+        let name_2 = data_poin_penilaian[1].name
+        let name_3 = data_poin_penilaian[2].name
+        let id_1 = data_poin_penilaian[0].id
+        let id_2 = data_poin_penilaian[1].id
+        let id_3 = data_poin_penilaian[2].id
+
+        axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/get/${idSupervisorGrade}`)
+        .then((res)=>{
+          let dataSupervisorGrade = res.data.data.grade_list
+          let dataSupervisorGradeWithNamePoinAspect = []
+          let getConcateGradeWithNamePoinAspect = function(data){
+            dataSupervisorGradeWithNamePoinAspect.push(
+              {
+                grade_id : data[0].id,
+                poinpenilaian : name_1,
+                bobot : max_grade_1,
+                deskripsi : data[0].aspect,
+                nilai : data[0].grade,
+                aspect_id : id_1
+              },
+              {
+                grade_id : data[1].id,
+                poinpenilaian : name_2,
+                bobot : max_grade_2,
+                deskripsi : data[1].aspect,
+                nilai : data[1].grade,
+                aspect_id : id_2
+              },
+              {
+                grade_id : data[2].id,
+                poinpenilaian : name_3,
+                bobot : max_grade_3,
+                deskripsi : data[2].aspect,
+                nilai : data[2].grade,
+                aspect_id : id_3
+              },
+
+              )
+          }
+
+          getConcateGradeWithNamePoinAspect(dataSupervisorGrade)
+          let temp_counter = []
+          temp_counter[0] = dataSupervisorGradeWithNamePoinAspect[0].nilai
+          temp_counter[1] = dataSupervisorGradeWithNamePoinAspect[1].nilai
+          temp_counter[2] = dataSupervisorGradeWithNamePoinAspect[2].nilai
+          setNilaiCounterEdit(temp_counter)
+          setdataPenilaianSebelumnya(dataSupervisorGradeWithNamePoinAspect)
+          console.log('CONSATE',dataSupervisorGradeWithNamePoinAspect )
+        })
+       })
+         
       })
       .catch(function (error) {
         if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -305,71 +323,34 @@ const FormPenilaianPembimbingJurusan = (props) => {
 
 
     GetDataInfoPeserta()
-    GetDataLaporanPeserta()
+    GatDataPenilaianPeserta()
     GetDataStatistik()
     getDataPoinPenilaianFormPembimbingJurusan()
-    getPenilaianPembimbingLaporanIsAvailable()
-    if (penilaianIsDone) {
-    }
-    console.log(poinPenilaianForm)
+
   }, [history])
 
-  useEffect(() => {
-    const getDetailPenilaianSebelumnya = async () => {
-      await axios
-        .get(
-          `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/${ID_LAPORAN}`,
-        )
-        .then((res) => {
-          console.log('DETAIL PENILAIAN', res.data.data)
-          // let temp = res.data.data
-          // let temp1 = []
-          // let temps = []
-          // let getTemp = function (obj) {
-          //   let idx = 0
-          //   for (var i in obj) {
-          //     temps[idx] = obj[i].attributes.nilai
-          //     temp1.push({
-          //       nilai: obj[i].attributes.nilai,
-          //       id: obj[i].id,
-          //       idpoin: obj[i].attributes.pembobotanformpembimbing.data.id,
-          //       poinpenilaian: obj[i].attributes.pembobotanformpembimbing.data.attributes.poin,
-          //       deskripsi: obj[i].attributes.pembobotanformpembimbing.data.attributes.deskripsi,
-          //       bobot: obj[i].attributes.pembobotanformpembimbing.data.attributes.bobot,
-          //     })
-          //     idx++
-          //   }
-          //   setNilaiCounterEdit(temps)
-          // }
-          // getTemp(temp)
-          // console.log('IYA', temp1)
-          // setdataPenilaianSebelumnya(temp1)
-        })
-    }
-    getDetailPenilaianSebelumnya()
-  }, [idPenilaianPembimbingSebelumnya])
 
   /** SIMPAN EDIT PENILAIAN */
   const putEditPenilaian = async () => {
-    //  console.log(idPenilaianPembimbingSebelumnya)
-    let datas = nilaiPembimbingJurusanEdit
-    let iterator = 1
-    let len_data = nilaiPembimbingJurusanEdit.length
-    for (var i in datas) {
-      let nilais = datas[i].nilai
+  
       await axios
-        .get(
-          `http://localhost:1337/api/detailpenilaianpembimbings?populate=*&filters[penilaianpembimbing][id][$eq]=${idPenilaianPembimbingSebelumnya}&filters[pembobotanformpembimbing][id][$eq]=${datas[i].id}`,
+        .put(
+          `${process.env.REACT_APP_API_GATEWAY_URL}/monitoring/supervisor/grade/update`,{
+      
+            "grade_list": [
+              {
+                "aspect_id": 1,
+                "grade": 20
+              }
+            ],
+            "id": 8,
+            "phase": 1
+          
+          }
         )
         .then((res) => {
-          console.log('RES', res.data.data[0].id)
-          console.log('nilasi', nilais)
-          axios.put(`http://localhost:1337/api/detailpenilaianpembimbings/${res.data.data[0].id}`, {
-            data: {
-              nilai: nilais,
-            },
-          })
-         
+        
+        notification.success({message:'Penilaian Berhasil Dilakukan!!!'})
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -385,144 +366,13 @@ const FormPenilaianPembimbingJurusan = (props) => {
             history.push('/500')
           }
         })
-      iterator++
 
-      // console.log('===========', parseInt(iterator) === parseInt(len_data)) 
-      if (parseInt(iterator) === parseInt(len_data)) {
-        notification.success({
-          message: 'Perubahan nilai berhasil disimpan',
-        })
-      }
-  
-    }
-    refreshGetDataPenilaian()
+
+   
   }
 
-  const refreshGetDataPenilaian = async (index) => {
-    await axios
-      .get(
-        `http://localhost:1337/api/detailpenilaianpembimbings?populate=*&filters[penilaianpembimbing][id][$eq]=${idPenilaianPembimbingSebelumnya}`,
-      )
-      .then((res) => {
-        console.log('DETAIL PENILAIAN', res.data.data)
-        let temp = res.data.data
-        let temp1 = []
-        let temps = []
-        let getTemp = function (obj) {
-          let idx = 0
-          for (var i in obj) {
-            temps[idx] = obj[i].attributes.nilai
-            temp1.push({
-              nilai: obj[i].attributes.nilai,
-              id: obj[i].id,
-              idpoin: obj[i].attributes.pembobotanformpembimbing.data.id,
-              poinpenilaian: obj[i].attributes.pembobotanformpembimbing.data.attributes.poin,
-              deskripsi: obj[i].attributes.pembobotanformpembimbing.data.attributes.deskripsi,
-              bobot: obj[i].attributes.pembobotanformpembimbing.data.attributes.bobot,
-            })
-            idx++
-          }
-          setNilaiCounterEdit(temps)
-        }
-        getTemp(temp)
-        console.log('IYA', temp1)
-        setdataPenilaianSebelumnya(temp1)
 
-        setLoadings((prevLoadings) => {
-          const newLoadings = [...prevLoadings]
-          newLoadings[index] = false
-          return newLoadings
-        })
-      })
-  }
 
-  /** POST DATA PENILAIAN */
-  const postPenilaian = async (data) => {
-    console.log('ID LAPORAN', ID_LAPORAN)
-    if (nilaiPembimbingJurusan.length > 2) {
-    
-
-      await axios
-        .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/create`, {
-        
-            grade_list:nilaiPembimbingJurusan,
-            participant_id : parseInt(NIM_PESERTA),
-            phase:dataLaporanPeserta.phase
-        })
-        .then((res) => {
-          console.log(res)
-          console.log(res.data.data)
-          setIdPenilaianPembimbing(res.data.data.id)
-          postDataNilaiPembimbing(nilaiPembimbingJurusan, res.data.data.id)
-        })
-        // .catch(function (error) {
-        //   if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-        //     history.push({
-        //       pathname: '/login',
-        //       state: {
-        //         session: true,
-        //       },
-        //     })
-        //   } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-        //     history.push('/404')
-        //   } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-        //     history.push('/500')
-        //   }
-        // })
-    } else {
-      notification.warning({
-        message: 'pastikan semua nilai setiap poin sudah terisi !!!',
-      })
-    }
-  }
-
-  useEffect(() => {
-    console.log('ID PENILAIAN', idPenilaianPembimbing)
-  }, idPenilaianPembimbing)
-
-  const postDataNilaiPembimbing = async (dataNilai, idPenilaian) => {
-    let isSuccess = false
-    if (dataNilai.length > 2) {
-      for (var i in dataNilai) {
-        console.log('NILAI', dataNilai[i].nilai)
-        console.log('ID', dataNilai[i].id)
-        let nilai = dataNilai[i].nilai
-        let idPembobotan = dataNilai[i].id
-        console.log('id penilaian', idPenilaian)
-        await axios
-          .post(`http://localhost:1337/api/detailpenilaianpembimbings`, {
-            data: {
-              nilai: nilai,
-              pembobotanformpembimbing: {
-                connect: [idPembobotan],
-              },
-              penilaianpembimbing: {
-                connect: [idPenilaian],
-              },
-            },
-          })
-          .then((res) => {
-            console.log('berhasil', res)
-            isSuccess = true
-          })
-      }
-
-      if (isSuccess) {
-        notification.success({
-          message: 'Data Penilaian Berhasil Disimpan',
-        })
-      } else {
-        notification.error({
-          message: 'Data Penilaian Gagal Disimpan',
-        })
-      }
-      history.push(`/rekapDokumenPeserta/laporan/${NIM_PESERTA}`)
-    } else {
-      notification.warning({
-        message: 'Setiap nilai pada poin penilaian harus diisi !!!',
-      })
-    }
-  }
 
   const buttonKembaliKeListHandling = () => {
     history.push(`/rekapDokumenPeserta/laporan/${NIM_PESERTA}`)
@@ -577,7 +427,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
                     Tepat Waktu
                   </Col>
                   <Col span={2}>
-                    <Progress percent={statistikLogbookOnTime.percent} format={(percent) => `${percent}`}  status="active" />
+                    <Progress percent={statistikLogbookOnTime.percent}   status="active" />
                   </Col>
                   <Col span={14}>{statistikLogbookOnTime.count} (dokumen)</Col>
                 </Row>
@@ -587,7 +437,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
                   </Col>
                   <Col span={2}>
                     {' '}
-                    <Progress percent={statistikLogbookLate.percent} format={(percent) => `${percent}`}  status="active" />
+                    <Progress percent={statistikLogbookLate.percent}   status="active" />
                   </Col>
                   <Col span={14}>{statistikLogbookLate.count} (dokumen)</Col>
                 </Row>
@@ -597,14 +447,14 @@ const FormPenilaianPembimbingJurusan = (props) => {
                   </Col>
                   <Col span={2}>
                     {' '}
-                    <Progress percent={statistikLogbookMissing.percent} format={(percent) => `${percent}`}  status="active" />
+                    <Progress percent={statistikLogbookMissing.percent}   status="active" />
                   </Col>
                   <Col span={14}>{statistikLogbookMissing.count} (dokumen)</Col>
                 </Row>
                 <hr />
                 <Row>
                   <Col span={4}>
-                    <b>2. &nbsp;&nbsp; Penilaian Pembimbing Jurusan</b>
+                    <b>2. &nbsp;&nbsp; Penilaian</b>
                   </Col>
                 </Row>
                 <Row>
@@ -612,7 +462,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
                     Sangat Baik
                   </Col>
                   <Col span={2}>
-                    <Progress percent={statistikLogbookNilaiSangatBaik.percent} format={(percent) => `${percent}`}  status="active" />
+                    <Progress percent={statistikLogbookNilaiSangatBaik.percent}   status="active" />
                   </Col>
                   <Col span={14}>{statistikLogbookNilaiSangatBaik.count} (dokumen)</Col>
                 </Row>
@@ -621,7 +471,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
                     Baik
                   </Col>
                   <Col span={2}>
-                    <Progress percent={statistikLogbookNilaiBaik.percent} format={(percent) => `${percent}`}  status="active" />
+                    <Progress percent={statistikLogbookNilaiBaik.percent}   status="active" />
                   </Col>
                   <Col span={14}>{statistikLogbookNilaiBaik.count} (dokumen)</Col>
                 </Row>
@@ -630,7 +480,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
                     Cukup
                   </Col>
                   <Col span={2}>
-                    <Progress percent={statistikLogbookNilaiCukup.percent} format={(percent) => `${percent}`}  status="active" />
+                    <Progress percent={statistikLogbookNilaiCukup.percent}   status="active" />
                   </Col>
                   <Col span={14}>{statistikLogbookNilaiCukup.count} (dokumen)</Col>
                 </Row>
@@ -639,7 +489,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
                     Kurang Baik
                   </Col>
                   <Col span={2}>
-                    <Progress percent={statistikLogbookNilaiKurang.percent} format={(percent) => `${percent}`}  status="active" />
+                    <Progress percent={statistikLogbookNilaiKurang.percent}   status="active" />
                   </Col>
                   <Col span={14}>{statistikLogbookNilaiKurang.count} (dokumen)</Col>
                 </Row>
@@ -663,7 +513,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
                     Mnegumpulkan
                   </Col>
                   <Col span={2}>
-                    <Progress percent={statistikSelfAssessmentSubmitted.percent} format={(percent) => `${percent}`}  status="active" />
+                    <Progress percent={statistikSelfAssessmentSubmitted.percent}   status="active" />
                   </Col>
                   <Col span={14}>{statistikSelfAssessmentSubmitted.count} (dokumen)</Col>
                 </Row>
@@ -673,58 +523,11 @@ const FormPenilaianPembimbingJurusan = (props) => {
                   </Col>
                   <Col span={2}>
                     {' '}
-                    <Progress percent={statistikSelfAssessmentMissing.percent} format={(percent) => `${percent}`}  status="active" />
+                    <Progress percent={statistikSelfAssessmentMissing.percent}   status="active" />
                   </Col>
                   <Col span={14}>{statistikSelfAssessmentMissing.count} (dokumen)</Col>
                 </Row>
                 <hr />
-                <Row>
-                  <Col span={4}>
-                    <b>2. &nbsp;&nbsp; Penilaian Pembimbing Jurusan</b>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col span={6} style={{ marginLeft: 35 }}>
-                    Sangat Baik (85-100)
-                  </Col>
-                  <Col span={2}>
-                    <Progress percent={80} format={(percent) => `${percent}`}  status="active" />
-                  </Col>
-                  <Col span={14}>18 (dokumen)</Col>
-                </Row>
-                <Row>
-                  <Col span={6} style={{ marginLeft: 35 }}>
-                    Baik (75-84)
-                  </Col>
-                  <Col span={2}>
-                    <Progress percent={10} format={(percent) => `${percent}`}  status="active" />
-                  </Col>
-                  <Col span={14}>18 (dokumen)</Col>
-                </Row>
-                <Row>
-                  <Col span={6} style={{ marginLeft: 35 }}>
-                    Cukup (65-83)
-                  </Col>
-                  <Col span={2}>
-                    <Progress percent={5} format={(percent) => `${percent}`}  status="active" />
-                  </Col>
-                  <Col span={14}>18 (dokumen)</Col>
-                </Row>
-                <Row>
-                  <Col span={6} style={{ marginLeft: 35 }}>
-                    Kurang Baik (0-64)
-                  </Col>
-                  <Col span={2}>
-                    <Progress percent={5} format={(percent) => `${percent}`}  status="active" />
-                  </Col>
-                  <Col span={14}>18 (dokumen)</Col>
-                </Row>
-                <hr />
-                <Row>
-                  <Col span={4}>
-                    <b>3. &nbsp;&nbsp; Perolehan Aspirasi Dari Perusahaan : </b>
-                  </Col>
-                </Row>
               </Card>
             </Col>
           </Row>
@@ -760,72 +563,6 @@ const FormPenilaianPembimbingJurusan = (props) => {
               </Col>
             </Row>
             <hr />
-            {!penilaianIsDone && (
-              <Form>
-                {poinPenilaianForm.map((data, index) => {
-                  return (
-                    <>
-                      <Row key={data.id} style={{ paddingBottom: 20, paddingTop: 20 }}>
-                        <Col style={{ textAlign: 'center' }} span={2}>
-                          {index + 1}
-                        </Col>
-                        <Col span={14}>
-                          <div>
-                            <b>{data.poin}</b>
-                          </div>
-                          <div>{data.deskripsi}</div>
-                        </Col>
-                        <Col style={{ textAlign: 'center' }} span={4}>
-                          {data.bobot}
-                        </Col>
-                        <Col style={{ textAlign: 'center' }} span={4}>
-                          <InputNumber
-                            placeholder="Nilai"
-                            size={'large'}
-                            // defaultValue={3}
-                            maxLength={2}
-                            // ref={nilaiTotal}
-                            value={nilaiPembimbingJurusan.nilai}
-                            onChange={(value) => {
-                              // if (value) {
-                              handleInputNilai(data.id, value, index, 'grade')
-                              // } else {
-                              //   notification.error({
-                              //     message: 'Harap isi semua nilai',
-                              //   })
-                              // }
-                            }}
-                            max={data.bobot}
-                            keyboard={true}
-                            minLength={1}
-                            required
-                          />
-                        </Col>
-                      </Row>
-                      <hr />
-                    </>
-                  )
-                })}
-                <Row>
-                  <Col span={16} style={{ fontSize: 20 }}>
-                    <b>TOTAL</b>
-                  </Col>
-                  <Col span={8}>
-                    <b>{total()}</b>
-                  </Col>
-                </Row>
-
-                <Button
-                  onClick={postPenilaian}
-                  className="form-control btn btn-primary"
-                  htmlType="submit"
-                >
-                  Simpan Penilaian
-                </Button>
-              </Form>
-            )}
-
-            {penilaianIsDone && (
               <Form>
                 {dataPenilaianSebelumnya.map((data, index) => {
                   return (
@@ -844,14 +581,13 @@ const FormPenilaianPembimbingJurusan = (props) => {
                           {data.bobot}
                         </Col>
                         <Col style={{ textAlign: 'center' }} span={4}>
-                          {console.log('PENIALIAN', dataPenilaianSebelumnya[index])}
                           <InputNumber
                             placeholder="Nilai"
                             size={'large'}
                             defaultValue={data.nilai}
                             maxLength={2}
-                            onChange={(e) => {
-                              handleEditChange(data.idpoin, e, index, 'nilai')
+                            onChange={(nilai) => {
+                              handleEditChange(data.aspect_id, nilai, index, 'grade')
                             }}
                             max={data.bobot}
                             keyboard={true}
@@ -881,7 +617,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
                   Simpan Penilaian
                 </Button>
               </Form>
-            )}
+          
           </div>
         </>
       )}

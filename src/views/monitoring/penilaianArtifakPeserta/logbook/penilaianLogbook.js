@@ -102,24 +102,25 @@ const PenilaianLogbook = () => {
     setPagesSelfAssessment(value)
   }
 
+  /** HANDLE SAAT NILAI SA DI UBAH */
   const handleChangeNilaiSelfAssessment = (
     index,
     keyData,
-    aspectId,
-    desc_sa,
-    grade_sa,
-    gradeId,
+    sa_grade,
+    sa_desc,
+    sa_aspect_id,
+    sa_grade_id,
   ) => {
     if (nilaiSelfAssessment[index]) {
       console.log('ya')
-      nilaiSelfAssessment[index][keyData] = grade_sa
+      nilaiSelfAssessment[index][keyData] = sa_grade
     } else {
       console.log('no')
       nilaiSelfAssessment[index] = {
-        aspect_id: aspectId,
-        description: desc_sa,
-        [keyData]: grade_sa,
-        grade_id: gradeId,
+        aspect_id: sa_aspect_id,
+        [keyData]: sa_grade,
+        description: sa_desc,
+        grade_id: sa_grade_id,
       }
 
       setNilaiSelfAssessment(nilaiSelfAssessment)
@@ -209,6 +210,7 @@ const PenilaianLogbook = () => {
   }
 
   useEffect(() => {
+    console.log(window.location.href)
     const getAssociatedLogbookRppSelfAssessmentBasedOnLogbook = async () => {
       axios.defaults.withCredentials = true
       let content = []
@@ -304,10 +306,10 @@ const PenilaianLogbook = () => {
     return (
       <>
         <div>
-          <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius: 2 }}>
+          <Row style={{ backgroundColor: '#00474f', padding: 3, borderRadius: 2 }}>
             <Col span={24}>
               <b>
-                <h4 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h4>
+                <h5 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h5>
               </b>
             </Col>
           </Row>
@@ -613,15 +615,17 @@ const PenilaianLogbook = () => {
               <div>
                 <div>
                   <table>
-                    <tr>
-                      <td>Tanggal Self Assessment</td>
-                      <td>:</td>
-                      <td>
-                        &nbsp;&nbsp;
-                        {selfAssessmentPeserta.start_date} &nbsp; s/d &nbsp;
-                        {selfAssessmentPeserta.finish_date}
-                      </td>
-                    </tr>
+                    <thead>
+                      <tr>
+                        <td>Tanggal Self Assessment</td>
+                        <td>:</td>
+                        <td>
+                          &nbsp;&nbsp;
+                          {selfAssessmentPeserta.start_date} &nbsp; s/d &nbsp;
+                          {selfAssessmentPeserta.finish_date}
+                        </td>
+                      </tr>
+                    </thead>
                   </table>
                   <div className="spacetop"></div>
                   <Table striped="columns">
@@ -648,44 +652,22 @@ const PenilaianLogbook = () => {
                             <td>{index + 1}</td>
                             <td>{data.aspect_name}</td>
                             <td width={'10%'}>
-                             {rolePengguna==='4' && (
-                               <Input
-                               onChange={(e) =>
-                                 handleChangeNilaiSelfAssessment(
-                                   index,
-                                   'grade',
-                                   data.aspect_id,
-                                   data.description,
-                                   e.target.value,
-                                   data.grade_id,
-                                 )
-                               }
-                               defaultValue={data.grade}
-                               type="number"
-                               placeholder="Input a number"
-                               maxLength={2}
-                             ></Input>
-                             )}
-
-                             {rolePengguna !=='4' && (
-                               <Input
-                               disabled
-                               onChange={(e) =>
-                                 handleChangeNilaiSelfAssessment(
-                                   index,
-                                   'grade',
-                                   data.aspect_id,
-                                   data.description,
-                                   e.target.value,
-                                   data.grade_id,
-                                 )
-                               }
-                               defaultValue={data.grade}
-                               type="number"
-                               placeholder="Input a number"
-                               maxLength={2}
-                             ></Input>
-                             )}
+                              <Input
+                                onChange={(e) =>
+                                  handleChangeNilaiSelfAssessment(
+                                    index,
+                                    'grade',
+                                    e.target.value,
+                                    data.description,
+                                    data.aspect_id,
+                                    data.grade_id,
+                                  )
+                                }
+                                defaultValue={data.grade}
+                                type="number"
+                                placeholder="Input a number"
+                                maxLength={2}
+                              ></Input>
                             </td>
                             <td>{data.description}</td>
                           </tr>
@@ -694,15 +676,9 @@ const PenilaianLogbook = () => {
                     </tbody>
                   </Table>
                 </div>
-                {rolePengguna === '4' && (
-                  <Button
-                    type="primary"
-                    onClick={SimpanPenilaianSelfAssessment}
-                    variant="contained"
-                  >
-                    Simpan Nilai
-                  </Button>
-                )}
+                <Button type="primary" onClick={SimpanPenilaianSelfAssessment} variant="contained">
+                  Simpan Nilai
+                </Button>
               </div>
               <br />
             </ul>

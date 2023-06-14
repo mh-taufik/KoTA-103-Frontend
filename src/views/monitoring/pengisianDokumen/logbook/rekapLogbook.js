@@ -139,58 +139,73 @@ const RekapLogbook = () => {
     })
   }
 
-  const refreshData = (index) => {
+  const refreshData = async(index) => {
     let PESERTA
     if (rolePengguna === '1') {
       PESERTA = NIM_PESERTA_AS_USER
     } else {
       PESERTA = NIM_PESERTA_FROM_PARAMS
     }
-
-    axios
+    enterLoading(index)
+    await axios
       .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/get-all/${PESERTA}`)
       .then((result) => {
-        const temp = result.data.data
-
-        var temp_res = []
-        const convertDate = (date) => {
-          let temp_date_split = date.split('-')
-          const month = [
-            'Januari',
-            'Februari',
-            'Maret',
-            'April',
-            'Mei',
-            'Juni',
-            'Juli',
-            'Agustus',
-            'September',
-            'Oktober',
-            'November',
-            'Desember',
-          ]
-          let date_month = temp_date_split[1]
-          let month_of_date = month[parseInt(date_month) - 1]
-          return date ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}` : null
-        }
-
-        const convertStatusPengecekan = (nilai) => {
-          return nilai ? 'Sudah Dinilai' : 'Belum Dinilai'
-        }
-
-        let getTempRes = function (obj) {
-          for (var i in obj) {
-            temp_res.push({
-              id: obj[i].id,
-              date: convertDate(obj[i].date),
-              grade: obj[i].grade,
-              status: obj[i].status,
-              grade_status: convertStatusPengecekan(obj[i].grade),
-            })
+        if (result.data.data.length > 0) {
+          console.log(result.data.data)
+          var temp = result.data.data
+          var temp_res = []
+          const convertDate = (date) => {
+            let temp_date_split = date.split('-')
+            const month = [
+              'Januari',
+              'Februari',
+              'Maret',
+              'April',
+              'Mei',
+              'Juni',
+              'Juli',
+              'Agustus',
+              'September',
+              'Oktober',
+              'November',
+              'Desember',
+            ]
+            let date_month = temp_date_split[1]
+            let month_of_date = month[parseInt(date_month) - 1]
+            return date
+              ? `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
+              : null
           }
-        }
 
-        getTempRes(temp)
+          function setKeyIfNull(index, id) {
+            return id ? id : index
+          }
+
+          function setProjectNameIfNull(project_name) {
+            return project_name ? project_name : '-'
+          }
+
+          let getTempRes = function (obj) {
+            for (var i in obj) {
+              temp_res.push({
+                id: setKeyIfNull(parseInt(i), obj[i].id),
+                real_id: obj[i].id,
+                date: convertDate(obj[i].date),
+                grade: obj[i].grade,
+                status: obj[i].status,
+                project_name: setProjectNameIfNull(obj[i].project_name),
+              })
+            }
+          }
+
+          getTempRes(temp)
+          setLogbookPeserta(temp_res)
+        } else {
+          setLogbookPeserta(result.data.data)
+        }
+        setIsLoading(false)
+
+ 
         setLogbookPeserta(temp_res)
         setIsLoading(false)
         setIsLoading(false)
@@ -594,7 +609,7 @@ const RekapLogbook = () => {
                 </Popover>
               )}
 
-              {(record.grade === 'BELUM DINILAI' && record.real_id !== null && isFinishDateToAssignLogbook) && (
+              {(record.grade === 'BELUM DINILAI' && record.real_id !== null && !isFinishDateToAssignLogbook) && (
                 <Popover content={<div>Lakukan pengeditan logbook</div>}>
                   <Popconfirm
                     placement="topRight"
@@ -786,7 +801,7 @@ const RekapLogbook = () => {
             />
           )}
 
-          {rolePengguna !== '5' && rolePengguna !== '1' && (
+          {rolePengguna !== '1' && (
             <CRow>
               <CCol sm={12}>
                 <div className="spacebottom"></div>

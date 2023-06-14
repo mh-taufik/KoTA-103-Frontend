@@ -31,12 +31,13 @@ import _ from 'lodash'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { Box } from '@mui/material'
-const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
+
+
+const PengisianSelfAssessment = () => {
+  const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const { TextArea } = Input
 const { Step } = Steps
 const { RangePicker } = DatePicker
-
-const FormPengisianSelfAssessment = () => {
   dayjs.extend(customParseFormat)
   const [dayRangeDeadlineSelfAssessment, setDayRangeDeadlineSelfAssessment] = useState()
   const NIM_PESERTA = localStorage.username
@@ -172,10 +173,11 @@ const FormPengisianSelfAssessment = () => {
           notification.warning({
             message: 'Silahkan pilih minggu lain, minggu yang anda pilih telah tersedia !!!',
           })
-        
+          return false
         } else {
           let end = new Date(tanggalselesai)
           end.setDate(end.getDate() + 1 + dayRangeDeadlineSelfAssessment) //jika hari lebih dari hari ini(tanggal selesai)
+          console.log('end ====',end)
           end = new Date(end)
           let today = new Date()
           if (today < end) {
@@ -253,12 +255,6 @@ const FormPengisianSelfAssessment = () => {
     }
   }
 
-  // const handleSuccessSubmit = (idSelfAssessment) => {
-  //   notification.success({
-  //     message: 'Data self assessment berhasil ditambahkan',
-  //   })
-  //   history.push(`/selfAssessment/formSelfAssessment/detail/${idSelfAssessment}`)
-  // }
 
   useEffect(() => {
     console.log('tanggal berakhir', tanggalBerakhirSelfAssessment)
@@ -326,7 +322,7 @@ const FormPengisianSelfAssessment = () => {
                   datestring.slice(5, 7),
                   datestring.slice(0, 4),
                 )
-                handleDateIsAvailable(tanggalmulai, tanggalselesai)
+                let handling = handleDateIsAvailable(tanggalmulai, tanggalselesai)
                 setTanggalMulaiSelfAssessment(
                   getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
                 )
@@ -420,4 +416,4 @@ const FormPengisianSelfAssessment = () => {
   )
 }
 
-export default FormPengisianSelfAssessment
+export default PengisianSelfAssessment

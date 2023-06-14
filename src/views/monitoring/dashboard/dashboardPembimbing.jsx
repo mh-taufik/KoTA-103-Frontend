@@ -1,9 +1,6 @@
 import React from 'react'
-import { Button, Card, Col, Progress, Row, Space } from 'antd'
-import { ClockCircleOutlined } from '@ant-design/icons'
-import { Timeline } from 'antd'
+import { Card, Col, Progress, Row} from 'antd'
 import '../pengisianDokumen/rpp/rpp.css'
-import Title from 'antd/es/typography/Title'
 const DashboardPembimbing = () => {
   const title = (judul) => {
     return (
@@ -40,9 +37,6 @@ const DashboardPembimbing = () => {
                   </Col>
                   <Col>Peserta Sudah Mempunyai RPP</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
 
@@ -59,9 +53,6 @@ const DashboardPembimbing = () => {
                   </Col>
                   <Col>Peserta Memiliki Dokumen Lengkap</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
 
@@ -78,9 +69,6 @@ const DashboardPembimbing = () => {
                   </Col>
                   <Col>Peserta Memiliki Dokumen Lengkap</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
 
@@ -97,9 +85,6 @@ const DashboardPembimbing = () => {
                   </Col>
                   <Col>Peserta Memiliki Dokumen Lengkap</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
           </Row>
@@ -119,27 +104,7 @@ const DashboardPembimbing = () => {
                   </Col>
                   <Col>Peserta Belum Mempunyai RPP</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
-              </Card>
-            </Col>
-            <Col span={6}>
-              <Card bordered={false}>
-                <b style={{ textAlign: 'center', fontSize: 20 }}>LOGBOOK</b>
-                <hr style={{ paddingTop: 5, color: '#520339' }} />
-                <Row style={{ padding: 10 }}>
-                  <Col span={12}>
-                    <b style={{ fontSize: 55 }}>0</b>
-                  </Col>
-                  <Col span={12}>
-                    <Progress type="circle" status="exception" size={80} percent={100} />
-                  </Col>
-                  <Col>Peserta Dokumen Tidak Lengkap</Col>
-                </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
+             
               </Card>
             </Col>
 
@@ -156,9 +121,6 @@ const DashboardPembimbing = () => {
                   </Col>
                   <Col>Peserta Dokumen Tidak Lengkap</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
 
@@ -175,9 +137,6 @@ const DashboardPembimbing = () => {
                   </Col>
                   <Col>Peserta Dokumen Tidak Lengkap</Col>
                 </Row>
-                {/* <Row>
-                <Col><Button type='primary'>Lihat Detail</Button></Col>
-              </Row> */}
               </Card>
             </Col>
           </Row>

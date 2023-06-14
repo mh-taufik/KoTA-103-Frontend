@@ -252,7 +252,21 @@ const ReviewLogbook = (props) => {
                   />
                 </Form.Group>
               </Col>
+            </Row>    <Row>
+              <Col>
+                <Form.Group className="mb-3" controlId="keterangan">
+                  <Form.Label>Keterangan</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={5}
+                    name="keterangan"
+                    defaultValue={logbookAttributesData.encountered_problem}
+                    disabled
+                  />
+                </Form.Group>
+              </Col>
             </Row>
+
 
          
           </Form>

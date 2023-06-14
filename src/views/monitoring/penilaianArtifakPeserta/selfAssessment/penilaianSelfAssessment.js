@@ -150,53 +150,6 @@ const PenilaianSelfAssessment = () => {
     // }
   }
 
-  /** MENGAMBIL DATA TIMELINE */
-  const getTimeline = async () => {
-    var obj = []
-    var content = []
-
-    await axios
-      .get(`http://localhost:1337/api/jadwalpenyelesaiankeseluruhans`)
-      .then((result) => {
-        console.log('HASIL PENYELESAIAN KESELURUHAN', result.data.data)
-        obj = result.data.data
-
-        var findObjectByLabel = function (obj) {
-          for (var i in obj) {
-            console.log(obj[i])
-            content.push({
-              id: obj[i].id,
-              name: obj[i].attributes.jenispekerjaan,
-              description: obj[i].attributes.butirpekerjaan,
-              start_date: obj[i].attributes.tanggalmulai,
-              end_date: obj[i].attributes.tanggalselesai,
-            })
-          }
-        }
-
-        findObjectByLabel(obj)
-        setTimeline(content)
-
-        setIsLoading(false)
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
-          history.push('/500')
-        }
-      })
-
-    console.log('content', content)
-    setTimeline(content)
-  }
 
   /** POST DATA PENILAIAN LOGBOOK PESERTA */
   const penilaianLogbookPeserta = async (idLogbook, index) => {
@@ -266,6 +219,7 @@ const PenilaianSelfAssessment = () => {
           const data_logbook = response.data.data.logbook
           const data_self_assessment = response.data.data.selfAssessment
           let content = []
+          // console.log('dataaa', data_logbook)
 
           if (data_rpp === null) {
             setIsRppAvailable(false)
@@ -273,7 +227,7 @@ const PenilaianSelfAssessment = () => {
             setIsRppAvailable(true)
           }
 
-          if (data_logbook === null) {
+          if (data_logbook === null || data_logbook.length<1) {
             setIsLogbookAvailable(false)
           } else {
             setIsLogbookAvailable(true)
@@ -350,7 +304,7 @@ const PenilaianSelfAssessment = () => {
           <Row style={{ backgroundColor: '#00474f', padding: 5, borderRadius: 2 }}>
             <Col span={24}>
               <b>
-                <h4 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h4>
+                <h5 style={{ color: '#f6ffed', marginLeft: 30, marginTop: 6 }}>{judul}</h5>
               </b>
             </Col>
           </Row>
@@ -488,7 +442,7 @@ const PenilaianSelfAssessment = () => {
 
   /** HANDLE BUTTON */
   const btnKembali = () => {
-    history.push(`/rekapDokumenPeserta/listAspectSelfAssessment/${NIM_PESERTA}`)
+    history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${NIM_PESERTA}`)
   }
 
   return isLoading ? (
@@ -630,114 +584,120 @@ const PenilaianSelfAssessment = () => {
         <div style={{ marginTop: 150 }}>
           {title('LOGBOOK')}
 
-          <div>
-            {logbookPeserta.map((currElement, index) => {
-              if (index === currentLogbook) {
-                return (
-                  <>
-                    <table>
-                      <tr>
-                        {/* <td>Status Pengumpulan</td> */}
-                        {/* <td>:</td> */}
-                        <td>
-                          <b>
-                            {/* {colorTextStatusPengumpulan(
+          {isLogbookAvailable && (
+            <div>
+              {logbookPeserta.map((currElement, index) => {
+                if (index === currentLogbook) {
+                  return (
+                    <>
+                      <table>
+                        <tr>
+                          {/* <td>Status Pengumpulan</td> */}
+                          {/* <td>:</td> */}
+                          <td>
+                            <b>
+                              {/* {colorTextStatusPengumpulan(
                                 logbookPeserta[currentLogbook].statuspengumpulan,
                               )} */}
-                          </b>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>Penilaian</td>
-                        <td>:</td>
-                        <td>{logbookPeserta[currentLogbook].grade}</td>
-                      </tr>
-                      <tr>
-                        <td>Tanggal Logbook</td>
-                        <td>:</td>
-                        <td>{logbookPeserta[currentLogbook].date}</td>
-                      </tr>
-                    </table>
-                    <div className="spacetop"></div>
-                    <Table striped="columns">
-                      <tbody>
-                        <tr>
-                          <td>
-                            <b>Tanggal</b>
+                            </b>
                           </td>
+                        </tr>
+                        <tr>
+                          <td>Penilaian</td>
+                          <td>:</td>
+                          <td>{logbookPeserta[currentLogbook].grade}</td>
+                        </tr>
+                        <tr>
+                          <td>Tanggal Logbook</td>
+                          <td>:</td>
                           <td>{logbookPeserta[currentLogbook].date}</td>
                         </tr>
-                        <tr>
-                          <td>
-                            <b>Nama Proyek</b>
-                          </td>
-                          <td>{logbookPeserta[currentLogbook].project_name}</td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <b>Proyek Manager</b>
-                          </td>
-                          <td>{logbookPeserta[currentLogbook].project_manager}</td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <b>Technical leader</b>
-                          </td>
-                          <td>{logbookPeserta[currentLogbook].technical_leader}</td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <b>Tugas</b>
-                          </td>
-                          <td>{logbookPeserta[currentLogbook].task}</td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <b>Waktu dan Kegiatan Harian</b>
-                          </td>
-                          <td>{logbookPeserta[currentLogbook].time_and_activity}</td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <b>Tools yang digunakan</b>
-                          </td>
-                          <td>{logbookPeserta[currentLogbook].tools}</td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <b>Hasil Kerja</b>
-                          </td>
-                          <td>{logbookPeserta[currentLogbook].work_result}</td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <b>Keterangan</b>
-                          </td>
-                          <td>{logbookPeserta[currentLogbook].description}</td>
-                        </tr>
-                      </tbody>
-                    </Table>
-                    <br />
-                    <br />
-                    <Button
-                      type="primary"
-                      onClick={() => showModalEdit(logbookPeserta[currentLogbook])}
-                    >
-                      Nilai
-                    </Button>
-                    <br />
-                    <br />
-                    <Pagination
-                      defaultCurrent={pages}
-                      defaultPageSize={1}
-                      onChange={handleChange}
-                      total={logbookPeserta.length}
-                    />
-                  </>
-                )
-              }
-            })}
-          </div>
+                      </table>
+                      <div className="spacetop"></div>
+                      <Table striped="columns">
+                        <tbody>
+                          <tr>
+                            <td>
+                              <b>Tanggal</b>
+                            </td>
+                            <td>{logbookPeserta[currentLogbook].date}</td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Nama Proyek</b>
+                            </td>
+                            <td>{logbookPeserta[currentLogbook].project_name}</td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Proyek Manager</b>
+                            </td>
+                            <td>{logbookPeserta[currentLogbook].project_manager}</td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Technical leader</b>
+                            </td>
+                            <td>{logbookPeserta[currentLogbook].technical_leader}</td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Tugas</b>
+                            </td>
+                            <td>{logbookPeserta[currentLogbook].task}</td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Waktu dan Kegiatan Harian</b>
+                            </td>
+                            <td>{logbookPeserta[currentLogbook].time_and_activity}</td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Tools yang digunakan</b>
+                            </td>
+                            <td>{logbookPeserta[currentLogbook].tools}</td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Hasil Kerja</b>
+                            </td>
+                            <td>{logbookPeserta[currentLogbook].work_result}</td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Keterangan</b>
+                            </td>
+                            <td>{logbookPeserta[currentLogbook].description}</td>
+                          </tr>
+                        </tbody>
+                      </Table>
+                      <br />
+                      <br />
+                      <Button
+                        type="primary"
+                        onClick={() => showModalEdit(logbookPeserta[currentLogbook])}
+                      >
+                        Nilai
+                      </Button>
+                      <br />
+                      <br />
+                      <Pagination
+                        defaultCurrent={pages}
+                        defaultPageSize={1}
+                        onChange={handleChange}
+                        total={logbookPeserta.length}
+                      />
+                    </>
+                  )
+                }
+              })}
+            </div>
+          )}
+
+          {!isLogbookAvailable && (
+            <Result icon={<FileOutlined />} title="Tidak Ada Logbook Yang Terkait" />
+          )}
         </div>
       </div>
 

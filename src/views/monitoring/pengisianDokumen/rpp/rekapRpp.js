@@ -117,7 +117,7 @@ const RekapRPP = () => {
   }
 
   useEffect(() => {
-    async function getRppPeserta(index) {
+    async function GetRppPeserta(index) {
       let PESERTA
       if (rolePengguna === '1') {
         PESERTA = NIM_PESERTA_AS_USER
@@ -162,12 +162,9 @@ const RekapRPP = () => {
           } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
             history.push('/404')
           } else if (error.toJSON().status > 500 && error.toJSON().status <= 599) {
-            history.push('/500')
-          } else if (error.toJSON().status === 500) {
+            //history.push('/500')
             setRppPeserta(undefined)
-            setIsLoading(false)
-            return
-          }
+          } 
         })
     }
 
@@ -239,7 +236,7 @@ const RekapRPP = () => {
 
     GetDataInfoPeserta()
     GetDataDeadlineAndPageOpened()
-    getRppPeserta()
+    GetRppPeserta()
   }, [history])
 
   /** HANDLE FILTERING TABLE */

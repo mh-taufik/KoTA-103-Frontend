@@ -18,6 +18,8 @@ import {
   Select,
   Spin,
   Popover,
+  Progress,
+  Card,
 } from 'antd'
 import axios from 'axios'
 import '../pengisianDokumen/rpp/rpp.css'
@@ -31,6 +33,7 @@ const PemetaanPembimbingJurusan = () => {
   const [state, setState] = useState({ searchText: '', searchedColumn: '' })
   const [isLoading, setIsLoading] = useState(true)
   const [key, setKey] = useState('1')
+  const contoller_abort = new AbortController();
   const [isModaleditOpen, setIsModalEditOpen] = useState(false)
   const [dataToEdit, setDataToEdit] = useState([])
   let history = useHistory()
@@ -44,6 +47,7 @@ const PemetaanPembimbingJurusan = () => {
   const USER_ID_PRODI = localStorage.id_prodi
   const [optPembimbing, setOptPembimbing] = useState([])
   const [prodi, setProdi] = useState()
+
 
   const getColumnSearchProps = (dataIndex, name) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -153,8 +157,7 @@ const PemetaanPembimbingJurusan = () => {
   }
 
   const HandleEditPembimbingJurusan = async (idPerusahaan, idPembimbing, index) => {
-    // console.log(idPerusahaan,'---', )
-    // console.log(idPembimbing,'-)-', )
+    console.log(idPerusahaan, idPembimbing)
     await axios
       .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/update`, [{
         "company_id" : parseInt(idPerusahaan),
@@ -199,6 +202,32 @@ const PemetaanPembimbingJurusan = () => {
         .then((result) => {
           setDataHasilPemetaan(result.data.data)
           console.log(result.data.data)
+          let data = result.data.data
+          let data_result =[]
+          function handleAttributeNull(data){
+            return data?data:undefined
+          }
+          if(data !== null){
+           let get_hasil_pemetaan = function (data){
+            for(var i in data){
+              data_result.push({
+                date:handleAttributeNull(data[i].date),
+                participant : handleAttributeNull(data[i].participant),
+                company_id : data[i].company_id,
+                company_name : data[i].company_name,
+                lecturer_id : data[i].lecturer_id,
+                lecturer_name : handleAttributeNull(data[i].lecturer_name),
+
+              })
+            }
+           }
+
+           get_hasil_pemetaan(data)
+           setDataHasilPemetaan(data_result)
+
+          }else{
+            setDataHasilPemetaan(undefined)
+          }
           setIsLoading(false)
         })
         .catch(function (error) {
@@ -215,6 +244,7 @@ const PemetaanPembimbingJurusan = () => {
             history.push('/500')
           }
         })
+        return () => contoller_abort.abort();
     }
 
     const getAllPembimbingJurusan = async () => {
@@ -248,6 +278,7 @@ const PemetaanPembimbingJurusan = () => {
             history.push('/500')
           }
         })
+        return () => contoller_abort.abort();
     }
 
     getAllPembimbingJurusan()
@@ -277,14 +308,13 @@ const PemetaanPembimbingJurusan = () => {
       width: '30%',
     },
     Table.EXPAND_COLUMN,
-    {
-      title: 'PESERTA',
-      dataIndex: 'peserta',
-      render: (text, record) => {
-        let count_participant = record.participant.length
-        return <b>{count_participant}</b>
-      },
-    },
+    // {
+    //   title: 'PESERTA',
+    //   dataIndex: 'peserta',
+    //   render: (text, record) => {
+    //    if(record.participant.length)
+    //   },
+    // },
     {
       title: 'AKSI',
       dataIndex: 'action',
@@ -335,6 +365,30 @@ const PemetaanPembimbingJurusan = () => {
     )
   }
 
+ const handleNullParticipant = (rec) =>{
+  if(rec !== null){
+    return (
+      <ul>
+        {rec.participant.map((data, idx) => {
+                    return (
+                      <Row style={{ padding: 7 }} key={idx}>
+                        <Col span={2}>{idx + 1}</Col>
+                        <Col span={4}>{data.id}</Col>
+                        <Col span={8}>{data.name}</Col>
+                      </Row>
+                    )
+                  })}
+      </ul>
+    )
+
+  }else{
+    return (
+      <ul>Tidak Ada Peserta</ul>
+    )
+  }
+
+ } 
+
   const first_items = [
     {
       key: '1',
@@ -351,21 +405,7 @@ const PemetaanPembimbingJurusan = () => {
             rowKey={dataHasilPemetaan.company_id}
             bordered
             pagination={true}
-            expandable={{
-              expandedRowRender: (rec) => (
-                <ul>
-                  {rec.participant.map((data, idx) => {
-                    return (
-                      <Row style={{ padding: 7 }} key={idx}>
-                        <Col span={2}>{idx + 1}</Col>
-                        <Col span={4}>{data.id}</Col>
-                        <Col span={8}>{data.name}</Col>
-                      </Row>
-                    )
-                  })}
-                </ul>
-              ),
-            }}
+            expandableIcon
           />
         </>
       
@@ -380,6 +420,7 @@ const PemetaanPembimbingJurusan = () => {
     <>
       <CCard className="mb-4">
         {title('PEMETAAN PEMBIMBING JURUSAN')}
+   
         <CCardBody>
           <CRow>
             <CCol sm={12}>
@@ -448,7 +489,6 @@ const PemetaanPembimbingJurusan = () => {
               defaultValue={dataToEdit.lecturer_name}
               onChange={(value) => {
                 setIdChoosen(value)
-                console.log(value)
               }}
               options={optPembimbing}
             />
