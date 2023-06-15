@@ -633,6 +633,89 @@ const FormPenilaianPembimbingJurusan = (props) => {
           </div>
         </>
       )}
+       {ROLE_PENGGUNA !== '4' && (
+        <>
+        
+          <div className=" container">
+            <FloatButton
+              type="primary"
+              onClick={buttonKembaliKeListHandling}
+              icon={<ArrowLeftOutlined />}
+              tooltip={<div>Kembali ke Rekap Laporan Peserta</div>}
+            />
+            <h3 align="center" className="title-s">
+              FORM PENILAIAN PEMBIMBING JURUSAN
+            </h3>
+
+            <hr />
+            <Row style={{ paddingBottom: 5, paddingTop: 4 }}>
+              <Col style={{ textAlign: 'center' }} span={2}>
+                NO
+              </Col>
+              <Col style={{ textAlign: 'center' }} span={14}>
+                KOMPONEN PENILAIAN
+              </Col>
+              <Col style={{ textAlign: 'center' }} span={4}>
+                NILAI MAKSIMUM
+              </Col>
+              <Col style={{ textAlign: 'center' }} span={4}>
+                NILAI
+              </Col>
+            </Row>
+            <hr />
+              <Form>
+                {dataPenilaianSebelumnya.map((data, index) => {
+                  return (
+                    <>
+                      <Row key={data.id} style={{ paddingBottom: 20, paddingTop: 20 }}>
+                        <Col style={{ textAlign: 'center' }} span={2}>
+                          {index + 1}
+                        </Col>
+                        <Col span={14}>
+                          <div>
+                            <b>{data.poinpenilaian}</b>
+                          </div>
+                          <div>{data.deskripsi}</div>
+                        </Col>
+                        <Col style={{ textAlign: 'center' }} span={4}>
+                          {data.bobot}
+                        </Col>
+                        <Col style={{ textAlign: 'center' }} span={4}>
+                          <InputNumber
+                            placeholder="Nilai"
+                            size={'large'}
+                            defaultValue={data.nilai}
+                            disabled
+                            maxLength={2}
+                            onChange={(nilai) => {
+                              handleEditChange(data.grade_id, nilai, index, 'grade')
+                              console.log('gradeid', data.grade_id)
+                            }}
+                            max={data.bobot}
+                            keyboard={true}
+                            minLength={1}
+                            required
+                          />
+                        </Col>
+                      </Row>
+                      <hr />
+                    </>
+                  )
+                })}
+                <Row>
+                  <Col span={16} style={{ fontSize: 20 }}>
+                    <b>TOTAL</b>
+                  </Col>
+                  <Col span={8}>
+                    <b>{totalEdit()}</b>
+                  </Col>
+                </Row>
+
+              </Form>
+          
+          </div>
+        </>
+      )}
 
       
     </>

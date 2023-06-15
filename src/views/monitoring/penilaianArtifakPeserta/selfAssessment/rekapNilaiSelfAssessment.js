@@ -2,12 +2,12 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import axios from 'axios'
 import { useHistory, useParams, Router } from 'react-router-dom'
-import { LoadingOutlined } from '@ant-design/icons'
+import { LoadingOutlined,FileExclamationOutlined  } from '@ant-design/icons'
 import '../../pengisianDokumen/rpp/rpp.css'
 import { Table } from 'react-bootstrap'
 import Popover from '@mui/material/Popover'
 import Typography from '@mui/material/Typography'
-import { Card, Col, FloatButton, Progress, Row, Space, Spin, Tooltip } from 'antd'
+import { Card, Col, FloatButton, Progress, Result, Row, Space, Spin, Tooltip } from 'antd'
 import { Box } from '@mui/material'
 
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
@@ -93,7 +93,7 @@ const RekapSelfAssessment = () => {
                 console.log('temssp',average_data)
 
                 let tempfinalGrade = []
-                let len_grade 
+                let len_grade = final_grade.length
                 let total_final_grade =0
                 let getFinalGrade = function(data) {
                   for(var i in data){
@@ -102,7 +102,7 @@ const RekapSelfAssessment = () => {
                     })
                     total_final_grade = total_final_grade+data[i].grade
                     console.log(data[i].grade, typeof(data[i].grade))
-                    len_grade = parseInt(i)
+                   
                   }
                 }
                 getFinalGrade(final_grade)
@@ -184,6 +184,7 @@ const RekapSelfAssessment = () => {
               history.push('/500')
             } else if (error.toJSON().status === 500) {
               setSelfAssessmentPeserta(undefined)
+              setIsNotNullDataSelfAssessment(false)
               setIsLoading(false)
             }
           })
@@ -229,9 +230,7 @@ const RekapSelfAssessment = () => {
     </Spin>
   ) : (
     <>
-      {isNotNullDataSelfAssessment && (
-        <>
-          <div>
+     <div>
             <Space
               className="spacebottom"
               direction="vertical"
@@ -264,6 +263,9 @@ const RekapSelfAssessment = () => {
               </Card>
             </Space>
           </div>
+      {isNotNullDataSelfAssessment && (
+        <>
+         
 
           {title('REKAP PENILAIAN SELF ASSESSMENT PESERTA')}
 
@@ -332,6 +334,16 @@ const RekapSelfAssessment = () => {
             <b>HASIL AKHIR PENILAIAN : {hasilAkhirPenilaian}</b>
           </div>
         </>
+      )}
+
+      {!isNotNullDataSelfAssessment && (
+         <div className="container2">
+         <Result
+           title="Peserta Belum Memiliki Self Assessment"
+           icon={<FileExclamationOutlined />}
+           subTitle="Belum ada rekap nilai apapun"
+         />
+       </div>
       )}
       <FloatButton
         type="primary"
