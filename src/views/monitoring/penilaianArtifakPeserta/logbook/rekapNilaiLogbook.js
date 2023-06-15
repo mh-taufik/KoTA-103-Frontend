@@ -151,6 +151,22 @@ const RekapPenilaianLogbook = () => {
       return 'cyan'
     } 
   }
+
+  const tagColorPenilaianLogbook = (nilai) =>{
+    let color
+    if (nilai === 'SANGAT BAIK') {
+      return 'green'
+    } else if (nilai === 'BAIK') {
+      return 'cyan'
+    } else if (nilai === 'CUKUP') {
+      return 'warning'
+    } else if (nilai === 'KURANG') {
+      return 'magenta'
+    } else if (nilai === 'BELUM DINILAI') {
+      return 'default'
+    }
+ 
+  }
   return isLoading ? (
     <Spin size="large" />
   ) : (
@@ -193,7 +209,7 @@ const RekapPenilaianLogbook = () => {
         </div>
 
       <div className="container2">
-        <h5>INFORMASI DOKUMEN PESERTA</h5>
+        <h5>DATA HASIL PENGUMPULAN DAN NILAI LOGBOOK</h5>
         <hr />
 
         <Table>
@@ -202,9 +218,8 @@ const RekapPenilaianLogbook = () => {
               <th>#</th>
               <th>Tanggal Logbook</th>
               <th>Nama Proyek</th>
-              <th>Status Penilaian</th>
               <th>Status Pengumpulan</th>
-              <th>Nilai</th>
+              <th>Penilaian</th>
             </tr>
           </thead>
           <tbody>
@@ -217,12 +232,8 @@ const RekapPenilaianLogbook = () => {
                   <td><Tag color={tagColorLogbookGradeHandling(data.status)}>
                       {data.status}
                     </Tag></td>
-                  <td>
-                    {/* <Tag color={tagColorStatusHandling(data.statuspengumpulan)}>
-                      {data.statuspengumpulan}
-                    </Tag> */}
-                  </td>
-                  <td>{data.grade}</td>
+                  <td><Tag color={tagColorPenilaianLogbook(data.grade)}>
+                      {data.grade}</Tag></td>
                 </tr>
               )
             })}

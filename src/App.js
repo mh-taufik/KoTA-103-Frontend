@@ -24,6 +24,8 @@ const PengajuanPerusahaan = lazyWithRetry(() => import('./views/pages/pengajuanP
 
 
 class App extends Component {
+ 
+
   render() {
     return (
       <BrowserRouter>

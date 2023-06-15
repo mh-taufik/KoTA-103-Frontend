@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import {ArrowLeftOutlined } from '@ant-design/icons';
 import { Document, Page, pdfjs } from 'react-pdf'
 import { UploadOutlined } from '@ant-design/icons'
-import { Button, FloatButton, Form, Input, Space, Upload, notification } from 'antd'
+import { Button, FloatButton, Form, Input, Result, Space, Upload, notification } from 'antd'
 import '../rpp/rpp.css'
 import Text from 'antd/lib/typography/Text'
 import './sample.css'
@@ -28,6 +28,7 @@ export default function UploadLaporan() {
   const [numPages, setNumPages] = useState(null)
   const [hiddenScroll, setHiddenScroll] = useState('upload-dokumen-laporan')
   const [fileData, setFileData] = useState()
+  const [isFinishDatePhase, setIsFinishDatePhase] = useState()
   const [storageFile, setStorageFile] = useState()
   const NIM_PESERTA = localStorage.username
   const [isUploadFileByLink, setIsUploadFileByLink] = useState(true)
@@ -65,29 +66,7 @@ export default function UploadLaporan() {
     return [year, month, day].join('-')
   }
 
-  const statusPengumpulan = async () => {
-    await axios
-      .get(
-        `http://localhost:1337/api/laporans?populate=*&filters[peserta][username]=${NIM_PESERTA}`,
-      )
-      .then((res) => {
-        console.log(res.data.data[0].attributes.deadline.data)
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-          history.push('/500')
-        }
-      })
-  }
+
 
   const onSubmit = async (values) => {
     let todayDate = new Date()
@@ -143,11 +122,11 @@ export default function UploadLaporan() {
 
         let temp = res.data.data
         let waltemp = []
+        let current_phase = temp.phase
      
         waltemp = {
             id: temp.id,
             link_drive: temp.uri,
-            // tanggal_deadline: convertDate(temp.attributes.deadlinen),
             fase : temp.phase,
             tanggal_pengumpulan: convertDate(temp.upload_date),
           }
@@ -159,6 +138,26 @@ export default function UploadLaporan() {
           id : 'linkdrive',
           name : 'linkdrive',
           value : waltemp.link_drive
+        })
+        let idDeadline
+        if(current_phase === 1){
+          idDeadline= 3
+        }else if(current_phase ===2){
+          idDeadline = 4
+        }else if(current_phase === 3){
+          idDeadline = 5
+        }
+
+        axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=${idDeadline}`).then((res)=>{
+          console.log('hasil', res.data.data)
+          let today = formatDate(new Date())
+          let date_finished_this_phase = res.data.data.finish_assignment_date
+          console.log('date' , today, date_finished_this_phase)
+          if(date_finished_this_phase < today){
+            setIsFinishDatePhase(true)
+          }else{
+            setIsFinishDatePhase(false)
+          }
         })
       
       })
@@ -224,9 +223,10 @@ export default function UploadLaporan() {
           <Box sx={{ color: 'info.main' }}>
           Tanggal Pengumpulan &nbsp;&nbsp;&nbsp; : {isiDetailLaporan.tanggal_pengumpulan}
           </Box>
-          <Box sx={{ color: 'info.main' }}>Link yang dikumpulkan : </Box><Input className='spacebottom' value={isiDetailLaporan.link_drive}/>
+          <Box sx={{ color: 'info.main' }}>Link yang dikumpulkan : <a href={isiDetailLaporan.link_drive}>{isiDetailLaporan.link_drive}</a></Box>
+          <div className='spacebottom'></div>
           <Text type="warning" className='spacetop'>
-            * Laporan KP / PKL dikumpulkan hanya satu file <br /> * Laporan dapat dikumpulkan
+            * Laporan KP / PKL dikumpulkan hanya satu file dalam bentuk link gdrive <br /> * Laporan dapat dikumpulkan
             kembali selama belum mencapai deadline <br /> * Pastikan Gdrive dapat diakses  <br/> * Pengumpulan kembali dapat dilakukan dengan mengisi form dibawah dan klik submit
           </Text>
      
@@ -234,7 +234,8 @@ export default function UploadLaporan() {
          
 
 
-          <Form
+        {!isFinishDatePhase && (
+            <Form
             className="spacetop"
             name="basic"
             form={form1}
@@ -264,6 +265,15 @@ export default function UploadLaporan() {
               Submit
             </Button>
           </Form>
+        )}
+
+        {isFinishDatePhase && (
+            <Result
+            title="Sudah Melewati Batas Tanggal Pengumpulan"
+            subTitle="Anda sudah tidak dapat melakukan pengeditan link laporan"
+          
+          />
+        )}
         </div>
       )}
             <FloatButton type='primary' icon={<ArrowLeftOutlined />} onClick={()=>{history.push(`/laporan`)}} tooltip={<div>Kembali ke Rekap Laporan</div>} />

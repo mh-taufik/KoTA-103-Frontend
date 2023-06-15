@@ -92,6 +92,17 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
       })
   }
 
+  function formatDate(date) {
+    var d = new Date(date),
+      month = '' + (d.getMonth() + 1),
+      day = '' + d.getDate(),
+      year = d.getFullYear()
+
+    if (month.length < 2) month = '0' + month
+    if (day.length < 2) day = '0' + day
+
+    return [year, month, day].join('-')
+  }
   useEffect(() => {
     async function getDataPoinPenilaianSelfAssessment() {
       await axios
@@ -128,12 +139,11 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
   }
 
   const handleOkCreate = async (index) => {
-    // if (poinTanggalDibuka) {
     await axios
       .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/create`, {
         description: poinName,
         name: poinName,
-        start_assessment_date: poinTanggalDibuka,
+        start_assessment_date: formatDate(new Date()),
         status: 6,
       })
       .then((response) => {
@@ -154,15 +164,13 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
           newLoadings[index] = false
           return newLoadings
         })
-        notification.error({
-          message: 'Poin penilaian telah ada!',
-        })
+     
       })
     // } else {
     //   notification.warning({ message: 'Isi Status Terlebih Dahulu!!!' })
     // }
 
-    refreshData()
+   
   }
 
   const handleCancelCreate = () => {
@@ -328,11 +336,11 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
       dataIndex: 'status',
       ...getColumnSearchProps('status', 'Status Poin Penilaian'),
     },
-    {
-      title: 'Tanggal Mulai Dibuka Akses',
-      dataIndex: 'start_assessment_date',
-      ...getColumnSearchProps('status', 'Status Poin Penilaian'),
-    },
+    // {
+    //   title: 'Tanggal Mulai Dibuka Akses',
+    //   dataIndex: 'start_assessment_date',
+    //   ...getColumnSearchProps('status', 'Status Poin Penilaian'),
+    // },
     {
       title: 'Aksi',
       width: '5%',
@@ -399,10 +407,10 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
                 <li>
                   Diberikan status active : apabila poin tersebut diizinkan untuk diisi oleh peserta
                 </li>
-                <li>
+                {/* <li>
                   Diberikan status inactive : apabila poin tersebut belum waktunya untuk diisi oleh
                   peserta
-                </li>
+                </li> */}
                 <li>
                   Diberikan status disabled : apabila poin tersebut tidak akan dilakukan pengisian
                   sama sekali oleh peserta
@@ -471,11 +479,11 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
           >
             <Input onChange={(e) => setPoinName(e.target.value)} />
           </Form.Item>
-
+{/* 
           <b>
             Tanggal Poin Dibuka <span style={{ color: 'red' }}> *</span>
-          </b>
-          <Form.Item
+          </b> */}
+          {/* <Form.Item
             name="tanggal"
             rules={[
               { required: true, message: 'Nama Poin Penilaian Tidak Boleh Kosong' },
@@ -486,7 +494,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
             ]}
           >
             <DatePicker onChange={(date, datestring) => setPoinTanggalDibuka(datestring)} />
-          </Form.Item>
+          </Form.Item> */}
         </Form>
       </Modal>
 
@@ -559,12 +567,12 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
               }}
             >
               <Option value={6}>Active</Option>
-              <Option value={7}>Inctive</Option>
+              {/* <Option value={7}>Inctive</Option> */}
               <Option value={8}>Disabled</Option>
             </Select>
           </Form.Item>
 
-          <b>
+          {/* <b>
             Tanggal Poin Penilaian<span style={{ color: 'red' }}> *</span>
           </b>
           <p>Tanggal Saat Ini : {coDate}</p>
@@ -577,7 +585,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
                 // console.log(datestring)
               }
             />
-       
+        */}
        
         </Form>
       </Modal>

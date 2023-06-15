@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import axios from 'axios'
 import { useHistory, useParams, Router } from 'react-router-dom'
@@ -7,7 +7,8 @@ import '../../pengisianDokumen/rpp/rpp.css'
 import { Table } from 'react-bootstrap'
 import Popover from '@mui/material/Popover'
 import Typography from '@mui/material/Typography'
-import { Card, Col, FloatButton, Progress, Row, Space, Tooltip } from 'antd'
+import { Card, Col, FloatButton, Progress, Row, Space, Spin, Tooltip } from 'antd'
+import { Box } from '@mui/material'
 
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const RekapSelfAssessment = () => {
@@ -19,10 +20,14 @@ const RekapSelfAssessment = () => {
   let rolePengguna = localStorage.id_role
   let history = useHistory()
   axios.defaults.withCredentials = true
+  const [bestPerformance, setBestPerformance] = useState()
+  const [hasilAkhirPenilaian, setHasilAkhirPenilaian]  = useState()
+  const [averagePerPoin, setAveragePerPoin] = useState()
+  const [finalGradePerPoin, setFinalGradePerPoin] = useState()
   const [selfAssessmentPeserta, setSelfAssessmentPeserta] = useState([])
   const [isNotNullDataSelfAssessment, setIsNotNullDataSelfAssessment] = useState()
   const [anchorEl, setAnchorEl] = React.useState(null)
-  const contoller_abort = new AbortController();
+  const contoller_abort = new AbortController()
   const [data, setData] = React.useState()
   const handlePopoverOpen = (event, data) => {
     setAnchorEl(event.currentTarget)
@@ -40,122 +45,159 @@ const RekapSelfAssessment = () => {
 
   const open = Boolean(anchorEl)
 
-  useEffect(() => {
-    async function getSelfAssessmentAspect() {
-      await axios
-        .get(
-          `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/get`,
-        )
-        .then((result) => {
-          console.log('komponen', result.data.data)
+  useEffect(
+    () => {
+   
+      async function getSelfAssessmentAspect() {
+        await axios
+          .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/get`)
+          .then((result) => {
+            console.log('komponen', result.data.data)
+            setKomponenPenilaianSelfAssessment(result.data.data)
 
-          setKomponenPenilaianSelfAssessment(result.data.data)
-          setIsLoading(false)
-        })
-        .catch(function (error) {
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
-              },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
-            history.push('/500')
-          }
-        })
-        return () => contoller_abort.abort();
-    }
+            axios
+              .get(
+                `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/get-final-grade/${ID_PARTICIPANT}`,
+              )
+              .then((result) => {
+                console.log('RES', result.data.data)
+                let best_performance = result.data.data.best_grade
+                let average_data = result.data.data.average_grade
+                let final_grade = result.data.data.final_grade
+                let tempBestPerformance = []
 
-    getSelfAssessmentAspect()
-
-    async function getDataInformasiPeserta() {
-      await axios
-        .post(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-by-id`, {
-          id: [ID_PARTICIPANT],
-        })
-        .then((result) => {
-          setDataPeserta(result.data.data[0])
-        })
-        .catch(function (error) {
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
-              },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
-            history.push('/500')
-          }
-        })
-    }
-
-    const getSelfAssessmentPeserta = async (index) => {
-      await axios
-        .get(
-          `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/get-all/${ID_PARTICIPANT}`,
-        )
-        .then((result) => {
-          console.log('sa', result.data.data.length)
-          if(result.data.data !== null){
+                let getBestPerformanceData = function (data) {
+                  for (var i in data) {
+                    tempBestPerformance.push({
+                      grade: data[i].grade,
+                      description: data[i].description,
+                    })
             
-          let temp = result.data.data
-          let temp1 = []
-          let last_index_data = temp.length - 1
+                  }
+                }
+                getBestPerformanceData(best_performance)
+                setBestPerformance(tempBestPerformance)
 
-          let getTempData = function (obj) {
-            for (var i in obj) {
-              console.log(i, last_index_data)
-              if (last_index_data === parseInt(i)) {
-                 break
-              } else {
-                temp1.push({
-                  finish_date: obj[i].finish_date,
-                  start_date: obj[i].start_date,
-                  grade: obj[i].grade,
-                  self_assessment_id: obj[i].self_assessment_id,
-                })
-              }
+                let tempAverage = []
+                let getAverage = function (data) {
+                  for (var i in data) {
+                    tempAverage.push({
+                      grade: data[i].grade,
+                 
+                    })
+                
+                  }
+                }
+                getAverage(average_data)
+                setAveragePerPoin(tempAverage)
+                console.log('temssp',average_data)
+
+                let tempfinalGrade = []
+                let len_grade 
+                let total_final_grade =0
+                let getFinalGrade = function(data) {
+                  for(var i in data){
+                    tempfinalGrade.push({
+                      grade : data[i].grade
+                    })
+                    total_final_grade = total_final_grade+data[i].grade
+                    console.log(data[i].grade, typeof(data[i].grade))
+                    len_grade = parseInt(i)
+                  }
+                }
+                getFinalGrade(final_grade)
+                setHasilAkhirPenilaian(Math.round(total_final_grade/len_grade))
+                setFinalGradePerPoin(tempfinalGrade)
+                setIsLoading(false)
+              })
+          })
+          .catch(function (error) {
+            if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+              history.push({
+                pathname: '/login',
+                state: {
+                  session: true,
+                },
+              })
+            } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+              history.push('/404')
+            } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+              history.push('/500')
             }
-          } 
+          })
+        return () => contoller_abort.abort()
+      }
 
-          getTempData(result.data.data)
-          setIsNotNullDataSelfAssessment(true)
-          setSelfAssessmentPeserta(temp1)
-          }else{
-            setIsNotNullDataSelfAssessment(false)
-          }
-  
+      getSelfAssessmentAspect()
 
-        })
-        .catch(function (error) {
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
-              },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status > 500 && error.toJSON().status <= 599) {
-            history.push('/500')
-          } else if (error.toJSON().status === 500) {
-            setSelfAssessmentPeserta(undefined)
-            setIsLoading(false)
-          }
-        })
-    }
+      async function getDataInformasiPeserta() {
+        await axios
+          .post(`${process.env.REACT_APP_API_GATEWAY_URL}participant/get-by-id`, {
+            id: [ID_PARTICIPANT],
+          })
+          .then((result) => {
+            setDataPeserta(result.data.data[0])
+          })
+          .catch(function (error) {
+            if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+              history.push({
+                pathname: '/login',
+                state: {
+                  session: true,
+                },
+              })
+            } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+              history.push('/404')
+            } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+              history.push('/500')
+            }
+          })
+      }
 
-    getDataInformasiPeserta()
-    getSelfAssessmentPeserta()
-    return () => contoller_abort.abort();
-  }, [history])
+      const getSelfAssessmentPeserta = async (index) => {
+        await axios
+          .get(
+            `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/get-all/${ID_PARTICIPANT}`,
+          )
+          .then((result) => {
+            console.log('sa', result.data.data)
+            if (result.data.data !== null) {
+              let temp = result.data.data
+
+              setIsNotNullDataSelfAssessment(true)
+              setSelfAssessmentPeserta(temp)
+            } else {
+              setIsNotNullDataSelfAssessment(false)
+            }
+          })
+          .catch(function (error) {
+            if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+              history.push({
+                pathname: '/login',
+                state: {
+                  session: true,
+                },
+              })
+            } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+              history.push('/404')
+            } else if (error.toJSON().status > 500 && error.toJSON().status <= 599) {
+              history.push('/500')
+            } else if (error.toJSON().status === 500) {
+              setSelfAssessmentPeserta(undefined)
+              setIsLoading(false)
+            }
+          })
+      }
+
+      // GetFinalGrade()
+      getDataInformasiPeserta()
+
+      getSelfAssessmentPeserta()
+      return () => contoller_abort.abort()
+    },
+    [history],
+    [],
+  )
 
   const title = (judul) => {
     return (
@@ -173,8 +215,6 @@ const RekapSelfAssessment = () => {
     )
   }
 
-
-
   const getRowGradeaDesc = (data) => {
     return data.map((nilaipoin, index) => (
       <td key={nilaipoin.grade_id}>
@@ -183,94 +223,116 @@ const RekapSelfAssessment = () => {
     ))
   }
 
-  return (
+  return isLoading ? (
+    <Spin tip="Loading" size="large">
+      <div className="content" />
+    </Spin>
+  ) : (
     <>
-   
-     {isNotNullDataSelfAssessment && (
-      <>
-       <div>
-        <Space
-          className="spacebottom"
-          direction="vertical"
-          size="middle"
-          style={{
-            display: 'flex',
-          }}
-        >
-          <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
-            <Row style={{ padding: 5 }}>
-              <Col span={4}>Nama Lengkap</Col>
-              <Col span={2}>:</Col>
-              <Col span={8}>{dataPeserta.name}</Col>
-            </Row>
-            <Row style={{ padding: 5 }}>
-              <Col span={4}>NIM</Col>
-              <Col span={2}>:</Col>
-              <Col span={8}>{dataPeserta.nim}</Col>
-            </Row>
-            <Row style={{ padding: 5 }}>
-              <Col span={4}>Sistem Kerja</Col>
-              <Col span={2}>:</Col>
-              <Col span={8}>{dataPeserta.work_system}</Col>
-            </Row>
-            <Row style={{ padding: 5 }}>
-              <Col span={4}>Angkatan</Col>
-              <Col span={2}>:</Col>
-              <Col span={8}>{dataPeserta.year}</Col>
-            </Row>
-          </Card>
-        </Space>
-      </div>
+      {isNotNullDataSelfAssessment && (
+        <>
+          <div>
+            <Space
+              className="spacebottom"
+              direction="vertical"
+              size="middle"
+              style={{
+                display: 'flex',
+              }}
+            >
+              <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
+                <Row style={{ padding: 5 }}>
+                  <Col span={4}>Nama Lengkap</Col>
+                  <Col span={2}>:</Col>
+                  <Col span={8}>{dataPeserta.name}</Col>
+                </Row>
+                <Row style={{ padding: 5 }}>
+                  <Col span={4}>NIM</Col>
+                  <Col span={2}>:</Col>
+                  <Col span={8}>{dataPeserta.nim}</Col>
+                </Row>
+                <Row style={{ padding: 5 }}>
+                  <Col span={4}>Sistem Kerja</Col>
+                  <Col span={2}>:</Col>
+                  <Col span={8}>{dataPeserta.work_system}</Col>
+                </Row>
+                <Row style={{ padding: 5 }}>
+                  <Col span={4}>Angkatan</Col>
+                  <Col span={2}>:</Col>
+                  <Col span={8}>{dataPeserta.year}</Col>
+                </Row>
+              </Card>
+            </Space>
+          </div>
 
-      {title('REKAP PENILAIAN SELF ASSESSMENT PESERTA')}
+          {title('REKAP PENILAIAN SELF ASSESSMENT PESERTA')}
 
-      <div className="container2">
-        {/* <button onClick={tes}>tes</button> */}
-
-        <Table responsive>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Tanggal Mulai</th>
-              {komponenPenilaianSelfAssessment.map((data, index) => (
-                <th key={data.aspect_id}>{data.aspect_name}</th>
-              ))}
-              {/* <th>Total</th> */}
-            </tr>
-          </thead>
-          <tbody>
-            {selfAssessmentPeserta.map((sa, index) => (
-              <tr key={sa.self_assessment_id}>
-                <td>{index + 1}</td>
-                <td>{sa.start_date}</td>
-                {getRowGradeaDesc(sa.grade)}
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-        {/* <Popover
-          id="mouse-over-popover"
-          sx={{
-            pointerEvents: 'none',
-          }}
-          open={open}
-          anchorEl={anchorEl}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'left',
-          }}
-          onClose={handlePopoverClose}
-          disableRestoreFocus
-        >
-          {handlePopOverData()}
-        </Popover> */}
-      </div>
-      </>
-     )}
+          <div className="container2">
+          <Box sx={{ color: 'warning.main' }} className="spacebottom">
+          <ul>
+            {/* <li>Pastikan semua RPP terisi</li> */}
+            <li>Nilai terdiri dari : nilai performansi terbaik diperoleh dari nilai tertinggi setiap poin self assesment  dari keseluruhan self assessment</li>
+            <li>Rata rata : diperoleh dari hasil rata-rata tiap poin untuk seluruh self assessment</li>
+            <li>Hasil akhir : 60% dari performansi terbaik dan 40% dari nilai rata-rata</li>
+            <li>Arahkan kursor ke nilai performansi terbaik, untuk melihat keterangan dari performansi terbaik</li>
+          </ul>
+        </Box>
+            <Table responsive>
+              <thead>
+                <tr>
+                  <th>Hasil Penilaian</th>
+                  {komponenPenilaianSelfAssessment.map((data, index) => (
+                    <th key={data.aspect_id}>{data.aspect_name}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td> BEST PERFORMANCE</td>
+                  {bestPerformance.map((data) => (
+                    <>
+                      <td style={{ width: 10 }}>
+                        {' '}
+                        <Tooltip title={data.description} color="gold" key={data}>
+                          {data.grade}
+                        </Tooltip>
+                      </td>
+                    </>
+                  ))}
+                </tr>
+                <tr>
+                  <td> RATA RATA PER POIN</td>
+                  {averagePerPoin.map((data) => (
+                    <>
+                      <td style={{ width: 10 }}>
+                        {' '}
+                        <Tooltip color="gold" key={data}>
+                          {data.grade}
+                        </Tooltip>
+                      </td>
+                    </>
+                  ))}
+                </tr>
+                <tr>
+                  <td>TOTAL NILAI PER POIN</td>
+                  {finalGradePerPoin.map((data) => (
+                    <>
+                      <td style={{ width: 10 }}>
+                        {' '}
+                        <Tooltip color="gold" key={data}>
+                          {data.grade}
+                        </Tooltip>
+                      </td>
+                    </>
+                  ))}
+                </tr>
+              </tbody>
+            </Table>
+            <div className='spacetop'></div>
+            <b>HASIL AKHIR PENILAIAN : {hasilAkhirPenilaian}</b>
+          </div>
+        </>
+      )}
       <FloatButton
         type="primary"
         icon={<ArrowLeftOutlined />}

@@ -4,7 +4,7 @@ import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { faEye, faPencil } from '@fortawesome/free-solid-svg-icons'
-import { Table, Button, Row, Col, Input, Space, Spin, Popover, Card, FloatButton, Alert, Result } from 'antd'
+import { Table, Button, Row, Col, Input, Space, Spin, Popover, Card, FloatButton, Alert, Result, Tag } from 'antd'
 import axios from 'axios'
 import { SearchOutlined } from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
@@ -75,7 +75,7 @@ const RekapSelfAssessment = () => {
           `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/get-all/${PESERTA}`,
         )
         .then((result) => {
-          let len = result.data.data.length-2
+          let len = result.data.data.length-1
           console.log('len', len, 'act',result.data.data.length)
 
           let temp = []
@@ -84,21 +84,26 @@ const RekapSelfAssessment = () => {
 
           
 
+          function handleIdNull (id,index){
+            return id?id:index
+          }
+
+          function setStatus(id){
+            return id?'Sudah Dikumpulkan' : 'Tidak Dikumpulkan'
+          }
           if (result.data.data.length > 1) {
             console.log('RESY')
             var getTempSelfAssessment = function (obj) {
               for (var i in obj) {
                 console.log(i, len)
-                if (parseInt(i)===parseInt(len)) {
-                  break
-
-                }else{
-                  console.log('ya')
+                if (parseInt(i)<len) {
                   temp.push({
                     start_date: convertDate(obj[i].start_date),
                     finish_date: convertDate(obj[i].finish_date),
-                    self_assessment_id: obj[i].self_assessment_id,
+                    self_assessment_id: handleIdNull(obj[i].self_assessment_id,parseInt(i)),
+                    actual_id : obj[i].self_assessment_id,
                     participant_id: obj[i].participant_id,
+                    status : setStatus(obj[i].self_assessment_id)
                   })
                 }
               
@@ -303,59 +308,54 @@ const RekapSelfAssessment = () => {
       PESERTA = NIM_PESERTA_FROM_PARAMS
     }
     await axios
-      .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/get-all/${PESERTA}`)
-      .then((result) => {
-        console.log(result.data.data)
+        .get(
+          `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/get-all/${PESERTA}`,
+        )
+        .then((result) => {
+          let len = result.data.data.length-1
+          console.log('len', len, 'act',result.data.data.length)
 
-        let temp = []
-        const len = result.data.data.length
-        const temp1 = JSON.parse(JSON.stringify(result.data.data))
+          let temp = []
+         
+          const temp1 = JSON.parse(JSON.stringify(result.data.data))
 
-        const convertDate = (date) => {
-          let temp_date_split = date.split('-')
-          const month = [
-            'Januari',
-            'Februari',
-            'Maret',
-            'April',
-            'Mei',
-            'Juni',
-            'Juli',
-            'Agustus',
-            'September',
-            'Oktober',
-            'November',
-            'Desember',
-          ]
-          let date_month = temp_date_split[1]
-          let month_of_date = month[parseInt(date_month) - 1]
-          console.log(month_of_date, 'isi date monts', month_of_date)
-          return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
-        }
+          
 
-        if (result.data.data.length > 0) {
-          console.log('RESY')
-          var getTempSelfAssessment = function (obj) {
-            for (var i in obj) {
-              if (parseInt(i) === len - 1) {
-                break
-              }
-              temp.push({
-                start_date: convertDate(obj[i].start_date),
-                finish_date: convertDate(obj[i].finish_date),
-                self_assessment_id: obj[i].self_assessment_id,
-                participant_id: obj[i].participant_id,
-              })
-            }
+          function handleIdNull (id,index){
+            return id?id:index
           }
 
-          getTempSelfAssessment(temp1)
-          setSelfAssessmentPeserta(temp)
-          setIsLoading(false)
-        } else {
-          setSelfAssessmentPeserta(result.data.data)
-          setIsLoading(false)
-        }
+          function setStatus(id){
+            return id?'Sudah Dikumpulkan' : 'Tidak Dikumpulkan'
+          }
+          if (result.data.data.length > 1) {
+            console.log('RESY')
+            var getTempSelfAssessment = function (obj) {
+              for (var i in obj) {
+                console.log(i, len)
+                if (parseInt(i)<len) {
+                  temp.push({
+                    start_date: convertDate(obj[i].start_date),
+                    finish_date: convertDate(obj[i].finish_date),
+                    self_assessment_id: handleIdNull(obj[i].self_assessment_id,parseInt(i)),
+                    actual_id : obj[i].self_assessment_id,
+                    participant_id: obj[i].participant_id,
+                    status : setStatus(obj[i].self_assessment_id)
+                  })
+                }
+              
+              }
+            }
+
+            getTempSelfAssessment(temp1)
+            setSelfAssessmentPeserta(temp)
+            setIsLoading(false)
+       
+          } else {
+            setSelfAssessmentPeserta(result.data.data)
+            setIsLoading(false)
+      
+          }
         setLoadings((prevLoadings) => {
           const newLoadings = [...prevLoadings]
           newLoadings[index] = false
@@ -405,18 +405,33 @@ const RekapSelfAssessment = () => {
       ...getColumnSearchProps('finish_date', 'Tanggal Selesai'),
     },
     {
+      title: 'STATUS PENGUMPULAN',
+      dataIndex: 'status',
+      key: 'status',
+      ...getColumnSearchProps('status', 'Status Pengumpulan'),
+      render: (text, record) => {
+        let color
+        if (record.status === 'Sudah Dikumpulkan') {
+          color = 'green'
+        } else if (record.status === 'Tidak Dikumpulkan') {
+          color = 'magenta'
+        }
+        return <Tag color={color}>{record.status}</Tag>
+      },
+    },
+    {
       title: 'AKSI',
       width: '10%',
       align: 'center',
       dataIndex: 'action',
       render: (text, record) => (
         <>
-          {rolePengguna !== '1' && rolePengguna !== '4' && (
+          {rolePengguna !== '1' && rolePengguna !== '4' && record.actual_id !== null && (
             <Row>
               <Col span={24} style={{ textAlign: 'center' }}>
                 <Popover content={<div>Lihat isi detail self assessment</div>}>
                   <Button
-                    id="button-pencil"
+                    id="button-pencil" 
                     htmlType="submit"
                     shape="circle"
                     style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
@@ -432,40 +447,41 @@ const RekapSelfAssessment = () => {
             </Row>
           )}
 
-          {rolePengguna === '4' && (
-            <Row>
-              <Col span={12} style={{ textAlign: 'center' }}>
-                <Popover content={<div>Lihat isi detail self assessment</div>}>
-                  <Button
-                    id="button-pencil"
-                    htmlType="submit"
-                    shape="circle"
-                    style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
-                    onClick={() => {
-                      lihatDetailSelfAssessment(record.self_assessment_id)
-                    }}
-                  >
-                    <FontAwesomeIcon icon={faEye} style={{ color: 'black' }} />
-                  </Button>
-                </Popover>
-              </Col>
+          {(rolePengguna === '4' && record.actual_id !== null) && (
+             <Row>
+             <Col span={12} style={{ textAlign: 'center' }}>
+               <Popover content={<div>Lihat isi detail self assessment</div>}>
+                 <Button
+                   id="button-pencil"
+                   htmlType="submit"
+                   shape="circle"
+                   style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
+                   onClick={() => {
+                     lihatDetailSelfAssessment(record.self_assessment_id)
+                   }}
+                 >
+                   <FontAwesomeIcon icon={faEye} style={{ color: 'black' }} />
+                 </Button>
+               </Popover>
+             </Col>
 
-              <Col span={12} style={{ textAlign: 'center' }}>
-                <Popover content={<div>Lakukan penilaian self assessment</div>}>
-                  <Button
-                    id="button-pencil"
-                    htmlType="submit"
-                    shape="circle"
-                    style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
-                    onClick={() => {
-                      actionGradeSelfAssessment(record.self_assessment_id)
-                    }}
-                  >
-                    <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
-                  </Button>
-                </Popover>
-              </Col>
-            </Row>
+             <Col span={12} style={{ textAlign: 'center' }}>
+               <Popover content={<div>Lakukan penilaian self assessment</div>}>
+                 <Button
+                   id="button-pencil"
+                   htmlType="submit"
+                   shape="circle"
+                   style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
+                   onClick={() => {
+                     actionGradeSelfAssessment(record.self_assessment_id)
+                   }}
+                 >
+                   <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+                 </Button>
+               </Popover>
+             </Col>
+           </Row>
+           
           )}
         </>
       ),
@@ -496,13 +512,31 @@ const RekapSelfAssessment = () => {
       ...getColumnSearchProps('finish_date', 'Tanggal Selesai'),
     },
     {
+      title: 'STATUS PENGUMPULAN',
+      dataIndex: 'status',
+      key: 'status',
+      ...getColumnSearchProps('status', 'Status Pengumpulan'),
+      render: (text, record) => {
+        let color
+        if (record.status === 'Sudah Dikumpulkan') {
+          color = 'green'
+        } else if (record.status === 'Tidak Dikumpulkan') {
+          color = 'magenta'
+        }
+        return <Tag color={color}>{record.status}</Tag>
+      },
+    },
+      
+    
+    {
       title: 'AKSI',
       width: '5%',
       align: 'center',
       dataIndex: 'action',
       render: (text, record) => (
         <>
-          <Row>
+        {record.actual_id !== null && (
+            <Row>
             <Col span={6} style={{ textAlign: 'center' }}>
               <Popover content={<div>Lihat isi detail self assessment</div>}>
                 <Button
@@ -519,6 +553,7 @@ const RekapSelfAssessment = () => {
               </Popover>
             </Col>
           </Row>
+        )}
         </>
       ),
     },

@@ -132,11 +132,6 @@ const FormPengisianLogbook = (props) => {
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=1`)
         .then((response) => {
            setRangeDayDeadline(response.data.data.day_range)
-          // let day_range = response.data.data.day_range
-          // let date = new Date()
-          // date.setDate(date.getDate()+day_range)
-          // setRangeDayDeadline(formatDate(date.toDateString()))
-          // console.log(formatDate(date.toDateString()))
         }).catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
             history.push({
@@ -152,12 +147,34 @@ const FormPengisianLogbook = (props) => {
           }
         })
     }
+
+    function GetTanggalLibur (){
+axios.get(`https://api-harilibur.vercel.app/api`, { mode: 'cors' }) 
+      .then((req,res)=>{
+          res.set('Access-Control-Allow-Origin', '*')
+  res.set('Access-Control-Allow-Credentials', 'true')
+        console.log('tgl libut',res)
+      }).catch(function (error) {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+          history.push('/500')
+        }
+      })
+    }
     GetDayRange()
+    GetTanggalLibur()
   },[history])
 
 
   const handleInputLogbookDate = async (date) => {
-    // console.log(rangeDayDeadline, date)
     let dateLimit = new Date(date)
     dateLimit.setDate(dateLimit.getDate()+rangeDayDeadline)
     let dateLimitResult = formatDate(dateLimit.toDateString())

@@ -256,9 +256,9 @@ const { RangePicker } = DatePicker
   }
 
 
-  useEffect(() => {
-    console.log('tanggal berakhir', tanggalBerakhirSelfAssessment)
-  }, [tanggalBerakhirSelfAssessment])
+  // useEffect(() => {
+  //   console.log('tanggal berakhir', tanggalBerakhirSelfAssessment)
+  // }, [tanggalBerakhirSelfAssessment])
  
   useEffect(()=>{
     async function GetDayRange() {
@@ -302,6 +302,7 @@ const { RangePicker } = DatePicker
             <ul>
               <li>Pastikan minggu yang dipilih belum pernah diisi sebelumnya</li>
               <li>Pengisian hanya satu kali, anda tidak dapat melakukan edit self assesment</li>
+              <li>Isi penilaian dengan angka 0, dan tanda - pada keterangan jika memang tidak ingin diisi</li>
               <li>
                 Pastikan semua keterangan terisi dan terdeskripsi dengan baik, agar nilai yang
                 diberikan juga baik
@@ -375,6 +376,7 @@ const { RangePicker } = DatePicker
                       placeholder="maksimal 1000 karakter"
                       name={`keterangan` + index}
                       maxLength={1000}
+                      rows={6}
                       onChange={(e) =>
                         handlePengisianNilaiDanKeteranganSelfAssessment(
                           index,

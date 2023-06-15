@@ -80,13 +80,14 @@ const FormPenilaianPembimbingJurusan = (props) => {
 
 
   /**HANDLE EDIT NILAI */
-  const handleEditChange = (id_aspect, nilai, index, keyData) => {
+  const handleEditChange = (id_grade, nilai, index, keyData) => {
     if (nilaiPembimbingJurusanEdit[index]) {
       nilaiPembimbingJurusanEdit[index][keyData] = nilai
     } else {
       nilaiPembimbingJurusanEdit[index] = {
-        aspect_id: id_aspect,
         [keyData]: nilai,
+        grade_id: id_grade,
+      
       }
     }
     setNilaiPembimbingJurusanEdit(nilaiPembimbingJurusanEdit)
@@ -265,7 +266,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
           let getConcateGradeWithNamePoinAspect = function(data){
             dataSupervisorGradeWithNamePoinAspect.push(
               {
-                grade_id : data[0].id,
+                grade_id : data[0].grade_id,
                 poinpenilaian : name_1,
                 bobot : max_grade_1,
                 deskripsi : data[0].aspect,
@@ -273,7 +274,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
                 aspect_id : id_1
               },
               {
-                grade_id : data[1].id,
+                grade_id : data[1].grade_id,
                 poinpenilaian : name_2,
                 bobot : max_grade_2,
                 deskripsi : data[1].aspect,
@@ -281,7 +282,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
                 aspect_id : id_2
               },
               {
-                grade_id : data[2].id,
+                grade_id : data[2].grade_id,
                 poinpenilaian : name_3,
                 bobot : max_grade_3,
                 deskripsi : data[2].aspect,
@@ -298,6 +299,21 @@ const FormPenilaianPembimbingJurusan = (props) => {
           temp_counter[1] = dataSupervisorGradeWithNamePoinAspect[1].nilai
           temp_counter[2] = dataSupervisorGradeWithNamePoinAspect[2].nilai
           setNilaiCounterEdit(temp_counter)
+
+          let nilai_pembimbing = ([{
+            grade :dataSupervisorGradeWithNamePoinAspect[0].nilai,
+            grade_id : dataSupervisorGradeWithNamePoinAspect[0].grade_id
+          },{
+            grade :dataSupervisorGradeWithNamePoinAspect[1].nilai,
+            grade_id : dataSupervisorGradeWithNamePoinAspect[1].grade_id
+          },{
+            grade :dataSupervisorGradeWithNamePoinAspect[2].nilai,
+            grade_id : dataSupervisorGradeWithNamePoinAspect[2].grade_id
+          }]
+          
+          )
+          setNilaiPembimbingJurusanEdit(nilai_pembimbing)
+
           setdataPenilaianSebelumnya(dataSupervisorGradeWithNamePoinAspect)
           console.log('CONSATE',dataSupervisorGradeWithNamePoinAspect )
         })
@@ -332,40 +348,35 @@ const FormPenilaianPembimbingJurusan = (props) => {
 
   /** SIMPAN EDIT PENILAIAN */
   const putEditPenilaian = async () => {
-  
-      await axios
-        .put(
-          `${process.env.REACT_APP_API_GATEWAY_URL}/monitoring/supervisor/grade/update`,{
+    await axios
+    .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/update`,{
+        "grade_list": nilaiPembimbingJurusanEdit,
+        "id": idSupervisorGrade,
+        "phase": fasePenilaian
       
-            "grade_list": [
-              {
-                "aspect_id": 1,
-                "grade": 20
-              }
-            ],
-            "id": 8,
-            "phase": 1
-          
-          }
-        )
-        .then((res) => {
-        
-        notification.success({message:'Penilaian Berhasil Dilakukan!!!'})
+      }
+    )
+    .then((req,res) => {
+    console.log(res)
+    console.log(req)
+    
+    notification.success({message:'Penilaian Berhasil Dilakukan!!!'})
+    })
+    .catch(function (error) {
+      if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+        history.push({
+          pathname: '/login',
+          state: {
+            session: true,
+          },
         })
-        .catch(function (error) {
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
-              },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-            history.push('/500')
-          }
-        })
+      } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+        history.push('/404')
+      } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+        history.push('/500')
+      }
+    })
+
 
 
    
@@ -587,7 +598,8 @@ const FormPenilaianPembimbingJurusan = (props) => {
                             defaultValue={data.nilai}
                             maxLength={2}
                             onChange={(nilai) => {
-                              handleEditChange(data.aspect_id, nilai, index, 'grade')
+                              handleEditChange(data.grade_id, nilai, index, 'grade')
+                              console.log('gradeid', data.grade_id)
                             }}
                             max={data.bobot}
                             keyboard={true}
