@@ -40,7 +40,7 @@ const RekapRPP = () => {
   let history = useHistory()
   const [loadings, setLoadings] = useState([])
   const [dataPeserta, setDataPeserta] = useState([])
-  const [isParticipantAllowedToAccessThisPage, setIsParticipantAllowedToAccessThisPage] = useState()
+  const [isParticipantAllowedToAccessThisPage, setIsParticipantAllowedToAccessThisPage] = useState('load')
   const [dataDeadlineRPP, setDataDeadlineRPP] = useState([])
   const desc = '*edit RPP yang dipilih'
   axios.defaults.withCredentials = true
@@ -503,7 +503,8 @@ const RekapRPP = () => {
                 )}
 
                 {!isDisableButton && (
-                  <Popconfirm
+                <Popover content="Edit data RPP">
+                    <Popconfirm
                     placement="topRight"
                     title="Yakin akan melakukan edit RPP?"
                     description={desc}
@@ -524,6 +525,7 @@ const RekapRPP = () => {
                       <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
                     </Button>
                   </Popconfirm>
+                </Popover>
                 )}
               </Col>
               <Col span={12} style={{ textAlign: 'center' }}>

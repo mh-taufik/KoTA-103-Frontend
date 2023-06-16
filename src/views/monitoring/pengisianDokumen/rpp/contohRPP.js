@@ -39,7 +39,7 @@ function ContohRPP() {
 
       <header className="App-header spacetop">
         <Document file="/contohrpp.pdf" onLoadSuccess={onDocumentLoadSuccess}>
-          <Page height="600" pageNumber={pageNumber} />
+          <Page height="800" pageNumber={pageNumber} />
         </Document>
         <p>
           {' '}

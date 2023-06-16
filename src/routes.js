@@ -60,6 +60,7 @@ const DashboardPanitia = lazyWithRetry(() => import('./views/monitoring/dashboar
 const DaftarPeserta = lazyWithRetry(() => import('./views/monitoring/daftarPeserta/daftarPeserta')) 
 const PemetaanPembimbingJurusan = lazyWithRetry(() => import('./views/monitoring/pemetaanPembimbing/PemetaanPembimbingJurusan'))
 const DashboardPeserta = lazyWithRetry(() => import('./views/monitoring/dashboard/dashboardPeserta'))
+const DashboardPembimbing = lazyWithRetry(() => import('./views/monitoring/dashboard/dashboardPembimbing'))
 //DOKUMEN PESERTA 
 const RekapDokumenPeserta = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/ListDokumenPeserta')) 
 //RPP
@@ -190,7 +191,8 @@ const routes = [
   //MONITORING
   { path: '/dashboardPeserta', name: 'Dashboard Peserta', component: DashboardPeserta, exact:true },
   { path: '/monitoringPelaksanaan', name: 'Monitoring Pelaksanaan', component: MonitoringPelaksanaan, exact:true },
-  { path: '/dashboardPanitia', name: 'Monitoring Panitia', component: DashboardPanitia, exact:true },
+  { path: '/dashboardPanitia', name: 'Monitoring Dashboard', component: DashboardPanitia, exact:true },
+  { path: '/dashboardPembimbing', name: 'Monitoring Dashboard', component: DashboardPembimbing, exact:true },
   { path: '/daftarPeserta', name: 'Daftar Peserta', component: DaftarPeserta, exact:true },
   { path: '/daftarPeserta/dashboardPeserta/:nim', name: ':nim', component: DashboardPeserta, exact:true },
 

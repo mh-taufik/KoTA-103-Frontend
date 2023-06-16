@@ -224,12 +224,14 @@ const DashboardPeserta = () => {
           </Row>
         </div>
       </div>
-      <FloatButton
-          type="primary"
-          onClick={()=>{history.push(`/daftarPeserta`)}}
-          icon={<ArrowLeftOutlined />}
-          tooltip={<div>Kembali ke Rekap Dokumen Peserta</div>}
-        />
+   {rolePengguna !== '1' && (
+       <FloatButton
+       type="primary"
+       onClick={()=>{history.push(`/daftarPeserta`)}}
+       icon={<ArrowLeftOutlined />}
+       tooltip={<div>Kembali ke Rekap Dokumen Peserta</div>}
+     />
+   )}
 
     </>
   )

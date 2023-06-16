@@ -530,14 +530,14 @@ const _nav = [
     ],
   },
   //PEMBIMBING JURUSAN
-  {
-    component: CNavItem,
-    name: 'Dashboard',
-    to: '/dashboard',
-    icon: <FontAwesomeIcon icon={faHouse} size="lg" />,
-    role: '5',
-    index: 60,
-  },
+  // {
+  //   component: CNavItem,
+  //   name: 'Dashboard Pembimbing',
+  //   to: '/dashboardPembimbing',
+  //   icon: <FontAwesomeIcon icon={faHouse} size="lg" />,
+  //   role: '5',
+  //   index: 60,
+  // },
 
   // {
   //   component: CNavGroup,
@@ -597,7 +597,7 @@ const _nav = [
   {
     component: CNavItem,
     name: 'Monitoring Dashboard',
-    to: '/monitoringPelaksanaan',
+    to: '/dashboardPembimbing',
     icon: <FontAwesomeIcon icon={faScaleUnbalancedFlip} size="lg" />,
     role: '4',
     index: 64,

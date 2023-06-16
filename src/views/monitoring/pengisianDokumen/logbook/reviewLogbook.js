@@ -17,6 +17,7 @@ const ReviewLogbook = (props) => {
   const LOGBOOK = params.id
   const [isLoading, setIsLoading] = useState(true)
   const [loadings, setLoadings] = useState([])
+  const [tanggalLogbook, setTanggalLogbook] = useState()
   const rolePengguna = localStorage.id_role
   const [logbookAttributesData, setLogbookAttributesData] = useState()
   axios.defaults.withCredentials = true
@@ -30,6 +31,29 @@ const ReviewLogbook = (props) => {
     })
   }
 
+  
+  const convertDate = (date) => {
+    let temp_date_split = date.split('-')
+    const month = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ]
+    let date_month = temp_date_split[1]
+    let month_of_date = month[parseInt(date_month) - 1]
+    console.log(month_of_date, 'isi date monts', month_of_date)
+    return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
+  }
+
   useEffect(() => {
 
     const getDataLogbook = async (index) => {
@@ -38,54 +62,9 @@ const ReviewLogbook = (props) => {
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/get/${ID_LOGBOOK}`)
         .then((result) => {
           console.log('RES', result.data.data)
-          // const convertDate = (date) => {
-          //   var temp_date_split = date.split('-')
-          //   const month = [
-          //     'Januari',
-          //     'Februari',
-          //     'Maret',
-          //     'April',
-          //     'Mei',
-          //     'Juni',
-          //     'Juli',
-          //     'Agustus',
-          //     'September',
-          //     'Oktober',
-          //     'November',
-          //     'Desember',
-          //   ]
-          //   var date_month = temp_date_split[1]
-          //   var month_of_date = month[parseInt(date_month) - 1]
-          //   return date ? `${temp_date_split[2]}  ${month_of_date}  ${temp_date_split[0]}` : null
-          // }
-
-          // const cekDataIsNull = (data) =>{
-          //   return data?data:" "
-          // }
-
-          // let data = result.data.data
-          // let temp_res = []
-       
-          //     temp_res = {
-          //       date : convertDate(data.date),
-          //       description : cekDataIsNull(data.description),
-          //       grade : data.grade,
-          //       id : data.id,
-          //       participant_id : data.participant_id,
-          //       project_manager : data.project_manager,
-          //       project_name : data.project_name,
-          //       status : data.status.status,
-          //       task : data.task,
-          //       technical_leader : data.technical_leader,
-          //       time_and_activity : data.time_and_activity,
-          //       tools : data.tools,
-          //       work_result : data.work_result,
-          //       encountered_problem : cekDataIsNull(data.encountered_problem)
-          //     }
-      
-
-          // console.log(temp_res)
+         
           setLogbookAttributesData(result.data.data)
+          setTanggalLogbook(convertDate(result.data.data.date))
           setIsLoading(false)
         })
         .catch(function (error) {
@@ -142,7 +121,7 @@ const ReviewLogbook = (props) => {
               <Col span={2}>
                Tanggal Logbook : 
               </Col>
-              <Col span={8}>{logbookAttributesData.date}</Col>
+              <Col span={8}>{tanggalLogbook}</Col>
               <Col span={2}>Status Pengumpulan : </Col>
               <Col span={4}><Tag color={setTagColorStatus(logbookAttributesData.status.status)}>{logbookAttributesData.status.status}</Tag></Col>
             </Row>
@@ -255,7 +234,7 @@ const ReviewLogbook = (props) => {
             </Row>    <Row>
               <Col>
                 <Form.Group className="mb-3" controlId="keterangan">
-                  <Form.Label>Keterangan</Form.Label>
+                  <Form.Label>Kendala </Form.Label>
                   <Form.Control
                     as="textarea"
                     rows={5}

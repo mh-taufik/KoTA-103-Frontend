@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import axios from 'axios'
 import { useHistory, useParams, Router } from 'react-router-dom'
-import { LoadingOutlined,FileExclamationOutlined  } from '@ant-design/icons'
+import { LoadingOutlined, FileExclamationOutlined } from '@ant-design/icons'
 import '../../pengisianDokumen/rpp/rpp.css'
 import { Table } from 'react-bootstrap'
 import Popover from '@mui/material/Popover'
@@ -18,10 +18,11 @@ const RekapSelfAssessment = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [komponenPenilaianSelfAssessment, setKomponenPenilaianSelfAssessment] = useState([])
   let rolePengguna = localStorage.id_role
+  const [dataStatistikPeserta, setDataStatistikPeserta] = useState([])
   let history = useHistory()
   axios.defaults.withCredentials = true
   const [bestPerformance, setBestPerformance] = useState()
-  const [hasilAkhirPenilaian, setHasilAkhirPenilaian]  = useState()
+  const [hasilAkhirPenilaian, setHasilAkhirPenilaian] = useState()
   const [averagePerPoin, setAveragePerPoin] = useState()
   const [finalGradePerPoin, setFinalGradePerPoin] = useState()
   const [selfAssessmentPeserta, setSelfAssessmentPeserta] = useState([])
@@ -47,7 +48,6 @@ const RekapSelfAssessment = () => {
 
   useEffect(
     () => {
-   
       async function getSelfAssessmentAspect() {
         await axios
           .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/get`)
@@ -72,7 +72,6 @@ const RekapSelfAssessment = () => {
                       grade: data[i].grade,
                       description: data[i].description,
                     })
-            
                   }
                 }
                 getBestPerformanceData(best_performance)
@@ -83,32 +82,38 @@ const RekapSelfAssessment = () => {
                   for (var i in data) {
                     tempAverage.push({
                       grade: data[i].grade,
-                 
                     })
-                
                   }
                 }
                 getAverage(average_data)
                 setAveragePerPoin(tempAverage)
-                console.log('temssp',average_data)
+                console.log('temssp', average_data)
 
                 let tempfinalGrade = []
                 let len_grade = final_grade.length
-                let total_final_grade =0
-                let getFinalGrade = function(data) {
-                  for(var i in data){
+                let total_final_grade = 0
+                let getFinalGrade = function (data) {
+                  for (var i in data) {
                     tempfinalGrade.push({
-                      grade : data[i].grade
+                      grade: data[i].grade,
                     })
-                    total_final_grade = total_final_grade+data[i].grade
-                    console.log(data[i].grade, typeof(data[i].grade))
-                   
+                    total_final_grade = total_final_grade + data[i].grade
+                    console.log(data[i].grade, typeof data[i].grade)
                   }
                 }
                 getFinalGrade(final_grade)
-                setHasilAkhirPenilaian(Math.round(total_final_grade/len_grade))
+                setHasilAkhirPenilaian(Math.round(total_final_grade / len_grade))
                 setFinalGradePerPoin(tempfinalGrade)
-                setIsLoading(false)
+
+                axios
+                  .get(
+                    `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/statistic/${ID_PARTICIPANT}`,
+                  )
+                  .then((res) => {
+                    setDataStatistikPeserta(res.data.data)
+            
+                    setIsLoading(false)
+                  })
               })
           })
           .catch(function (error) {
@@ -230,55 +235,83 @@ const RekapSelfAssessment = () => {
     </Spin>
   ) : (
     <>
-     <div>
-            <Space
-              className="spacebottom"
-              direction="vertical"
-              size="middle"
-              style={{
-                display: 'flex',
-              }}
-            >
-              <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
-                <Row style={{ padding: 5 }}>
-                  <Col span={4}>Nama Lengkap</Col>
-                  <Col span={2}>:</Col>
-                  <Col span={8}>{dataPeserta.name}</Col>
-                </Row>
-                <Row style={{ padding: 5 }}>
-                  <Col span={4}>NIM</Col>
-                  <Col span={2}>:</Col>
-                  <Col span={8}>{dataPeserta.nim}</Col>
-                </Row>
-                <Row style={{ padding: 5 }}>
-                  <Col span={4}>Sistem Kerja</Col>
-                  <Col span={2}>:</Col>
-                  <Col span={8}>{dataPeserta.work_system}</Col>
-                </Row>
-                <Row style={{ padding: 5 }}>
-                  <Col span={4}>Angkatan</Col>
-                  <Col span={2}>:</Col>
-                  <Col span={8}>{dataPeserta.year}</Col>
-                </Row>
-              </Card>
-            </Space>
-          </div>
+      <div>
+        <Space
+          className="spacebottom"
+          direction="vertical"
+          size="middle"
+          style={{
+            display: 'flex',
+          }}
+        >
+          <Card title="Informasi Peserta" size="small" style={{ padding: 30 }}>
+            <Row style={{ padding: 5 }}>
+              <Col span={4}>Nama Lengkap</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>{dataPeserta.name}</Col>
+            </Row>
+            <Row style={{ padding: 5 }}>
+              <Col span={4}>NIM</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>{dataPeserta.nim}</Col>
+            </Row>
+            <Row style={{ padding: 5 }}>
+              <Col span={4}>Sistem Kerja</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>{dataPeserta.work_system}</Col>
+            </Row>
+            <Row style={{ padding: 5 }}>
+              <Col span={4}>Angkatan</Col>
+              <Col span={2}>:</Col>
+              <Col span={8}>{dataPeserta.year}</Col>
+            </Row>
+          </Card>
+        </Space>
+      </div>
       {isNotNullDataSelfAssessment && (
         <>
-         
-
           {title('REKAP PENILAIAN SELF ASSESSMENT PESERTA')}
 
           <div className="container2">
-          <Box sx={{ color: 'warning.main' }} className="spacebottom">
-          <ul>
-            {/* <li>Pastikan semua RPP terisi</li> */}
-            <li>Nilai terdiri dari : nilai performansi terbaik diperoleh dari nilai tertinggi setiap poin self assesment  dari keseluruhan self assessment</li>
-            <li>Rata rata : diperoleh dari hasil rata-rata tiap poin untuk seluruh self assessment</li>
-            <li>Hasil akhir : 60% dari performansi terbaik dan 40% dari nilai rata-rata</li>
-            <li>Arahkan kursor ke nilai performansi terbaik, untuk melihat keterangan dari performansi terbaik</li>
-          </ul>
-        </Box>
+  
+            <Box sx={{ color: 'warning.main' }} className="spacebottom">
+              <ul>
+                {/* <li>Pastikan semua RPP terisi</li> */}
+                <li>
+                  Nilai terdiri dari : nilai performansi terbaik diperoleh dari nilai tertinggi
+                  setiap poin self assesment dari keseluruhan self assessment
+                </li>
+                <li>
+                  Rata rata : diperoleh dari hasil rata-rata tiap poin untuk seluruh self assessment
+                </li>
+                <li>Hasil akhir : 60% dari performansi terbaik dan 40% dari nilai rata-rata</li>
+                <li>
+                  Arahkan kursor ke nilai performansi terbaik, untuk melihat keterangan dari
+                  performansi terbaik
+                </li>
+              </ul>
+            </Box>
+            <div className='spacebottom'>
+            <Row style={{ padding: 6 }}>
+              <Col span={4}>Self Assessment Dikumpulkan</Col>
+              <Col span={4}>
+                <Progress
+                  status="active"
+                  percent={dataStatistikPeserta.self_assessment_submitted.percent}
+                />
+              </Col>
+              <Col span={2}>&nbsp;&nbsp;{dataStatistikPeserta.self_assessment_submitted.count} Dokumen</Col>
+              <Col span={2}></Col>
+              <Col span={4}>Self Assessment Tidak Dikumpulkan</Col>
+              <Col span={4}>
+                <Progress
+                  status="exception active"
+                  percent={dataStatistikPeserta.self_assessment_missing.percent}
+                />
+              </Col>
+              <Col span={2}>&nbsp;&nbsp;{dataStatistikPeserta.self_assessment_missing.count} Dokumen</Col>
+            </Row>
+            </div >
             <Table responsive>
               <thead>
                 <tr>
@@ -330,20 +363,20 @@ const RekapSelfAssessment = () => {
                 </tr>
               </tbody>
             </Table>
-            <div className='spacetop'></div>
+            <div className="spacetop"></div>
             <b>HASIL AKHIR PENILAIAN : {hasilAkhirPenilaian}</b>
           </div>
         </>
       )}
 
       {!isNotNullDataSelfAssessment && (
-         <div className="container2">
-         <Result
-           title="Peserta Belum Memiliki Self Assessment"
-           icon={<FileExclamationOutlined />}
-           subTitle="Belum ada rekap nilai apapun"
-         />
-       </div>
+        <div className="container2">
+          <Result
+            title="Peserta Belum Memiliki Self Assessment"
+            icon={<FileExclamationOutlined />}
+            subTitle="Belum ada rekap nilai apapun"
+          />
+        </div>
       )}
       <FloatButton
         type="primary"

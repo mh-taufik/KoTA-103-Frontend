@@ -331,15 +331,6 @@ const PengisianRpp = () => {
         JSON.stringify(jadwalPenyelesaianKeseluruhan),
       )
 
-      // console.log(tanggalMulaiPekerjaan, tanggalBerakhirPekerjaan)
-      // console.log(topikPekerjaan)
-      // console.log(deskripsiTugas)
-      // console.log(peranDalamPekerjaan)
-      // console.log(jsonDataDeliverables)
-      // console.log(jsonDataMilestones)
-      // console.log(jsonDataRencanaPerminggu)
-      // console.log(jsonDataJadwalPenyelesaianKeseluruhan)
-
       await axios
         .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/create`, {
           start_date: tanggalMulaiPekerjaan,
@@ -559,20 +550,21 @@ const PengisianRpp = () => {
           <div>
             <Form.Item
               labelAlign="left"
-              name="tanggalMulaiPekerjaan"
+              name="tanggalMulai1"
+              key={51002}
               label="Tanggal Mulai Pengerjaan"
-              // rules={[
-              //   {
-              //     required: true,
-              //     message: 'Masukkan tanggal pengerjaan terlebih dahulu !',
-              //   },
-              //   {
-              //     type: 'datepicker',
-              //     warningOnly: 'true',
-              //   },
-              // ]}
+              rules={[
+                {
+                  required: true,
+                  message: 'Masukkan tanggal pengerjaan terlebih dahulu !',
+                },
+                {
+                  type: 'datepicker',
+                  warningOnly: 'true',
+                },
+              ]}
             >
-              <Space direction="vertical" size={12}>
+          
                 <RangePicker
                   format="YYYY-MM-DD"
                  
@@ -590,7 +582,7 @@ const PengisianRpp = () => {
                   }}
                   onChange={(date, datestring) => handleInputTanggalPengerjaan(datestring)}
                 />
-              </Space>
+           
             </Form.Item>
 
             <Form.Item
@@ -978,6 +970,7 @@ const PengisianRpp = () => {
                         </Form.Item>
                       </Col>
                       <Col span={4}>
+
                         <Select
                           defaultValue="Jenis Pekerjaan"
                           style={{ width: '100%' }}

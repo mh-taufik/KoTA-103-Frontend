@@ -60,7 +60,7 @@ const RekapSelfAssessment = () => {
   }
 
   useEffect(() => {
-   // console.log('NIM_PESERTA_FROM_PARAMS ==> ', NIM_PESERTA_FROM_PARAMS)
+ 
 
     const getSelfAssessment = async (index) => {
       let PESERTA
@@ -579,7 +579,9 @@ const RekapSelfAssessment = () => {
     )
   }
   return isLoading ? (
-    <Spin indicator={antIcon} />
+    <Spin tip="Loading" size="large">
+        <div className="content" />
+      </Spin>
   ) : (
     <>
       <div>

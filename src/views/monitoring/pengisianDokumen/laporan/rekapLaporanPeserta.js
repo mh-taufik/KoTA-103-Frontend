@@ -37,11 +37,17 @@ const RekapLaporanPeserta = () => {
   const [loadings, setLoadings] = useState([])
   axios.defaults.withCredentials = true
   const [tanggalLaporanDibuka, setTanggalLaporanDibuka] = useState()
+  const [deadlineLaporanFaseSatu, setDeadlineLaporanFaseSatu] = useState([])
+  const [deadlineLaporanFaseDua, setDeadlineLaporanFaseDua] = useState([])
+  const [deadlineLaporanFaseTiga, setDeadlineLaporanFaseTiga] = useState([])
   const [isStartDateToAccessThisPage, setIsStartDateToAccessThisPage] = useState()
-  const [messageApi, contextHolder] = message.useMessage()
-  const info = (link) => {
+  const [messageApi, contextHolder] = message.useMessage();
+  const success = (link) => {
     navigator.clipboard.writeText(link)
-    messageApi.info('Link disalin')
+    messageApi.open({
+      type: 'success',
+      content: 'Link berhasil disalin',
+    });
   }
 
   const getColumnSearchProps = (dataIndex, name) => ({
@@ -276,6 +282,22 @@ const RekapLaporanPeserta = () => {
     async function GetDataDeadline () {
       await axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=3`).then((response)=>{
         setTanggalLaporanDibuka(convertDate(response.data.data.start_assignment_date))
+        let res_1 = response.data.data
+        let deadline_laporan_satu = {start_date : convertDate(res_1.start_assignment_date),finish_date : convertDate(res_1.finish_assignment_date)}
+        setDeadlineLaporanFaseSatu(deadline_laporan_satu)
+
+        axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=4`).then((result)=>{
+          let res_2 = result.data.data
+          let deadline_laporan_dua = {start_date : convertDate(res_2.start_assignment_date),finish_date : convertDate(res_2.finish_assignment_date)}
+          setDeadlineLaporanFaseDua(deadline_laporan_dua)
+          
+          axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=5`).then((res)=>{
+            let res_3 = res.data.data
+            let deadline_laporan_tiga = {start_date : convertDate(res_3.start_assignment_date),finish_date : convertDate(res_3.finish_assignment_date)}
+            setDeadlineLaporanFaseTiga(deadline_laporan_tiga)
+            setIsLoading(false)
+          })
+        })
       }).catch(function (error) {
         if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
           history.push({
@@ -337,7 +359,7 @@ const RekapLaporanPeserta = () => {
         <>
           {rolePengguna !== '1' && (
             <Row>
-              <Col span={12} style={{ textAlign: 'center' }}>
+              <Col span={8} style={{ textAlign: 'center' }}>
                 <Popover
                   content={
                     <>
@@ -355,13 +377,23 @@ const RekapLaporanPeserta = () => {
                   </Button>
                 </Popover>
               </Col>
-              <Col span={12} style={{ textAlign: 'center' }}>
+              <Col span={8} style={{ textAlign: 'center' }}>
                 <Popover content={<div>Salin Link Gdrive</div>}>
-                  <Button type="primary" onClick={() => info(record.uri)}>
+                {contextHolder}
+                  <Button type="primary" onClick={() => success(record.uri)}>
                     Copy
                   </Button>
                 </Popover>
               </Col>
+              <Col span={8} style={{ textAlign: 'center' }}>
+              <Popover content={<div>Kunjungi Link</div>}>
+              <a href={record.uri} target="_blank" rel="noopener noreferrer">
+              <Button type="primary">
+                  Kunjungi Link
+                </Button>
+              </a>
+              </Popover>
+            </Col>
             </Row>
           )}
         </>
@@ -405,18 +437,28 @@ const RekapLaporanPeserta = () => {
       render: (text, record) => (
         <>
           <Row>
-            <Col span={12} style={{ textAlign: 'center' }}>
-              <Popover content={<div>Lakukan pengumpulan Laporan KP / PKL</div>}>
+            <Col span={8} style={{ textAlign: 'center' }}>
+              <Popover content={<div>Lakukan edit pengumpulan Laporan KP / PKL</div>}>
                 <Button type="primary" onClick={() => pengumpulanLaporan(record.id)}>
                   Pengumpulan
                 </Button>
               </Popover>
             </Col>
-            <Col span={12} style={{ textAlign: 'center' }}>
+            <Col span={8} style={{ textAlign: 'center' }}>
               <Popover content={<div>Salin Link Gdrive</div>}>
-                <Button type="primary" onClick={() => info(record.uri)}>
+              {contextHolder}
+                <Button type="primary" onClick={() => success(record.uri)}>
                   Copy
                 </Button>
+              </Popover>
+            </Col>
+            <Col span={8} style={{ textAlign: 'center' }}>
+              <Popover content={<div>Kunjungi Link</div>}>
+              <a href={record.uri} target="_blank" rel="noopener noreferrer">
+              <Button type="primary">
+                  Kunjungi Link
+                </Button>
+              </a>
               </Popover>
             </Col>
           </Row>
@@ -494,7 +536,11 @@ const RekapLaporanPeserta = () => {
                   Pengisian dapat dilakukan mulai &nbsp;&nbsp; <b>{tanggalLaporanDibuka}</b>&nbsp;&nbsp;
                 </li>
                 <li>Peserta dapat melakukan edit link laporan selama masih memiliki akses untuk pengeditan</li>
-                <li>Laporan dikumpulkan dalam bentuk link</li>
+                <li>Laporan dikumpulkan dalam bentuk link Gdrive</li>
+                <li>Dalam pelaksanaan pengumpulan laporan memiliki 3 fase : fase 1, 2, dan 3</li>
+                <li><b>Fase 1</b> Akses pengumpulan akan dimulai dari tanggal &nbsp;&nbsp; <b>{deadlineLaporanFaseSatu.start_date}</b>&nbsp;&nbsp; dan akan ditutup akses pengumpulan pada tanggal &nbsp;&nbsp;<b>{deadlineLaporanFaseSatu.finish_date}</b></li>
+                <li><b>Fase 2</b> Akses pengumpulan akan dimulai dari tanggal &nbsp;&nbsp; <b>{deadlineLaporanFaseDua.start_date}</b>&nbsp;&nbsp; dan akan ditutup akses pengumpulan pada tanggal &nbsp;&nbsp;<b>{deadlineLaporanFaseDua.finish_date}</b></li>
+                <li><b>Fase 3</b> Akses pengumpulan akan dimulai dari tanggal &nbsp;&nbsp; <b>{deadlineLaporanFaseTiga.start_date}</b>&nbsp;&nbsp; dan akan ditutup akses pengumpulan pada tanggal &nbsp;&nbsp;<b>{deadlineLaporanFaseTiga.finish_date}</b></li>
               </ul>
             </div>
           }

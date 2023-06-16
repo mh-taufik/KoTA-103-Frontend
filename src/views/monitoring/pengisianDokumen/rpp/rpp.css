@@ -60,7 +60,7 @@ body {
 }
 
 .pdf-container{
-    width: 100%;
+    width: 90%;
     height: 600px;
     background-color: #e4e4e4;
     overflow-y: auto;
@@ -97,8 +97,8 @@ body {
   }
   
   .App-header {
-    background-color: #282c34;
-    min-height: 100vh;
+    background-color: #898a8b;
+    min-height: 110vh;
     display: flex;
     flex-direction: column;
     align-items: center;

@@ -37,12 +37,12 @@ const PemetaanPembimbingJurusan = () => {
   const [isModaleditOpen, setIsModalEditOpen] = useState(false)
   const [dataToEdit, setDataToEdit] = useState([])
   let history = useHistory()
-  const [CURRENT_YEAR, SET_CURRENT_YEAR] = useState(new Date().getFullYear())
   const [loadings, setLoadings] = useState([])
   const [form1] = Form.useForm()
   const [dataHasilPemetaan, setDataHasilPemetaan] = useState([])
   const [idChoosen, setIdChoosen] = useState()
   const [idPerusahaanChoosen, setIdPerusahaanChoosen] = useState()
+  const [idPembimbingChoosen, setIdPembimbingChoosen] = useState()
   axios.defaults.withCredentials = true
   const USER_ID_PRODI = localStorage.id_prodi
   const [optPembimbing, setOptPembimbing] = useState([])
@@ -157,8 +157,9 @@ const PemetaanPembimbingJurusan = () => {
   }
 
   const HandleEditPembimbingJurusan = async (idPerusahaan, idPembimbing, index) => {
-    console.log(idPerusahaan, idPembimbing)
-    await axios
+    console.log(idPerusahaan, idPembimbing, 's', idPembimbingChoosen)
+    if(idPembimbingChoosen !== null){
+      await axios
       .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/update`, [{
         "company_id" : parseInt(idPerusahaan),
         "lecturer_id" : parseInt(idPembimbing)
@@ -187,6 +188,38 @@ const PemetaanPembimbingJurusan = () => {
           history.push('/500')
         }
       })
+    }else{
+      await axios
+      .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/create`, [{
+        "company_id" : parseInt(idPerusahaan),
+        "lecturer_id" : parseInt(idPembimbing)
+      }])
+      .then((res) => {
+        console.log(res)
+     
+        notification.success({
+          message: 'Data Pembimbing Jurusan Berhasil Diubah',
+        })
+        setIsModalEditOpen(false)
+        refreshData(index)
+        form1.resetFields()
+      })
+      .catch(function (error) {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+          history.push('/500')
+        }
+      })
+    }
+  
   }
 
   useEffect(() => {
@@ -205,11 +238,13 @@ const PemetaanPembimbingJurusan = () => {
           let data = result.data.data
           let data_result =[]
           function handleAttributeNull(data){
-            return data?data:undefined
+            
+            return data?data:undefined  
           }
           if(data !== null){
            let get_hasil_pemetaan = function (data){
             for(var i in data){
+              console.log('partiicpant', data[i].participant)
               data_result.push({
                 date:handleAttributeNull(data[i].date),
                 participant : handleAttributeNull(data[i].participant),
@@ -224,6 +259,7 @@ const PemetaanPembimbingJurusan = () => {
 
            get_hasil_pemetaan(data)
            setDataHasilPemetaan(data_result)
+           console.log('RES', data_result)
 
           }else{
             setDataHasilPemetaan(undefined)
@@ -331,6 +367,7 @@ const PemetaanPembimbingJurusan = () => {
                   style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
                   onClick={() => {
                     setIdPerusahaanChoosen(record.company_id)
+                    setIdPembimbingChoosen(record.lecturer_id)
                     showModalEdit(record)
                   }}
                 >
@@ -365,29 +402,7 @@ const PemetaanPembimbingJurusan = () => {
     )
   }
 
- const handleNullParticipant = (rec) =>{
-  if(rec !== null){
-    return (
-      <ul>
-        {rec.participant.map((data, idx) => {
-                    return (
-                      <Row style={{ padding: 7 }} key={idx}>
-                        <Col span={2}>{idx + 1}</Col>
-                        <Col span={4}>{data.id}</Col>
-                        <Col span={8}>{data.name}</Col>
-                      </Row>
-                    )
-                  })}
-      </ul>
-    )
 
-  }else{
-    return (
-      <ul>Tidak Ada Peserta</ul>
-    )
-  }
-
- } 
 
   const first_items = [
     {
