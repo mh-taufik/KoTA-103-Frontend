@@ -210,7 +210,18 @@ const { RangePicker } = DatePicker
 
   /**SUBMIT DATA */
   const submitData = async () => {
-    // console.log(dataPengisianSelfAssessmentPeserta)
+    console.log(dataPengisianSelfAssessmentPeserta)
+    console.log(dataPengisianSelfAssessmentPeserta.length , ']]]]]lenght')
+    let dataPengisian = []
+    let handleArrayDataPengisian = function (data){
+      for(var i in data){
+        if(data[i]){
+          dataPengisian.push(data[i])
+        }
+      }
+    }
+    handleArrayDataPengisian(dataPengisianSelfAssessmentPeserta)
+    console.log('-----', dataPengisian)
     if (isDateAvailable) {
       if (dataPengisianSelfAssessmentPeserta.length < 1) {
         notification.error({
@@ -218,7 +229,7 @@ const { RangePicker } = DatePicker
         })
         return
       } else {
-        const data = JSON.parse(JSON.stringify(dataPengisianSelfAssessmentPeserta))
+        const data = JSON.parse(JSON.stringify(dataPengisian))
         console.log('hmmm', data)
         await axios
           .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/create`, {
@@ -226,10 +237,11 @@ const { RangePicker } = DatePicker
             finish_date: tanggalBerakhirSelfAssessment,
             grade: data,
           })
-          .then((response) => {
+          .then((req,response) => {
            let id = response.data.data.id
             notification.success({message:'Self assessment berhasil ditambahkan'})
             history.push(`/selfAssessment/formSelfAssessment/detail/${id}`)
+            console.log(req)
           
           }).catch(function (error) {
             if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -302,7 +314,7 @@ const { RangePicker } = DatePicker
             <ul>
               <li>Pastikan minggu yang dipilih belum pernah diisi sebelumnya</li>
               <li>Pengisian hanya satu kali, anda tidak dapat melakukan edit self assesment</li>
-              <li>Isi penilaian dengan angka 0, dan tanda - pada keterangan jika memang tidak ingin diisi</li>
+              {/* <li>Isi penilaian dengan angka 0, dan tanda - pada keterangan jika memang tidak ingin diisi</li> */}
               <li>
                 Pastikan semua keterangan terisi dan terdeskripsi dengan baik, agar nilai yang
                 diberikan juga baik
@@ -359,6 +371,7 @@ const { RangePicker } = DatePicker
                   </Col>
                   <Col span={4} style={{ padding: 8 }}>
                     <InputNumber
+                    key={poinSelfAssessment.aspect_id}
                       name={`nilai` + index}
                       placeholder="nilai"
                       onChange={(e) =>

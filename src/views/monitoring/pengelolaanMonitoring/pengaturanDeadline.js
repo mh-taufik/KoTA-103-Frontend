@@ -30,13 +30,13 @@ import customParseFormat from 'dayjs/plugin/customParseFormat'
 dayjs.extend(customParseFormat)
 const { RangePicker } = DatePicker
 
-
 const PengelolaanDeadline = () => {
   axios.defaults.withCredentials = true
   const dateFormat = 'YYYY-MM-DD'
   const [dataDeadline, setDataDeadline] = useState([])
   const [isModaleditVisible, setIsModalEditVisible] = useState(false)
   const [form1] = Form.useForm()
+  const [form] = Form.useForm()
   const [isLoading, setIsLoading] = useState(true)
   const [loadings, setLoadings] = useState([])
   let history = useHistory()
@@ -45,12 +45,19 @@ const PengelolaanDeadline = () => {
   const [top, setTop] = useState(10)
   const [bottom, setBottom] = useState(10)
 
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalCreateNewVisible, setIsModalCreateNewVisible] = useState(false)
   const [idDeadlineEdit, setIdDeadlineEdit] = useState()
   const [nameDeadlineEdit, setNameDeadlineEdit] = useState()
   const [dayRangeDeadlineEdit, setDayRangeDeadlineEdit] = useState()
   const [startAssignmentDateDeadlineEdit, setStartAssignmentDateDeadlineEdit] = useState()
   const [finishAssignmentDateDeadlineEdit, setFinishAssignmentDateDeadlineEdit] = useState()
+  const [nameDeadlineNew, setNameDeadlineNew] = useState()
+  const [dayRangeDeadlineNew, setDayRangeDeadlineNew] = useState()
+  const [startAssignmentDateDeadlineNew, setStartAssignmentDateDeadlineNew] = useState()
+  const [finishAssignmentDateDeadlineNew, setFinishAssignmentDateDeadlineNew] = useState()
+  const [isDeadlineLaporan, setIsDeadlineLaporan] = useState()
+
+
 
   useEffect(() => {
     async function getDataDeadline() {
@@ -77,7 +84,6 @@ const PengelolaanDeadline = () => {
         })
     }
     getDataDeadline()
-
   }, [history])
 
   const refreshData = async (index) => {
@@ -130,6 +136,51 @@ const PengelolaanDeadline = () => {
 
   const handleCancelEdit = () => {
     setIsModalEditVisible(false)
+  }
+
+  const showModalCreateNew = (record) => {
+    setIsModalCreateNewVisible(true)
+  }
+
+  const handleCancelCreateNew = () => {
+    setIsModalCreateNewVisible(false)
+  }
+
+
+  const handleCreateNewDeadline = async (data_name, dayrange,finishDate,startDate) => {
+    let name = data_name.toLowerCase()
+    let isLaporan = name.includes('laporan')
+    if(isLaporan){
+      await axios.post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/create`,
+      {
+        "day_range": dayRangeDeadlineNew,
+        "finish_assignment_date": startAssignmentDateDeadlineNew,
+        "name": nameDeadlineNew,
+        "start_assignment_date": finishAssignmentDateDeadlineNew
+      }
+      ).then((res)=>{
+        handleCancelCreateNew()
+        notification.success({message:'Data Deadline berhasil ditambahkan'})
+        form.resetFields()
+        refreshData()
+      }).catch(function (error) {
+        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+          history.push('/500')
+        }
+      })
+    }else{
+      notification.warning({message:'Hanya data dengan nama yang mengandung kata "laporan" yang dapat dilakukan penambahan deadline'})
+    }
+
   }
 
   const columns = [
@@ -209,11 +260,38 @@ const PengelolaanDeadline = () => {
                 Deadline adalah batas akhir pengumpulan, dimana kemudian akan dilakukan lock
                 pengumpulan
               </li>
+              <li>
+                LAPORAN DINAMIS : apabila diperlukannya pengumpulan laporan secara bertahap
+              </li>
+              <li>Harap penamaan angka dengan tanggal pada deadline laporan disesuaikan dengan tahapan, karena akan berpengaruh pada information board pada rekap laporan peserta</li>
+              <li>
+                Laporan bersifat dinamis, dapat dilakukan penambahan data laporan baru, namun dengan
+                format penamaan, contoh : laporan 4 , laporan 5, dst
+              </li>
+              <li>
+                Info Deadline/lock pengumpulan : Day Range hanya berlaku pada logbook, self
+                assessment. Untuk laporan memanfaatkan data tanggal mulai dan tanggal selesai
+              </li>
             </ul>
           </Box>
         </Typography>
 
-        <div className="spacetop"></div>
+        <div className="spacetop spacebottom">
+          <Row>
+            <Col span={24} style={{ textAlign: 'right' }}>
+              <Button
+                id="create-logbook"
+                size="sm"
+                shape="round"
+                style={{ color: 'white', background: '#339900', marginBottom: 16 }}
+                onClick={showModalCreateNew}
+              >
+                Tambahkan Data
+              </Button>
+            </Col>
+          </Row>
+        </div>
+
         <Table
           className="spacetop"
           scroll={{ x: 'max-content' }}
@@ -222,6 +300,97 @@ const PengelolaanDeadline = () => {
           rowKey="id"
           bordered
         />
+
+        <Modal
+          title="Tambah Data Deadline"
+          open={isModalCreateNewVisible}
+          onOk={form.submit}
+          onCancel={handleCancelCreateNew}
+          width={600}
+          zIndex={9999999}
+          footer={[
+            <Button key="back" onClick={handleCancelCreateNew}>
+              Batal
+            </Button>,
+            <Button loading={loadings[2]} key="submit" type="primary" onClick={form.submit}>
+              Simpan
+            </Button>,
+          ]}
+          destroyOnClose
+        >
+          <Form
+            form={form}
+            name="basic"
+            wrapperCol={{ span: 24 }}
+            onFinish={() =>
+             handleCreateNewDeadline(nameDeadlineNew, dayRangeDeadlineNew,startAssignmentDateDeadlineNew,finishAssignmentDateDeadlineNew)
+             
+            }
+            autoComplete="off"
+           
+          >
+            <hr />
+            <Form.Item
+              label="Nama Deadline"
+              name="namaDeadline"
+              rules={[{ required: true, message: 'Nama Deadline tidak boleh kosong!' }]}
+            >
+              <Input
+                type="text"
+                onChange={(e) => setNameDeadlineNew(e.target.value)}
+              />
+            </Form.Item>
+            <Form.Item
+              label="Rentang Hari"
+              name="rentangHari"
+              rules={[{ required: true, message: 'Rentang Hari tidak boleh kosong!' }]}
+            >
+              <Input
+                type="number"
+                onChange={(e) => setDayRangeDeadlineNew(e.target.value)}
+              />
+            </Form.Item>
+
+            <Form.Item
+                name="tanggal_pengumpulan_dibuka"
+                label="Tanggal Pengumpulan Dibuka"
+                rules={[
+                  {
+                    required: true,
+                    message : 'Masukkan tanggal pengumpulan dibuka !'
+                  },
+                  {
+                    type: 'date',
+                    warningOnly: true,
+                  },
+                ]}
+              >
+              <DatePicker
+                onChange={(date, datestring) => setStartAssignmentDateDeadlineNew(datestring)}
+              />
+            </Form.Item>
+
+            <Form.Item
+                name="tanggal_pengumpulan_ditutup"
+                label="Tanggal Pengumpulan Ditutup"
+                rules={[
+                  {
+                    required: true,
+                    message : 'Masukkan tanggal pengumpulan ditutup !'
+                  },
+                  {
+                    type: 'date',
+                    warningOnly: true,
+                  },
+                ]}
+              >
+              <DatePicker
+                onChange={(date, datestring) => setFinishAssignmentDateDeadlineNew(datestring)}
+              />
+            </Form.Item>
+          </Form>
+        </Modal>
+
 
         <Modal
           title="Ubah Data Deadline"
@@ -238,8 +407,6 @@ const PengelolaanDeadline = () => {
               Simpan
             </Button>,
           ]}
-
-          
           destroyOnClose
         >
           <Form
@@ -291,7 +458,7 @@ const PengelolaanDeadline = () => {
               />
             </Form.Item>
 
-            <Form.Item  label="Tanggal Pengumpulan Dibuka">
+            <Form.Item label="Tanggal Pengumpulan Dibuka">
               <DatePicker
                 defaultValue={dayjs(startAssignmentDateDeadlineEdit, dateFormat)}
                 onChange={(date, datestring) => setStartAssignmentDateDeadlineEdit(datestring)}

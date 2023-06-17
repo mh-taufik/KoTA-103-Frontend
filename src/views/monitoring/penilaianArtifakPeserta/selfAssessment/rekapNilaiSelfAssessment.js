@@ -98,7 +98,7 @@ const RekapSelfAssessment = () => {
                       grade: data[i].grade,
                     })
                     total_final_grade = total_final_grade + data[i].grade
-                    console.log(data[i].grade, typeof data[i].grade)
+                    console.log("total",data[i].grade, typeof data[i].grade)
                   }
                 }
                 getFinalGrade(final_grade)
@@ -111,8 +111,8 @@ const RekapSelfAssessment = () => {
                   )
                   .then((res) => {
                     setDataStatistikPeserta(res.data.data)
-            
-                    setIsLoading(false)
+
+                    getSelfAssessmentPeserta()
                   })
               })
           })
@@ -130,10 +130,8 @@ const RekapSelfAssessment = () => {
               history.push('/500')
             }
           })
-        return () => contoller_abort.abort()
+   
       }
-
-      getSelfAssessmentAspect()
 
       async function getDataInformasiPeserta() {
         await axios
@@ -170,10 +168,24 @@ const RekapSelfAssessment = () => {
               let temp = result.data.data
 
               setIsNotNullDataSelfAssessment(true)
-              setSelfAssessmentPeserta(temp)
+              // setSelfAssessmentPeserta(temp)
+              let dataSelfAssessmentPesertaSubmitted = []
+              let getDataSelfAssessmentPesertaSubmitted = function (data) {
+            
+                for (var i in data) {
+                  console.log('DDD', data[i])
+                  if (data[i].self_assessment_id !== null) {
+                    dataSelfAssessmentPesertaSubmitted.push(data[i])
+                  } 
+                }
+              }
+              getDataSelfAssessmentPesertaSubmitted(result.data.data)
+              console.log('HASIL AKHIR SA', dataSelfAssessmentPesertaSubmitted)
+              setSelfAssessmentPeserta(dataSelfAssessmentPesertaSubmitted)
             } else {
               setIsNotNullDataSelfAssessment(false)
             }
+            setIsLoading(false)
           })
           .catch(function (error) {
             if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -197,8 +209,8 @@ const RekapSelfAssessment = () => {
 
       // GetFinalGrade()
       getDataInformasiPeserta()
+      getSelfAssessmentAspect()
 
-      getSelfAssessmentPeserta()
       return () => contoller_abort.abort()
     },
     [history],
@@ -221,12 +233,8 @@ const RekapSelfAssessment = () => {
     )
   }
 
-  const getRowGradeaDesc = (data) => {
-    return data.map((nilaipoin, index) => (
-      <td key={nilaipoin.grade_id}>
-        <Tooltip title={nilaipoin.description}>{nilaipoin.grade}</Tooltip>
-      </td>
-    ))
+  function getDataPerSA(data) {
+    data.map((data, index) => <td key={data.grade_id}>{data.grade}</td>)
   }
 
   return isLoading ? (
@@ -268,12 +276,10 @@ const RekapSelfAssessment = () => {
           </Card>
         </Space>
       </div>
+      {title('REKAP PENILAIAN SELF ASSESSMENT PESERTA')}
       {isNotNullDataSelfAssessment && (
         <>
-          {title('REKAP PENILAIAN SELF ASSESSMENT PESERTA')}
-
           <div className="container2">
-  
             <Box sx={{ color: 'warning.main' }} className="spacebottom">
               <ul>
                 {/* <li>Pastikan semua RPP terisi</li> */}
@@ -291,27 +297,31 @@ const RekapSelfAssessment = () => {
                 </li>
               </ul>
             </Box>
-            <div className='spacebottom'>
-            <Row style={{ padding: 6 }}>
-              <Col span={4}>Self Assessment Dikumpulkan</Col>
-              <Col span={4}>
-                <Progress
-                  status="active"
-                  percent={dataStatistikPeserta.self_assessment_submitted.percent}
-                />
-              </Col>
-              <Col span={2}>&nbsp;&nbsp;{dataStatistikPeserta.self_assessment_submitted.count} Dokumen</Col>
-              <Col span={2}></Col>
-              <Col span={4}>Self Assessment Tidak Dikumpulkan</Col>
-              <Col span={4}>
-                <Progress
-                  status="exception active"
-                  percent={dataStatistikPeserta.self_assessment_missing.percent}
-                />
-              </Col>
-              <Col span={2}>&nbsp;&nbsp;{dataStatistikPeserta.self_assessment_missing.count} Dokumen</Col>
-            </Row>
-            </div >
+            <div className="spacebottom">
+              <Row style={{ padding: 6 }}>
+                <Col span={4}>Self Assessment Dikumpulkan</Col>
+                <Col span={4}>
+                  <Progress
+                    status="active"
+                    percent={dataStatistikPeserta.self_assessment_submitted.percent}
+                  />
+                </Col>
+                <Col span={2}>
+                  &nbsp;&nbsp;{dataStatistikPeserta.self_assessment_submitted.count} Dokumen
+                </Col>
+                <Col span={2}></Col>
+                <Col span={4}>Self Assessment Tidak Dikumpulkan</Col>
+                <Col span={4}>
+                  <Progress
+                    status="exception active"
+                    percent={dataStatistikPeserta.self_assessment_missing.percent}
+                  />
+                </Col>
+                <Col span={2}>
+                  &nbsp;&nbsp;{dataStatistikPeserta.self_assessment_missing.count} Dokumen
+                </Col>
+              </Row>
+            </div>
             <Table responsive>
               <thead>
                 <tr>
@@ -322,6 +332,25 @@ const RekapSelfAssessment = () => {
                 </tr>
               </thead>
               <tbody>
+                {selfAssessmentPeserta.map((data, index) => {
+                  return (
+                    <tr key={data.self_assessment_id}>
+                    <td>
+                      {data.start_date}
+                    </td>
+                    {data.grade.map((grades,index)=>{
+                      return (
+                      <td key={grades.grade_id}>
+                          <Tooltip title={grades.description} color="gold">
+                        {grades.grade}
+                      </Tooltip>
+                      </td>
+                      )
+                    })}
+                  </tr>
+                  )
+                })}
+
                 <tr>
                   <td> BEST PERFORMANCE</td>
                   {bestPerformance.map((data) => (

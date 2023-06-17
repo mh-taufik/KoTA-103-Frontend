@@ -191,6 +191,7 @@ const RekapLogbook = () => {
                 id: setKeyIfNull(parseInt(i), obj[i].id),
                 real_id: obj[i].id,
                 date: convertDate(obj[i].date),
+                real_date : obj[i].date,
                 grade: obj[i].grade,
                 status: obj[i].status,
                 project_name: setProjectNameIfNull(obj[i].project_name),
@@ -545,6 +546,35 @@ const RekapLogbook = () => {
     history.push(`/logbook/detaillogbook/${record.id}`)
   }
 
+  function formatDate(date) {
+    var d = new Date(date),
+      month = '' + (d.getMonth() + 1),
+      day = '' + d.getDate(),
+      year = d.getFullYear()
+
+    if (month.length < 2) month = '0' + month
+    if (day.length < 2) day = '0' + day
+
+    return [year, month, day].join('-')
+  }
+
+  function cekIfDateLogbookIsLimitDeadline(date){
+    let dateLimit = new Date(date)
+    dateLimit.setDate(dateLimit.getDate()+0)
+    let dateLimitResult = formatDate(dateLimit.toDateString())
+    let today = formatDate(new Date())
+    console.log(dateLimitResult,today,date)
+
+    if(dateLimitResult < today){
+     
+      return false
+     
+    }else{
+      console.log('dase')
+      return true
+    }
+  }
+
   const columns = [
     {
       title: 'NO',
@@ -592,7 +622,7 @@ const RekapLogbook = () => {
         <>
           <Row>
             <Col span={12} style={{ textAlign: 'center' }}>
-              {record.grade !== 'BELUM DINILAI' && record.real_id !== null && (
+              {(record.grade !== 'BELUM DINILAI' && record.real_id !== null && cekIfDateLogbookIsLimitDeadline(record.real_date))&& (
                 <Popover content={<div>Pengeditan logbook tidak diizinkan</div>}>
                   <Button
                     id="button-pencil"

@@ -284,10 +284,18 @@ const PemetaanPembimbingJurusan = () => {
     }
 
     const getAllPembimbingJurusan = async () => {
+      let PRODI 
+      if(USER_ID_PRODI === '0'){
+        PRODI = 'D3'
+      }else{
+        PRODI = 'D4'
+      }
+      console.log(PRODI, USER_ID_PRODI)
       await axios
-        .get(`${process.env.REACT_APP_API_GATEWAY_URL}account/get-supervisor`)
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}account/get-supervisor?prodi=${PRODI}`)
         .then((result) => {
           let temp_data = result.data.data
+          console.log('dosen', result.data.data)
           let data_res = []
           let funcDataRes = function (data) {
             for (var i in data) {

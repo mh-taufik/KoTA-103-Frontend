@@ -37,9 +37,8 @@ const RekapLaporanPeserta = () => {
   const [loadings, setLoadings] = useState([])
   axios.defaults.withCredentials = true
   const [tanggalLaporanDibuka, setTanggalLaporanDibuka] = useState()
-  const [deadlineLaporanFaseSatu, setDeadlineLaporanFaseSatu] = useState([])
-  const [deadlineLaporanFaseDua, setDeadlineLaporanFaseDua] = useState([])
-  const [deadlineLaporanFaseTiga, setDeadlineLaporanFaseTiga] = useState([])
+  const [infoDeadlineLaporan, setInfoDeadlineLaporan] = useState([])
+  const [totalLaporanPhase, setTotalLaporanPhase] = useState()
   const [isStartDateToAccessThisPage, setIsStartDateToAccessThisPage] = useState()
   const [messageApi, contextHolder] = message.useMessage();
   const success = (link) => {
@@ -228,7 +227,25 @@ const RekapLaporanPeserta = () => {
           setDataLaporanPeserta(undefined)
          }
 
-         setIsLoading(false)
+        axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all/laporan`).then((response)=>{
+          let dataDeadlineLaporan =[]
+          let getInfoDeadlineLaporan = function(data){
+            for(var i in data){
+              dataDeadlineLaporan.push({
+                id : data[i].id,
+                day_range : data[i].day_range,
+                start_assignment_date : convertDate(data[i].start_assignment_date),
+                finish_assignment_date : convertDate(data[i].finish_assignment_date)
+              })
+            }
+          }
+          getInfoDeadlineLaporan(response.data.data)
+          setInfoDeadlineLaporan(dataDeadlineLaporan)
+          setTotalLaporanPhase(response.data.data.length)
+          setIsLoading(false)
+        })
+
+   
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -279,43 +296,30 @@ const RekapLaporanPeserta = () => {
         })
     }
 
-    async function GetDataDeadline () {
-      await axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=3`).then((response)=>{
-        setTanggalLaporanDibuka(convertDate(response.data.data.start_assignment_date))
-        let res_1 = response.data.data
-        let deadline_laporan_satu = {start_date : convertDate(res_1.start_assignment_date),finish_date : convertDate(res_1.finish_assignment_date)}
-        setDeadlineLaporanFaseSatu(deadline_laporan_satu)
-
-        axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=4`).then((result)=>{
-          let res_2 = result.data.data
-          let deadline_laporan_dua = {start_date : convertDate(res_2.start_assignment_date),finish_date : convertDate(res_2.finish_assignment_date)}
-          setDeadlineLaporanFaseDua(deadline_laporan_dua)
-          
-          axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=5`).then((res)=>{
-            let res_3 = res.data.data
-            let deadline_laporan_tiga = {start_date : convertDate(res_3.start_assignment_date),finish_date : convertDate(res_3.finish_assignment_date)}
-            setDeadlineLaporanFaseTiga(deadline_laporan_tiga)
-            setIsLoading(false)
-          })
-        })
-      }).catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-          history.push('/500')
-        }
-      })
-    }
+    // async function GetDataDeadline () {
+    //   await axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all/laporan`).then((response)=>{
+    //     setInfoDeadlineLaporan(response.data.data)
+    //     setTotalLaporanPhase(response.data.data.length)
+    //     setIsLoading(false)
+    //   })
+    //   .catch(function (error) {
+    //     if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+    //       history.push({
+    //         pathname: '/login',
+    //         state: {
+    //           session: true,
+    //         },
+    //       })
+    //     } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+    //       history.push('/404')
+    //     } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+    //       history.push('/500')
+    //     }
+    //   })
+    // }
 
     GetDataInfoPeserta()
-    GetDataDeadline ()
+    // GetDataDeadline ()
 
     getLaporanPeserta()
   }, [history])
@@ -537,10 +541,13 @@ const RekapLaporanPeserta = () => {
                 </li>
                 <li>Peserta dapat melakukan edit link laporan selama masih memiliki akses untuk pengeditan</li>
                 <li>Laporan dikumpulkan dalam bentuk link Gdrive</li>
-                <li>Dalam pelaksanaan pengumpulan laporan memiliki 3 fase : fase 1, 2, dan 3</li>
-                <li><b>Fase 1</b> Akses pengumpulan akan dimulai dari tanggal &nbsp;&nbsp; <b>{deadlineLaporanFaseSatu.start_date}</b>&nbsp;&nbsp; dan akan ditutup akses pengumpulan pada tanggal &nbsp;&nbsp;<b>{deadlineLaporanFaseSatu.finish_date}</b></li>
-                <li><b>Fase 2</b> Akses pengumpulan akan dimulai dari tanggal &nbsp;&nbsp; <b>{deadlineLaporanFaseDua.start_date}</b>&nbsp;&nbsp; dan akan ditutup akses pengumpulan pada tanggal &nbsp;&nbsp;<b>{deadlineLaporanFaseDua.finish_date}</b></li>
-                <li><b>Fase 3</b> Akses pengumpulan akan dimulai dari tanggal &nbsp;&nbsp; <b>{deadlineLaporanFaseTiga.start_date}</b>&nbsp;&nbsp; dan akan ditutup akses pengumpulan pada tanggal &nbsp;&nbsp;<b>{deadlineLaporanFaseTiga.finish_date}</b></li>
+                <li>Dalam pelaksanaan pengumpulan laporan memiliki &nbsp;&nbsp; <b>{totalLaporanPhase}</b> &nbsp;&nbsp; fase </li>
+                {infoDeadlineLaporan.map((data,index)=>{
+                  return(
+                    <li key={data.id}><b>Fase {index+1}</b> Akses pengumpulan akan dimulai dari tanggal &nbsp;&nbsp; <b>{data.start_assignment_date}</b>&nbsp;&nbsp; dan akan ditutup akses pengumpulan pada tanggal &nbsp;&nbsp;<b>{data.finish_assignment_date}</b></li>
+                  )
+                })}
+            
               </ul>
             </div>
           }

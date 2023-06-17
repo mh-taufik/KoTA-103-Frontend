@@ -32,6 +32,7 @@ import {
   Select,
   Space,
   Spin,
+  Tag,
   notification,
 } from 'antd'
 import '../../pengisianDokumen/rpp/rpp.css'
@@ -51,9 +52,7 @@ const PenilaianLogbook = () => {
   const [timeline, setTimeline] = useState([])
 
   const [isLoading, setIsLoading] = useState(true)
-  const [currentPage, setCurrentPage] = useState(1)
-
-  const [postPerPage, setPostPerPage] = useState(1)
+  const [statusPengumpulan, setStatusPengumpulan] = useState()
   const [listLogbook, setListLogbook] = useState([])
   let rolePengguna = localStorage.id_role
   const [idPengguna, setIdPengguna] = useState(localStorage.username)
@@ -152,6 +151,8 @@ const PenilaianLogbook = () => {
   const showModalEdit = (record) => {
     setIsModalEditVisible(true)
     setChoose(record)
+    setStatusPengumpulan(record.status)
+    setNilai(record.grade)
     setIdLogbookChoosen(record.id)
   }
 
@@ -209,6 +210,30 @@ const PenilaianLogbook = () => {
     }
   }
 
+  
+
+ 
+  const convertDate = (date) => {
+    let temp_date_split = date.split('-')
+    const month = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ]
+    let date_month = temp_date_split[1]
+    let month_of_date = month[parseInt(date_month) - 1]
+    return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
+  }
+
   useEffect(() => {
     console.log(window.location.href)
     const getAssociatedLogbookRppSelfAssessmentBasedOnLogbook = async () => {
@@ -234,7 +259,30 @@ const PenilaianLogbook = () => {
             setIsLogbookAvailable(false)
           } else {
             setIsLogbookAvailable(true)
-            setLogbookPeserta(data_logbook)
+            // setLogbookPeserta(data_logbook)
+            let dataLogbookHasConvertDate 
+            let getDataLogbookWithConvertDate = function (data){
+                dataLogbookHasConvertDate = {
+                  id : data.data,
+                  date : convertDate(data.date),
+                  task : data.task,
+                  tools : data.tools,
+                  description : data.description,
+                  grade : data.grade,
+                  status : data.status.status,
+                  participant_id : data.participant_id,
+                  project_name : data.project_name,
+                  project_manager : data.project_manager,
+                  technical_leader : data.technical_leader,
+                  time_and_activity : data.time_and_activity,
+                  work_result : data.work_result,
+                  encountered_problem : data.encountered_problem
+                }
+     
+            }
+            getDataLogbookWithConvertDate(data_logbook)
+            
+            setLogbookPeserta(dataLogbookHasConvertDate)
           }
 
           if (data_self_assessment === null) {
@@ -318,15 +366,13 @@ const PenilaianLogbook = () => {
       </>
     )
   }
-
-  //PENYESUAIAN WARNA TEKS SESUAI DENGAN STATUS PENGUMPULAN
-  const colorTextStatusPengumpulan = (teks) => {
-    if (teks === 'terlambat') {
-      return <text style={{ color: '#a8071a' }}>{teks}</text>
-    } else if (teks === 'tepat waktu') {
-      return <text style={{ color: '#237804' }}>{teks}</text>
-    }
+ function getColorStatusPengumpulan (status){
+  if (status === 'Terlambat') {
+   return 'volcano'
+  } else if (status === 'Tepat Waktu') {
+   return 'green'
   }
+ }
 
   /**OPTION PENILAIAN */
   const textSangatBaik = <text>Deskripsi Penilaian</text>
@@ -407,7 +453,30 @@ const PenilaianLogbook = () => {
           setIsLogbookAvailable(false)
         } else {
           setIsLogbookAvailable(true)
-          setLogbookPeserta(data_logbook)
+          let dataLogbookHasConvertDate 
+          let getDataLogbookWithConvertDate = function (data){
+              dataLogbookHasConvertDate = {
+                id : data.data,
+                date : convertDate(data.date),
+                task : data.task,
+                tools : data.tools,
+                description : data.description,
+                grade : data.grade,
+                status : data.status.status,
+                participant_id : data.participant_id,
+                project_name : data.project_name,
+                project_manager : data.project_manager,
+                technical_leader : data.technical_leader,
+                time_and_activity : data.time_and_activity,
+                work_result : data.work_result,
+                encountered_problem : data.encountered_problem
+              }
+   
+          }
+          getDataLogbookWithConvertDate(data_logbook)
+          
+          setLogbookPeserta(dataLogbookHasConvertDate)
+          
         }
 
         if (data_self_assessment === null) {
@@ -509,23 +578,19 @@ const PenilaianLogbook = () => {
                 <tr>
                   <td>Status Pengumpulan</td>
                   <td>:</td>
-                  <td>
-                    <b>
-                      {/* {colorTextStatusPengumpulan(
-                                logbookPeserta.status.status
-                              )} */}
-                    </b>
+                  <td>&nbsp;&nbsp;
+                  <Tag color={getColorStatusPengumpulan(logbookPeserta.status)}>{logbookPeserta.status}</Tag>
                   </td>
                 </tr>
                 <tr>
                   <td>Penilaian</td>
                   <td>:</td>
-                  <td>{logbookPeserta.grade}</td>
+                  <td>&nbsp;&nbsp;{logbookPeserta.grade}</td>
                 </tr>
                 <tr>
                   <td>Tanggal Logbook</td>
                   <td>:</td>
-                  <td>{logbookPeserta.date}</td>
+                  <td>&nbsp;&nbsp;{logbookPeserta.date}</td>
                 </tr>
               </table>
               <div className="spacetop"></div>
@@ -598,11 +663,11 @@ const PenilaianLogbook = () => {
                   </tr>
                 </tbody>
               </Table>
-            {rolePengguna === '4' && (
+              {rolePengguna === '4' && (
                 <Button type="primary" onClick={() => showModalEdit(logbookPeserta)}>
-                Nilai
-              </Button>
-            )}
+                  Nilai
+                </Button>
+              )}
             </>
           )}
         </div>
@@ -707,7 +772,10 @@ const PenilaianLogbook = () => {
           </Button>,
         ]}
       >
-        {/* <h6>Penilaian saat ini : {penilaianBefore}</h6> */}
+        <div className="spacetop"></div>
+        <h6>Penilaian : {nilai}</h6>
+        <h6>Status Pengumpulan : {statusPengumpulan}</h6>
+        <div className="spacebottom"></div>
         <Form
           form={form1}
           name="basic"

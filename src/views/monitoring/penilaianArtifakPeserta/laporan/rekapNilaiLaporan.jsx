@@ -43,6 +43,28 @@ const RekapPenilaianLogbook = () => {
       </>
     )
   }
+  
+  const convertDate = (date) => {
+    let temp_date_split = date.split('-')
+    const month = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ]
+    let date_month = temp_date_split[1]
+    let month_of_date = month[parseInt(date_month) - 1]
+    console.log(month_of_date, 'isi date monts', month_of_date)
+    return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
+  }
 
   useEffect(() => {
     const GetDataInfoPeserta = async () => {
@@ -52,7 +74,7 @@ const RekapPenilaianLogbook = () => {
         })
         .then((result) => {
           setDataPeserta(result.data.data[0])
-          setIsLoading(false)
+       
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -75,18 +97,29 @@ const RekapPenilaianLogbook = () => {
           `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/get-all/${NIM_PESERTA}`,
         )
         .then((res) => {
-          let dataPenilaianLaporanPeserta = res.data.data
-          setDataNilaiLaporanPeserta(dataPenilaianLaporanPeserta)
-          let nilai
-          let banyakNilai = dataNilaiLaporanPeserta.len
-          let GetAverage = function (data) {
-            for (var i in data) {
-              nilai += data.phase
+          console.log('data nilai', res.data.data)
+          let rekap_laporan = res.data.data
+          let dataHasilRekapLaporanGrade = []
+          let rata_rata_nilai_keseluruhan = 0
+          let ubahListDataGradeLaporan = function(data){
+            for(var i in data){
+              let nilai_total = data[i].grade_list[0].grade + data[i].grade_list[1].grade + data[i].grade_list[2].grade
+              dataHasilRekapLaporanGrade.push({
+                id : data[i].id,
+                phase : data[i].phase,
+                date : convertDate(data[i].date),
+                penilaian_satu_grade : data[i].grade_list[0].grade,
+                penilaian_dua_grade : data[i].grade_list[1].grade,
+                penilaian_tiga_grade : data[i].grade_list[2].grade,
+                nilai_total : nilai_total
+              })
+              rata_rata_nilai_keseluruhan = rata_rata_nilai_keseluruhan + nilai_total
             }
           }
-          GetAverage(dataPenilaianLaporanPeserta)
-          let hasil = nilai / banyakNilai
-          setAverageGrade(hasil)
+          ubahListDataGradeLaporan(res.data.data)
+          setAverageGrade(rata_rata_nilai_keseluruhan)
+          setDataNilaiLaporanPeserta(dataHasilRekapLaporanGrade)
+         
           setIsLoading(false)
         })
         .catch(function (error) {
@@ -108,17 +141,10 @@ const RekapPenilaianLogbook = () => {
     GetDataInfoPeserta()
   }, [history])
 
-  const tagColorStatusHandling = (status) => {
-    if (status === 'terlambat') {
-      return 'warning'
-    } else if (status === 'tepat waktu') {
-      return 'success'
-    } else if (status === 'belum mengumpulkan') {
-      return 'default'
-    }
-  }
   return isLoading ? (
-    <Spin size="large" />
+    <Spin tip="Loading" size="large">
+    <div className="content" />
+  </Spin>
   ) : (
     <>
       <Space
@@ -155,14 +181,17 @@ const RekapPenilaianLogbook = () => {
 
       {title('REKAP PENILAIAN FORM PEMBIMBING JURUSAN')}
       <div className="container2">
-        <h5>INFORMASI HASIL PENILAIAN</h5>
         <hr />
 
         <table className="table">
           <thead>
             <tr>
               <th scope="col">FASE</th>
-              <th scope="col">NILAI</th>
+              <th scope='col'>TANGGAL</th>
+              <th scope="col">NILAI PROSES BIMBINGAN</th>
+              <th scope="col">NILAI LAPORAN</th>
+              <th scope="col">NILAI LAINNYA</th>
+              <th scope="col">NILAI TOTAL</th>
             </tr>
           </thead>
           <tbody>
@@ -171,16 +200,20 @@ const RekapPenilaianLogbook = () => {
                 <tr key={data.id}>
                   <td>{data.phase}</td>
                   <td>{data.date}</td>
+                  <td>{data.penilaian_satu_grade}</td>
+                  <td>{data.penilaian_dua_grade}</td>
+                  <td>{data.penilaian_tiga_grade}</td>
+                  <td>{data.nilai_total}</td>
                 </tr>
               )
             })}
           </tbody>
           <tfoot>
-            <tr>
-              <td>
+            <tr style={{padding:15}}>
+              <td colSpan={4}>
                 <b>NILAI RATA-RATA</b>
               </td>
-              <td>
+              <td colSpan={2}>
                 <b>{averageGrade}</b>
               </td>
             </tr>

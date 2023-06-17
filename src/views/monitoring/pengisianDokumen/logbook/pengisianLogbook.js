@@ -102,7 +102,6 @@ const FormPengisianLogbook = (props) => {
   }
   const toggleAll = () => {
     setNestedModal(!nestedModal)
-    // console.log('ISI SESUAI RPP', isSesuaiRpp, ' dan ', kendala)
     submitLogbook(false, kendala)
     setCloseAll(true)
   }
@@ -148,29 +147,8 @@ const FormPengisianLogbook = (props) => {
         })
     }
 
-    function GetTanggalLibur (){
-axios.get(`https://api-harilibur.vercel.app/api`, { mode: 'cors' }) 
-      .then((req,res)=>{
-          res.set('Access-Control-Allow-Origin', '*')
-  res.set('Access-Control-Allow-Credentials', 'true')
-        console.log('tgl libut',res)
-      }).catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-          history.push('/500')
-        }
-      })
-    }
     GetDayRange()
-    GetTanggalLibur()
+
   },[history])
 
 
@@ -193,6 +171,7 @@ axios.get(`https://api-harilibur.vercel.app/api`, { mode: 'cors' })
       .then((result) => {
        
         const response_data = result.data.data
+        console.log(result)
         if (response_data) {
           notification.warning({
             message: 'Pilih tanggal lain, logbook sudah tersedia',
@@ -200,8 +179,29 @@ axios.get(`https://api-harilibur.vercel.app/api`, { mode: 'cors' })
           setSubmitAccepted(false)
         } else {
           setSubmitAccepted(true)
+          
           setTanggalLogbook(date)
         }
+      })
+      .catch(function (error) {
+        if(error.toJSON().status >= 500 && error.toJSON().status <= 500){
+          if(new Date(date).getDay() === 0 || new Date(date).getDay() === 6){
+            notification.warning({message:'Tanggal termasuk hari libur, pengumpulan pada hari libur ditolak'})
+            setSubmitAccepted(false)
+          }else{
+            notification.warning({message:'Tanggal termasuk hari libur, pengumpulan pada hari libur ditolak'})
+            setSubmitAccepted(false)
+          }
+        }else if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        } 
       })
     }
 
@@ -231,7 +231,6 @@ axios.get(`https://api-harilibur.vercel.app/api`, { mode: 'cors' })
     // }
     await axios
       .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/create`, {
-      
           'date': tanggalLogbook,
           'project_name': namaProyek,
           'tools': tools,
