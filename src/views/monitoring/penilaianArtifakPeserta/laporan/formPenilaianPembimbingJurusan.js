@@ -243,8 +243,8 @@ const FormPenilaianPembimbingJurusan = (props) => {
       })
       .then((response) => {
         setFasePenilaian(response.data.data.phase)
-        setIdSupervisorGrade(response.data.data.supervisorGrade)
-       let idSupervisorGrade = response.data.data.supervisorGrade
+        setIdSupervisorGrade(response.data.data.supervisor_grade)
+       let idSupervisorGrade = response.data.data.supervisor_grade
        axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/aspect/get`).then((result)=>{
         
  

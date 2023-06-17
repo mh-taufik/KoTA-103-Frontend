@@ -117,7 +117,10 @@ const RekapPenilaianLogbook = () => {
             }
           }
           ubahListDataGradeLaporan(res.data.data)
-          setAverageGrade(rata_rata_nilai_keseluruhan)
+          let banyakPenilaian = rekap_laporan.length
+          let hasilAkhirNilai = rata_rata_nilai_keseluruhan/banyakPenilaian
+
+          setAverageGrade(Math.ceil(hasilAkhirNilai))
           setDataNilaiLaporanPeserta(dataHasilRekapLaporanGrade)
          
           setIsLoading(false)

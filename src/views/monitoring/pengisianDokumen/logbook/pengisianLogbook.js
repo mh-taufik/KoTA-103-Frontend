@@ -66,7 +66,6 @@ const FormPengisianLogbook = (props) => {
     message.error('Submit Gagal, Pastikan Semua Data Sudah Terisi !!!')
   }
 
-
   const toggleExL = () => setModalExL(!modalExL)
 
   function onDocumentLoadSuccess({ numPages }) {
@@ -85,7 +84,6 @@ const FormPengisianLogbook = (props) => {
   function changePageNext() {
     changePage(+1)
   }
-
 
   const toggle = () => {
     setModal(!modal)
@@ -125,13 +123,14 @@ const FormPengisianLogbook = (props) => {
     return [year, month, day].join('-')
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     async function GetDayRange() {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=1`)
         .then((response) => {
-           setRangeDayDeadline(response.data.data.day_range)
-        }).catch(function (error) {
+          setRangeDayDeadline(response.data.data.day_range)
+        })
+        .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
             history.push({
               pathname: '/login',
@@ -148,70 +147,58 @@ const FormPengisianLogbook = (props) => {
     }
 
     GetDayRange()
-
-  },[history])
-
+  }, [history])
 
   const handleInputLogbookDate = async (date) => {
     let dateLimit = new Date(date)
-    dateLimit.setDate(dateLimit.getDate()+rangeDayDeadline)
+    dateLimit.setDate(dateLimit.getDate() + rangeDayDeadline)
     let dateLimitResult = formatDate(dateLimit.toDateString())
     let today = formatDate(new Date())
-    console.log(dateLimitResult, today)
-    
-    if(dateLimitResult < today){
-      notification.warning({message:'Tanggal yang dipilih melebihi batas deadline, tidak menerima pengumpulan lagi !!!'})
+    // console.log(dateLimitResult, today)
+
+    if (dateLimitResult < today) {
+      notification.warning({
+        message:
+          'Tanggal yang dipilih melebihi batas deadline, tidak menerima pengumpulan lagi !!!',
+      })
       setSubmitAccepted(false)
-    
-    }else{
+    } else {
       await axios
-      .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/check`,{
-        'date' : date
-      })
-      .then((result) => {
-       
-        const response_data = result.data.data
-        console.log(result)
-        if (response_data) {
-          notification.warning({
-            message: 'Pilih tanggal lain, logbook sudah tersedia',
-          })
-          setSubmitAccepted(false)
-        } else {
-          setSubmitAccepted(true)
-          
-          setTanggalLogbook(date)
-        }
-      })
-      .catch(function (error) {
-        if(error.toJSON().status >= 500 && error.toJSON().status <= 500){
-          if(new Date(date).getDay() === 0 || new Date(date).getDay() === 6){
-            notification.warning({message:'Tanggal termasuk hari libur, pengumpulan pada hari libur ditolak'})
-            setSubmitAccepted(false)
-          }else{
-            notification.warning({message:'Tanggal termasuk hari libur, pengumpulan pada hari libur ditolak'})
+        .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/check`, {
+          date: date,
+        })
+        .then((result) => {
+          const response_data = result.data.data
+          console.log(result)
+          if (response_data) {
+            setSubmitAccepted(true)
+            setTanggalLogbook(date)
+          } else {
+            notification.warning({
+              message: 'Pilih tanggal lain, logbook sudah tersedia',
+            })
             setSubmitAccepted(false)
           }
-        }else if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
-          })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } 
-      })
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+            console.log('err', error.response.data)
+            let message_err = error.response.data.message
+            notification.warning({ message: message_err })
+            setSubmitAccepted(false)
+          } else if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          }
+        })
     }
-
-  
-
-     
-    
-    
   }
-
 
   const submitLogbook = (sesuai, kendala) => {
     if (!submitAccepted) {
@@ -224,31 +211,30 @@ const FormPengisianLogbook = (props) => {
     }
   }
 
-
   const saveDataLogbook = async (data, kesesuaian, kendala) => {
     // const cekStatusPengumpulan = (date) => {
     //   return new Date(date) > new Date() ? 5 : 4
     // }
     await axios
       .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/create`, {
-          'date': tanggalLogbook,
-          'project_name': namaProyek,
-          'tools': tools,
-          'work_result': hasilKerja,
-          'project_manager': projectManager,
-          'description': keterangan,
-          'technical_leader': technicalLeader,
-          'task': tugasPeserta,
-          'time_and_activity': waktuDanKegiatanPeserta,
-          'encountered_problem': kendala,
-          'participant_id' : parseInt(NIM_PESERTA_BY_PESERTA_AS_USER)
-         
+        date: tanggalLogbook,
+        project_name: namaProyek,
+        tools: tools,
+        work_result: hasilKerja,
+        project_manager: projectManager,
+        description: keterangan,
+        technical_leader: technicalLeader,
+        task: tugasPeserta,
+        time_and_activity: waktuDanKegiatanPeserta,
+        encountered_problem: kendala,
+        participant_id: parseInt(NIM_PESERTA_BY_PESERTA_AS_USER),
       })
       .then((response) => {
+        let id = response.data.data.id
         notification.success({
           message: 'Logbook berhasil ditambahkan',
         })
-        history.push(`/logbook`)
+        history.push(`/logbook/detaillogbook/${id}`)
       })
       .catch(function (error) {
         if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -307,7 +293,7 @@ const FormPengisianLogbook = (props) => {
                 <DatePicker
                   disabledDate={(current) => {
                     return current.isAfter(moment())
-                    }}
+                  }}
                   max={moment().format('YYYY-MM-DD')}
                   onChange={(date, dateString) => {
                     handleInputLogbookDate(dateString)
@@ -403,7 +389,7 @@ const FormPengisianLogbook = (props) => {
                 ]}
                 onChange={(e) => setTugasPeserta(e.target.value)}
               >
-                <TextArea rows={4}  placeholder="Tugas" />
+                <TextArea rows={4} placeholder="Tugas" />
               </Form.Item>
             </Col>
           </Row>
@@ -427,7 +413,7 @@ const FormPengisianLogbook = (props) => {
                 ]}
                 onChange={(e) => setWaktuDanKegiatanPeserta(e.target.value)}
               >
-                <TextArea rows={4}  placeholder="Waktu dan Kegiatan" />
+                <TextArea rows={4} placeholder="Waktu dan Kegiatan" />
               </Form.Item>
             </Col>
           </Row>
@@ -599,7 +585,6 @@ const FormPengisianLogbook = (props) => {
             </Space>
           </header>
         </ModalBody>
-
       </Modal>
 
       {/* FLOAT BUTTON */}

@@ -24,7 +24,7 @@ import { LoadingOutlined } from '@ant-design/icons'
 import { message } from 'antd'
 
 const RekapLaporanPeserta = () => {
-  const params = useParams() //ngambil dari params, dimana params untuk menunjukkan detail logbook
+  const params = useParams()
   const NIM_PESERTA_FROM_PARAMS = params.id
   let searchInput
   const [state, setState] = useState({ searchText: '', searchedColumn: '' })
@@ -217,6 +217,7 @@ const RekapLaporanPeserta = () => {
                 uri: obj[i].uri,
                 phase: obj[i].phase,
                 upload_date: convertDate(obj[i].upload_date),
+                supervisor_grade : obj[i].supervisor_grade
               })
             }
           }
@@ -235,7 +236,8 @@ const RekapLaporanPeserta = () => {
                 id : data[i].id,
                 day_range : data[i].day_range,
                 start_assignment_date : convertDate(data[i].start_assignment_date),
-                finish_assignment_date : convertDate(data[i].finish_assignment_date)
+                finish_assignment_date : convertDate(data[i].finish_assignment_date),
+
               })
             }
           }
@@ -296,36 +298,16 @@ const RekapLaporanPeserta = () => {
         })
     }
 
-    // async function GetDataDeadline () {
-    //   await axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all/laporan`).then((response)=>{
-    //     setInfoDeadlineLaporan(response.data.data)
-    //     setTotalLaporanPhase(response.data.data.length)
-    //     setIsLoading(false)
-    //   })
-    //   .catch(function (error) {
-    //     if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-    //       history.push({
-    //         pathname: '/login',
-    //         state: {
-    //           session: true,
-    //         },
-    //       })
-    //     } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-    //       history.push('/404')
-    //     } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-    //       history.push('/500')
-    //     }
-    //   })
-    // }
+
 
     GetDataInfoPeserta()
-    // GetDataDeadline ()
+
 
     getLaporanPeserta()
   }, [history])
 
-  const actionPenilaianFormPembimbingJurusan = (idLogbook) => {
-    history.push(`/rekapDokumenPeserta/laporan/${NIM_PESERTA_FROM_PARAMS}/nilai/${idLogbook}`)
+  const actionPenilaianFormPembimbingJurusan = (idLaporan) => {
+    history.push(`/rekapDokumenPeserta/laporan/${NIM_PESERTA_FROM_PARAMS}/nilai/${idLaporan}`)
   }
 
   const AksiKembaliPanitia = () => {
@@ -563,7 +545,7 @@ const RekapLaporanPeserta = () => {
           <Col span={24} style={{ textAlign: 'right' }}>
           
               <Button
-                id="create-logbook"
+                id="create-laporan"
               
                 size="sm"
                 shape="round"
