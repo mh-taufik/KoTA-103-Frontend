@@ -210,6 +210,7 @@ const EditRPP = () => {
   }
 
   /**HANDLE MODAL AND DATA EDIT RENCANA CAPAIAN MINGGUAN */
+
   const [isModalRencanaCapaianMingguanEditOpen, setIsModalRencanaCapaianMingguanEditOpen] =
     useState(false)
   const [dataRencanaCapaianMingguanEdit, setDataRencanaCapaianMingguanEdit] = useState([])
@@ -223,6 +224,26 @@ const EditRPP = () => {
     dataRencanaCapaianMingguanEditTanggalBerakhir,
     setDataRencanaCapaianMingguanEditTanggalBerakhir,
   ] = useState()
+
+  useEffect(()=>{
+    if(dataRencanaCapaianMingguanEditTanggalBerakhir){
+      setDataRencanaCapaianMingguanEditTanggalBerakhir(dataRencanaCapaianMingguanEditTanggalBerakhir)
+    }
+    },[dataRencanaCapaianMingguanEditTanggalBerakhir])
+
+    
+  useEffect(()=>{
+    if(dataRencanaCapaianMingguanEditTanggalMulai){
+      setDataRencanaCapaianMingguanEditTanggalMulai(dataRencanaCapaianMingguanEditTanggalMulai)
+    }
+    },[dataRencanaCapaianMingguanEditTanggalMulai])
+
+    
+  useEffect(()=>{
+    if(dataRencanaCapaianMingguanEditRencana){
+      setDataRencanaCapaianMingguanEditRencana(dataRencanaCapaianMingguanEditRencana)
+    }
+    },[dataRencanaCapaianMingguanEditRencana])
 
   /** HANDLE MODAL EDIT RENCANA CAPAIAN MINGGUAN*/
   const showModalRencanaCapaianMingguanEdit = (data) => {
@@ -307,6 +328,82 @@ const EditRPP = () => {
   const handleCancelModalJadwalPenyelesaianEdit = () => {
     setIsModalJadwalPenyelesaianEditOpen(false)
   }
+  
+
+  useEffect(()=>{
+    if(dataJadwalPenyelesaianEditButirPekerjaan){
+      setDataJadwalPenyelesaianEditButirPekerjaan(dataJadwalPenyelesaianEditButirPekerjaan)
+    }
+  },[dataJadwalPenyelesaianEditButirPekerjaan])
+
+  useEffect(()=>{
+    if(dataJadwalPenyelesaianEditJenisPekerjaan){
+      setDataJadwalPenyelesaianEditJenisPekerjaan(dataJadwalPenyelesaianEditJenisPekerjaan)
+    }
+  },[dataJadwalPenyelesaianEditJenisPekerjaan])
+
+  useEffect(()=>{
+    if(dataJadwalPenyelesaianEditTanggalMulai){
+      setDataJadwalPenyelesaianEditTanggalMulai(dataJadwalPenyelesaianEditTanggalMulai)
+    }
+  },[dataJadwalPenyelesaianEditTanggalMulai])
+
+  useEffect(()=>{
+    if(dataJadwalPenyelesaianEditTanggalSelesai){
+      setDataJadwalPenyelesaianEditTanggalSelesai(dataJadwalPenyelesaianEditTanggalSelesai)
+    }
+  },[dataJadwalPenyelesaianEditTanggalSelesai])
+
+
+  /** PUT DATA JADWAL PENYELESAIAN */
+  const putDataJadwalPenyelesaianEdit = async () => {
+   console.log('tgl ml', dataJadwalPenyelesaianEditTanggalMulai)
+    await axios
+      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/completion-schedule/update`, {
+        "completion_schedule": [
+          {
+            "finish_date": dataJadwalPenyelesaianEditTanggalSelesai,
+            "id": 56,
+            "start_date": dataJadwalPenyelesaianEditTanggalMulai,
+            "task_name": dataJadwalPenyelesaianEditButirPekerjaan,
+            "task_type": dataJadwalPenyelesaianEditJenisPekerjaan
+        
+          },
+        ],
+        "deliverables": [],
+        "milestone": [],
+        "rpp_id": parseInt(RPP_ID),
+        "weekly_achievement_plan": [],
+      })
+      .then((res) => {
+        console.log(res)
+        // console.log(res.data.data)
+        setIsModalJadwalPenyelesaianEditOpen(false)
+        notification.success({ message: 'Data Jadwal Penyelesaian Keseluruhan Berhasil Diubah' })
+        refreshDataRPP()
+      })
+    .catch(function (error) {
+      if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+        history.push({
+          pathname: '/login',
+          state: {
+            session: true,
+          },
+        })
+      } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+        history.push('/404')
+      } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
+        history.push('/500')
+      }
+    })
+
+    refreshDataRPP()
+  }
+
+
+
+
+
 
   /** HANDLE CHAGES FINISH DATE */
   /** HANDLE EDIT DELIVEREBLES MODAL AND DATA */
@@ -509,47 +606,6 @@ const EditRPP = () => {
     refreshDataRPP()
   }
 
-  /** PUT DATA JADWAL PENYELESAIAN */
-  const putDataJadwalPenyelesaianEdit = async () => {
-    await axios
-      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/completion-schedule/update`, {
-        completion_schedule: [
-          {
-            finish_date: dataJadwalPenyelesaianEditTanggalSelesai,
-            id: 4,
-            start_date: dataJadwalPenyelesaianEditTanggalMulai,
-            task_name: dataJadwalPenyelesaianEditButirPekerjaan,
-            task_type: dataJadwalPenyelesaianEditJenisPekerjaan,
-          },
-        ],
-        deliverables: [],
-        milestone: [],
-        rpp_id: parseInt(RPP_ID),
-        weekly_achievement_plan: [],
-      })
-      .then((res) => {
-        console.log(res)
-        // console.log(res.data.data)
-        setIsModalJadwalPenyelesaianEditOpen(false)
-        notification.success({ message: 'Data Jadwal Penyelesaian Keseluruhan Berhasil Diubah' })
-      })
-    .catch(function (error) {
-      if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-        history.push({
-          pathname: '/login',
-          state: {
-            session: true,
-          },
-        })
-      } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-        history.push('/404')
-      } else if (error.toJSON().status >= 500 && error.toJSON().status <= 599) {
-        history.push('/500')
-      }
-    })
-
-    refreshDataRPP()
-  }
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages)
@@ -1304,11 +1360,11 @@ const EditRPP = () => {
       render: (text, record) => {
         let dateLimit = new Date()
         let minusToGetLimit = new Date().getDay()
-        if (minusToGetLimit === 0) {
-          setLimitMinusDay(7)
-        } else {
+        // if (minusToGetLimit === 0) {
+        //   setLimitMinusDay(7)
+        // } else {
           setLimitMinusDay(minusToGetLimit)
-        }
+        // }
 
         /**MENGAMBIL TANGGAL HARI INI + SISA NYA(DALAM MINGGU) / MENGAMBIL TANGGAL AKHIR DIMINGGU INI */
         dateLimit.setDate(dateLimit.getDate() + (7 - limitMinusDay))
@@ -1338,14 +1394,15 @@ const EditRPP = () => {
                 id="button-edit-jadwal-penyelesaian"
                 shape="circle"
                 onClick={() => {
-                  console.log(record)
+                  console.log('-agudgeud', record)
                   showModalJadwalPenyelesaianEdit(record, statusDatePickerStart)
+                  
 
-                  console.log(dateLimit)
-                  console.log(weekOnDateFinish)
-                  console.log(yearOnDateFinish)
-                  console.log(limitDateGetMondayDateBasedOnFinishDate)
-                  console.log(monLimit)
+                  // console.log(dateLimit)
+                  // console.log(weekOnDateFinish)
+                  // console.log(yearOnDateFinish)
+                  // console.log(limitDateGetMondayDateBasedOnFinishDate)
+                  // console.log(monLimit)
 
                   // console.log(limitDateGetMondayDateBasedOnFinishDate>limitDateToEdit)
                 }}
@@ -1373,6 +1430,14 @@ const EditRPP = () => {
     },
   ]
 
+  useEffect(()=>{
+    if(dataFinishDateEdit){
+      setDataFinishDateEdit(dataFinishDateEdit)
+    }
+  },[dataFinishDateEdit])
+
+ 
+
   return isLoading ? (
     <Spin tip="Loading" size="large">
       <div className="content" />
@@ -1394,7 +1459,6 @@ const EditRPP = () => {
         <Space>
           <Modal
             title="Format Pengisian Dokumen RPP"
-            visible={isModalOpen}
             open={isModalOpen}
             onCancel={handleOk}
             style={{ top: 0 }}
@@ -1562,11 +1626,11 @@ const EditRPP = () => {
                       >
                         <DatePicker
                           disabledDate={(current) => {
-                            if (new Date().getDay() === 0) {
-                              setLimitMinusDay(7)
-                            } else {
+                            // if (new Date().getDay() === 0) {
+                            //   setLimitMinusDay(7)
+                            // } else {
                               setLimitMinusDay(new Date().getDay())
-                            }
+                            // }
 
                             return (
                               moment().add(-1, 'days') >= current ||
@@ -1680,11 +1744,11 @@ const EditRPP = () => {
                           style={{ width: '100%' }}
                           disabledDate={(current) => {
                             let minusToGetLimit = new Date().getDay()
-                            if (minusToGetLimit === 0) {
-                              setLimitMinusDay(7)
-                            } else {
+                            // if (minusToGetLimit === 0) {
+                            //   setLimitMinusDay(7)
+                            // } else {
                               setLimitMinusDay(minusToGetLimit)
-                            }
+                            // }
 
                             return (
                               moment().add(-1, 'days') >= current ||
@@ -1789,11 +1853,11 @@ const EditRPP = () => {
                           //format={weekFormat}
                           disabledDate={(current) => {
                             let minusToGetLimit = new Date().getDay()
-                            if (minusToGetLimit === 0) {
-                              setLimitMinusDay(7)
-                            } else {
+                            // if (minusToGetLimit === 0) {
+                            //   setLimitMinusDay(7)
+                            // } else {
                               setLimitMinusDay(minusToGetLimit)
-                            }
+                            // }
 
                             return (
                               moment().add(-1, 'days') >= current ||
@@ -1919,11 +1983,11 @@ const EditRPP = () => {
                           placeholder="Minggu Ke"
                           disabledDate={(current) => {
                             let minusToGetLimit = new Date().getDay()
-                            if (minusToGetLimit === 0) {
-                              setLimitMinusDay(7)
-                            } else {
+                            // if (minusToGetLimit === 0) {
+                            //   setLimitMinusDay(7)
+                            // } else {
                               setLimitMinusDay(minusToGetLimit)
-                            }
+                            // }
 
                             return (
                               moment().add(-1, 'days') >= current ||
@@ -2064,11 +2128,11 @@ const EditRPP = () => {
               }}
               disabledDate={(current) => {
                 let minusToGetLimit = new Date().getDay()
-                if (minusToGetLimit === 0) {
-                  setLimitMinusDay(7)
-                } else {
+                // if (minusToGetLimit === 0) {
+                //   setLimitMinusDay(7)
+                // } else {
                   setLimitMinusDay(minusToGetLimit)
-                }
+                // }
                 return (
                   moment().add(-1, 'days') >= current ||
                   moment().add(7 - limitMinusDay, 'days') >= current
@@ -2154,11 +2218,11 @@ const EditRPP = () => {
                 onChange={(date, datestring) => setDataMilestonesEditTanggalMulai(datestring)}
                 disabledDate={(current) => {
                   let minusToGetLimit = new Date().getDay()
-                  if (minusToGetLimit === 0) {
-                    setLimitMinusDay(7)
-                  } else {
+                  // if (minusToGetLimit === 0) {
+                  //   setLimitMinusDay(7)
+                  // } else {
                     setLimitMinusDay(minusToGetLimit)
-                  }
+                  // }
                   return (
                     moment().add(-1, 'days') >= current ||
                     moment().add(7 - limitMinusDay, 'days') >= current
@@ -2189,11 +2253,11 @@ const EditRPP = () => {
                 onChange={(date, datestring) => setDataMilestonesEditTanggalSelesai(datestring)}
                 disabledDate={(current) => {
                   let minusToGetLimit = new Date().getDay()
-                  if (minusToGetLimit === 0) {
-                    setLimitMinusDay(7)
-                  } else {
+                  // if (minusToGetLimit === 0) {
+                  //   setLimitMinusDay(7)
+                  // } else {
                     setLimitMinusDay(minusToGetLimit)
-                  }
+                  // }
                   return (
                     moment().add(-1, 'days') >= current ||
                     moment().add(7 - limitMinusDay, 'days') >= current
@@ -2293,11 +2357,11 @@ const EditRPP = () => {
                 }}
                 disabledDate={(current) => {
                   let minusToGetLimit = new Date().getDay()
-                  if (minusToGetLimit === 0) {
-                    setLimitMinusDay(7)
-                  } else {
+                  // if (minusToGetLimit === 0) {
+                  //   setLimitMinusDay(7)
+                  // } else {
                     setLimitMinusDay(minusToGetLimit)
-                  }
+                  // }
 
                   return (
                     moment().add(-1, 'days') >= current ||
@@ -2420,11 +2484,11 @@ const EditRPP = () => {
               disabled={handleStatusStartWeekDatePicker}
               disabledDate={(current) => {
                 let minusToGetLimit = new Date().getDay()
-                if (minusToGetLimit === 0) {
-                  setLimitMinusDay(7)
-                } else {
+                // if (minusToGetLimit === 0) {
+                //   setLimitMinusDay(7)
+                // } else {
                   setLimitMinusDay(minusToGetLimit)
-                }
+                // }
 
                 return (
                   moment().add(-1, 'days') >= current ||
@@ -2456,11 +2520,11 @@ const EditRPP = () => {
               }
               disabledDate={(current) => {
                 let minusToGetLimit = new Date().getDay()
-                if (minusToGetLimit === 0) {
-                  setLimitMinusDay(7)
-                } else {
+                // if (minusToGetLimit === 0) {
+                //   setLimitMinusDay(7)
+                // } else {
                   setLimitMinusDay(minusToGetLimit)
-                }
+                // }
 
                 return (
                   moment().add(-1, 'days') >= current ||
@@ -2516,11 +2580,11 @@ const EditRPP = () => {
               onChange={(date, datestring) => setDataFinishDateEdit(datestring)}
               disabledDate={(current) => {
                 let minusToGetLimit = new Date().getDay()
-                if (minusToGetLimit === 0) {
-                  setLimitMinusDay(7)
-                } else {
+                // if (minusToGetLimit === 0) {
+                //   setLimitMinusDay(7)
+                // } else {
                   setLimitMinusDay(minusToGetLimit)
-                }
+                // }
                 return (
                   moment().add(-1, 'days') >= current ||
                   moment().add(7 - limitMinusDay, 'days') >= current

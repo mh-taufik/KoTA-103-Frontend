@@ -36,8 +36,27 @@ const RekapSelfAssessment = () => {
     // console.log(data)
   }
 
-  const handlePopoverClose = () => {
-    setAnchorEl(null)
+
+  const convertDate = (date) => {
+    let temp_date_split = date.split('-')
+    const month = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ]
+    let date_month = temp_date_split[1]
+    let month_of_date = month[parseInt(date_month) - 1]
+    console.log(month_of_date, 'isi date monts', month_of_date)
+    return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
   }
 
   const handlePopOverData = () => {
@@ -94,6 +113,7 @@ const RekapSelfAssessment = () => {
                 let total_final_grade = 0
                 let getFinalGrade = function (data) {
                   for (var i in data) {
+                    
                     tempfinalGrade.push({
                       grade: data[i].grade,
                     })
@@ -175,7 +195,15 @@ const RekapSelfAssessment = () => {
                 for (var i in data) {
                   console.log('DDD', data[i])
                   if (data[i].self_assessment_id !== null) {
-                    dataSelfAssessmentPesertaSubmitted.push(data[i])
+                    let data_sa = {
+                      start_date : convertDate(data[i].start_date),
+                      grade : data[i].grade,
+                      self_assessment_id : data[i].self_assessment_id,
+                      participant_id :data[i].participant_id,
+                      finish_date :data[i].finish_date
+                    }
+                    console.log('datasa', data_sa)
+                    dataSelfAssessmentPesertaSubmitted.push(data_sa)
                   } 
                 }
               }

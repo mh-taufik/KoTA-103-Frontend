@@ -31,13 +31,13 @@ import _ from 'lodash'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { Box } from '@mui/material'
-
+import updateLocale from 'dayjs/plugin/updateLocale'
 
 const PengisianSelfAssessment = () => {
   const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
-const { TextArea } = Input
-const { Step } = Steps
-const { RangePicker } = DatePicker
+  const { TextArea } = Input
+  const { Step } = Steps
+  const { RangePicker } = DatePicker
   dayjs.extend(customParseFormat)
   const [dayRangeDeadlineSelfAssessment, setDayRangeDeadlineSelfAssessment] = useState()
   const NIM_PESERTA = localStorage.username
@@ -47,7 +47,11 @@ const { RangePicker } = DatePicker
   const [isLoading, setIsLoading] = useState(true)
   axios.defaults.withCredentials = true
   let history = useHistory()
-  const [komponenPenilaianSelfAssessment, setKomponenPenilaianSelfAssessment]= useState([])
+  dayjs.extend(updateLocale)
+  dayjs.updateLocale('en', {
+    weekStart: 1,
+  })
+  const [komponenPenilaianSelfAssessment, setKomponenPenilaianSelfAssessment] = useState([])
 
   const [dataPengisianSelfAssessmentPeserta, setDataPengisianSelfAssessmentPeserta] = useState([])
   const [indexUpdate, setIndexUpdate] = useState()
@@ -161,6 +165,17 @@ const { RangePicker } = DatePicker
   }
 
   /**PENGECEKAN DATA TANGGAL */
+  function formatDate(date) {
+    var d = new Date(date),
+      month = '' + (d.getMonth() + 1),
+      day = '' + d.getDate(),
+      year = d.getFullYear()
+
+    if (month.length < 2) month = '0' + month
+    if (day.length < 2) day = '0' + day
+
+    return [year, month, day].join('-')
+  }
   const handleDateIsAvailable = async (tanggalmulai, tanggalselesai) => {
     await axios
       .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/check`, {
@@ -168,7 +183,7 @@ const { RangePicker } = DatePicker
       })
       .then((res) => {
         console.log('IS DATA AVAILABLE', res.data.data)
-        if(res.data.data) {
+        if (res.data.data) {
           setIsDateAvailable(false)
           notification.warning({
             message: 'Silahkan pilih minggu lain, minggu yang anda pilih telah tersedia !!!',
@@ -177,14 +192,15 @@ const { RangePicker } = DatePicker
         } else {
           let end = new Date(tanggalselesai)
           end.setDate(end.getDate() + 1 + dayRangeDeadlineSelfAssessment) //jika hari lebih dari hari ini(tanggal selesai)
-          console.log('end ====',end)
-          end = new Date(end)
-          let today = new Date()
+          console.log('end ====', end)
+          end = formatDate(new Date(end))
+          let today = formatDate(new Date())
+          //console.log('hasil', today<end,'today',today,'==','and')
           if (today < end) {
             setIsDateAvailable(true)
-            console.log('ses', today, end, today < end)
+            //console.log('ses', today, end, today < end)
           } else if (today > end) {
-            console.log('ses', today, end, today > end)
+            //console.log('ses', today, end, today > end)
             notification.warning({
               message: 'Sudah melewati deadline!!!',
             })
@@ -211,11 +227,11 @@ const { RangePicker } = DatePicker
   /**SUBMIT DATA */
   const submitData = async () => {
     console.log(dataPengisianSelfAssessmentPeserta)
-    console.log(dataPengisianSelfAssessmentPeserta.length , ']]]]]lenght')
+    console.log(dataPengisianSelfAssessmentPeserta.length, ']]]]]lenght')
     let dataPengisian = []
-    let handleArrayDataPengisian = function (data){
-      for(var i in data){
-        if(data[i]){
+    let handleArrayDataPengisian = function (data) {
+      for (var i in data) {
+        if (data[i]) {
           dataPengisian.push(data[i])
         }
       }
@@ -237,13 +253,12 @@ const { RangePicker } = DatePicker
             finish_date: tanggalBerakhirSelfAssessment,
             grade: data,
           })
-          .then((req,response) => {
-           let id = response.data.data.id
-            notification.success({message:'Self assessment berhasil ditambahkan'})
+          .then((response) => {
+            let id = response.data.data.id
+            notification.success({ message: 'Self assessment berhasil ditambahkan' })
             history.push(`/selfAssessment/formSelfAssessment/detail/${id}`)
-            console.log(req)
-          
-          }).catch(function (error) {
+          })
+          .catch(function (error) {
             if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
               history.push({
                 pathname: '/login',
@@ -263,22 +278,22 @@ const { RangePicker } = DatePicker
         message:
           'Silahkan ubah minggu self assessment terlebih dahulu, untuk bisa melakukan submit !!!',
       })
-      return 
+      return
     }
   }
-
 
   // useEffect(() => {
   //   console.log('tanggal berakhir', tanggalBerakhirSelfAssessment)
   // }, [tanggalBerakhirSelfAssessment])
- 
-  useEffect(()=>{
+
+  useEffect(() => {
     async function GetDayRange() {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=1`)
         .then((response) => {
           setDayRangeDeadlineSelfAssessment(response.data.data.day_range)
-        }).catch(function (error) {
+        })
+        .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
             history.push({
               pathname: '/login',
@@ -294,8 +309,7 @@ const { RangePicker } = DatePicker
         })
     }
     GetDayRange()
-
-  },[history])
+  }, [history])
 
   const handleKembaliKeRekapSelfAssessment = () => {
     history.push(`/selfAssessment`)
@@ -371,7 +385,7 @@ const { RangePicker } = DatePicker
                   </Col>
                   <Col span={4} style={{ padding: 8 }}>
                     <InputNumber
-                    key={poinSelfAssessment.aspect_id}
+                      key={poinSelfAssessment.aspect_id}
                       name={`nilai` + index}
                       placeholder="nilai"
                       onChange={(e) =>
@@ -415,9 +429,7 @@ const { RangePicker } = DatePicker
             okText="Ya"
             cancelText="Tidak"
           >
-            <Button type="primary">
-              Submit
-            </Button>
+            <Button type="primary">Submit</Button>
           </Popconfirm>
         </div>
       </Form>

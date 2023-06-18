@@ -503,7 +503,7 @@ const _nav = [
   },
   {
     component: CNavGroup,
-    name: 'Pengaturan Monitoring',
+    name: 'Pengelolaan Monitoring',
     icon: <FontAwesomeIcon icon={faSitemap} size="lg" />,
     role: '0',
     index: 56,
