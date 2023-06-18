@@ -436,8 +436,8 @@ const RekapSelfAssessment = () => {
                     shape="circle"
                     style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
                     onClick={() => {
-                      // lihatDetailSelfAssessment(record.self_assessment_id)
-                      console.log(record.self_assessment_id)
+                      lihatDetailSelfAssessment(record.self_assessment_id)
+                      // console.log(record.self_assessment_id)
                     }}
                   >
                     <FontAwesomeIcon icon={faEye} style={{ color: 'black' }} />

@@ -92,6 +92,7 @@ const FormPenilaianPembimbingJurusan= lazyWithRetry(() => import('./views/monito
 const RekapPenilaianLogbook= lazyWithRetry(() => import('./views/monitoring/penilaianArtifakPeserta/logbook/rekapNilaiLogbook')) 
 const PenilaianSelfAssessment= lazyWithRetry(() => import('./views/monitoring/penilaianArtifakPeserta/selfAssessment/penilaianSelfAssessment')) 
 const RekapPenilaianLaporan= lazyWithRetry(() => import('./views/monitoring/penilaianArtifakPeserta/laporan/rekapNilaiLaporan')) 
+const PenilaianDetailRPP= lazyWithRetry(() => import('./views/monitoring/penilaianArtifakPeserta/penilaianDokumenDetailRPP')) 
 
 
 const routes = [
@@ -230,12 +231,14 @@ const routes = [
   { path: '/rekapDokumenPeserta/logbookPeserta/:id', name: ':id', component: RekapLogbook, exact:true},
   { path: '/rekapDokumenPeserta/logbookPeserta/:nim/detail/:id', name: ':id', component: ReviewLogbook, exact:true},
   { path: '/rekapDokumenPeserta/logbookPeserta/:nim/nilai/:id', name: 'Penilaian Logbook', component: PenilaianLogbook, exact:true},
+  { path: '/rekapDokumenPeserta/logbookPeserta/:nim/nilai/:idlogbook/detailRPP/:id', name: ':id', component: PenilaianDetailRPP, exact:true},
   { path: '/rekapDokumenPeserta/rppPeserta/:id', name: ':id', component: RekapRPP, exact:true},
   { path: '/rekapDokumenPeserta/rppPeserta/:nim/detail/:id', name: ':id', component: DetailRPP, exact:true},
   { path: '/rekapDokumenPeserta/selfAssessmentPeserta/:id', name: ':id', component: RekapSelfAssessment, exact:true},
   { path: '/rekapDokumenPeserta/selfAssessmentPeserta/:nim/rekapPenilaianSelfAssessment', name: ':nim', component: RekapPenilaianSelfAssessment, exact:true},
   { path: '/rekapDokumenPeserta/selfAssessmentPeserta/:nim/detail/:id', name: ':id', component: DetailSelfAssessment, exact:true},
   { path: '/rekapDokumenPeserta/selfAssessmentPeserta/:nim/penilaian/:id', name: ':id', component: PenilaianSelfAssessment, exact:true},
+  { path: '/rekapDokumenPeserta/selfAssessmentPeserta/:nim/penilaian/:idsa/detailRPP/:id', name: ':id', component: PenilaianDetailRPP, exact:true},
   { path: '/rekapDokumenPeserta/laporan/:id', name: ':id', component: RekapLaporan, exact:true},
   { path: '/rekapDokumenPeserta/laporan/:nim/nilai/:id', name: ':id', component: FormPenilaianPembimbingJurusan, exact:true},
   

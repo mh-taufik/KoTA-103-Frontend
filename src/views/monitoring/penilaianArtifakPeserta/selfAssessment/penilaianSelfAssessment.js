@@ -44,6 +44,7 @@ const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
 const PenilaianSelfAssessment = () => {
   let history = useHistory()
   var params = useParams()
+
   let NIM_PESERTA = params.nim //untuk pembimbing
   let ID_SELFASSESSMENT = params.id //untuk pembimbing
 
@@ -51,14 +52,11 @@ const PenilaianSelfAssessment = () => {
 
   const [isLoading, setIsLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
-
-  const [postPerPage, setPostPerPage] = useState(1)
-  const [listLogbook, setListLogbook] = useState([])
   let rolePengguna = localStorage.id_role
   const [idPengguna, setIdPengguna] = useState(localStorage.username)
-  var idPeserta = useParams()
-  const [infoDataPeserta, setInfoDataPeserta] = useState([])
-  const [logbookCurrent, setLogbookCurrent] = useState([])
+ 
+
+  const [idDataRPP,setIdDataRPP] = useState()
   const [form1] = Form.useForm()
   const [form2] = Form.useForm()
   const [isModaleditVisible, setIsModalEditVisible] = useState(false)
@@ -118,9 +116,7 @@ const PenilaianSelfAssessment = () => {
     console.log('nilai self assessment', nilaiSelfAssessment)
   }, [nilaiSelfAssessment])
 
-  const tes = () => {
-    console.log('nilai self assessment', nilaiSelfAssessment)
-  }
+
 
   /** HANDLE CANCEL EDIT MODAL */
   const handleCancelEdit = () => {
@@ -245,6 +241,7 @@ const PenilaianSelfAssessment = () => {
 
           if (data_rpp !== null) {
             if (data_rpp.completion_schedules !== null) {
+              setIdDataRPP(data_rpp.rpp_id)
               var findObjectByLabel = function (obj) {
                 for (var i in obj) {
                   content.push({
@@ -279,6 +276,15 @@ const PenilaianSelfAssessment = () => {
           }
         })
     }
+
+    function getCurrUrl () {
+      let url = window.location.href
+      let getSplit = url.split('/')
+      console.log('hasil split', getSplit)
+      console.log('url', window.location.href)
+    }
+
+    getCurrUrl()
 
     getDataBasedOnSelfAssessment()
   }, [history])
@@ -445,6 +451,10 @@ const PenilaianSelfAssessment = () => {
     history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${NIM_PESERTA}`)
   }
 
+  const lihatIsiDetailRPP = () => {
+    history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${NIM_PESERTA}/penilaian/${ID_SELFASSESSMENT}/detailRPP/${idDataRPP}`)
+  }
+
   return isLoading ? (
     <Spin tip="Loading" size="large">
       <div className="content" />
@@ -455,6 +465,7 @@ const PenilaianSelfAssessment = () => {
         {title('RENCANA PENGERJAAN PROYEK ( RPP )')}
 
         {isRppAvailable && (
+          <>
           <div style={{ padding: 10 }}>
             <div style={{ background: '#fff', padding: 24 }}>
               <div style={{ overflowX: 'scroll' }}>
@@ -495,6 +506,8 @@ const PenilaianSelfAssessment = () => {
               </div>
             </div>
           </div>
+          <div className='spacetop'><Button type='primary' onClick={lihatIsiDetailRPP}>Lihat Detail RPP</Button></div>
+          </>
         )}
 
         {!isRppAvailable && <Result icon={<FileOutlined />} title="Tidak Ada RPP Yang Terkait" />}
@@ -678,7 +691,7 @@ const PenilaianSelfAssessment = () => {
                         type="primary"
                         onClick={() => showModalEdit(logbookPeserta[currentLogbook])}
                       >
-                        Nilai
+                         Penilaian
                       </Button>
                       <br />
                       <br />

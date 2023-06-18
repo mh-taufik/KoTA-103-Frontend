@@ -55,16 +55,14 @@ const PenilaianLogbook = () => {
   const [statusPengumpulan, setStatusPengumpulan] = useState()
   const [listLogbook, setListLogbook] = useState([])
   let rolePengguna = localStorage.id_role
-  const [idPengguna, setIdPengguna] = useState(localStorage.username)
   var idPeserta = useParams()
-  const [infoDataPeserta, setInfoDataPeserta] = useState([])
-  const [logbookCurrent, setLogbookCurrent] = useState([])
   const [form1] = Form.useForm()
   const [form2] = Form.useForm()
   const [isModaleditVisible, setIsModalEditVisible] = useState(false)
   const [choose, setChoose] = useState([])
   const [loadings, setLoadings] = useState([])
   const [logbookCurrentComplete, setLogbookCurrentComplete] = useState([])
+  const [idDataRPP,setIdDataRPP] = useState()
   const [showArrow, setShowArrow] = useState(true)
   const [arrowAtCenter, setArrowAtCenter] = useState(false)
   const [penilaianBefore, setPenilaianBefore] = useState()
@@ -73,33 +71,14 @@ const PenilaianLogbook = () => {
   const [selfAssessmentPeserta, setSelfAssessmentPeserta] = useState([])
   const [logbookPeserta, setLogbookPeserta] = useState([])
   const [nilaiSelfAssessment, setNilaiSelfAssessment] = useState([])
-  const [pages, setPages] = useState()
-  const [currentLogbook, setCurrentLogbook] = useState()
-  const [pagesSelfAssessment, setPagesSelfAssessment] = useState(1)
-  const [currentSelfAssessment, setCurrentSelfAssessment] = useState(0)
-  const [allIdSelfAssessmentPeserta, setAllIdSelfAssessmentPeserta] = useState([])
-  const [messageRpp, setMessageRpp] = useState()
-  const [messageLogbook, setMessageLogbook] = useState()
-  const [messageSelfAssessment, setMessageSelfAssessment] = useState()
+
+
   const [isRppAvailable, setIsRppAvailable] = useState()
   const [isLogbookAvailable, setIsLogbookAvailable] = useState()
   const [isSelfAssessmentAvailable, setIsSelfAssessmentAvailable] = useState()
   const [rppComplete, setRppComplete] = useState()
   const [aspectGradeSelfAssessmentPeserta, setAspectGradeSelfAssessmentPeserta] = useState([])
-  /** PAGINATION LOGBOOK */
-  const handleChange = (value) => {
-    var page = value - 1
-    setCurrentLogbook(page)
-    console.log('page', value)
-    setPages(value)
-  }
 
-  const handleChangeSelfAssessmentPages = (value) => {
-    var page = value - 1
-    setCurrentSelfAssessment(page)
-    console.log('page', value)
-    setPagesSelfAssessment(value)
-  }
 
   /** HANDLE SAAT NILAI SA DI UBAH */
   const handleChangeNilaiSelfAssessment = (
@@ -296,6 +275,7 @@ const PenilaianLogbook = () => {
 
           if (data_rpp !== null) {
             if (data_rpp.completion_schedules !== null) {
+              setIdDataRPP(data_rpp.rpp_id)
               var findObjectByLabel = function (obj) {
                 for (var i in obj) {
                   // console.log(obj[i])
@@ -373,8 +353,11 @@ const PenilaianLogbook = () => {
    return 'green'
   }
  }
+ const lihatIsiDetailRPP = () => {
+  history.push(`/rekapDokumenPeserta/logbookPeserta/${NIM_PESERTA}/nilai/${LOGBOOK_PESERTA}/detailRPP/${idDataRPP}`)
+}
 
-  /**OPTION PENILAIAN */
+
   const textSangatBaik = <text>Deskripsi Penilaian</text>
 
   const contentPenilaianSangatBaik = (
@@ -526,6 +509,7 @@ const PenilaianLogbook = () => {
         {title('RENCANA PENGERJAAN PROYEK ( RPP )')}
 
         {isRppAvailable && (
+         <>
           <div style={{ padding: 10 }}>
             <div style={{ background: '#fff', padding: 24 }}>
               <div style={{ overflowX: 'scroll' }}>
@@ -566,6 +550,8 @@ const PenilaianLogbook = () => {
               </div>
             </div>
           </div>
+          <div className='spacetop'><Button type='primary' onClick={lihatIsiDetailRPP}>Lihat Detail RPP</Button></div>
+         </>
         )}
 
         {!isRppAvailable && <Result icon={<FileOutlined />} title="Tidak Ada RPP Yang Terkait" />}
@@ -665,7 +651,7 @@ const PenilaianLogbook = () => {
               </Table>
               {rolePengguna === '4' && (
                 <Button type="primary" onClick={() => showModalEdit(logbookPeserta)}>
-                  Nilai
+                  Penilaian
                 </Button>
               )}
             </>

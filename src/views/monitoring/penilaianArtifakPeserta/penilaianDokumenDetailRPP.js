@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import '../rpp/rpp.css'
+import '../pengisianDokumen/rpp/rpp.css'
 import { Col, Row } from 'react-bootstrap'
 import axios from 'axios'
 import { Route, Router, useHistory, useParams } from 'react-router-dom'
@@ -18,22 +18,23 @@ import {
 import Paper from '@mui/material/Paper'
 import { Button, FloatButton, Popover, Space, Spin } from 'antd'
 
-const DetailDataRPP = (props) => {
-  var params = useParams()
+const PenilaianDokumenDetailRPP = (props) => {
+  const params = useParams()
   let RPP_ID = params.id
   let NIM_PESERTA = params.nim
+  let ID_SA = params.idsa
+  let ID_LOGBOOK = params.idlogbook
   const [isLoading, setIsLoading] = useState(true)
   const [isSpinner, setIsSpinner] = useState(true)
   const [dataRPP, setDataRPP] = useState([])
+  const [isSelfAssessmentLink, setIsSelfAssessmentLink] = useState()
   const [dataMilestones, setDataMilestones] = useState([])
   const [dataCapaianMingguan, setDataCapaianMingguan] = useState([])
   const [dataDeliverables, setDataDeliverables] = useState([])
   const [dataJadwalPenyelesaianKeseluruhan, setDataJadwalPenyelesaianKeseluruhan] = useState([])
   const [loadings, setLoadings] = useState([])
   const rolePengguna = localStorage.id_role
-  var idLogbook
-  //   var RPP = params.id
-  var RPP = 1
+
   axios.defaults.withCredentials = true
   let history = useHistory()
 
@@ -46,7 +47,21 @@ const DetailDataRPP = (props) => {
   }
 
   useEffect(() => {
-    console.log('params',params)
+    
+    
+    function getCurrUrl () {
+        let url = window.location.href
+        let getSplit = url.split('/')
+        if(getSplit[4] === 'selfAssessmentPeserta'){
+            setIsSelfAssessmentLink(true)
+        }else{
+            setIsSelfAssessmentLink(false)
+        }
+       
+      }
+  
+      getCurrUrl()
+
     const getRPPDetailPeserta = async (index) => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/get/${RPP_ID}`)
@@ -182,7 +197,7 @@ const DetailDataRPP = (props) => {
   }, [history])
 
   const HandleKembali = () => {
-   (rolePengguna === '1')?  history.push(`/rencanaPenyelesaianProyek`): history.push(`/rekapDokumenPeserta/rppPeserta/${NIM_PESERTA}`)
+ isSelfAssessmentLink? history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${NIM_PESERTA}/penilaian/${ID_SA}`): history.push(`/rekapDokumenPeserta/logbookPeserta/${NIM_PESERTA}/nilai/${ID_LOGBOOK}`)
   }
 
 
@@ -348,4 +363,4 @@ const DetailDataRPP = (props) => {
   )
 }
 
-export default DetailDataRPP
+export default PenilaianDokumenDetailRPP
