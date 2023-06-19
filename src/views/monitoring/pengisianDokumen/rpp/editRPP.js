@@ -329,6 +329,11 @@ const EditRPP = () => {
     setIsModalJadwalPenyelesaianEditOpen(false)
   }
   
+  useEffect(()=>{
+    if(dataJadwalPenyelesaianEdit){
+      setDataJadwalPenyelesaianEdit(dataJadwalPenyelesaianEdit)
+    }
+  },[dataJadwalPenyelesaianEdit])
 
   useEffect(()=>{
     if(dataJadwalPenyelesaianEditButirPekerjaan){
@@ -357,7 +362,7 @@ const EditRPP = () => {
 
   /** PUT DATA JADWAL PENYELESAIAN */
   const putDataJadwalPenyelesaianEdit = async () => {
-   console.log('tgl ml', dataJadwalPenyelesaianEditTanggalMulai)
+   console.log('tgl ml data', dataJadwalPenyelesaianEditTanggalSelesai, dataJadwalPenyelesaianEdit.id, typeof(dataJadwalPenyelesaianEdit.id))
     await axios
       .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/completion-schedule/update`, {
         "completion_schedule": [
@@ -423,7 +428,10 @@ const EditRPP = () => {
   /** PUT EDIT FINISH DATE */
   const putDataFinishDateEdit = async () => {
     console.log(dataFinishDateEdit)
-    await axios
+    if(dataRPP.start_date>dataFinishDateEdit){
+      notification.warning({message:'Harap cek kembali tanggal selesai !!! '})
+    }else{
+      await axios
       .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/update/simple`, {
         finish_date : dataFinishDateEdit,
         rpp_id : parseInt(RPP_ID)
@@ -450,6 +458,7 @@ const EditRPP = () => {
       })
 
     refreshDataRPP()
+    }
   }
 
   /** ADD DATA TO RPP */
@@ -1359,34 +1368,36 @@ const EditRPP = () => {
       width: '5%',
       render: (text, record) => {
         let dateLimit = new Date()
-        let minusToGetLimit = new Date().getDay()
-        // if (minusToGetLimit === 0) {
-        //   setLimitMinusDay(7)
-        // } else {
-          setLimitMinusDay(minusToGetLimit)
-        // }
+        // let minusToGetLimit = new Date().getDay()
+        // // if (minusToGetLimit === 0) {
+        // //   setLimitMinusDay(7)
+        // // } else {
+        //   setLimitMinusDay(minusToGetLimit)
+        // // }
 
         /**MENGAMBIL TANGGAL HARI INI + SISA NYA(DALAM MINGGU) / MENGAMBIL TANGGAL AKHIR DIMINGGU INI */
         dateLimit.setDate(dateLimit.getDate() + (7 - limitMinusDay))
         let recStartDate = new Date(record.start_date)
-        let recFinishDate = new Date(record.finish_date)
-        let weekOnDateFinish = getWeekBasedOnDate(recFinishDate) - 1
-        let yearOnDateFinish = record.finish_date.slice(0, 4)
-        let limitDateGetMondayDateBasedOnFinishDate = getDateOfISOWeek(
-          weekOnDateFinish,
-          yearOnDateFinish,
-        )
-        let monLimit = new Date(limitDateGetMondayDateBasedOnFinishDate)
-        let limitDateToEdit = formatDate(dateLimit.toDateString())
-        let statusDatePickerStart
+        // let recFinishDate = new Date(record.finish_date)
+        let weekOnDateStart = getWeekBasedOnDate(recStartDate) - 1
+        let currWeek = getWeekBasedOnDate(new Date())-1
+        // let yearOnDateStart = record.finish_date.slice(0, 4)
+        // let limitDateGetMondayDateBasedOnStartDate = getDateOfISOWeek(
+        //   weekOnDateStart,
+        //   yearOnDateStart,
+        // )
+        // let monLimit = new Date(limitDateGetMondayDateBasedOnStartDate)
+        // let limitDateToEdit = formatDate(dateLimit.toDateString())
+        // let statusDatePickerStart
+        //return <button onClick={()=>{console.log(weekOnDateStart,'curr',currWeek)}}>tes</button>
 
 
-        if (limitDateGetMondayDateBasedOnFinishDate > limitDateToEdit) {
-          if (record.start_date > limitDateToEdit) {
-            statusDatePickerStart = false 
-          } else {
-            statusDatePickerStart = true
-          }
+        if (weekOnDateStart>currWeek) {
+          // if (record.start_date > limitDateToEdit) {
+          //   statusDatePickerStart = false 
+          // } else {
+          //   statusDatePickerStart = true
+          // }
           return (
             <Popover content={<div>Edit data</div>}>
               <Button
@@ -1394,7 +1405,7 @@ const EditRPP = () => {
                 shape="circle"
                 onClick={() => {
                   console.log('-agudgeud', record)
-                  showModalJadwalPenyelesaianEdit(record, statusDatePickerStart)
+                  showModalJadwalPenyelesaianEdit(record, false)
             
                 }}
                 style={{ backgroundColor: '#fff566', borderColor: '#fff566' }}

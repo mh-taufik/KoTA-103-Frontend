@@ -428,23 +428,7 @@ const PemetaanPembimbingJurusan = () => {
             rowKey={dataHasilPemetaan.company_id}
             bordered
             pagination={true}
-            expandable={{
-              expandedRowRender: (rec) => (
-                // <ul>
-                //   {rec.participant.map((data, idx) => {
-                //     return (
-                //       <Row style={{ padding: 7 }} key={idx}>
-                //         <Col span={2}>{idx + 1}</Col>
-                //         <Col span={4}>{data.id}</Col>
-                //         <Col span={8}>{data.name}</Col>
-                //       </Row>
-                //     )
-                //   })}
-                // </ul>
-                <>{console.log(rec.participant)}</>
-              ),
-            }}
-            expandableIcon
+           
           />
         </>
       
