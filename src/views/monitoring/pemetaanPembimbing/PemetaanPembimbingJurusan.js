@@ -157,7 +157,7 @@ const PemetaanPembimbingJurusan = () => {
   }
 
   const HandleEditPembimbingJurusan = async (idPerusahaan, idPembimbing, index) => {
-    console.log(idPerusahaan, idPembimbing, 's', idPembimbingChoosen)
+
     if(idPembimbingChoosen !== null){
       await axios
       .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/update`, [{
@@ -165,7 +165,7 @@ const PemetaanPembimbingJurusan = () => {
         "lecturer_id" : parseInt(idPembimbing)
       }])
       .then((res) => {
-        console.log(res)
+       
      
         notification.success({
           message: 'Data Pembimbing Jurusan Berhasil Diubah',
@@ -195,7 +195,7 @@ const PemetaanPembimbingJurusan = () => {
         "lecturer_id" : parseInt(idPembimbing)
       }])
       .then((res) => {
-        console.log(res)
+    
      
         notification.success({
           message: 'Data Pembimbing Jurusan Berhasil Diubah',
@@ -234,7 +234,7 @@ const PemetaanPembimbingJurusan = () => {
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all`)
         .then((result) => {
           setDataHasilPemetaan(result.data.data)
-          console.log(result.data.data)
+      
           let data = result.data.data
           let data_result =[]
           function handleAttributeNull(data){
@@ -244,7 +244,7 @@ const PemetaanPembimbingJurusan = () => {
           if(data !== null){
            let get_hasil_pemetaan = function (data){
             for(var i in data){
-              console.log('partiicpant', data[i].participant)
+   
               data_result.push({
                 date:handleAttributeNull(data[i].date),
                 participant : handleAttributeNull(data[i].participant),
@@ -259,7 +259,7 @@ const PemetaanPembimbingJurusan = () => {
 
            get_hasil_pemetaan(data)
            setDataHasilPemetaan(data_result)
-           console.log('RES', data_result)
+       
 
           }else{
             setDataHasilPemetaan(undefined)
@@ -290,12 +290,12 @@ const PemetaanPembimbingJurusan = () => {
       }else{
         PRODI = 'D4'
       }
-      console.log(PRODI, USER_ID_PRODI)
+
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}account/get-supervisor?prodi=${PRODI}`)
         .then((result) => {
           let temp_data = result.data.data
-          console.log('dosen', result.data.data)
+      
           let data_res = []
           let funcDataRes = function (data) {
             for (var i in data) {

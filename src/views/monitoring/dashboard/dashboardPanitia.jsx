@@ -25,12 +25,11 @@ const DashboardPanitia = () => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/dashboard`)
         .then((result) => {
-          console.log(result.data.data)
+     
           let data = result.data.data
           setTotalParticipantMappingDone(data.supervisor_mapping_done)
           setTotalParticipantMappingUndone(data.supervisor_mapping_undone)
   
-          console.log(data.supervisor_mapping_done)
           setDataDashboard(result.data.data)
         })
         .catch(function (error) {

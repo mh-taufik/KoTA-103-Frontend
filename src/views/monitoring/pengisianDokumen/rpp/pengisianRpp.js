@@ -617,7 +617,8 @@ const PengisianRpp = () => {
               label="Deskripsi Tugas"
               rules={[{ required: true, message: 'Masukkan deskripsi tugas terlebih dahulu !' }]}
             >
-              <Input
+              <TextArea
+              rows={5}
                 placeholder="Masukkan deskripsi tugas"
                 onChange={(e) => setDeskripsiTugas(e.target.value)}
               />

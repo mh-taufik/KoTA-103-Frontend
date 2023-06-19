@@ -363,7 +363,7 @@ const EditRPP = () => {
         "completion_schedule": [
           {
             "finish_date": dataJadwalPenyelesaianEditTanggalSelesai,
-            "id": 56,
+            "id": dataJadwalPenyelesaianEdit.id,
             "start_date": dataJadwalPenyelesaianEditTanggalMulai,
             "task_name": dataJadwalPenyelesaianEditButirPekerjaan,
             "task_type": dataJadwalPenyelesaianEditJenisPekerjaan
@@ -1380,11 +1380,10 @@ const EditRPP = () => {
         let limitDateToEdit = formatDate(dateLimit.toDateString())
         let statusDatePickerStart
 
-        // console.log(recDueDate, dateLimit, '---', recDueDate > dateLimit)
 
         if (limitDateGetMondayDateBasedOnFinishDate > limitDateToEdit) {
           if (record.start_date > limitDateToEdit) {
-            statusDatePickerStart = false //jika belum limit , disable nya di false,(tidak di disable)
+            statusDatePickerStart = false 
           } else {
             statusDatePickerStart = true
           }
@@ -1396,15 +1395,7 @@ const EditRPP = () => {
                 onClick={() => {
                   console.log('-agudgeud', record)
                   showModalJadwalPenyelesaianEdit(record, statusDatePickerStart)
-                  
-
-                  // console.log(dateLimit)
-                  // console.log(weekOnDateFinish)
-                  // console.log(yearOnDateFinish)
-                  // console.log(limitDateGetMondayDateBasedOnFinishDate)
-                  // console.log(monLimit)
-
-                  // console.log(limitDateGetMondayDateBasedOnFinishDate>limitDateToEdit)
+            
                 }}
                 style={{ backgroundColor: '#fff566', borderColor: '#fff566' }}
               >

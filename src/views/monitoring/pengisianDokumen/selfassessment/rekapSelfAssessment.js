@@ -629,7 +629,7 @@ const RekapSelfAssessment = () => {
           <li>Akses Pengumpulan Self Assessment dimulai dari tanggal &nbsp;&nbsp; <b>{dataDeadlineSelfAssessment.start_date}</b> &nbsp;&nbsp; dan akses akan ditutup pada tanggal &nbsp;&nbsp; <b>{dataDeadlineSelfAssessment.finish_date}</b></li>
           <li>Peserta tidak dapat melakukan pengeditan self assessment</li>
           <li>Self Assessment dikumpulkan seminggu sekali</li>
-          <li>Batas pengumpulan setiap self assessment adalah &nbsp;&nbsp;<b>{5+dataDeadlineSelfAssessment.day_range}</b>&nbsp;&nbsp; hari terhitung dari senin</li>
+          <li>Batas pengumpulan terakhir self assessment adalah hari ke - &nbsp;&nbsp;<b>{5+dataDeadlineSelfAssessment.day_range}</b>&nbsp;&nbsp;terhitung dari senin(minggu dari tanggal dokumen yang dikumpulkan)</li>
           <li>Isilah field <b>keterangan</b> pada self assessement sedetail mungkin</li>
           </ul>
           </div>

@@ -62,6 +62,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
   const [statistikLogbookNilaiKurang, setStatistikLogbookNilaiKurang] = useState([])
   const [statistikSelfAssessmentSubmitted, setStatistikSelfAssessmentSubmitted] = useState([])
   const [statistikSelfAssessmentMissing, setStatistikSelfAssessmentMissing] = useState([])
+  const [statistikApresiasiPerusahaan, setStatistikApresiasiPerusahaan] = useState([])
 
 
 
@@ -218,6 +219,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
           setStatistikLogbookNilaiKurang(JSON.parse(JSON.stringify(result.data.data.logbook_nilai_kurang)))
           setStatistikSelfAssessmentSubmitted(JSON.parse(JSON.stringify(result.data.data.self_assessment_submitted)))
           setStatistikSelfAssessmentMissing(JSON.parse(JSON.stringify(result.data.data.self_assessment_missing)))
+          setStatistikApresiasiPerusahaan(JSON.parse(JSON.stringify(result.data.data.self_assessment_apresiasi_perusahaan)))
           setIsLoading(false)
         })
         .catch(function (error) {
@@ -507,8 +509,26 @@ const FormPenilaianPembimbingJurusan = (props) => {
                 <hr />
                 <Row>
                   <Col span={4}>
-                    <b>3. &nbsp;&nbsp; Total Kesesuaian Dengan RPP : </b>
+                    <b>3. &nbsp;&nbsp; Total Kesesuaian Dengan RPP  </b>
                   </Col>
+                </Row>
+                <Row>
+                  <Col span={6} style={{ marginLeft: 35 }}>
+                    Sesuai Perencanaan
+                  </Col>
+                  <Col span={2}>
+                    <Progress percent={statistikLogbookMatch.percent}   status="active" />
+                  </Col>
+                  <Col span={14}>{statistikLogbookMatch.count} (dokumen)</Col>
+                </Row>
+                <Row>
+                  <Col span={6} style={{ marginLeft: 35 }}>
+                    Tidak Sesuai Perencanaan
+                  </Col>
+                  <Col span={2}>
+                    <Progress percent={statistikLogbookNotMatch.percent}   status="active" />
+                  </Col>
+                  <Col span={14}>{statistikLogbookNotMatch.count} (dokumen)</Col>
                 </Row>
               </Card>
             </Col>
@@ -521,7 +541,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
                 </Row>
                 <Row>
                   <Col span={6} style={{ marginLeft: 35 }}>
-                    Mnegumpulkan
+                    Mengumpulkan
                   </Col>
                   <Col span={2}>
                     <Progress percent={statistikSelfAssessmentSubmitted.percent}   status="active" />
@@ -539,6 +559,16 @@ const FormPenilaianPembimbingJurusan = (props) => {
                   <Col span={14}>{statistikSelfAssessmentMissing.count} (dokumen)</Col>
                 </Row>
                 <hr />
+                <Row>
+                  <Col span={6} style={{ marginLeft: 35 }}>
+                   <b>Apresiasi Perusahaan</b>
+                  </Col>
+                  <Col span={2}>
+                    {' '}
+                    <Progress percent={statistikApresiasiPerusahaan.percent}   status="active" />
+                  </Col>
+                  <Col span={14}>{statistikApresiasiPerusahaan.count} (dokumen)</Col>
+                </Row>
               </Card>
             </Col>
           </Row>

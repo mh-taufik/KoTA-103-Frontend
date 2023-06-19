@@ -27,17 +27,24 @@ import { LoadingOutlined } from '@ant-design/icons'
 import '../rpp/rpp.css'
 import { Button, Dropdown, Space } from 'antd'
 import Text from 'antd/lib/typography/Text'
-import _ from 'lodash'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { Box } from '@mui/material'
-import updateLocale from 'dayjs/plugin/updateLocale'
 
 const PengisianSelfAssessment = () => {
-  const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />
   const { TextArea } = Input
-  const { Step } = Steps
   const { RangePicker } = DatePicker
+  const dateFormat = 'YYYY/MM/DD'
+  const weekFormat = 'YYYY-MM-DD'
+  const monthFormat = 'YYYY/MM'
+
+  /** Manually entering any of the following formats will perform date parsing */
+  const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY', 'DD-MM-YYYY', 'DD-MM-YY']
+  const customFormat = (value) => `custom format: ${value.format(dateFormat)}`
+  const customWeekStartEndFormat = (value) =>
+    `${dayjs(value).startOf('week').format(weekFormat)} ~ ${dayjs(value)
+      .endOf('week')
+      .format(weekFormat)}`
   dayjs.extend(customParseFormat)
   const [dayRangeDeadlineSelfAssessment, setDayRangeDeadlineSelfAssessment] = useState()
   const NIM_PESERTA = localStorage.username
@@ -47,21 +54,13 @@ const PengisianSelfAssessment = () => {
   const [isLoading, setIsLoading] = useState(true)
   axios.defaults.withCredentials = true
   let history = useHistory()
-  dayjs.extend(updateLocale)
-  dayjs.updateLocale('en', {
-    weekStart: 1,
-  })
+
   const [komponenPenilaianSelfAssessment, setKomponenPenilaianSelfAssessment] = useState([])
 
   const [dataPengisianSelfAssessmentPeserta, setDataPengisianSelfAssessmentPeserta] = useState([])
   const [indexUpdate, setIndexUpdate] = useState()
   const [tanggalMulaiSelfAssessment, setTanggalMulaiSelfAssessment] = useState()
   const [tanggalBerakhirSelfAssessment, setTanggalBerakhirSelfAssessment] = useState()
-  const [newIdSelfAssessment, setNewIdSelfAssessment] = useState()
-  const [isSuccessSubmit, setIsSuccessSubmit] = useState()
-  const defaultType = '-'
-  const defaultNum = 0
-  /** JIKA TRUE BERARTI TANGGAL NYA GAADA DI DATA */
   const [isDateAvailable, setIsDateAvailable] = useState(false)
 
   const enterLoading = (index) => {
@@ -191,11 +190,13 @@ const PengisianSelfAssessment = () => {
           return false
         } else {
           let end = new Date(tanggalselesai)
-          end.setDate(end.getDate() + 1 + dayRangeDeadlineSelfAssessment) //jika hari lebih dari hari ini(tanggal selesai)
+          end.setDate(end.getDate() + dayRangeDeadlineSelfAssessment) //jika hari lebih dari hari ini(tanggal selesai)
           console.log('end ====', end)
           end = formatDate(new Date(end))
           let today = formatDate(new Date())
-          //console.log('hasil', today<end,'today',today,'==','and')
+          // let day_today = new Date.getDay()
+
+          console.log('hasil', today < end, 'today', today, '==', 'end', end)
           if (today < end) {
             setIsDateAvailable(true)
             //console.log('ses', today, end, today < end)
@@ -289,7 +290,7 @@ const PengisianSelfAssessment = () => {
   useEffect(() => {
     async function GetDayRange() {
       await axios
-        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=1`)
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=2`)
         .then((response) => {
           setDayRangeDeadlineSelfAssessment(response.data.data.day_range)
         })
@@ -338,10 +339,13 @@ const PengisianSelfAssessment = () => {
           <div className="spacetop"></div>
           <b>PILIH MINGGU SELF ASSESSMENT &nbsp;&nbsp;&nbsp; : &nbsp;</b>
           <Space direction="vertical" size={12}>
+            {/* <DatePicker defaultValue={dayjs()} format={customWeekStartEndFormat} picker="week" onChange={(date,dateString)=>{
+              console.log('TANGGAL', dateString)
+            }}/> */}
             <DatePicker
               picker="week"
               disabledDate={(current) => {
-                return moment().add(-1, 'days') >= current || current.isAfter(moment())
+                return   moment().add(-1,"days") <= current
               }}
               onChange={(date, datestring) => {
                 let tanggalmulai = getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4))
@@ -349,12 +353,13 @@ const PengisianSelfAssessment = () => {
                   datestring.slice(5, 7),
                   datestring.slice(0, 4),
                 )
+                console.log('tanggalmulai',tanggalmulai,tanggalselesai)
                 let handling = handleDateIsAvailable(tanggalmulai, tanggalselesai)
                 setTanggalMulaiSelfAssessment(
-                  getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
+                  tanggalmulai
                 )
                 setTanggalBerakhirSelfAssessment(
-                  getDateOfEndWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
+                  tanggalselesai
                 )
               }}
               renderExtraFooter={() => 'Pilih Minggu Self Assessment'}

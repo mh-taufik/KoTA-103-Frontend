@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import 'antd/dist/reset.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEye, faPencil, faTrashCan } from '@fortawesome/free-solid-svg-icons'
+import {  faPencil } from '@fortawesome/free-solid-svg-icons'
 import {
   Table,
   Button,
@@ -10,25 +10,22 @@ import {
   Form,
   Input,
   Modal,
-  Space,
+
   notification,
   Spin,
-  Select,
-  Popover,
+
   DatePicker,
 } from 'antd'
 import axios from 'axios'
-import { SearchOutlined } from '@ant-design/icons'
-import Highlighter from 'react-highlight-words'
 import { useHistory } from 'react-router-dom'
-import { LoadingOutlined } from '@ant-design/icons'
+
 import '../pengisianDokumen/rpp/rpp.css'
-import { Option } from 'antd/lib/mentions'
+
 import { Box, Typography } from '@mui/material'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 dayjs.extend(customParseFormat)
-const { RangePicker } = DatePicker
+
 
 const PengelolaanDeadline = () => {
   axios.defaults.withCredentials = true
@@ -40,11 +37,6 @@ const PengelolaanDeadline = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [loadings, setLoadings] = useState([])
   let history = useHistory()
-  const [dataEdit, setDataEdit] = useState([])
-  const [dataDeadlineEdit, setDataDeadlineEdit] = useState([])
-  const [top, setTop] = useState(10)
-  const [bottom, setBottom] = useState(10)
-
   const [isModalCreateNewVisible, setIsModalCreateNewVisible] = useState(false)
   const [idDeadlineEdit, setIdDeadlineEdit] = useState()
   const [nameDeadlineEdit, setNameDeadlineEdit] = useState()
@@ -55,17 +47,54 @@ const PengelolaanDeadline = () => {
   const [dayRangeDeadlineNew, setDayRangeDeadlineNew] = useState()
   const [startAssignmentDateDeadlineNew, setStartAssignmentDateDeadlineNew] = useState()
   const [finishAssignmentDateDeadlineNew, setFinishAssignmentDateDeadlineNew] = useState()
-  const [isDeadlineLaporan, setIsDeadlineLaporan] = useState()
 
 
+
+
+  const convertDate = (date) => {
+    let temp_date_split = date.split('-')
+    const month = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ]
+    let date_month = temp_date_split[1]
+    let month_of_date = month[parseInt(date_month) - 1]
+
+    return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
+  }
 
   useEffect(() => {
     async function getDataDeadline() {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all`)
         .then((result) => {
-          console.log('res', result.data.data)
-          setDataDeadline(result.data.data)
+  
+          let data_deadline_res_convert_date = []
+          let get_data_deadline_with_convert_date = function(data){
+            for(var i in data){
+              data_deadline_res_convert_date.push({
+                day_range : data[i].day_range,
+                finish_assignment_date : data[i].finish_assignment_date,
+                finish_assignment_date_convert : convertDate(data[i].finish_assignment_date),
+                id : data[i].id,
+                name : data[i].name,
+                start_assignment_date : data[i].start_assignment_date,
+                start_assignment_date_convert : convertDate(data[i].start_assignment_date)
+              })
+            }
+          }
+          get_data_deadline_with_convert_date(result.data.data)
+          setDataDeadline(data_deadline_res_convert_date)
           setIsLoading(false)
         })
         .catch(function (error) {
@@ -90,7 +119,23 @@ const PengelolaanDeadline = () => {
     await axios
       .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all`)
       .then((result) => {
-        setDataDeadline(result.data.data)
+     
+        let data_deadline_res_convert_date = []
+        let data_deadline_with_convert_date = function(data){
+          for(var i in data){
+            data_deadline_res_convert_date.push({
+              day_range : data[i].day_range,
+              finish_assignment_date : data[i].finish_assignment_date,
+              finish_assignment_date_convert : convertDate(data[i].finish_assignment_date),
+              id : data[i].id,
+              name : data[i].name,
+              start_assignment_date : data[i].start_assignment_date,
+              start_assignment_date_convert : convertDate(data[i].start_assignment_date)
+            })
+          }
+        }
+        data_deadline_with_convert_date(result.data.data)
+        setDataDeadline(data_deadline_res_convert_date)
         setIsLoading(false)
         setLoadings((prevLoadings) => {
           const newLoadings = [...prevLoadings]
@@ -116,7 +161,7 @@ const PengelolaanDeadline = () => {
         start_assignment_date: startDateAssignment,
       })
       .then((result) => {
-        console.log(result)
+
         setIsModalEditVisible(false)
         notification.success({ message: 'Data Deadline Berhasil Diubah' })
       })
@@ -203,11 +248,11 @@ const PengelolaanDeadline = () => {
     },
     {
       title: 'Tanggal Dibuka Pengumpulan',
-      dataIndex: 'start_assignment_date',
+      dataIndex: 'start_assignment_date_convert',
     },
     {
       title: 'Tanggal Batas Pengumpulan',
-      dataIndex: 'finish_assignment_date',
+      dataIndex: 'finish_assignment_date_convert',
     },
     {
       title: 'Aksi',

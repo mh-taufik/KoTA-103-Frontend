@@ -34,7 +34,7 @@ const DashboardPeserta = () => {
       await axios
         .get(api_get_dashboard)
         .then((result) => {
-          console.log(result.data.data)
+    
           
 
          if(rolePengguna === '1'){
@@ -67,7 +67,6 @@ const DashboardPeserta = () => {
           axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/document-grade?participant_id=${NIM_PESERTA}`)
           .then((res)=>{
             setInformasiPenilaianDokumenPeserta(res.data.data)
-            console.log('INFO PENILAIAN', res.data.data.laporan_graded)
             setTotalLogbookDinilai(res.data.data.logbook_graded)
             setTotalLogbookBelumDinilai(res.data.data.logbook_ungraded)
             setTotalLaporanDinilai(res.data.data.laporan_graded)
