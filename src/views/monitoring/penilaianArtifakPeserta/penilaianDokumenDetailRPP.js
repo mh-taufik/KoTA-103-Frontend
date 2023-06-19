@@ -217,7 +217,7 @@ const PenilaianDokumenDetailRPP = (props) => {
         <Box sx={{ color: 'primary.main' }}>
           Tanggal RPP : {dataRPP.start_date} &nbsp;&nbsp;s/d&nbsp;&nbsp; {dataRPP.finish_date}
         </Box>
-        <Box sx={{ color: 'primary.main' }}>Dikumpulkan Pada : 15 Januari 2023</Box>
+=
         <div className="spacebottom"></div>
 
         <TableContainer component={Paper} style={{padding:20}}>
