@@ -109,7 +109,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/get`)
         .then((result) => {
           setPoinPenilaian(result.data.data)
-          console.log(result.data.data)
+         // console.log(result.data.data)
           setIsLoading(false)
         })
         .catch(function (error) {
@@ -188,10 +188,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
     tanggalAksesDibuka,
     index,
   ) => {
-    console.log(idPoinPenilaian, typeof idPoinPenilaian)
-    console.log(namaPoinPenilaian, typeof namaPoinPenilaian)
-    console.log(statusPoinPenilaian, typeof statusPoinPenilaian)
-    console.log(tanggalAksesDibuka, typeof tanggalAksesDibuka)
+  
     axios
       .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/update`, {
         description: namaPoinPenilaian,
@@ -201,7 +198,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
         status: statusPoinPenilaian,
       })
       .then((response) => {
-        console.log(response)
+       // console.log(response)
         refreshData(index)
         notification.success({
           message: 'Poin penilaian berhasil diubah',
@@ -209,7 +206,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
         setIsModalEditVisible(false)
       })
       .catch((error) => {
-        console.log(error)
+      
         setIsModalEditVisible(false)
         setLoadings((prevLoadings) => {
           const newLoadings = [...prevLoadings]
@@ -356,18 +353,13 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
                 shape="circle"
                 style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
                 onClick={() => {
-                  console.log(
-                    record.aspect_id,
-                    record.status,
-                    record.aspect_name,
-                    record.start_assessment_date,
-                  )
+                
                   setEId(record.aspect_id)
                   setEPoinPenilaian(record.aspect_name)
                   setEStatus(record.status)
                   setEPoinTanggal(record.start_assessment_date)
                   setCoDate(record.start_assessment_date)
-                  console.log(record.start_assessment_date)
+                //  console.log(record.start_assessment_date)
                   if(record.status === 'Active'){
                     setEStatus(6)
                   }else if(record.status === 'Inactive'){
@@ -563,7 +555,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
               defaultValue={eStatus}
               onChange={(value) => {
                 setEStatus(value)
-                console.log(value)
+                //console.log(value)
               }}
             >
               <Option value={6}>Active</Option>
