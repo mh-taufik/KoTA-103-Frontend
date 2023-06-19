@@ -428,7 +428,7 @@ const RekapSelfAssessment = () => {
         <>
           {rolePengguna !== '1' && rolePengguna !== '4' && record.actual_id !== null && (
             <Row>
-              <Col span={24} style={{ textAlign: 'center' }}>
+              <Col span={12} style={{ textAlign: 'center' }}>
                 <Popover content={<div>Lihat isi detail self assessment</div>}>
                   <Button
                     id="button-pencil" 
@@ -444,6 +444,21 @@ const RekapSelfAssessment = () => {
                   </Button>
                 </Popover>
               </Col>
+              <Col span={12} style={{ textAlign: 'center' }}>
+               <Popover content={<div>Lihat penilaian self assessment</div>}>
+                 <Button
+                   id="button-pencil"
+                   htmlType="submit"
+                   shape="circle"
+                   style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
+                   onClick={() => {
+                     actionGradeSelfAssessment(record.self_assessment_id)
+                   }}
+                 >
+                   <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+                 </Button>
+               </Popover>
+             </Col>
             </Row>
           )}
 

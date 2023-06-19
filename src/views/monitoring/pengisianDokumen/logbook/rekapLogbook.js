@@ -496,15 +496,26 @@ const RekapLogbook = () => {
         <>
           {rolePengguna !== '1' && rolePengguna !== '4' && record.real_id !== null && (
             <Row>
-              <Col span={24} style={{ textAlign: 'center' }}>
+              <Col span={12} style={{ textAlign: 'center' }}>
                 <Popover content={<div>Lihat isi detail dokumen logbook</div>}>
                   <Button
                     size="small"
                     type="primary"
-                    shape="round"
+                    
                     onClick={() => actionLihatDetailPenilaianLogbook(record.id)}
                   >
                     Lihat Detail
+                  </Button>
+                </Popover>
+              </Col>
+              <Col span={12} style={{ textAlign: 'center' }}>
+                <Popover content={<div>Lihat penilaian logbook</div>}>
+                  <Button
+                    size="small"
+                    onClick={() => actionPenilaianLogbook(record.id)}
+                    style={{ backgroundColor: '#ffa940', color: 'white' }}
+                  >
+                    &nbsp;&nbsp; &nbsp;&nbsp; Penilaian &nbsp;&nbsp;&nbsp;&nbsp;
                   </Button>
                 </Popover>
               </Col>
@@ -525,7 +536,7 @@ const RekapLogbook = () => {
                 </Popover>
               </Col>
               <Col span={12} style={{ textAlign: 'center' }}>
-                <Popover content={<div>Lihat penilaian logbook</div>}>
+                <Popover content={<div>Lakukan penilaian logbook</div>}>
                   <Button
                     size="small"
                     onClick={() => actionPenilaianLogbook(record.id)}

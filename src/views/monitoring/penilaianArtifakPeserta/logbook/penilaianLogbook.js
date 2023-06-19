@@ -661,7 +661,7 @@ const PenilaianLogbook = () => {
         <div style={{ marginTop: 150 }}>
           {title('SELF ASSESSMENT')}
 
-          {isSelfAssessmentAvailable && (
+          {(isSelfAssessmentAvailable && rolePengguna ==='4') &&(
             <ul className="list-group mb-4">
               <div>
                 <div>
@@ -727,9 +727,85 @@ const PenilaianLogbook = () => {
                     </tbody>
                   </Table>
                 </div>
-                <Button type="primary" onClick={SimpanPenilaianSelfAssessment} variant="contained">
+             
+                  <Button type="primary" onClick={SimpanPenilaianSelfAssessment} variant="contained">
                   Simpan Nilai
                 </Button>
+               
+              </div>
+              <br />
+            </ul>
+          )}
+
+{(isSelfAssessmentAvailable && rolePengguna!=='4')&& (
+            <ul className="list-group mb-4">
+              <div>
+                <div>
+                  <table>
+                    <thead>
+                      <tr>
+                        <td>Tanggal Self Assessment</td>
+                        <td>:</td>
+                        <td>
+                          &nbsp;&nbsp;
+                          {selfAssessmentPeserta.start_date} &nbsp; s/d &nbsp;
+                          {selfAssessmentPeserta.finish_date}
+                        </td>
+                      </tr>
+                    </thead>
+                  </table>
+                  <div className="spacetop"></div>
+                  <Table striped="columns">
+                    <thead>
+                      <tr>
+                        <td>
+                          <b>NO</b>
+                        </td>
+                        <td>
+                          <b>POIN SELF ASSESSMENT</b>
+                        </td>
+                        <td width={'10%'}>
+                          <b>NILAI</b>
+                        </td>
+                        <td width={'50%'}>
+                          <b>KETERANGAN</b>
+                        </td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {aspectGradeSelfAssessmentPeserta.map((data, index) => {
+                        return (
+                          <tr key={data.aspect_id}>
+                            <td>{index + 1}</td>
+                            <td>{data.aspect_name}</td>
+                            <td width={'10%'}>
+                              <Input
+                              disabled
+                                onChange={(e) =>
+                                  handleChangeNilaiSelfAssessment(
+                                    index,
+                                    'grade',
+                                    e.target.value,
+                                    data.description,
+                                    data.aspect_id,
+                                    data.grade_id,
+                                  )
+                                }
+                                defaultValue={data.grade}
+                                type="number"
+                                placeholder="Input a number"
+                                maxLength={2}
+                              ></Input>
+                            </td>
+                            <td>{data.description}</td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </Table>
+                </div>
+             
+               
               </div>
               <br />
             </ul>

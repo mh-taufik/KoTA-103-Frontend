@@ -124,8 +124,6 @@ const EditRPP = () => {
         weekly_achievement_plan: [],
       })
       .then((res) => {
-        console.log(res)
-        console.log(res.data.data)
         setIsModalDeliverablesEditOpen(false)
         notification.success({ message: 'Data deliverables berhasil diubah' })
       })
@@ -187,8 +185,6 @@ const EditRPP = () => {
         weekly_achievement_plan: [],
       })
       .then((res) => {
-        console.log(res)
-        console.log(res.data.data)
         setIsModalMilestonesEditOpen(false)
         notification.success({ message: 'Data milestones berhasil diubah' })
       })
@@ -276,8 +272,6 @@ const EditRPP = () => {
         ],
       })
       .then((res) => {
-        // console.log(res)
-        // console.log(res.data.data)
         setIsModalRencanaCapaianMingguanEditOpen(false)
         notification.success({ message: 'Data Rencana Capaian Mingguan Berhasil Diubah' })
       })
@@ -322,7 +316,6 @@ const EditRPP = () => {
     setDataJadwalPenyelesaianEdit(data)
 
     setIsModalJadwalPenyelesaianEditOpen(true)
-    console.log('id', data.id, typeof data.id)
   }
 
   const handleCancelModalJadwalPenyelesaianEdit = () => {
@@ -362,7 +355,6 @@ const EditRPP = () => {
 
   /** PUT DATA JADWAL PENYELESAIAN */
   const putDataJadwalPenyelesaianEdit = async () => {
-   console.log('tgl ml data', dataJadwalPenyelesaianEditTanggalSelesai, dataJadwalPenyelesaianEdit.id, typeof(dataJadwalPenyelesaianEdit.id))
     await axios
       .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/completion-schedule/update`, {
         "completion_schedule": [
@@ -381,8 +373,6 @@ const EditRPP = () => {
         "weekly_achievement_plan": [],
       })
       .then((res) => {
-        console.log(res)
-        // console.log(res.data.data)
         setIsModalJadwalPenyelesaianEditOpen(false)
         notification.success({ message: 'Data Jadwal Penyelesaian Keseluruhan Berhasil Diubah' })
         refreshDataRPP()
@@ -427,7 +417,6 @@ const EditRPP = () => {
 
   /** PUT EDIT FINISH DATE */
   const putDataFinishDateEdit = async () => {
-    console.log(dataFinishDateEdit)
     if(dataRPP.start_date>dataFinishDateEdit){
       notification.warning({message:'Harap cek kembali tanggal selesai !!! '})
     }else{
@@ -437,8 +426,6 @@ const EditRPP = () => {
         rpp_id : parseInt(RPP_ID)
       })
       .then((res) => {
-        console.log(res)
-        console.log(res.data.data)
         setIsModalFinishDateEditOpen(false)
         notification.success({ message: 'Data tanggal selesai RPP berhasil diubah' })
       })
@@ -476,7 +463,7 @@ const EditRPP = () => {
       })
       .then((res) => {
         setIsSuccessInputEdit(true)
-        console.log(res)
+        notification.success({message:'Data Deliverables berhasil ditambahkan'})
       })
       .catch(function (error) {
         if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -510,7 +497,7 @@ const EditRPP = () => {
       })
       .then((res) => {
         setIsSuccessInputEdit(true)
-        console.log(res)
+        notification.success({message:'Data Milestones berhasil ditambahkan'})
       })
       .catch(function (error) {
         if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -526,14 +513,14 @@ const EditRPP = () => {
           history.push('/500')
         }
       })
-
+      refreshDataRPP()
     window.location.reload(false)
   }
 
   /** HANDLE ADD RENCANA CAPAIAN PERMINGGU */
   const postDataRencanaCapaianPermingguAdditional = async () => {
     let jsonRencanaCapaianPerminggu = JSON.parse(JSON.stringify(capaianPerminggu))
-    console.log(';o', jsonRencanaCapaianPerminggu)
+
 
     await axios
       .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/weekly-achievement/create`,{
@@ -551,7 +538,8 @@ const EditRPP = () => {
       })
       .then((res) => {
         setIsSuccessInputEdit(true)
-        console.log('res', res)
+        notification.success({message:'Data Rencana Capaian Perminggu berhasil ditambahkan'})
+      
       })
       .catch(function (error) {
         if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -568,15 +556,15 @@ const EditRPP = () => {
         }
       })
 
-  
+      refreshDataRPP()
     window.location.reload(false)
-  //  refreshDataRPP()
+
   }
 
-  /** HANDLE ADD JADWAL PENYELESAIAN KESELURUHAN */
+
   const postDataJadwalPenyelesaianKeseluruhanAdditional = async () => {
     let jsonJadwalPenyelesaian = JSON.parse(JSON.stringify(jadwalPenyelesaianKeseluruhan))
-    console.log('json', jsonJadwalPenyelesaian)
+
     await axios
       .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/completion-schedule/update`, {
         "completion_schedule": jsonJadwalPenyelesaian,
@@ -593,7 +581,8 @@ const EditRPP = () => {
       })
       .then((res) => {
         setIsSuccessInputEdit(true)
-        console.log(res)
+        notification.success({message:'Data Jadwal Keseluruhan berhasil ditambahkan'})
+   
       })
       .catch(function (error) {
         if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -610,9 +599,9 @@ const EditRPP = () => {
         }
       })
 
-
+      refreshDataRPP()
     window.location.reload(false)
-    refreshDataRPP()
+   
   }
 
 
@@ -638,7 +627,7 @@ const EditRPP = () => {
     await axios
       .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/get/${RPP_ID}`)
       .then((response) => {
-        console.log(response.data.data)
+     
 
         setDataRPP({
           start_date: response.data.data.start_date,
@@ -664,7 +653,7 @@ const EditRPP = () => {
 
         temp_deliverables(temp_del)
         setDataDeliverables(temp_del1)
-        console.log('deliverables', temp_del1)
+
 
         /** SET DATA MILESTONES */
         let temp_mil = []
@@ -683,7 +672,7 @@ const EditRPP = () => {
 
         temp_milestone(temp_mil)
         setDataMilestones(temp_mil1)
-        console.log('milestones', temp_mil1)
+  
 
         /**SET DATA RENCANA CAPAIAN MINGGUAN */
         let temp_rcm = []
@@ -702,7 +691,7 @@ const EditRPP = () => {
 
         temp_rencanaCapaianMingguan(temp_rcm)
         setDataCapaianMingguan(temp_rcm1)
-        console.log('capaian mingguan', temp_rcm1)
+     
 
         /** JADWAL PENYELESAIAN KESELURUHAN */
         let temp_jadwalKeseluruhan = []
@@ -722,7 +711,7 @@ const EditRPP = () => {
 
         temp_jadwalKeseluruhans(temp_jadwalKeseluruhan)
         setDataJadwalPenyelesaianKeseluruhan(temp_jadwalKeseluruhan1)
-        console.log('jadwal keseluruhan', temp_jadwalKeseluruhan1)
+
         setIsLoading(false)
       })
       .catch(function (error) {
@@ -767,11 +756,11 @@ const EditRPP = () => {
 
   /** SAVE DATA DELIVERABLES TO STATE OF DELIVERABLES */
   const handleDataDeliverables = (index, event, type) => {
-    console.log(index, event, type)
+  
     let data = [...deliverables]
     data[index][type] = event
     setDeliverables(data)
-    console.log('data deliverables=> ', deliverables)
+  
   }
 
   const handleAddRowDeliverables = () => {
@@ -781,15 +770,12 @@ const EditRPP = () => {
   }
 
   const handleDropRowDeliverables = () => {
-    console.log('sebelum apus', deliverables)
-    console.log(deliverables.length)
-    console.log(deliverables)
+
     var will_delete = deliverables.length - 1
     var temp = []
     var tempDeliverables = function (obj) {
       for (var i in obj) {
-        console.log('[', i)
-        console.log(']', will_delete)
+
         if (i === 0) {
           break
         } else if (i < will_delete) {
@@ -799,17 +785,17 @@ const EditRPP = () => {
     }
     tempDeliverables(deliverables)
     setDeliverables(temp)
-    console.log('del', deliverables)
+
     setNoOfRowsDeliverables(noOfRowsDeliverables - 1)
   }
 
   /** SAVE DATA MILESTONES TO STATE OF MILESTONES */
   const handleDataMilestones = (index, event, type) => {
-    console.log(index, event, type)
+ 
     let data = [...milestones]
     data[index][type] = event
     setMilestones(data)
-    console.log('data milestones=> ', milestones)
+
   }
 
   const handleAddRowMilestones = () => {
@@ -819,15 +805,12 @@ const EditRPP = () => {
   }
 
   const handleDropRowMilestones = () => {
-    console.log('sebelum apus milestones', milestones)
-    console.log(milestones.length)
-    console.log(milestones)
+
     var will_delete = milestones.length - 1
     var temp = []
     var tempMilestones = function (obj) {
       for (var i in obj) {
-        console.log('[', i)
-        console.log(']', will_delete)
+
         if (i === 0) {
           break
         } else if (i < will_delete) {
@@ -837,17 +820,17 @@ const EditRPP = () => {
     }
     tempMilestones(milestones)
     setMilestones(temp)
-    console.log('del milestones', milestones)
+
     setNoOfRowsMilestones(noOfRowsMilestones - 1)
   }
 
   /** SAVE DATA RENCANA CAPAIAN PERMINGGU TO STATE OF RENCANA CAPAIAN PERMINGGU */
   const handleDataRencanaCapaianPerminggu = (index, event, type) => {
-    console.log(index, event, type)
+  
     let data = [...capaianPerminggu]
     data[index][type] = event
     setCapaianPerminggu(data)
-    console.log('data capaianperminggu=> ', capaianPerminggu)
+
   }
 
   const handleAddRowRencanaCapaianPerminggu = () => {
@@ -857,14 +840,12 @@ const EditRPP = () => {
   }
 
   const handleDropRowRencanaCapaianPerminggu = () => {
-    console.log('sebelum apus rcm', capaianPerminggu)
-    console.log(capaianPerminggu.length)
+
     var will_delete = capaianPerminggu.length - 1
     var temp = []
     var tempCapaianPerminggu = function (obj) {
       for (var i in obj) {
-        console.log('[', i)
-        console.log(']', will_delete)
+
         if (i === 0) {
           break
         } else if (i < will_delete) {
@@ -874,17 +855,17 @@ const EditRPP = () => {
     }
     tempCapaianPerminggu(capaianPerminggu)
     setCapaianPerminggu(temp)
-    console.log('del capaian', capaianPerminggu)
+
     setNoOfRowsCapaianPerminggu(noOfRowsCapaianPerminggu - 1)
   }
 
   /** SAVE DATA JADWAL PENYELESAIAN PEKERJAAN KESELURUHAN TO SET STATE OF JADWAL PENYELESAIAN PEKERJAAN KESELURUHAN */
   const handleDataJadwalPenyelesaianKeseluruhan = (index, event, type) => {
-    console.log(index, event, type)
+
     let data = [...jadwalPenyelesaianKeseluruhan]
     data[index][type] = event
     SetJadwalPenyelesaianKeseluruhan(data)
-    console.log('data jadwal penyelesaian=> ', jadwalPenyelesaianKeseluruhan)
+
   }
 
   const handleAddRowJadwalPenyelesaianKeseluruhan = () => {
@@ -896,14 +877,12 @@ const EditRPP = () => {
   }
 
   const handleDropRowJadwalPenyelesaianKeseluruhan = () => {
-    console.log('sebelum apus perencanaan', jadwalPenyelesaianKeseluruhan)
-    console.log(jadwalPenyelesaianKeseluruhan.length)
+
     var will_delete = jadwalPenyelesaianKeseluruhan.length - 1
     var temp = []
     var tempJadwalKeseluruhan = function (obj) {
       for (var i in obj) {
-        console.log('[', i)
-        console.log(']', will_delete)
+
         if (i === 0) {
           break
         } else if (i < will_delete) {
@@ -913,14 +892,12 @@ const EditRPP = () => {
     }
     tempJadwalKeseluruhan(jadwalPenyelesaianKeseluruhan)
     SetJadwalPenyelesaianKeseluruhan(temp)
-    console.log('del peyelesaian', jadwalPenyelesaianKeseluruhan)
+
     setNoOfRowsJadwalPenyelesaianPekerjaanKeseluruhan(
       noOfRowsJadwalPenyelesaianPekerjaanKeseluruhan - 1,
     )
   }
 
-  /** FUNCTIONAL */
-  /**get data date berdasarkan minggu dalam tahun */
 
   function formatDate(date) {
     var d = new Date(date),
@@ -949,9 +926,9 @@ const EditRPP = () => {
   function getEndDateOfWeek(w, y) {
     var simple = new Date(y, 0, 1 + (w - 1) * 7)
     var dow = simple.getDay()
-    console.log('dow =>', dow)
+
     var ISOweekStart = simple
-    console.log('dow =>', ISOweekStart)
+
     if (dow <= 4) {
       ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1)
     } else {
@@ -962,11 +939,7 @@ const EditRPP = () => {
     return formatDate(ISOweekStart.toDateString())
   }
 
-  /** HANDLE RANGE DATE SAAT MEMILIH  */
-  const disabledDate = (current) => {
-    // Can not select days before today and today
-    return current && current < dayjs().endOf('day')
-  }
+
 
   const getWeekBasedOnDate = (date) => {
     var year = new Date(date.getFullYear(), 0, 1)
@@ -995,7 +968,7 @@ const EditRPP = () => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/get/${RPP_ID}`)
         .then((response) => {
-          console.log(response.data.data)
+
 
           setDataRPP({
             start_date: response.data.data.start_date,
@@ -1021,9 +994,9 @@ const EditRPP = () => {
 
           temp_deliverables(temp_del)
           setDataDeliverables(temp_del1)
-          console.log('deliverables', temp_del1)
 
-          /** SET DATA MILESTONES */
+
+    
           let temp_mil = []
           let temp_mil1 = []
           temp_mil = response.data.data.milestones
@@ -1040,9 +1013,7 @@ const EditRPP = () => {
 
           temp_milestone(temp_mil)
           setDataMilestones(temp_mil1)
-          console.log('milestones', temp_mil1)
-
-          /**SET DATA RENCANA CAPAIAN MINGGUAN */
+     
           let temp_rcm = []
           let temp_rcm1 = []
           temp_rcm = response.data.data.weekly_achievement_plans
@@ -1059,9 +1030,7 @@ const EditRPP = () => {
 
           temp_rencanaCapaianMingguan(temp_rcm)
           setDataCapaianMingguan(temp_rcm1)
-          console.log('capaian mingguan', temp_rcm1)
 
-          /** JADWAL PENYELESAIAN KESELURUHAN */
           let temp_jadwalKeseluruhan = []
           let temp_jadwalKeseluruhan1 = []
           temp_jadwalKeseluruhan = response.data.data.completion_schedules
@@ -1079,7 +1048,7 @@ const EditRPP = () => {
 
           temp_jadwalKeseluruhans(temp_jadwalKeseluruhan)
           setDataJadwalPenyelesaianKeseluruhan(temp_jadwalKeseluruhan1)
-          console.log('capaian mingguan', temp_jadwalKeseluruhan1)
+  
           setIsLoading(false)
         })
         .catch(function (error) {
@@ -1131,10 +1100,10 @@ const EditRPP = () => {
       render: (text, record) => {
         let dateLimit = new Date()
 
-        /**MENGAMBIL TANGGAL HARI INI + SISA NYA(DALAM MINGGU) / MENGAMBIL TANGGAL AKHIR DIMINGGU INI */
+
         dateLimit.setDate(dateLimit.getDate() + (7 - new Date().getDay()))
         let recDueDate = new Date(record.due_date)
-        // console.log(recDueDate, dateLimit, '---', recDueDate > dateLimit)
+   
 
         if (recDueDate > dateLimit) {
           return (
@@ -1144,8 +1113,7 @@ const EditRPP = () => {
                 shape="circle"
                 onClick={() => {
                   showModalDeliverablesEdit(record)
-                  // console.log(record)
-                  // console.log('CLICK EDIT DELIVERABLES')
+
                 }}
                 style={{ backgroundColor: '#fff566', borderColor: '#fff566' }}
               >
@@ -1206,12 +1174,12 @@ const EditRPP = () => {
       render: (text, record) => {
         let dateLimit = new Date()
 
-        /**MENGAMBIL TANGGAL HARI INI + SISA NYA(DALAM MINGGU) / MENGAMBIL TANGGAL AKHIR DIMINGGU INI */
+    
         dateLimit.setDate(dateLimit.getDate() + (7 - new Date().getDay()))
         let recStartDate = new Date(record.start_date)
         let recFinishDate = new Date(record.finish_date)
         let popoverSD
-        // console.log(recDueDate, dateLimit, '---', recDueDate > dateLimit)
+    
 
         if (recFinishDate > dateLimit) {
           if (recStartDate > dateLimit) {
@@ -1226,7 +1194,7 @@ const EditRPP = () => {
                 shape="circle"
                 onClick={() => {
                   showModalMilestonesEdit(record, popoverSD)
-                  console.log(record)
+            
                 }}
                 style={{ backgroundColor: '#fff566', borderColor: '#fff566' }}
               >
@@ -1287,12 +1255,12 @@ const EditRPP = () => {
       render: (text, record) => {
         let dateLimit = new Date()
 
-        /**MENGAMBIL TANGGAL HARI INI + SISA NYA(DALAM MINGGU) / MENGAMBIL TANGGAL AKHIR DIMINGGU INI */
+   
         dateLimit.setDate(dateLimit.getDate() + (7 - new Date().getDay()))
         let recStartDate = new Date(record.start_date)
         let recFinishDate = new Date(record.finish_date)
 
-        // console.log(recDueDate, dateLimit, '---', recDueDate > dateLimit)
+   
 
         if (recStartDate > dateLimit) {
           return (
@@ -1301,7 +1269,7 @@ const EditRPP = () => {
                 id="button-edit-rencana-capaian-perminggu"
                 shape="circle"
                 onClick={() => {
-                  console.log(record)
+ 
                   showModalRencanaCapaianMingguanEdit(record)
                 }}
                 style={{ backgroundColor: '#fff566', borderColor: '#fff566' }}
@@ -1368,43 +1336,22 @@ const EditRPP = () => {
       width: '5%',
       render: (text, record) => {
         let dateLimit = new Date()
-        // let minusToGetLimit = new Date().getDay()
-        // // if (minusToGetLimit === 0) {
-        // //   setLimitMinusDay(7)
-        // // } else {
-        //   setLimitMinusDay(minusToGetLimit)
-        // // }
 
-        /**MENGAMBIL TANGGAL HARI INI + SISA NYA(DALAM MINGGU) / MENGAMBIL TANGGAL AKHIR DIMINGGU INI */
         dateLimit.setDate(dateLimit.getDate() + (7 - limitMinusDay))
         let recStartDate = new Date(record.start_date)
-        // let recFinishDate = new Date(record.finish_date)
+
         let weekOnDateStart = getWeekBasedOnDate(recStartDate) - 1
         let currWeek = getWeekBasedOnDate(new Date())-1
-        // let yearOnDateStart = record.finish_date.slice(0, 4)
-        // let limitDateGetMondayDateBasedOnStartDate = getDateOfISOWeek(
-        //   weekOnDateStart,
-        //   yearOnDateStart,
-        // )
-        // let monLimit = new Date(limitDateGetMondayDateBasedOnStartDate)
-        // let limitDateToEdit = formatDate(dateLimit.toDateString())
-        // let statusDatePickerStart
-        //return <button onClick={()=>{console.log(weekOnDateStart,'curr',currWeek)}}>tes</button>
 
 
         if (weekOnDateStart>currWeek) {
-          // if (record.start_date > limitDateToEdit) {
-          //   statusDatePickerStart = false 
-          // } else {
-          //   statusDatePickerStart = true
-          // }
           return (
             <Popover content={<div>Edit data</div>}>
               <Button
                 id="button-edit-jadwal-penyelesaian"
                 shape="circle"
                 onClick={() => {
-                  console.log('-agudgeud', record)
+      
                   showModalJadwalPenyelesaianEdit(record, false)
             
                 }}
@@ -1447,17 +1394,7 @@ const EditRPP = () => {
   ) : (
     <>
       <div className="container">
-        {/* <button
-          onClick={() => {
-            // console.log(7-new Date().getDay())
-            console.log(dataJadwalPenyelesaianEditButirPekerjaan)
-            console.log(dataJadwalPenyelesaianEditJenisPekerjaan)
-            console.log(dataJadwalPenyelesaianEditTanggalMulai)
-            console.log(dataJadwalPenyelesaianEditTanggalSelesai)
-          }}
-        >
-          teeees
-        </button> */}
+
         <Space>
           <Modal
             title="Format Pengisian Dokumen RPP"
@@ -1628,11 +1565,9 @@ const EditRPP = () => {
                       >
                         <DatePicker
                           disabledDate={(current) => {
-                            // if (new Date().getDay() === 0) {
-                            //   setLimitMinusDay(7)
-                            // } else {
+                          
                               setLimitMinusDay(new Date().getDay())
-                            // }
+                          
 
                             return (
                               moment().add(-1, 'days') >= current ||
@@ -1665,7 +1600,7 @@ const EditRPP = () => {
                       type="primary"
                       htmlType="submit"
                       onClick={() => {
-                        console.log(deliverables)
+                  
                         postDataDeliverablesAdditional()
                       }}
                     >
@@ -1746,11 +1681,9 @@ const EditRPP = () => {
                           style={{ width: '100%' }}
                           disabledDate={(current) => {
                             let minusToGetLimit = new Date().getDay()
-                            // if (minusToGetLimit === 0) {
-                            //   setLimitMinusDay(7)
-                            // } else {
+                          
                               setLimitMinusDay(minusToGetLimit)
-                            // }
+                          
 
                             return (
                               moment().add(-1, 'days') >= current ||
@@ -1780,7 +1713,7 @@ const EditRPP = () => {
                   <Button
                     type="primary"
                     onClick={() => {
-                      console.log(milestones)
+                 
                       postDataMilestonesAdditional()
                     }}
                   >
@@ -1852,14 +1785,12 @@ const EditRPP = () => {
                         <DatePicker
                           picker="week"
                           placeholder="Minggu Ke"
-                          //format={weekFormat}
+                    
                           disabledDate={(current) => {
                             let minusToGetLimit = new Date().getDay()
-                            // if (minusToGetLimit === 0) {
-                            //   setLimitMinusDay(7)
-                            // } else {
+                         
                               setLimitMinusDay(minusToGetLimit)
-                            // }
+                          
 
                             return (
                               moment().add(-1, 'days') >= current ||
@@ -1905,7 +1836,7 @@ const EditRPP = () => {
                     <Button
                       type="primary"
                       onClick={() => {
-                        console.log('data',capaianPerminggu)
+               
                         postDataRencanaCapaianPermingguAdditional()
                       }}
                     >
@@ -1919,7 +1850,7 @@ const EditRPP = () => {
           <hr />
           <div className="spacebottom"></div>
 
-          {/* JADWAL PENYELESAIAN PEKERJAAN KESELURUHAN */}
+   
           <div>
             <br />
             <div className="spacebottom"></div>
@@ -1985,11 +1916,9 @@ const EditRPP = () => {
                           placeholder="Minggu Ke"
                           disabledDate={(current) => {
                             let minusToGetLimit = new Date().getDay()
-                            // if (minusToGetLimit === 0) {
-                            //   setLimitMinusDay(7)
-                            // } else {
+                         
                               setLimitMinusDay(minusToGetLimit)
-                            // }
+                       
 
                             return (
                               moment().add(-1, 'days') >= current ||
@@ -2042,7 +1971,7 @@ const EditRPP = () => {
                       type="primary"
                       htmlType="submit"
                       onClick={() => {
-                        console.log(jadwalPenyelesaianKeseluruhan)
+                
                         postDataJadwalPenyelesaianKeseluruhanAdditional()
                       }}
                     >
@@ -2058,11 +1987,10 @@ const EditRPP = () => {
         </Form>
       </div>
 
-      {/* MODAL EDIT DELIVERABLES */}
       <Modal
         title="Edit Deliverables"
         open={isModalDeliverablesEditOpen}
-        // onOk={handleOkModalDeliverablesEdit}
+   
         onCancel={handleCancelModalDeliverablesEdit}
         footer={false}
         destroyOnClose
@@ -2130,11 +2058,9 @@ const EditRPP = () => {
               }}
               disabledDate={(current) => {
                 let minusToGetLimit = new Date().getDay()
-                // if (minusToGetLimit === 0) {
-                //   setLimitMinusDay(7)
-                // } else {
+           
                   setLimitMinusDay(minusToGetLimit)
-                // }
+              
                 return (
                   moment().add(-1, 'days') >= current ||
                   moment().add(7 - limitMinusDay, 'days') >= current
@@ -2220,11 +2146,9 @@ const EditRPP = () => {
                 onChange={(date, datestring) => setDataMilestonesEditTanggalMulai(datestring)}
                 disabledDate={(current) => {
                   let minusToGetLimit = new Date().getDay()
-                  // if (minusToGetLimit === 0) {
-                  //   setLimitMinusDay(7)
-                  // } else {
+           
                     setLimitMinusDay(minusToGetLimit)
-                  // }
+               
                   return (
                     moment().add(-1, 'days') >= current ||
                     moment().add(7 - limitMinusDay, 'days') >= current
@@ -2255,11 +2179,9 @@ const EditRPP = () => {
                 onChange={(date, datestring) => setDataMilestonesEditTanggalSelesai(datestring)}
                 disabledDate={(current) => {
                   let minusToGetLimit = new Date().getDay()
-                  // if (minusToGetLimit === 0) {
-                  //   setLimitMinusDay(7)
-                  // } else {
+                 
                     setLimitMinusDay(minusToGetLimit)
-                  // }
+                
                   return (
                     moment().add(-1, 'days') >= current ||
                     moment().add(7 - limitMinusDay, 'days') >= current
@@ -2349,7 +2271,7 @@ const EditRPP = () => {
               <DatePicker
                 picker="week"
                 onChange={(date, datestring) => {
-                  console.log(datestring)
+             
                   setDataRencanaCapaianMingguanEditTanggalMulai(
                     getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4)),
                   )
@@ -2359,11 +2281,9 @@ const EditRPP = () => {
                 }}
                 disabledDate={(current) => {
                   let minusToGetLimit = new Date().getDay()
-                  // if (minusToGetLimit === 0) {
-                  //   setLimitMinusDay(7)
-                  // } else {
+             
                     setLimitMinusDay(minusToGetLimit)
-                  // }
+             
 
                   return (
                     moment().add(-1, 'days') >= current ||
@@ -2486,12 +2406,9 @@ const EditRPP = () => {
               disabled={handleStatusStartWeekDatePicker}
               disabledDate={(current) => {
                 let minusToGetLimit = new Date().getDay()
-                // if (minusToGetLimit === 0) {
-                //   setLimitMinusDay(7)
-                // } else {
+           
                   setLimitMinusDay(minusToGetLimit)
-                // }
-
+           
                 return (
                   moment().add(-1, 'days') >= current ||
                   moment().add(7 - limitMinusDay, 'days') >= current
@@ -2522,11 +2439,9 @@ const EditRPP = () => {
               }
               disabledDate={(current) => {
                 let minusToGetLimit = new Date().getDay()
-                // if (minusToGetLimit === 0) {
-                //   setLimitMinusDay(7)
-                // } else {
+             
                   setLimitMinusDay(minusToGetLimit)
-                // }
+             
 
                 return (
                   moment().add(-1, 'days') >= current ||
@@ -2582,11 +2497,7 @@ const EditRPP = () => {
               onChange={(date, datestring) => setDataFinishDateEdit(datestring)}
               disabledDate={(current) => {
                 let minusToGetLimit = new Date().getDay()
-                // if (minusToGetLimit === 0) {
-                //   setLimitMinusDay(7)
-                // } else {
                   setLimitMinusDay(minusToGetLimit)
-                // }
                 return (
                   moment().add(-1, 'days') >= current ||
                   moment().add(7 - limitMinusDay, 'days') >= current

@@ -341,7 +341,7 @@ const DashboardPeserta = () => {
                   <Col span={12}>
                     <Progress type="circle" status="exception" size={80} percent={100} />
                   </Col>
-                  <Col>Dokumen Belum Dilengkapi</Col>
+                  <Col>Dokumen Belum Dikumpulkan</Col>
                 </Row>
               </Card>
             </Col>
@@ -357,7 +357,7 @@ const DashboardPeserta = () => {
                   <Col span={12}>
                     <Progress type="circle" status="exception" size={80} percent={100} />
                   </Col>
-                  <Col>Dokumen Belum Dilengkapi</Col>
+                  <Col>Dokumen Belum Dikumpulkan</Col>
                 </Row>
               </Card>
             </Col>
@@ -373,7 +373,7 @@ const DashboardPeserta = () => {
                   <Col span={12}>
                     <Progress type="circle" status="exception" size={80} percent={100} />
                   </Col>
-                  <Col>Dokumen Belum Dilengkapi</Col>
+                  <Col>Dokumen Belum Dikumpulkan</Col>
                 </Row>
               </Card>
             </Col>
