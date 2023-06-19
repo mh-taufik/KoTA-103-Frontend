@@ -350,7 +350,7 @@ const RekapPenilaianPeserta = () => {
             <Col span={24} style={{ textAlign: 'center' }}>
              
           
-              <Popover content={<div>Lihat list dokumen, detail, dan penilaian logbook</div>}>
+              <Popover content={<div>Lihat Rekap Nilai Logbook</div>}>
                 <Button
                   type="primary"
                   style={{ borderColor: 'white' }}
@@ -410,7 +410,7 @@ const RekapPenilaianPeserta = () => {
             <Col span={24} style={{ textAlign: 'center' }}>
               
               <Popover
-                content={<div>Lihat list dokumen, detail, dan penilaian self assessment</div>}
+                content={<div>Lihat rekap nilai self assessment</div>}
               >
                 {' '}
                 <Button
@@ -472,7 +472,7 @@ const RekapPenilaianPeserta = () => {
               <Popover
                 content={
                   <>
-                    <div>Lihat list dokumen dan detail laporan</div>{' '}
+                    <div>Lihat rekap nilai laporan</div>{' '}
                     <div>(form penilaian pembimbing)</div>
                   </>
                 }
