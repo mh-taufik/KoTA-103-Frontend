@@ -42,6 +42,7 @@ const RekapRPP = () => {
   const [dataPeserta, setDataPeserta] = useState([])
   const [isParticipantAllowedToAccessThisPage, setIsParticipantAllowedToAccessThisPage] = useState('load')
   const [dataDeadlineRPP, setDataDeadlineRPP] = useState([])
+  const [isFinishDateToAssignRPP, setIsFinishDateToAssignRPP] = useState()
   const desc = '*edit RPP yang dipilih'
   axios.defaults.withCredentials = true
 
@@ -223,6 +224,7 @@ const RekapRPP = () => {
         day_range : range
        }
 
+
        setDataDeadlineRPP(data_deadline)
 
        let today = formatDate(new Date())
@@ -231,6 +233,15 @@ const RekapRPP = () => {
        }else{
         setIsParticipantAllowedToAccessThisPage(false)
        }
+
+       
+       if(finish_date <= today){
+        setIsFinishDateToAssignRPP(true)
+       }else{
+        setIsFinishDateToAssignRPP(false)
+       }
+
+       console.log('f', finish_date, today)
       })
     }
 
@@ -502,7 +513,24 @@ const RekapRPP = () => {
                   </Popover>
                 )}
 
-                {!isDisableButton && (
+          {!isDisableButton && isFinishDateToAssignRPP && (
+                  <Popover content={<div>Pengeditan tidak diizinkan</div>}>
+                    <Button
+                      id="button-pencil"
+                      htmlType="submit"
+                      disabled
+                      shape="circle"
+                      style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
+                      onClick={() => {
+                        setWannaEdit(record)
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+                    </Button>
+                  </Popover>
+                )}
+
+                {!isDisableButton && !isFinishDateToAssignRPP &&(
                 <Popover content="Edit data RPP">
                     <Popconfirm
                     placement="topRight"
@@ -519,7 +547,8 @@ const RekapRPP = () => {
                       shape="circle"
                       style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
                       onClick={() => {
-                        setWannaEdit(record)
+                        // setWannaEdit(record)
+                        console.log(isFinishDateToAssignRPP)
                       }}
                     >
                       <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
