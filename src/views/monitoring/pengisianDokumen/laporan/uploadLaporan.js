@@ -123,6 +123,7 @@ export default function UploadLaporan() {
         let temp = res.data.data
         let waltemp = []
         let current_phase = temp.phase
+        console.log('fase',current_phase)
      
         waltemp = {
             id: temp.id,
@@ -148,17 +149,33 @@ export default function UploadLaporan() {
           idDeadline = 5
         }
 
-        axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=${idDeadline}`).then((res)=>{
-          console.log('hasil', res.data.data)
-          let today = formatDate(new Date())
-          let date_finished_this_phase = res.data.data.finish_assignment_date
-          console.log('date' , today, date_finished_this_phase)
-          if(date_finished_this_phase < today){
-            setIsFinishDatePhase(true)
-          }else{
-            setIsFinishDatePhase(false)
+        let phase = (parseInt(current_phase))-1
+        axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all/laporan`)
+        .then((res)=>{
+          let dataDeadlineLaporan = res.data.data
+          let dataIdDeadline
+          for(var i in dataDeadlineLaporan) {
+            if(parseInt(phase) === parseInt(i)){
+              console.log('data deadlinenya itu', dataDeadlineLaporan[i])
+              console.log('fase', phase, i)
+              dataIdDeadline = dataDeadlineLaporan[i].id
+            }
           }
+          axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=${dataIdDeadline}`).then((res)=>{
+            console.log('hasil', res.data.data)
+            let today = formatDate(new Date())
+            let date_finished_this_phase = res.data.data.finish_assignment_date
+            console.log('date' , today, date_finished_this_phase)
+            if(date_finished_this_phase <= today){
+              setIsFinishDatePhase(true)
+            }else{
+              setIsFinishDatePhase(false)
+            }
+          })
         })
+
+
+     
       
       })
     }
