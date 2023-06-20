@@ -251,7 +251,7 @@ const PengelolaanDeadline = () => {
       dataIndex: 'start_assignment_date_convert',
     },
     {
-      title: 'Tanggal Batas Pengumpulan',
+      title: 'Tanggal Pengumpulan Ditutup',
       dataIndex: 'finish_assignment_date_convert',
     },
     {
