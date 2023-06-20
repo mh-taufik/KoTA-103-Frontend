@@ -703,7 +703,8 @@ const PenilaianLogbook = () => {
                             <td>{index + 1}</td>
                             <td>{data.aspect_name}</td>
                             <td width={'10%'}>
-                              <Input
+                              {data.description !== '-' && (
+                                <Input
                                 onChange={(e) =>
                                   handleChangeNilaiSelfAssessment(
                                     index,
@@ -719,6 +720,29 @@ const PenilaianLogbook = () => {
                                 placeholder="Input a number"
                                 maxLength={2}
                               ></Input>
+                              )}
+
+{data.description === '-' && (
+                                <Input
+                                disabled
+                                onChange={(e) =>
+                                  handleChangeNilaiSelfAssessment(
+                                    index,
+                                    'grade',
+                                    e.target.value,
+                                    data.description,
+                                    data.aspect_id,
+                                    data.grade_id,
+                                  )
+                                }
+                                defaultValue={data.grade}
+                                type="number"
+                                placeholder="Input a number"
+                                maxLength={2}
+                              ></Input>
+                              )}
+
+
                             </td>
                             <td>{data.description}</td>
                           </tr>
