@@ -547,8 +547,8 @@ const RekapRPP = () => {
                       shape="circle"
                       style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
                       onClick={() => {
-                        // setWannaEdit(record)
-                        console.log(isFinishDateToAssignRPP)
+                        setWannaEdit(record)
+                        // console.log(isFinishDateToAssignRPP)
                       }}
                     >
                       <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
