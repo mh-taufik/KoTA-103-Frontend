@@ -526,7 +526,7 @@ const RekapLaporanPeserta = () => {
                 <li>Dalam pelaksanaan pengumpulan laporan memiliki &nbsp;&nbsp; <b>{totalLaporanPhase}</b> &nbsp;&nbsp; fase </li>
                 {infoDeadlineLaporan.map((data,index)=>{
                   return(
-                    <li key={data.id}><b>Fase {index+1}</b> Akses pengumpulan akan dimulai dari tanggal &nbsp;&nbsp; <b>{data.start_assignment_date}</b>&nbsp;&nbsp; dan batas pengumpulan terakhir pada tanggal &nbsp;&nbsp;<b>{data.finish_assignment_date}</b></li>
+                    <li key={data.id}><b>Fase {index+1}</b> Akses pengumpulan akan dimulai dari tanggal &nbsp;&nbsp; <b>{data.start_assignment_date}</b>&nbsp;&nbsp; dan pengumpulan akan ditutup akses pada &nbsp;&nbsp;<b>{data.finish_assignment_date}</b></li>
                   )
                 })}
             
