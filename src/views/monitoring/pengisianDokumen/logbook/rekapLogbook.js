@@ -676,7 +676,7 @@ const RekapLogbook = () => {
               )}
 
 {(record.grade === 'BELUM DINILAI' && record.real_id !== null && isFinishDateToAssignLogbook) && (
-                <Popover content={<div>Pengeditan tidak diizinkan</div>}>
+                <Popover content={<div>Pengeditan Logbook tidak diizinkan</div>}>
                   <Popconfirm
                     placement="topRight"
                     disabled
@@ -690,6 +690,7 @@ const RekapLogbook = () => {
                       id="button-pencil"
                       htmlType="submit"
                       shape="circle"
+                      disabled
                       style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
                       onClick={() => {
                         setWannaEdit(record)
