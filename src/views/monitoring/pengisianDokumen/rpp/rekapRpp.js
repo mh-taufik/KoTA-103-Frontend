@@ -672,7 +672,7 @@ const RekapRPP = () => {
             />
           )}
           <CCardBody>
-            {(rolePengguna === '1' && isParticipantAllowedToAccessThisPage ) && (
+            {(rolePengguna === '1' && isParticipantAllowedToAccessThisPage && !isFinishDateToAssignRPP ) && (
               <Row>
                 <Col span={24} style={{ textAlign: 'right' }}>
                   <Button
@@ -684,6 +684,25 @@ const RekapRPP = () => {
                   >
                     Tambahkan RPP Baru
                   </Button>
+                </Col>
+              </Row>
+            )}
+
+{(rolePengguna === '1' && isParticipantAllowedToAccessThisPage && isFinishDateToAssignRPP ) && (
+              <Row>
+                <Col span={24} style={{ textAlign: 'right' }}>
+                 <Popover content={<div>Penambahan RPP Sudah Tidak Diizinkan</div>}>
+                 <Button
+                    id="create-logbook"
+                    size="sm"
+                    shape="round"
+                    disabled
+                    style={{ color: 'white', background: '#339900', marginBottom: 16 }}
+                    onClick={handleCreateRPP}
+                  >
+                    Tambahkan RPP Baru
+                  </Button>
+                 </Popover>
                 </Col>
               </Row>
             )}
