@@ -633,7 +633,7 @@ const RekapLogbook = () => {
         <>
           <Row>
             <Col span={12} style={{ textAlign: 'center' }}>
-              {(record.grade !== 'BELUM DINILAI' && record.real_id !== null && cekIfDateLogbookIsLimitDeadline(record.real_date))&& (
+              {(record.grade !== 'BELUM DINILAI' && record.real_id !== null)&& (
                 <Popover content={<div>Pengeditan logbook tidak diizinkan</div>}>
                   <Button
                     id="button-pencil"
@@ -654,6 +654,32 @@ const RekapLogbook = () => {
                 <Popover content={<div>Lakukan pengeditan logbook</div>}>
                   <Popconfirm
                     placement="topRight"
+                    title="Yakin akan melakukan edit logbook?"
+                    description={desc}
+                    onConfirm={confirmToEdit}
+                    okText="Yes"
+                    cancelText="No"
+                  >
+                    <Button
+                      id="button-pencil"
+                      htmlType="submit"
+                      shape="circle"
+                      style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
+                      onClick={() => {
+                        setWannaEdit(record)
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
+                    </Button>
+                  </Popconfirm>
+                </Popover>
+              )}
+
+{(record.grade === 'BELUM DINILAI' && record.real_id !== null && isFinishDateToAssignLogbook) && (
+                <Popover content={<div>Pengeditan tidak diizinkan</div>}>
+                  <Popconfirm
+                    placement="topRight"
+                    disabled
                     title="Yakin akan melakukan edit logbook?"
                     description={desc}
                     onConfirm={confirmToEdit}
