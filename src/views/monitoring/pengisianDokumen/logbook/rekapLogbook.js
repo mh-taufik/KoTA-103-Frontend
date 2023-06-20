@@ -766,7 +766,7 @@ const RekapLogbook = () => {
               <ul>
                 <li>
                   Pengisian dapat dilakukan mulai &nbsp;&nbsp; <b>{dataDeadlineLogbook.start_date}</b>&nbsp;&nbsp; dan akan ditutup
-                  akses pengumpulan pada &nbsp;&nbsp; <b>{dataDeadlineLogbook.finish_date}</b>
+                  akses pengumpulan setelah tanggal &nbsp;&nbsp; <b>{dataDeadlineLogbook.finish_date}</b>
                 </li>
                 <li>
                   Pengeditan logbook akan berpengaruh pada status pengumpulan

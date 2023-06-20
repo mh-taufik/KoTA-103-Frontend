@@ -157,11 +157,12 @@ const FormPengisianLogbook = (props) => {
     // console.log(dateLimitResult, today)
 
     if (dateLimitResult < today) {
+      setSubmitAccepted(false)
       notification.warning({
         message:
           'Tanggal yang dipilih melebihi batas deadline, tidak menerima pengumpulan lagi !!!',
       })
-      setSubmitAccepted(false)
+      
     } else {
       await axios
         .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/check`, {
