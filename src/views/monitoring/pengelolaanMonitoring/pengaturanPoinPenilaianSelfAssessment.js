@@ -391,7 +391,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
         <CCardBody>
           <h4 className="justify spacebottom">PENGELOLAAN POIN PENILAIAN SELF ASSESSMENT</h4>
           <Typography component="div" variant="body1">
-            <Box sx={{ color: 'warning.main' }}>
+            <Box sx={{ color: 'info.main' }}>
               <ul style={{ fontSize: 14 }}>
                 <li>
                   Poin penilaian akan dipergunakan pada form pengisian self assessment peserta

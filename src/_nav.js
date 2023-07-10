@@ -580,14 +580,14 @@ const _nav = [
     role: '0',
     index: 60,
   },
-  {
-    component: CNavItem,
-    name: 'Rekap Penilaian Peserta',
-    to: '/rekapPenilaianPeserta',
-    icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
-    role: '0',
-    index: 62,
-  },
+  // {
+  //   component: CNavItem,
+  //   name: 'Rekap Penilaian Peserta',
+  //   to: '/rekapPenilaianPeserta',
+  //   icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
+  //   role: '0',
+  //   index: 62,
+  // },
   {
     component: CNavTitle,
     name: 'Monitoring Pelaksanaan',
@@ -618,14 +618,14 @@ const _nav = [
     role: '4',
     index: 66,
   },
-  {
-    component: CNavItem,
-    name: 'Rekap Penilaian Peserta',
-    to: '/rekapPenilaianPeserta',
-    icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
-    role: '4',
-    index: 67,
-  },
+  // {
+  //   component: CNavItem,
+  //   name: 'Rekap Penilaian Peserta',
+  //   to: '/rekapPenilaianPeserta',
+  //   icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
+  //   role: '4',
+  //   index: 67,
+  // },
 
 
 ]

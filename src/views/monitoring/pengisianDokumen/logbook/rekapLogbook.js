@@ -814,7 +814,7 @@ const RekapLogbook = () => {
             <>
               <Row>
                 <Col span={24} style={{ textAlign: 'right' }}>
-                  {!isFinishDateToAssignLogbook && (
+                
                     <Button
                       id="create-logbook"
                       size="sm"
@@ -824,22 +824,8 @@ const RekapLogbook = () => {
                     >
                       Tambahkan Logbook Baru
                     </Button>
-                  )}
-
-                  {isFinishDateToAssignLogbook && (
-                    <Popover content={'Pengumpulan Logbook Sudah Tidak Diizinkan !!! '}>
-                      <Button
-                        id="create-logbook"
-                        size="sm"
-                        disabled
-                        shape="round"
-                        style={{ color: 'white', background: '#339900', marginBottom: 16 }}
-                        onClick={handleCreateLogbook}
-                      >
-                        Tambahkan Logbook Baru
-                      </Button>
-                    </Popover>
-                  )}
+               
+                
                 </Col>
               </Row>
             </>

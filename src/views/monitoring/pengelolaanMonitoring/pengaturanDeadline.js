@@ -297,7 +297,7 @@ const PengelolaanDeadline = () => {
           PENGELOLAAN BATAS DEADLINE (LOCK PENGUMPULAN DOKUMEN)
         </h4>
         <Typography component="div" variant="body1" className="spacebottom">
-          <Box sx={{ color: 'warning.main' }}>
+          <Box sx={{ color: 'info.main' }}>
             <ul style={{ fontSize: 14 }}>
               <li>Pengaturan deadline untuk 3 dokumen : logbook, self assesment, laporan</li>
               <li>Deadline diatur dalam hitungan hari</li>

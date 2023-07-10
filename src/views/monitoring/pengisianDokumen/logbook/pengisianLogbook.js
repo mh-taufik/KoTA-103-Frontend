@@ -36,7 +36,6 @@ const FormPengisianLogbook = (props) => {
 
   const NIM_PESERTA_BY_PARAMS = params.id
   const NIM_PESERTA_BY_PESERTA_AS_USER = localStorage.username
-  const [rangeDayDeadline, setRangeDayDeadline] = useState()
   const [idPeserta, setIdPeserta] = useState()
   const [isLoading, setIsLoading] = useState(true)
   const [tanggalLogbook, setTanggalLogbook] = useState()
@@ -124,53 +123,16 @@ const FormPengisianLogbook = (props) => {
   }
 
   useEffect(() => {
-    async function GetDayRange() {
-      await axios
-        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=1`)
-        .then((response) => {
-          setRangeDayDeadline(response.data.data.day_range)
-        })
-        .catch(function (error) {
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
-              },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-            history.push('/500')
-          }
-        })
-    }
-
-    GetDayRange()
+ 
   }, [history])
 
-  const handleInputLogbookDate = async (date) => {
-    let dateLimit = new Date(date)
-    dateLimit.setDate(dateLimit.getDate() + rangeDayDeadline)
-    let dateLimitResult = formatDate(dateLimit.toDateString())
-    let today = formatDate(new Date())
-    // console.log(dateLimitResult, today)
-
-    if (dateLimitResult < today) {
-      setSubmitAccepted(false)
-      notification.warning({
-        message:
-          'Tanggal yang dipilih melebihi batas deadline, tidak menerima pengumpulan lagi !!!',
-      })
-      
-    } else {
+const handleInputLogbookDate = async (date) => {
       await axios
         .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/check`, {
           date: date,
         })
         .then((result) => {
           const response_data = result.data.data
-          console.log(result)
           if (response_data) {
             setSubmitAccepted(true)
             setTanggalLogbook(date)
@@ -198,7 +160,7 @@ const FormPengisianLogbook = (props) => {
             history.push('/404')
           }
         })
-    }
+    
   }
 
   const submitLogbook = (sesuai, kendala) => {
@@ -213,9 +175,6 @@ const FormPengisianLogbook = (props) => {
   }
 
   const saveDataLogbook = async (data, kesesuaian, kendala) => {
-    // const cekStatusPengumpulan = (date) => {
-    //   return new Date(date) > new Date() ? 5 : 4
-    // }
     await axios
       .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/create`, {
         date: tanggalLogbook,
@@ -262,7 +221,7 @@ const FormPengisianLogbook = (props) => {
         <h3 align="center" className="title-s">
           FORM PENGISIAN LOGBOOK
         </h3>
-        <Box sx={{ color: 'warning.main', fontSize: 12 }} className="spacebottom">
+        <Box sx={{ color: 'info.main', fontSize: 12 }} className="spacebottom">
           <ul>
             <li>Setiap logbook akan dinilai</li>
             <li>Isi sesuai dengan kegiatan yang anda lakukan saat KP / PKL</li>
@@ -409,7 +368,7 @@ const FormPengisianLogbook = (props) => {
                   },
                   {
                     type: 'string',
-                    min: 10,
+                    min: 25,
                   },
                 ]}
                 onChange={(e) => setWaktuDanKegiatanPeserta(e.target.value)}
@@ -457,7 +416,7 @@ const FormPengisianLogbook = (props) => {
                   },
                   {
                     type: 'string',
-                    min: 10,
+                    min: 20,
                   },
                 ]}
                 onChange={(e) => setHasilKerja(e.target.value)}
@@ -481,7 +440,7 @@ const FormPengisianLogbook = (props) => {
                   },
                   {
                     type: 'string',
-                    min: 6,
+                    min: 25,
                   },
                 ]}
                 onChange={(e) => setKeterangan(e.target.value)}

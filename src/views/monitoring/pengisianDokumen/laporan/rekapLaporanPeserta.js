@@ -345,7 +345,7 @@ const RekapLaporanPeserta = () => {
         <>
           {rolePengguna !== '1' && (
             <Row>
-              <Col span={8} style={{ textAlign: 'center' }}>
+              <Col span={12} style={{ textAlign: 'center' }}>
                 <Popover
                   content={
                     <>
@@ -363,15 +363,8 @@ const RekapLaporanPeserta = () => {
                   </Button>
                 </Popover>
               </Col>
-              <Col span={8} style={{ textAlign: 'center' }}>
-                <Popover content={<div>Salin Link Gdrive</div>}>
-                {contextHolder}
-                  <Button type="primary" onClick={() => success(record.uri)}>
-                    Copy
-                  </Button>
-                </Popover>
-              </Col>
-              <Col span={8} style={{ textAlign: 'center' }}>
+           
+              <Col span={12} style={{ textAlign: 'center' }}>
               <Popover content={<div>Kunjungi Link</div>}>
               <a href={record.uri} target="_blank" rel="noopener noreferrer">
               <Button type="primary">
@@ -423,22 +416,15 @@ const RekapLaporanPeserta = () => {
       render: (text, record) => (
         <>
           <Row>
-            <Col span={8} style={{ textAlign: 'center' }}>
+            <Col span={12} style={{ textAlign: 'center' }}>
               <Popover content={<div>Lakukan edit pengumpulan Laporan KP / PKL</div>}>
                 <Button type="primary" onClick={() => pengumpulanLaporan(record.id)}>
                   Pengumpulan
                 </Button>
               </Popover>
             </Col>
-            <Col span={8} style={{ textAlign: 'center' }}>
-              <Popover content={<div>Salin Link Gdrive</div>}>
-              {contextHolder}
-                <Button type="primary" onClick={() => success(record.uri)}>
-                  Copy
-                </Button>
-              </Popover>
-            </Col>
-            <Col span={8} style={{ textAlign: 'center' }}>
+           
+            <Col span={12} style={{ textAlign: 'center' }}>
               <Popover content={<div>Kunjungi Link</div>}>
               <a href={record.uri} target="_blank" rel="noopener noreferrer">
               <Button type="primary">

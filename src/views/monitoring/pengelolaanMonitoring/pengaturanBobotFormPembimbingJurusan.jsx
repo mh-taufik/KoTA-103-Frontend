@@ -247,7 +247,7 @@ const PengaturanBobotFormPembimbingJurusan = () => {
         <h2 className="justify">Pengelolaan Poin Penilaian Form Pembimbing</h2>
 
         <hr></hr>
-        <Box sx={{ color: 'warning.main' }}>
+        <Box sx={{ color: 'info.main' }}>
           CATATAN
           <ul>
             <li>
@@ -310,7 +310,7 @@ const PengaturanBobotFormPembimbingJurusan = () => {
           </Popover>
           <div className="spacetop" style={{ textAlign: 'center' }}>
             <b style={{ fontSize: 20 }}>TOTAL BOBOT </b>
-            <Box style={{ fontSize: 20 }} sx={{ color: 'error.main' }}>
+            <Box style={{ fontSize: 20 }} sx={{ color: 'info.main' }}>
               <b>{CekTotalBobotInput()}</b>
             </Box>
           </div>

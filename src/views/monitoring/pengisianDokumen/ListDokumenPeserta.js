@@ -50,7 +50,7 @@ const ListDokumenPeserta = () => {
   }
 
   const getColumnSearchProps = (dataIndex) => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
       <div
         style={{
           padding: 8,
@@ -89,15 +89,7 @@ const ListDokumenPeserta = () => {
           >
             Reset
           </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => {
-              close()
-            }}
-          >
-            close
-          </Button>
+         
         </Space>
       </div>
     ),
