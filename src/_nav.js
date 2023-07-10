@@ -594,14 +594,14 @@ const _nav = [
     role: '4',
     index: 63,
   },
-  {
-    component: CNavItem,
-    name: 'Monitoring Dashboard',
-    to: '/dashboardPembimbing',
-    icon: <FontAwesomeIcon icon={faScaleUnbalancedFlip} size="lg" />,
-    role: '4',
-    index: 64,
-  },
+  // {
+  //   component: CNavItem,
+  //   name: 'Monitoring Dashboard',
+  //   to: '/dashboardPembimbing',
+  //   icon: <FontAwesomeIcon icon={faScaleUnbalancedFlip} size="lg" />,
+  //   role: '4',
+  //   index: 64,
+  // },
   {
     component: CNavItem,
     name: 'Daftar Peserta',

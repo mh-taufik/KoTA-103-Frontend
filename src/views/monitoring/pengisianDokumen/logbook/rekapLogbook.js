@@ -650,7 +650,7 @@ const RekapLogbook = () => {
                 </Popover>
               )}
 
-              {(record.grade === 'BELUM DINILAI' && record.real_id !== null && !isFinishDateToAssignLogbook) && (
+              {(record.grade === 'BELUM DINILAI' && record.real_id !== null) && (
                 <Popover content={<div>Lakukan pengeditan logbook</div>}>
                   <Popconfirm
                     placement="topRight"
@@ -675,32 +675,6 @@ const RekapLogbook = () => {
                 </Popover>
               )}
 
-{(record.grade === 'BELUM DINILAI' && record.real_id !== null && isFinishDateToAssignLogbook) && (
-                <Popover content={<div>Pengeditan Logbook tidak diizinkan</div>}>
-                  <Popconfirm
-                    placement="topRight"
-                    disabled
-                    title="Yakin akan melakukan edit logbook?"
-                    description={desc}
-                    onConfirm={confirmToEdit}
-                    okText="Yes"
-                    cancelText="No"
-                  >
-                    <Button
-                      id="button-pencil"
-                      htmlType="submit"
-                      shape="circle"
-                      disabled
-                      style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
-                      onClick={() => {
-                        setWannaEdit(record)
-                      }}
-                    >
-                      <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
-                    </Button>
-                  </Popconfirm>
-                </Popover>
-              )}
             </Col>
             {record.real_id !== null && (
               <Col span={12} style={{ textAlign: 'center' }}>
@@ -799,7 +773,7 @@ const RekapLogbook = () => {
                   Pengeditan logbook akan berpengaruh pada status pengumpulan
                 </li>
                 <li>Peserta dapat melakukan edit (selama masih memiliki akses) dan melihat detail isi logbook</li>
-                <li>Tanggal logbook yang dikumpulkan melebihi &nbsp; <b>{dataDeadlineLogbook.day_range}</b> &nbsp; hari, pengumpulan logbook tersebut akan ditolak</li>
+                <li>Tanggal logbook yang dikumpulkan melebihi &nbsp; <b>{dataDeadlineLogbook.day_range}</b> &nbsp; hari, pengumpulan logbook tersebut akan diberi status <b>terlambat</b></li>
               </ul>
             </div>
           }
