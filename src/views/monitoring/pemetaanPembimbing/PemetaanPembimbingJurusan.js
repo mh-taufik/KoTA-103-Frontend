@@ -412,29 +412,6 @@ const PemetaanPembimbingJurusan = () => {
 
 
 
-  const first_items = [
-    {
-      key: '1',
-      label: 'PEMETAAN',
-      children: 
-        <>
-          <h5 className="spacebottom spacetop" style={{ textAlign: 'center' }}>
-            TABEL PEMETAAN PEMBIMBING JURUSAN PROGRAM STUDI {prodi}{' '}
-          </h5>
-          <Table
-            scroll={{ x: 'max-content' }}
-            columns={columns}
-            dataSource={dataHasilPemetaan}
-            rowKey={dataHasilPemetaan.company_id}
-            bordered
-            pagination={true}
-           
-          />
-        </>
-      
-    },
-  ]
-
   return isLoading ? (
     <Spin tip="Loading" size="large">
       <div className="content" />
@@ -447,7 +424,15 @@ const PemetaanPembimbingJurusan = () => {
         <CCardBody>
           <CRow>
             <CCol sm={12}>
-              <Tabs type="card" items={first_items} onChange={onChange}></Tabs>
+            <Table
+            scroll={{ x: 'max-content' }}
+            columns={columns}
+            dataSource={dataHasilPemetaan}
+            rowKey={dataHasilPemetaan.company_id}
+            bordered
+            pagination={true}
+           
+          />
             </CCol>
           </CRow>
         </CCardBody>

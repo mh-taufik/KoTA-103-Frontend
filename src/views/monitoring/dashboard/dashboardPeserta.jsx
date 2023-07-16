@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Button, Card, Col, FloatButton, Progress, Row, Space } from 'antd'
-import { ClockCircleOutlined,ArrowLeftOutlined  } from '@ant-design/icons'
+import { ClockCircleOutlined,ArrowLeftOutlined , FileDoneOutlined } from '@ant-design/icons'
 import { Timeline } from 'antd'
 import '../pengisianDokumen/rpp/rpp.css'
 import Title from 'antd/es/typography/Title'
@@ -269,11 +269,13 @@ const DashboardPeserta = () => {
                 <hr style={{ paddingTop: 5, color: '#001d66' }} />
                 <Row style={{ padding: 10 }}>
                   <Col span={12}>
-                    <b style={{ fontSize: 55 }}>{dataDashboardPeserta.rpp_submitted}</b>
+                    <b style={{ fontSize: 40 }}>{dataDashboardPeserta.rpp_submitted}</b>
                   </Col>
-                  <Col span={12}>
-                    <Progress type="circle" size={80} percent={100} />
-                  </Col>
+                  {/* <Col span={12}>
+                    <Progress type="circle" size={80} pe
+                    rcent={100} />
+                  </Col> */}
+                   <Col span={12}> <FileDoneOutlined style={{ fontSize: 50 , color: 'green' }}/></Col>
                   <Col>Dokumen Sudah Dikumpulkan</Col>
                 </Row>
               </Card>
@@ -285,11 +287,12 @@ const DashboardPeserta = () => {
                 <hr style={{ paddingTop: 5, color: '#001d66' }} />
                 <Row style={{ padding: 10 }}>
                   <Col span={12}>
-                    <b style={{ fontSize: 55 }}>{dataDashboardPeserta.logbook_submitted}</b>
+                    <b style={{ fontSize: 40 }}>{dataDashboardPeserta.logbook_submitted} / 40</b>
                   </Col>
-                  <Col span={12}>
+                  {/* <Col span={12}>
                     <Progress type="circle" size={80} percent={100} />
-                  </Col>
+                  </Col> */}
+                   <Col span={12}> <FileDoneOutlined style={{ fontSize: 50 , color: 'green' , marginLeft:20}}/></Col>
                   <Col>Dokumen Sudah Dikumpulkan</Col>
                 </Row>
               </Card>
@@ -301,11 +304,13 @@ const DashboardPeserta = () => {
                 <hr style={{ paddingTop: 5, color: '#001d66' }} />
                 <Row style={{ padding: 10 }}>
                   <Col span={12}>
-                    <b style={{ fontSize: 55 }}>{dataDashboardPeserta.self_assessment_submitted}</b>
+                    {/* <b style={{ fontSize: 40 }}>{dataDashboardPeserta.self_assessment_submitted}</b> */}
+                    <b style={{ fontSize: 40 }}>{dataDashboardPeserta.self_assessment_submitted} / 8</b>
                   </Col>
-                  <Col span={12}>
+                  {/* <Col span={12}>
                     <Progress type="circle" size={80} percent={100} />
-                  </Col>
+                  </Col> */}
+                   <Col span={12}> <FileDoneOutlined style={{ fontSize: 50 , color: 'green' }}/></Col>
                   <Col>Dokumen Sudah Dikumpulkan</Col>
                 </Row>
               </Card>
@@ -317,11 +322,12 @@ const DashboardPeserta = () => {
                 <hr style={{ paddingTop: 5, color: '#001d66' }} />
                 <Row style={{ padding: 10 }}>
                   <Col span={12}>
-                    <b style={{ fontSize: 55 }}>{dataDashboardPeserta.laporan_submitted}</b>
+                    <b style={{ fontSize: 40 }}>{dataDashboardPeserta.laporan_submitted} / 3</b>
                   </Col>
-                  <Col span={12}>
+                  {/* <Col span={12}>
                     <Progress type="circle" size={80} percent={100} />
-                  </Col>
+                  </Col> */}
+                 <Col span={12}> <FileDoneOutlined style={{ fontSize: 50 , color: 'green' }}/></Col>
                   <Col>Dokumen Sudah Dikumpulkan</Col>
                 </Row>
               </Card>
@@ -329,7 +335,7 @@ const DashboardPeserta = () => {
           </Row>
         </div>
         <div>
-          <Row gutter={16}>
+          {/* <Row gutter={16}>
             <Col span={8}>
               <Card bordered={false}>
                 <b style={{ textAlign: 'center', fontSize: 20 }}>LOGBOOK</b>
@@ -377,7 +383,7 @@ const DashboardPeserta = () => {
                 </Row>
               </Card>
             </Col>
-          </Row>
+          </Row> */}
         </div>
       </div>
    {rolePengguna !== '1' && (

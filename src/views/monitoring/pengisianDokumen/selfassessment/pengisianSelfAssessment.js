@@ -16,6 +16,7 @@ import {
   Popover,
   Popconfirm,
   FloatButton,
+  Alert,
 } from 'antd'
 import { MinusCircleOutlined } from '@ant-design/icons'
 import { PlusOutlined } from '@ant-design/icons'
@@ -323,19 +324,27 @@ const PengisianSelfAssessment = () => {
     <>
       <Form>
         {' '}
-        <div className="container">
+        <Alert
+          className="spacebottom2"
+          message="Informasi Pengisian Self Assessment"
+          description={
+            <div>
+              <ul>
+                <li>Pastikan minggu yang dipilih belum pernah diisi sebelumnya</li>
+                <li>Pengisian hanya satu kali, anda tidak dapat melakukan edit self assesment</li>
+                {/* <li>Isi penilaian dengan angka 0, dan tanda - pada keterangan jika memang tidak ingin diisi</li> */}
+                <li>
+                  Pastikan semua keterangan terisi dan terdeskripsi dengan baik, agar nilai yang
+                  diberikan juga baik
+                </li>
+              </ul>
+            </div>
+          }
+          type="info"
+          showIcon
+        />
+        <div className="container2">
           <h3 className="title-s spacetop">PENGISIAN SELF ASSESSMENT</h3>
-          <Box sx={{ color: 'warning.main' }}>
-            <ul>
-              <li>Pastikan minggu yang dipilih belum pernah diisi sebelumnya</li>
-              <li>Pengisian hanya satu kali, anda tidak dapat melakukan edit self assesment</li>
-              {/* <li>Isi penilaian dengan angka 0, dan tanda - pada keterangan jika memang tidak ingin diisi</li> */}
-              <li>
-                Pastikan semua keterangan terisi dan terdeskripsi dengan baik, agar nilai yang
-                diberikan juga baik
-              </li>
-            </ul>
-          </Box>
           <div className="spacetop"></div>
           <b>PILIH MINGGU SELF ASSESSMENT &nbsp;&nbsp;&nbsp; : &nbsp;</b>
           <Space direction="vertical" size={12}>
@@ -345,7 +354,7 @@ const PengisianSelfAssessment = () => {
             <DatePicker
               picker="week"
               disabledDate={(current) => {
-                return   moment().add(-1,"days") <= current
+                return moment().add(-1, 'days') <= current
               }}
               onChange={(date, datestring) => {
                 let tanggalmulai = getDateOfISOWeek(datestring.slice(5, 7), datestring.slice(0, 4))
@@ -353,14 +362,10 @@ const PengisianSelfAssessment = () => {
                   datestring.slice(5, 7),
                   datestring.slice(0, 4),
                 )
-                console.log('tanggalmulai',tanggalmulai,tanggalselesai)
+                console.log('tanggalmulai', tanggalmulai, tanggalselesai)
                 let handling = handleDateIsAvailable(tanggalmulai, tanggalselesai)
-                setTanggalMulaiSelfAssessment(
-                  tanggalmulai
-                )
-                setTanggalBerakhirSelfAssessment(
-                  tanggalselesai
-                )
+                setTanggalMulaiSelfAssessment(tanggalmulai)
+                setTanggalBerakhirSelfAssessment(tanggalselesai)
               }}
               renderExtraFooter={() => 'Pilih Minggu Self Assessment'}
             />
@@ -369,13 +374,13 @@ const PengisianSelfAssessment = () => {
           <hr className="spacetop" />
 
           <Row>
-            <Col span={8} style={{ padding: 2 }}>
+            <Col span={8} style={{ padding: 2, textAlign: 'center' }}>
               <h6>ASPEK PENILAIAN</h6>
             </Col>
-            <Col span={4} style={{ padding: 2 }}>
+            <Col span={4} style={{ padding: 2, textAlign: 'center' }}>
               <h6>NILAI</h6>
             </Col>
-            <Col span={12} style={{ padding: 2 }}>
+            <Col span={12} style={{ padding: 2, textAlign: 'center' }}>
               <h6>KETERANGAN</h6>
             </Col>
           </Row>
@@ -388,11 +393,16 @@ const PengisianSelfAssessment = () => {
                   <Col span={8} style={{ padding: 8 }}>
                     <Text strong>{poinSelfAssessment.aspect_name}</Text>
                   </Col>
-                  <Col span={4} style={{ padding: 8 }}>
+                  <Col span={4} style={{ padding: 8, textAlign: 'center' }}>
                     <InputNumber
                       key={poinSelfAssessment.aspect_id}
                       name={`nilai` + index}
                       placeholder="nilai"
+                      max = {100}
+                     
+                      min = {0}
+                      keyboard={true}
+                      required
                       onChange={(e) =>
                         handlePengisianNilaiDanKeteranganSelfAssessment(
                           index,
