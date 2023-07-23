@@ -98,10 +98,7 @@ const PengisianRpp = () => {
   }
 
   /** USE EFFECT */
-  useEffect(() => {
-    console.log('NIM PESERTA ', NIM_PESERTA)
-    // getInformasiDataPeserta()
-  }, history)
+  useEffect(() => {}, history)
 
   /**HANDLE FAILED INPUT */
   const onFinishFailed = () => {
@@ -118,11 +115,9 @@ const PengisianRpp = () => {
 
   /** SAVE DATA DELIVERABLES TO STATE OF DELIVERABLES */
   const handleDataDeliverables = (index, event, type) => {
-    console.log(index, event, type)
     let data = [...deliverables]
     data[index][type] = event
     setDeliverables(data)
-    console.log('data deliverables=> ', deliverables)
   }
 
   const handleAddRowDeliverables = () => {
@@ -132,15 +127,10 @@ const PengisianRpp = () => {
   }
 
   const handleDropRowDeliverables = () => {
-    console.log('sebelum apus', deliverables)
-    console.log(deliverables.length)
-    console.log(deliverables)
     var will_delete = deliverables.length - 1
     var temp = []
     var tempDeliverables = function (obj) {
       for (var i in obj) {
-        console.log('[', i)
-        console.log(']', will_delete)
         if (i === 0) {
           break
         } else if (i < will_delete) {
@@ -150,35 +140,28 @@ const PengisianRpp = () => {
     }
     tempDeliverables(deliverables)
     setDeliverables(temp)
-    console.log('del', deliverables)
+
     setNoOfRowsDeliverables(noOfRowsDeliverables - 1)
   }
 
   /** SAVE DATA MILESTONES TO STATE OF MILESTONES */
   const handleDataMilestones = (index, event, type) => {
-    console.log(index, event, type)
     let data = [...milestones]
     data[index][type] = event
     setMilestones(data)
-    console.log('data milestones=> ', milestones)
   }
 
   const handleAddRowMilestones = () => {
-    let newField = {description: '', start_date: '', finish_date: '' }
+    let newField = { description: '', start_date: '', finish_date: '' }
     setMilestones([...milestones, newField])
     setNoOfRowsMilestones(noOfRowsMilestones + 1)
   }
 
   const handleDropRowMilestones = () => {
-    console.log('sebelum apus milestones', milestones)
-    console.log(milestones.length)
-    console.log(milestones)
     var will_delete = milestones.length - 1
     var temp = []
     var tempMilestones = function (obj) {
       for (var i in obj) {
-        console.log('[', i)
-        console.log(']', will_delete)
         if (i === 0) {
           break
         } else if (i < will_delete) {
@@ -188,17 +171,15 @@ const PengisianRpp = () => {
     }
     tempMilestones(milestones)
     setMilestones(temp)
-    console.log('del milestones', milestones)
+
     setNoOfRowsMilestones(noOfRowsMilestones - 1)
   }
 
   /** SAVE DATA RENCANA CAPAIAN PERMINGGU TO STATE OF RENCANA CAPAIAN PERMINGGU */
   const handleDataRencanaCapaianPerminggu = (index, event, type) => {
-
     let data = [...capaianPerminggu]
     data[index][type] = event
     setCapaianPerminggu(data)
-  
   }
 
   const handleAddRowRencanaCapaianPerminggu = () => {
@@ -208,12 +189,10 @@ const PengisianRpp = () => {
   }
 
   const handleDropRowRencanaCapaianPerminggu = () => {
-
     var will_delete = capaianPerminggu.length - 1
     var temp = []
     var tempCapaianPerminggu = function (obj) {
       for (var i in obj) {
-
         if (i === 0) {
           break
         } else if (i < will_delete) {
@@ -223,17 +202,14 @@ const PengisianRpp = () => {
     }
     tempCapaianPerminggu(capaianPerminggu)
     setCapaianPerminggu(temp)
-    console.log('del capaian', capaianPerminggu)
     setNoOfRowsCapaianPerminggu(noOfRowsCapaianPerminggu - 1)
   }
 
   /** SAVE DATA JADWAL PENYELESAIAN PEKERJAAN KESELURUHAN TO SET STATE OF JADWAL PENYELESAIAN PEKERJAAN KESELURUHAN */
   const handleDataJadwalPenyelesaianKeseluruhan = (index, event, type) => {
-    console.log(index, event, type)
     let data = [...jadwalPenyelesaianKeseluruhan]
     data[index][type] = event
     SetJadwalPenyelesaianKeseluruhan(data)
-    console.log('data jadwal penyelesaian=> ', jadwalPenyelesaianKeseluruhan)
   }
 
   const handleAddRowJadwalPenyelesaianKeseluruhan = () => {
@@ -245,14 +221,10 @@ const PengisianRpp = () => {
   }
 
   const handleDropRowJadwalPenyelesaianKeseluruhan = () => {
-    console.log('sebelum apus perencanaan', jadwalPenyelesaianKeseluruhan)
-    console.log(jadwalPenyelesaianKeseluruhan.length)
     var will_delete = jadwalPenyelesaianKeseluruhan.length - 1
     var temp = []
     var tempJadwalKeseluruhan = function (obj) {
       for (var i in obj) {
-        console.log('[', i)
-        console.log(']', will_delete)
         if (i === 0) {
           break
         } else if (i < will_delete) {
@@ -262,13 +234,12 @@ const PengisianRpp = () => {
     }
     tempJadwalKeseluruhan(jadwalPenyelesaianKeseluruhan)
     SetJadwalPenyelesaianKeseluruhan(temp)
-    console.log('del peyelesaian', jadwalPenyelesaianKeseluruhan)
+
     setNoOfRowsJadwalPenyelesaianPekerjaanKeseluruhan(
       noOfRowsJadwalPenyelesaianPekerjaanKeseluruhan - 1,
     )
   }
 
-  /** FUNCTIONAL */
   /**get data date berdasarkan minggu dalam tahun */
   function formatDate(date) {
     var d = new Date(date),
@@ -294,15 +265,12 @@ const PengisianRpp = () => {
 
     ISOweekStart = new Date(ISOweekStart)
     return formatDate(ISOweekStart.toDateString())
-    // console.log(ISOweekStart)
   }
 
   function getDateOfEndWeek(w, y) {
     var simple = new Date(y, 0, 1 + (w - 1) * 7)
     var dow = simple.getDay()
-    console.log('dow =>', dow)
     var ISOweekStart = simple
-    console.log('dow =>', ISOweekStart)
     if (dow <= 4) {
       ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1)
     } else {
@@ -313,65 +281,9 @@ const PengisianRpp = () => {
     return formatDate(ISOweekStart.toDateString())
   }
 
-  /** HANDLE RANGE DATE SAAT MEMILIH  */
-  const disabledDate = (current) => {
-    // Can not select days before today and today
-    return current && current < dayjs().endOf('day')
-  }
-
-  const createDataRPP = async () => {
-    console.log(submitAccepted)
-    if (submitAccepted) {
-      const jsonDataDeliverables = JSON.parse(JSON.stringify(deliverables))
-      const jsonDataMilestones = JSON.parse(JSON.stringify(milestones))
-      const jsonDataRencanaPerminggu = JSON.parse(JSON.stringify(capaianPerminggu))
-      const jsonDataJadwalPenyelesaianKeseluruhan = JSON.parse(
-        JSON.stringify(jadwalPenyelesaianKeseluruhan),
-      )
-
-      await axios
-        .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/create`, {
-          start_date: tanggalMulaiPekerjaan,
-          finish_date: tanggalBerakhirPekerjaan,
-          work_title: topikPekerjaan,
-          task_description: deskripsiTugas,
-          group_role: peranDalamPekerjaan,
-          completion_schedules: jsonDataJadwalPenyelesaianKeseluruhan,
-          deliverables: jsonDataDeliverables,
-          milestones: jsonDataMilestones,
-          weekly_achievement_plans: jsonDataRencanaPerminggu,
-        })
-        .then((result) => {
-          notification.success({
-            message: 'Data RPP Berhasil Ditambahkan',
-          })
-        })
-        .catch(function (error) {
-          setIsSuccessInput(false)
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
-              },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status > 500 && error.toJSON().status <= 500) {
-            history.push('/500')
-          }
-        })
-    } else {
-      notification.warning({ message: 'Pastikan Semua Data Terisi !!! ' })
-    }
-    
-  }
-
   /** HANDLE TAMBAH RPP */
   const handleSubmitRPP = async () => {
-
-    let accept_to_submit 
-
+    let accept_to_submit
 
     if (deliverables.length < 1) {
       notification.warning({ message: 'Isi Deliverables Terlebih Dahulu' })
@@ -430,15 +342,12 @@ const PengisianRpp = () => {
           weekly_achievement_plans: jsonDataRencanaPerminggu,
         })
         .then((response) => {
-          console.log(response.data.data)
-          console.log(response.data.data.id)
           let id_new = response.data.data.id
           notification.success({
             message: 'Data RPP Berhasil Ditambahkan',
           })
           setTimeout(1200)
           history.push(`/rencanaPenyelesaianProyek/detail/${id_new}`)
-       
         })
         .catch(function (error) {
           setIsSuccessInput(false)
@@ -472,7 +381,6 @@ const PengisianRpp = () => {
     history.push(`/rencanaPenyelesaianProyek/peserta/formPengisianRPP/contohPengisianRPP`)
   }
 
- 
   return (
     <>
       <div className="container">
@@ -562,25 +470,22 @@ const PengisianRpp = () => {
                 },
               ]}
             >
-          
-                <RangePicker
-                  format="YYYY-MM-DD"
-                 
-                  disabledDate={(current) => {
-                    if (new Date().getDay() === 0) {
-                      setLimitMinusDay(7)
-                    } else {
-                      setLimitMinusDay(new Date().getDay())
-                    }
+              <RangePicker
+                format="YYYY-MM-DD"
+                disabledDate={(current) => {
+                  if (new Date().getDay() === 0) {
+                    setLimitMinusDay(7)
+                  } else {
+                    setLimitMinusDay(new Date().getDay())
+                  }
 
-                    return (
-                      moment().add(-1, 'days') >= current ||
-                      moment().add(7 - limitMinusDay, 'days') >= current
-                    )
-                  }}
-                  onChange={(date, datestring) => handleInputTanggalPengerjaan(datestring)}
-                />
-           
+                  return (
+                    moment().add(-1, 'days') >= current ||
+                    moment().add(7 - limitMinusDay, 'days') >= current
+                  )
+                }}
+                onChange={(date, datestring) => handleInputTanggalPengerjaan(datestring)}
+              />
             </Form.Item>
 
             <Form.Item
@@ -616,7 +521,7 @@ const PengisianRpp = () => {
               rules={[{ required: true, message: 'Masukkan deskripsi tugas terlebih dahulu !' }]}
             >
               <TextArea
-              rows={5}
+                rows={5}
                 placeholder="Masukkan deskripsi tugas"
                 onChange={(e) => setDeskripsiTugas(e.target.value)}
               />
@@ -670,18 +575,18 @@ const PengisianRpp = () => {
                         ]}
                       >
                         <DatePicker
-                             disabledDate={(current) => {
-                              if (new Date().getDay() === 0) {
-                                setLimitMinusDay(7)
-                              } else {
-                                setLimitMinusDay(new Date().getDay())
-                              }
-          
-                              return (
-                                moment().add(-1, 'days') >= current ||
-                                moment().add(7 - limitMinusDay, 'days') >= current
-                              )
-                            }}
+                          disabledDate={(current) => {
+                            if (new Date().getDay() === 0) {
+                              setLimitMinusDay(7)
+                            } else {
+                              setLimitMinusDay(new Date().getDay())
+                            }
+
+                            return (
+                              moment().add(-1, 'days') >= current ||
+                              moment().add(7 - limitMinusDay, 'days') >= current
+                            )
+                          }}
                           style={{ width: '70%' }}
                           value={deliverables.date}
                           onChange={(date, datestring) =>
@@ -781,7 +686,7 @@ const PengisianRpp = () => {
                             } else {
                               setLimitMinusDay(new Date().getDay())
                             }
-        
+
                             return (
                               moment().add(-1, 'days') >= current ||
                               moment().add(7 - limitMinusDay, 'days') >= current
@@ -880,7 +785,7 @@ const PengisianRpp = () => {
                             } else {
                               setLimitMinusDay(new Date().getDay())
                             }
-        
+
                             return (
                               moment().add(-1, 'days') >= current ||
                               moment().add(7 - limitMinusDay, 'days') >= current
@@ -969,7 +874,6 @@ const PengisianRpp = () => {
                         </Form.Item>
                       </Col>
                       <Col span={4}>
-
                         <Select
                           defaultValue="Jenis Pekerjaan"
                           style={{ width: '100%' }}
@@ -1010,7 +914,7 @@ const PengisianRpp = () => {
                               } else {
                                 setLimitMinusDay(new Date().getDay())
                               }
-          
+
                               return (
                                 moment().add(-1, 'days') >= current ||
                                 moment().add(7 - limitMinusDay, 'days') >= current

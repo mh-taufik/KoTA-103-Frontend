@@ -65,7 +65,7 @@ const RekapRPP = () => {
     await axios
       .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/get-all/${PESERTA}`)
       .then((result) => {
-        console.log('ES', result.data.data)
+      
         if (result.data.data.length > 0) {
           let temp = []
           let getDataTempRPP = function (obj) {
@@ -113,7 +113,7 @@ const RekapRPP = () => {
     ]
     let date_month = temp_date_split[1]
     let month_of_date = month[parseInt(date_month) - 1]
-    console.log(month_of_date, 'isi date monts', month_of_date)
+   
     return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
   }
 
@@ -129,7 +129,7 @@ const RekapRPP = () => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/get-all/${PESERTA}`)
         .then((result) => {
-          console.log('ES', result.data.data)
+       
           if (result.data.data.length > 0) {
             let temp = []
           
@@ -241,7 +241,7 @@ const RekapRPP = () => {
         setIsFinishDateToAssignRPP(false)
        }
 
-       console.log('f', finish_date, today)
+
       })
     }
 
@@ -548,7 +548,7 @@ const RekapRPP = () => {
                       style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
                       onClick={() => {
                         setWannaEdit(record)
-                        // console.log(isFinishDateToAssignRPP)
+                   
                       }}
                     >
                       <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
@@ -566,7 +566,7 @@ const RekapRPP = () => {
                     style={{ backgroundColor: '#bae0ff', borderColor: '#bae0ff' }}
                     onClick={() => {
                       history.push(`/rencanaPenyelesaianProyek/detail/${record.rpp_id}`)
-                      // console.log(limit_date_for_edit_rpp , today,  limit_date_for_edit_rpp > today)
+                    
                     }}
                   >
                     <FontAwesomeIcon icon={faEye} style={{ color: 'black' }} />

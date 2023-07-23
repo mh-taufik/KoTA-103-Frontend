@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import 'antd/dist/reset.css'
-import { ArrowLeftOutlined , FileTextOutlined} from '@ant-design/icons'
+import { ArrowLeftOutlined, FileTextOutlined } from '@ant-design/icons'
 import { Document, Page } from 'react-pdf/dist/esm/entry.webpack'
 import {
   Steps,
@@ -33,6 +33,7 @@ import Text from 'antd/lib/typography/Text'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { Box } from '@mui/material'
+import { center } from 'underscore.string'
 // import { Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap'
 
 const PengisianSelfAssessment = () => {
@@ -72,16 +73,16 @@ const PengisianSelfAssessment = () => {
 
   const showRubrikSelfAssessment = () => setModalRubrikSelfAssessment(!modalRubrikSelfAssessment)
 
-  function onDocumentLoadSuccess ({ numPages }){
+  function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages)
     setPageNumber(1)
   }
 
-  function changePage(setPageAdded){
+  function changePage(setPageAdded) {
     setPageNumber((prevPageNumber) => prevPageNumber + setPageAdded)
   }
 
-  function changePageBack(){
+  function changePageBack() {
     changePage(-1)
   }
 
@@ -96,7 +97,6 @@ const PengisianSelfAssessment = () => {
       return newLoadings
     })
   }
-
 
   useEffect(() => {
     const getPoinPenilaianSelfAssessment = async (record, index) => {
@@ -356,15 +356,21 @@ const PengisianSelfAssessment = () => {
           description={
             <div>
               <ul>
-                <li>Self Assessment : adalah penilaian peserta terhadap dirinya sendiri, atas beberapa aspek yang telah ditetapkan (baca <b>rubrik</b> dengan menekan float button dengan icon <FileTextOutlined /> )</li>
-                <li>Sebelum mengisi, diharapkan peserta membaca rubrik pengisian terlebih dahulu, sebagai petunjuk dalam melakukan penilaian</li>
+                <li>
+                  Self Assessment : adalah penilaian peserta terhadap dirinya sendiri, atas beberapa
+                  aspek yang telah ditetapkan (baca <b>rubrik</b> dengan menekan float button dengan
+                  icon <FileTextOutlined /> )
+                </li>
+                <li>
+                  Sebelum mengisi, diharapkan peserta membaca rubrik pengisian terlebih dahulu,
+                  sebagai petunjuk dalam melakukan penilaian
+                </li>
                 <li>Pastikan minggu yang dipilih belum pernah diisi sebelumnya</li>
                 <li>Pengisian hanya satu kali, anda tidak dapat melakukan edit self assesment</li>
                 <li>
                   Pastikan semua keterangan terisi dan terdeskripsi dengan baik, agar nilai yang
                   diberikan juga baik
                 </li>
-              
               </ul>
             </div>
           }
@@ -426,9 +432,8 @@ const PengisianSelfAssessment = () => {
                       key={poinSelfAssessment.aspect_id}
                       name={`nilai` + index}
                       placeholder="nilai"
-                      max = {100}
-                     
-                      min = {0}
+                      max={100}
+                      min={0}
                       keyboard={true}
                       required
                       onChange={(e) =>
@@ -477,50 +482,76 @@ const PengisianSelfAssessment = () => {
           </Popconfirm>
         </div>
       </Form>
-     
-     
+
       {/* CONTOH PDF */}
-      <Modal title="Rubrik Pengisian Self Assessment - Acuan Pengisian Nilai Self Asssesssment"   open={modalRubrikSelfAssessment} width={1050} onCancel={showRubrikSelfAssessment}>
-      
-      <Document file="/rubrikSelfAssessment.pdf" onLoadSuccess={onDocumentLoadSuccess}>
-              <Page height="800" width={1000} pageNumber={pageNumber} />
-            </Document>
-            
-            <Space wrap>
-              {pageNumber > 1 && (
-                <Button className="btn-pdf" type="primary" onClick={changePageBack}>
-                  Halaman Sebelumnya
-                </Button>
-              )}
-              {pageNumber < numPages && (
-                <Button className="btn-pdf" onClick={changePageNext} type="primary">
-                  Halaman Selanjutnya
-                </Button>
-              )}
-            </Space>
+      <Modal
+      style={{marginLeft:350}}
+        title="Rubrik Pengisian Self Assessment - Acuan Pengisian Nilai Self Asssesssment"
+        footer={[
+          <>
+            {pageNumber > 1 && (
+              <Button key={1} className="btn-pdf" type="primary" onClick={changePageBack}>
+                Halaman Sebelumnya
+              </Button>
+            )}
+
+            {pageNumber < numPages && (
+              <Button key={2} className="btn-pdf" onClick={changePageNext} type="primary">
+                Halaman Selanjutnya
+              </Button>
+            )}
+          </>,
+
+          // <Space wrap key={1}>
+
+          // {pageNumber < numPages && (
+          // <Button key={2} className="btn-pdf" onClick={changePageNext} type="primary">
+          //   Halaman Selanjutnya
+          // </Button>
+          //   )}
+          // </Space>
+        ]}
+        open={modalRubrikSelfAssessment}
+        width={1050}
+        onCancel={showRubrikSelfAssessment}
+      >
+        <Document file="/rubrikSelfAssessment.pdf" onLoadSuccess={onDocumentLoadSuccess}>
+          <Page height="800" width={1000} pageNumber={pageNumber} />
+        </Document>
+
+        <Space wrap>
+          {pageNumber > 1 && (
+            <Button className="btn-pdf" type="primary" onClick={changePageBack}>
+              Halaman Sebelumnya
+            </Button>
+          )}
+          {pageNumber < numPages && (
+            <Button className="btn-pdf" onClick={changePageNext} type="primary">
+              Halaman Selanjutnya
+            </Button>
+          )}
+        </Space>
       </Modal>
 
-       <FloatButton
-      shape="circle"
-      onClick={handleKembaliKeRekapSelfAssessment}
-      type="primary"
-      style={{
-        right: 94,
-      }}
-      tooltip={<div>Kembali ke Rekap Self Assessment</div>}
-      icon={<ArrowLeftOutlined />}
-    />
-    <FloatButton
-      shape="square"
-      type="primary"
-      style={{
-        right: 24,
-      }}
-      onClick={showRubrikSelfAssessment}
-      tooltip={<div>Rubrik Pengisian Self Assessment</div>}
-   
-     
-    />
+      <FloatButton
+        shape="circle"
+        onClick={handleKembaliKeRekapSelfAssessment}
+        type="primary"
+        style={{
+          right: 94,
+        }}
+        tooltip={<div>Kembali ke Rekap Self Assessment</div>}
+        icon={<ArrowLeftOutlined />}
+      />
+      <FloatButton
+        shape="square"
+        type="primary"
+        style={{
+          right: 24,
+        }}
+        onClick={showRubrikSelfAssessment}
+        tooltip={<div>Rubrik Pengisian Self Assessment</div>}
+      />
     </>
   )
 }

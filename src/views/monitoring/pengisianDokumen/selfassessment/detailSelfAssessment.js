@@ -50,7 +50,7 @@ const DetailSelfAssessment = (props) => {
           `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/get/${ID_SELF_ASESSMENT}`,
         )
         .then((result) => {
-          console.log('data self assessment', result.data.data)
+        
    
           let data_grade_poin = []
           const convertDate = (date) => {
@@ -78,7 +78,7 @@ const DetailSelfAssessment = (props) => {
             convertDate(result.data.data.finish_date),
           )
 
-          console.log(result.data.data.aspect_list)
+       
           let funcGetPoinGrade = function(data){
             for(var i in data){
               data_grade_poin.push({
@@ -92,7 +92,7 @@ const DetailSelfAssessment = (props) => {
           }
 
           funcGetPoinGrade(result.data.data.aspect_list)
-          console.log(data_grade_poin)
+       
           setSelfAssessment(data_grade_poin)
         })
         .catch(function (error) {
