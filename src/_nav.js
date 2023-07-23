@@ -436,8 +436,8 @@ const _nav = [
   },
   {
     component: CNavItem,
-    name: 'Pemetaan Pembimbing Jurusan',
-    to: '/pemetaanPembimbingJurusan',
+    name: 'Pengaturan Pembimbing Jurusan',
+    to: '/pengaturanDaftarPembimbingJurusan',
     icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
     role: '0',
     index: 53,

@@ -284,15 +284,8 @@ const PemetaanPembimbingJurusan = () => {
     }
 
     const getAllPembimbingJurusan = async () => {
-      let PRODI 
-      if(USER_ID_PRODI === '0'){
-        PRODI = 'D3'
-      }else{
-        PRODI = 'D4'
-      }
-
       await axios
-        .get(`${process.env.REACT_APP_API_GATEWAY_URL}account/get-supervisor?prodi=${PRODI}`)
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}account/get-supervisor`)
         .then((result) => {
           let temp_data = result.data.data
       
@@ -356,7 +349,8 @@ const PemetaanPembimbingJurusan = () => {
     //   title: 'PESERTA',
     //   dataIndex: 'peserta',
     //   render: (text, record) => {
-    //    if(record.participant.length)
+    //     let count_participant = record.participant.length
+    //     return <b>{count_participant}</b>
     //   },
     // },
     {
@@ -419,7 +413,7 @@ const PemetaanPembimbingJurusan = () => {
   ) : (
     <>
       <CCard className="mb-4">
-        {title('PEMETAAN PEMBIMBING JURUSAN')}
+        {title('PENGATURAN DAFTAR PEMBIMBING JURUSAN')}
    
         <CCardBody>
           <CRow>
@@ -431,6 +425,21 @@ const PemetaanPembimbingJurusan = () => {
             rowKey={dataHasilPemetaan.company_id}
             bordered
             pagination={true}
+            expandable={{
+              expandedRowRender: (rec) => (
+                <ul>
+                  {rec.participant.map((data, idx) => {
+                    return (
+                      <Row style={{ padding: 7 }} key={idx}>
+                        <Col span={2}>{idx + 1}</Col>
+                        <Col span={4}>{data.id}</Col>
+                        <Col span={8}>{data.name}</Col>
+                      </Row>
+                    )
+                  })}
+                </ul>
+              ),
+            }}
            
           />
             </CCol>

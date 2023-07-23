@@ -359,7 +359,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
                   setEStatus(record.status)
                   setEPoinTanggal(record.start_assessment_date)
                   setCoDate(record.start_assessment_date)
-                //  console.log(record.start_assessment_date)
+              
                   if(record.status === 'Active'){
                     setEStatus(6)
                   }else if(record.status === 'Inactive'){
@@ -541,7 +541,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
               defaultValue={ePoinPenilaian}
               onChange={
                 (e) => setEPoinPenilaian(e.target.value)
-                //console.log(e.target.value)
+               
               }
             />
           </Form.Item>
@@ -555,7 +555,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
               defaultValue={eStatus}
               onChange={(value) => {
                 setEStatus(value)
-                //console.log(value)
+              
               }}
             >
               <Option value={6}>Active</Option>

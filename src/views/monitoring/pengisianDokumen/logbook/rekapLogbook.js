@@ -151,7 +151,7 @@ const RekapLogbook = () => {
       .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/get-all/${PESERTA}`)
       .then((result) => {
         if (result.data.data.length > 0) {
-          console.log(result.data.data)
+       
           var temp = result.data.data
           var temp_res = []
           const convertDate = (date) => {
@@ -262,7 +262,7 @@ const RekapLogbook = () => {
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/get-all/${PESERTA}`)
         .then((result) => {
           if (result.data.data.length > 0) {
-            console.log(result.data.data)
+         
             var temp = result.data.data
             var temp_res = []
             const convertDate = (date) => {
@@ -357,7 +357,7 @@ const RekapLogbook = () => {
             ]
             let date_month = temp_date_split[1]
             let month_of_date = month[parseInt(date_month) - 1]
-            console.log(month_of_date, 'isi date monts', month_of_date)
+        
             return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
           }
 
@@ -385,7 +385,7 @@ const RekapLogbook = () => {
           setDataDeadlineLogbook(data_date_deadline)
 
           let today = formatDate(new Date())
-          console.log('===', start_date, today)
+      
           if (start_date <= today) {
             setIsParticipantAllowedToAccessThisPage(true)
           } else {
@@ -569,22 +569,6 @@ const RekapLogbook = () => {
     return [year, month, day].join('-')
   }
 
-  function cekIfDateLogbookIsLimitDeadline(date){
-    let dateLimit = new Date(date)
-    dateLimit.setDate(dateLimit.getDate()+0)
-    let dateLimitResult = formatDate(dateLimit.toDateString())
-    let today = formatDate(new Date())
-    console.log(dateLimitResult,today,date)
-
-    if(dateLimitResult < today){
-     
-      return false
-     
-    }else{
-      console.log('dase')
-      return true
-    }
-  }
 
   const columns = [
     {

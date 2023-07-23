@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Box from '@mui/material/Box'
-import {ArrowLeftOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import TextField from '@mui/material/TextField'
 import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
@@ -58,23 +58,20 @@ const FormEditLogbook = (props) => {
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/get/${ID_LOGBOOK}`)
         .then((response) => {
           dataLogbook = response.data.data
-          console.log('data', dataLogbook)
-        
+
           setLogbookAttributesData(response.data.data)
           let temp = response.data.data
           let temp_res = []
-          let getTempRes = function (obj){
-          
-              setNamaProyek(obj.project_name)
-              setProjectManager(obj.project_manager)
-              setTechnicalLeader(obj.technical_leader)
-              setTugasPeserta(obj.task)
-              setWaktuDanKegiatanPeserta(obj.time_and_activity)
-              setTools(obj.tools)
-              setHasilKerja(obj.work_result)
-              setKeterangan(obj.description)
-              setKendala(obj.encountered_problem)
-           
+          let getTempRes = function (obj) {
+            setNamaProyek(obj.project_name)
+            setProjectManager(obj.project_manager)
+            setTechnicalLeader(obj.technical_leader)
+            setTugasPeserta(obj.task)
+            setWaktuDanKegiatanPeserta(obj.time_and_activity)
+            setTools(obj.tools)
+            setHasilKerja(obj.work_result)
+            setKeterangan(obj.description)
+            setKendala(obj.encountered_problem)
           }
           getTempRes(temp)
         })
@@ -94,31 +91,24 @@ const FormEditLogbook = (props) => {
         })
     }
 
-
     getDataLogbook()
   }, [history])
 
-
-
-
   const putLogbookParticipantChanged = async (index) => {
-    //console.log(namaProyek, tools, hasilKerja, projectManager, keterangan,technicalLeader,tugasPeserta,waktuDanKegiatanPeserta,kendala,ID_LOGBOOK)
     await axios
       .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/update`, {
-          project_name: namaProyek,
-          tools : tools,
-          work_result : hasilKerja,
-          project_manager : projectManager,
-          description : keterangan,
-          technical_leader : technicalLeader,
-          task : tugasPeserta,
-          time_and_activity :  waktuDanKegiatanPeserta,
-          encountered_problem : kendala,
-          id : ID_LOGBOOK
-        
+        project_name: namaProyek,
+        tools: tools,
+        work_result: hasilKerja,
+        project_manager: projectManager,
+        description: keterangan,
+        technical_leader: technicalLeader,
+        task: tugasPeserta,
+        time_and_activity: waktuDanKegiatanPeserta,
+        encountered_problem: kendala,
+        id: ID_LOGBOOK,
       })
       .then((response) => {
-        console.log(response)
         notification.success({
           message: 'Logbook berhasil diubah',
         })
@@ -153,22 +143,12 @@ const FormEditLogbook = (props) => {
     })
   }
 
-
-  //CLICKED SUBMIT BUTTON
-  const submitLogbook = () => {
-    putLogbookParticipantChanged()
-    // console.log('id logbook = ', LOGBOOK)
-    // console.log('hasil edit : ', namaProyek)
-    // history.push(`/logbook/formEditLogbook/reviewEdit/${LOGBOOK}`)
-  }
-
   return (
     <>
       <React.Fragment>
         <div className="container">
-       
           <h3 align="center" className="title-s">
-            FORM PENGISAN LOGBOOK - EDIT LOGBOOK 
+            FORM PENGISAN LOGBOOK - EDIT LOGBOOK
           </h3>
 
           <Form>
@@ -311,16 +291,17 @@ const FormEditLogbook = (props) => {
               </Col>
             </Row>
 
-            <Button className="form-control btn btn-primary" onClick={putLogbookParticipantChanged  }>
+            <Button className="form-control btn btn-primary" onClick={putLogbookParticipantChanged}>
               Submit Logbook
             </Button>
           </Form>
         </div>
-        <FloatButton type='primary' icon={<ArrowLeftOutlined />}  onClick={()=>history.push(`/logbook`)} tooltip={<div>Kembali ke Rekap Logbook</div>} />
-
-
-
-
+        <FloatButton
+          type="primary"
+          icon={<ArrowLeftOutlined />}
+          onClick={() => history.push(`/logbook`)}
+          tooltip={<div>Kembali ke Rekap Logbook</div>}
+        />
       </React.Fragment>
     </>
   )

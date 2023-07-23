@@ -95,7 +95,6 @@ const FormPengisianLogbook = (props) => {
   const toggleYes = () => {
     setIsSesuaiRpp(true)
     submitLogbook(true, '')
-    // console.log('daa', isSesuaiRpp)
   }
   const toggleAll = () => {
     setNestedModal(!nestedModal)
@@ -122,53 +121,47 @@ const FormPengisianLogbook = (props) => {
     return [year, month, day].join('-')
   }
 
-  useEffect(() => {
- 
-  }, [history])
+  useEffect(() => {}, [history])
 
-const handleInputLogbookDate = async (date) => {
-      await axios
-        .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/check`, {
-          date: date,
-        })
-        .then((result) => {
-          const response_data = result.data.data
-          if (response_data) {
-            setSubmitAccepted(true)
-            setTanggalLogbook(date)
-          } else {
-            notification.warning({
-              message: 'Pilih tanggal lain, logbook sudah tersedia',
-            })
-            setSubmitAccepted(false)
-          }
-        })
-        .catch(function (error) {
-          if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-            console.log('err', error.response.data)
-            let message_err = error.response.data.message
-            notification.warning({ message: message_err })
-            setSubmitAccepted(false)
-          } else if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
-              },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          }
-        })
-    
+  const handleInputLogbookDate = async (date) => {
+    await axios
+      .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/check`, {
+        date: date,
+      })
+      .then((result) => {
+        const response_data = result.data.data
+        if (response_data) {
+          setSubmitAccepted(true)
+          setTanggalLogbook(date)
+        } else {
+          notification.warning({
+            message: 'Pilih tanggal lain, logbook sudah tersedia',
+          })
+          setSubmitAccepted(false)
+        }
+      })
+      .catch(function (error) {
+        if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+          let message_err = error.response.data.message
+          notification.warning({ message: message_err })
+          setSubmitAccepted(false)
+        } else if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+          history.push({
+            pathname: '/login',
+            state: {
+              session: true,
+            },
+          })
+        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+          history.push('/404')
+        }
+      })
   }
 
   const submitLogbook = (sesuai, kendala) => {
     if (!submitAccepted) {
-      console.log('tidak bisa')
       notification.info({ message: 'Silahkan ganti tanggal logbook' })
     } else {
-      console.log('bisa')
       var idParticipant = idPeserta
       saveDataLogbook(idParticipant, sesuai, kendala)
     }
@@ -257,7 +250,6 @@ const handleInputLogbookDate = async (date) => {
                   max={moment().format('YYYY-MM-DD')}
                   onChange={(date, dateString) => {
                     handleInputLogbookDate(dateString)
-                    //console.log('a', dateString)
                   }}
                 />
               </Form.Item>

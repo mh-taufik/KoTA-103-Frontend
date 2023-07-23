@@ -194,11 +194,11 @@ const PengisianRpp = () => {
 
   /** SAVE DATA RENCANA CAPAIAN PERMINGGU TO STATE OF RENCANA CAPAIAN PERMINGGU */
   const handleDataRencanaCapaianPerminggu = (index, event, type) => {
-    console.log(index, event, type)
+
     let data = [...capaianPerminggu]
     data[index][type] = event
     setCapaianPerminggu(data)
-    console.log('data capaianperminggu=> ', capaianPerminggu)
+  
   }
 
   const handleAddRowRencanaCapaianPerminggu = () => {
@@ -208,14 +208,12 @@ const PengisianRpp = () => {
   }
 
   const handleDropRowRencanaCapaianPerminggu = () => {
-    console.log('sebelum apus rcm', capaianPerminggu)
-    console.log(capaianPerminggu.length)
+
     var will_delete = capaianPerminggu.length - 1
     var temp = []
     var tempCapaianPerminggu = function (obj) {
       for (var i in obj) {
-        console.log('[', i)
-        console.log(']', will_delete)
+
         if (i === 0) {
           break
         } else if (i < will_delete) {

@@ -39,12 +39,12 @@ export default function TambahLaporan() {
   const [currentLaporanPhase, setCurrentLaporanPhase] = useState()
 
   function onFileChange(event) {
-    console.log(event)
+
     setFile(event.target.files[0])
     setHiddenScroll('upload-dokumen-laporans')
     var v = event.target.files[0].name
     setFileData(v)
-    console.log(v)
+
   }
 
   function onDocumentLoadSuccess({ numPages: nextNumPages }) {
@@ -70,7 +70,7 @@ export default function TambahLaporan() {
         uri: linkGdrive,
       })
       .then((res) => {
-        console.log('hasil', res)
+      
         notification.success({
           message: 'Submit data laporan berhasil',
         })
@@ -80,7 +80,7 @@ export default function TambahLaporan() {
   }
 
   const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo)
+
   }
 
   useEffect(() => {
@@ -103,7 +103,7 @@ export default function TambahLaporan() {
                     if (phase === parseInt(data[i].phase)) {
                       setIsThisPhaseHavingLaporan(true)
                     }
-                    console.log('pase', phase, data[i].phase)
+               
                   }
                 }
 

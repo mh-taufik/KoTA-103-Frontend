@@ -40,7 +40,7 @@ export default function UploadLaporan() {
 
     const getDataLaporanPeserta = async () => {
       await axios.get(`http://localhost:1337/api/laporans/${idLaporan}?populate=*`).then((res) => {
-        console.log('RES', res.data.data)
+     
         const convertDate = (date) => {
           let temp_date_split = date.split('-')
           const month = [
@@ -75,8 +75,7 @@ export default function UploadLaporan() {
             tanggal_pengumpulan: convertDate(temp.attributes.tanggalpengumpulan),
           }
         
-      
-        console.log('TEP', waltemp)
+
         setIsiDetailLaporan(waltemp)
         form1.setFieldValue({
           id : 'linkdrive',

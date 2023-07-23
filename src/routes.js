@@ -58,7 +58,7 @@ const pengelolaanPertanyaanFeedback = lazyWithRetry(() => import('./views/pengel
 const MonitoringPelaksanaan = lazyWithRetry(() => import('./views/monitoring/dashboard/MonitoringPelaksanaan'))
 const DashboardPanitia = lazyWithRetry(() => import('./views/monitoring/dashboard/dashboardPanitia'))
 const DaftarPeserta = lazyWithRetry(() => import('./views/monitoring/daftarPeserta/daftarPeserta')) 
-const PemetaanPembimbingJurusan = lazyWithRetry(() => import('./views/monitoring/pemetaanPembimbing/PemetaanPembimbingJurusan'))
+const SetPembimbingJurusan = lazyWithRetry(() => import('./views/monitoring/pemetaanPembimbing/PemetaanPembimbingJurusan'))
 const DashboardPeserta = lazyWithRetry(() => import('./views/monitoring/dashboard/dashboardPeserta'))
 const DashboardPembimbing = lazyWithRetry(() => import('./views/monitoring/dashboard/dashboardPembimbing'))
 //DOKUMEN PESERTA 
@@ -198,7 +198,7 @@ const routes = [
   { path: '/daftarPeserta/dashboardPeserta/:nim', name: ':nim', component: DashboardPeserta, exact:true },
 
   //PEMETAAN PEMBIMBING JURUSAN
-  { path: '/pemetaanPembimbingJurusan', name: 'Pemetaan Pembimbing Jurusan', component: PemetaanPembimbingJurusan, exact:true },
+  { path: '/pengaturanDaftarPembimbingJurusan', name: 'Pengaturan Pembimbing Jurusan', component: SetPembimbingJurusan, exact:true },
 
   /** RPP */
   { path: '/rencanaPenyelesaianProyek', name: 'Rencana Penyelesaian Proyek', component: RekapRPP, exact:true},

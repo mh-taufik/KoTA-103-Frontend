@@ -47,6 +47,7 @@ const PengelolaanDeadline = () => {
   const [dayRangeDeadlineNew, setDayRangeDeadlineNew] = useState()
   const [startAssignmentDateDeadlineNew, setStartAssignmentDateDeadlineNew] = useState()
   const [finishAssignmentDateDeadlineNew, setFinishAssignmentDateDeadlineNew] = useState()
+  const [isLaporanEdit, setIsLaporanEdit] = useState()
 
 
 
@@ -78,16 +79,32 @@ const PengelolaanDeadline = () => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all`)
         .then((result) => {
+          const getDayRangeStatus = (range) =>{
+            return range===0?'-': range
+          }
+
+        
+          const isLaporan = (name) =>{
+            let res = name.includes('laporan')
+            if(res){
+              return 1
+            }else{
+              return 0
+            }
+          }
+       
   
           let data_deadline_res_convert_date = []
           let get_data_deadline_with_convert_date = function(data){
             for(var i in data){
               data_deadline_res_convert_date.push({
                 day_range : data[i].day_range,
+                day_range_in_list : getDayRangeStatus(data[i].day_range), 
                 finish_assignment_date : data[i].finish_assignment_date,
                 finish_assignment_date_convert : convertDate(data[i].finish_assignment_date),
                 id : data[i].id,
                 name : data[i].name,
+                is_laporan : isLaporan((data[i].name).toLowerCase()),
                 start_assignment_date : data[i].start_assignment_date,
                 start_assignment_date_convert : convertDate(data[i].start_assignment_date)
               })
@@ -119,15 +136,29 @@ const PengelolaanDeadline = () => {
     await axios
       .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all`)
       .then((result) => {
+        const getDayRangeStatus = (range) =>{
+          return range===0?'-': range
+        }
+
+        const isLaporan = (name) =>{
+          let res = name.includes('laporan')
+          if(res){
+            return 1
+          }else{
+            return 0
+          }
+        }
      
         let data_deadline_res_convert_date = []
         let data_deadline_with_convert_date = function(data){
           for(var i in data){
             data_deadline_res_convert_date.push({
               day_range : data[i].day_range,
+              day_range_in_list : getDayRangeStatus(data[i].day_range), 
               finish_assignment_date : data[i].finish_assignment_date,
               finish_assignment_date_convert : convertDate(data[i].finish_assignment_date),
               id : data[i].id,
+              is_laporan : isLaporan((data[i].name).toLowerCase()),
               name : data[i].name,
               start_assignment_date : data[i].start_assignment_date,
               start_assignment_date_convert : convertDate(data[i].start_assignment_date)
@@ -152,6 +183,11 @@ const PengelolaanDeadline = () => {
     startDateAssignment,
     finishDateAssignment,
   ) {
+    // console.log( idDeadline,
+    //   nameDeadline,
+    //   dayRange,
+    //   startDateAssignment,
+    //   finishDateAssignment,)
     await axios
       .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/update`, {
         day_range: dayRange,
@@ -161,7 +197,6 @@ const PengelolaanDeadline = () => {
         start_assignment_date: startDateAssignment,
       })
       .then((result) => {
-
         setIsModalEditVisible(false)
         notification.success({ message: 'Data Deadline Berhasil Diubah' })
       })
@@ -171,6 +206,7 @@ const PengelolaanDeadline = () => {
     setStartAssignmentDateDeadlineEdit(undefined)
     setIdDeadlineEdit(undefined)
     setFinishAssignmentDateDeadlineEdit(undefined)
+   
 
     refreshData()
   }
@@ -194,11 +230,12 @@ const PengelolaanDeadline = () => {
 
   const handleCreateNewDeadline = async (data_name, dayrange,finishDate,startDate) => {
     let name = data_name.toLowerCase()
+    //dayRangeDeadlineNew
     let isLaporan = name.includes('laporan')
     if(isLaporan){
       await axios.post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/create`,
       {
-        "day_range": dayRangeDeadlineNew,
+        "day_range": 0,
         "finish_assignment_date": startAssignmentDateDeadlineNew,
         "name": nameDeadlineNew,
         "start_assignment_date": finishAssignmentDateDeadlineNew
@@ -244,7 +281,7 @@ const PengelolaanDeadline = () => {
     },
     {
       title: 'Rentang Hari Batas Pengumpulan',
-      dataIndex: 'day_range',
+      dataIndex: 'day_range_in_list',
     },
     {
       title: 'Tanggal Dibuka Pengumpulan',
@@ -274,7 +311,9 @@ const PengelolaanDeadline = () => {
                   setDayRangeDeadlineEdit(record.day_range)
                   setStartAssignmentDateDeadlineEdit(record.start_assignment_date)
                   setFinishAssignmentDateDeadlineEdit(record.finish_assignment_date)
+                  setIsLaporanEdit(record.is_laporan)
                   showModalEdit(record)
+                  
                 }}
               >
                 <FontAwesomeIcon icon={faPencil} style={{ color: 'black' }} />
@@ -294,29 +333,14 @@ const PengelolaanDeadline = () => {
     <>
       <div className="container2">
         <h4 className="justify spacebottom">
-          PENGELOLAAN BATAS DEADLINE (LOCK PENGUMPULAN DOKUMEN)
+          PENGATURAN DEADLINE DOKUMEN PESERTA
         </h4>
         <Typography component="div" variant="body1" className="spacebottom">
           <Box sx={{ color: 'info.main' }}>
             <ul style={{ fontSize: 14 }}>
-              <li>Pengaturan deadline untuk 3 dokumen : logbook, self assesment, laporan</li>
-              <li>Deadline diatur dalam hitungan hari</li>
-              <li>
-                Deadline adalah batas akhir pengumpulan, dimana kemudian akan dilakukan lock
-                pengumpulan
-              </li>
-              <li>
-                LAPORAN DINAMIS : apabila diperlukannya pengumpulan laporan secara bertahap
-              </li>
-              <li>Harap penamaan angka dengan tanggal pada deadline laporan disesuaikan dengan tahapan, karena akan berpengaruh pada information board pada rekap laporan peserta</li>
-              <li>
-                Laporan bersifat dinamis, dapat dilakukan penambahan data laporan baru, namun dengan
-                format penamaan, contoh : laporan 4 , laporan 5, dst
-              </li>
-              <li>
-                Info Deadline/lock pengumpulan : Day Range hanya berlaku pada logbook, self
-                assessment. Untuk laporan memanfaatkan data tanggal mulai dan tanggal selesai
-              </li>
+            <li style={{padding:10}}><b>RENTANG BATAS PENGUMPULAN LOGBOOK</b> : Batas toleransi pengumpulan logbook, jika melewati batas hari, maka status pengumpulan akan berubah menjadi terlambat</li>
+            <li style={{padding:10}}><b>RENTANG BATAS PENGUMPULAN SELF ASSESSEMENT</b> : Batas toleransi pengumpulan self assessment, jika melewati batas hari, maka pengumpulan dokumen tidak diterima</li>
+            <li style={{padding:10}}><b>TANGGAL PENGUMPULAN DITUTUP</b> : batas akses pengumpulan dokumen ( kecuali logbook, akan tetap menerima pengumpulan ) </li>
             </ul>
           </Box>
         </Typography>
@@ -510,12 +534,16 @@ const PengelolaanDeadline = () => {
               />
             </Form.Item>
 
-            <Form.Item label="Tanggal Pengumpulan Ditutup">
-              <DatePicker
-                defaultValue={dayjs(finishAssignmentDateDeadlineEdit, dateFormat)}
-                onChange={(date, datestring) => setFinishAssignmentDateDeadlineEdit(datestring)}
-              />
-            </Form.Item>
+       
+            {isLaporanEdit === 1 && (
+                <Form.Item label="Tanggal Pengumpulan Ditutup">
+                <DatePicker
+                  defaultValue={dayjs(finishAssignmentDateDeadlineEdit, dateFormat)}
+                  onChange={(date, datestring) => setFinishAssignmentDateDeadlineEdit(datestring)}
+                />
+              </Form.Item>
+            )}
+          
           </Form>
         </Modal>
       </div>

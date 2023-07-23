@@ -50,7 +50,6 @@ const ReviewLogbook = (props) => {
     ]
     let date_month = temp_date_split[1]
     let month_of_date = month[parseInt(date_month) - 1]
-    console.log(month_of_date, 'isi date monts', month_of_date)
     return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
   }
 
@@ -61,7 +60,6 @@ const ReviewLogbook = (props) => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/get/${ID_LOGBOOK}`)
         .then((result) => {
-          console.log('RES', result.data.data)
          
           setLogbookAttributesData(result.data.data)
           setTanggalLogbook(convertDate(result.data.data.date))

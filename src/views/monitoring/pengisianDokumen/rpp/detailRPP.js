@@ -46,12 +46,11 @@ const DetailRPP = (props) => {
   }
 
   useEffect(() => {
-    console.log('params',params)
     const getRPPDetailPeserta = async (index) => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/get/${RPP_ID}`)
         .then((response) => {
-          console.log(response.data.data)
+   
 
           const convertDate = (date) => {
             var temp_date_split = date.split('-')
@@ -98,7 +97,7 @@ const DetailRPP = (props) => {
     
               temp_deliverables(temp_del)
               setDataDeliverables(temp_del1)
-              console.log('deliverables', temp_del1)
+            
 
           /** SET DATA MILESTONES */
           let temp_mil = []
@@ -117,7 +116,7 @@ const DetailRPP = (props) => {
 
           temp_milestone(temp_mil)
           setDataMilestones(temp_mil1)
-          console.log('milestones', temp_mil1)
+      
 
       
 
@@ -138,7 +137,7 @@ const DetailRPP = (props) => {
 
           temp_rencanaCapaianMingguan(temp_rcm)
           setDataCapaianMingguan(temp_rcm1)
-          console.log('capaian mingguan', temp_rcm1)
+      
 
           /** JADWAL PENYELESAIAN KESELURUHAN */
           let temp_jadwalKeseluruhan = []
@@ -158,7 +157,7 @@ const DetailRPP = (props) => {
 
           temp_jadwalKeseluruhans(temp_jadwalKeseluruhan)
           setDataJadwalPenyelesaianKeseluruhan(temp_jadwalKeseluruhan1)
-          console.log('capaian mingguan', temp_jadwalKeseluruhan1)
+     
 
           setIsLoading(false)
         })

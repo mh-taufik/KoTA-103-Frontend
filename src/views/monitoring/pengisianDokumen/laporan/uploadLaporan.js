@@ -40,12 +40,12 @@ export default function UploadLaporan() {
   const ID_LAPORAN_PESERTA = params.id
 
   function onFileChange(event) {
-    console.log(event)
+ 
     setFile(event.target.files[0])
     setHiddenScroll('upload-dokumen-laporans')
     var v = event.target.files[0].name
     setFileData(v)
-    console.log(v)
+  
   }
 
   function onDocumentLoadSuccess({ numPages: nextNumPages }) {
@@ -77,7 +77,7 @@ export default function UploadLaporan() {
         'uri' : linkGdrive
       })
       .then((res) => {
-        console.log('hasil', res.data.data)
+
         notification.success({
           message: 'Submit data pembaruan link berhasil',
         })
@@ -87,7 +87,7 @@ export default function UploadLaporan() {
   }
 
   const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo)
+   
   }
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export default function UploadLaporan() {
 
     const getDataLaporanPeserta = async () => {
       await axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/get/${ID_LAPORAN_PESERTA}`).then((res) => {
-        console.log('RES', res.data.data)
+  
         const convertDate = (date) => {
           let temp_date_split = date.split('-')
           const month = [
@@ -123,7 +123,7 @@ export default function UploadLaporan() {
         let temp = res.data.data
         let waltemp = []
         let current_phase = temp.phase
-        console.log('fase',current_phase)
+  
      
         waltemp = {
             id: temp.id,
@@ -133,7 +133,7 @@ export default function UploadLaporan() {
           }
         
       
-        console.log('TEP', waltemp)
+
         setIsiDetailLaporan(waltemp)
         form1.setFieldValue({
           id : 'linkdrive',
@@ -156,16 +156,15 @@ export default function UploadLaporan() {
           let dataIdDeadline
           for(var i in dataDeadlineLaporan) {
             if(parseInt(phase) === parseInt(i)){
-              console.log('data deadlinenya itu', dataDeadlineLaporan[i])
-              console.log('fase', phase, i)
+          
               dataIdDeadline = dataDeadlineLaporan[i].id
             }
           }
           axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=${dataIdDeadline}`).then((res)=>{
-            console.log('hasil', res.data.data)
+      
             let today = formatDate(new Date())
             let date_finished_this_phase = res.data.data.finish_assignment_date
-            console.log('date' , today, date_finished_this_phase)
+        
             if(date_finished_this_phase <= today){
               setIsFinishDatePhase(true)
             }else{
@@ -183,10 +182,6 @@ export default function UploadLaporan() {
     getDataLaporanPeserta()
    
   }, [history])
-
-  const tes = ()=>{
-    console.log(isiDetailLaporan)
-  }
 
   return (
     <>
