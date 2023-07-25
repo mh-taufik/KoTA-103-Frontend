@@ -30,15 +30,11 @@ const ListDokumenPeserta = () => {
   const [isNotNullSupervisorParticipant, setIsNotNullSupervisorParticipant] = useState()
   const searchInput = useRef(null)
   const contoller_abort = new AbortController()
-  const [totalRppSubmitted, setTotalRppSubmitted] = useState()
-  const [totalRppMissing, setTotalRppMissing] = useState()
-  const [totalLogbookSubmitted, setTotalLogbookSubmitted] = useState()
-  const [totalLogbookMissing, setTotalLogbookMissing] = useState()
-  const [totalSelfAssessmentSubmitted, setTotalSelfAssessmentSubmitted] = useState()
-  const [totalSelfAssessmentMissing, setTotalSelfAssessmentMissing] = useState()
-  const [totalLaporanSubmitted, setTotalLaporanSubmitted] = useState()
-  const [totalLaporanMissing, setTotalLaporanMissing] = useState()
   const [totalCountingDocument, setTotalCountingDocument] = useState()
+  const [rekapRpp, setRekapRpp] = useState([])
+  const [rekapLogbook,setRekapLogbook] = useState([])
+  const [rekapSelfAssessment, setRekapSelfAssessment] = useState([])
+  const [rekapLaporan, setRekapLaporan] = useState([])
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm()
     setSearchText(selectedKeys[0])
@@ -89,7 +85,6 @@ const ListDokumenPeserta = () => {
           >
             Reset
           </Button>
-         
         </Space>
       </div>
     ),
@@ -148,49 +143,24 @@ const ListDokumenPeserta = () => {
   }
 
   useEffect(() => {
-    const getAllListPeserta = async (record, index) => {
-      if (rolePengguna !== '4') {
-        await axios
-          .get(
-            `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all?type=comitte`,
-          )
-          .then((res) => {
-            if (res.data.data !== null) {
-              setIsNotNullSupervisorParticipant(true)
-              let participant_supervisor = []
-
-              let getParticipantSupervisor = function (data) {
-                for (var iterate_data in data) {
-                  let data_company = data[iterate_data].company_name
-                  let data_supervisor = data[iterate_data].lecturer_name
-                  let participant = data[iterate_data].participant
-                  //console.log()
-                  for (var iterate_participant in participant) {
-                    participant_supervisor.push({
-                      id: participant[iterate_participant].id,
-                      name: participant[iterate_participant].name,
-                      supervisor: data_supervisor,
-                      company: data_company,
-                    })
-                  }
-                }
-              }
-
-              getParticipantSupervisor(res.data.data)
-              setDataPeserta(participant_supervisor)
-            } else {
-              setIsNotNullSupervisorParticipant(false)
-            }
-            axios
-              .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/dashboard`)
-              .then((response) => {
-                setTotalCountingDocument(response.data.data)
-                console.log()
-
-                setIsLoading(false)
-              })
+    const getAllRekap = async (record, index) => {
+      await axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/rekap`)
+      .then((result)=>{
+        setRekapRpp(result.data.data)
+        axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/rekap`)
+        .then((result)=>{
+          setRekapLogbook(result.data.data)
+          axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/rekap`)
+          .then((result)=>{
+            setRekapSelfAssessment(result.data.data)
+            axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/rekap`)
+            .then((result)=>{
+              setRekapLaporan(result.data.data)
+              setIsLoading(false)
+            })
           })
-          .catch(function (error) {
+        })
+      }).catch(function (error) {
             if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
               history.push({
                 pathname: '/login',
@@ -204,65 +174,9 @@ const ListDokumenPeserta = () => {
               history.push('/500')
             }
           })
-      } else if (rolePengguna === '4') {
-        await axios
-          .get(
-            `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all?type=supervisor`,
-          )
-          .then((res) => {
-            if (res.data.data !== null) {
-              let participant_supervisor = []
-
-              let getParticipantSupervisor = function (data) {
-                for (var iterate_data in data) {
-                  let data_company = data[iterate_data].company_name
-                  let data_supervisor = data[iterate_data].lecturer_name
-                  let participant = data[iterate_data].participant
-                  for (var iterate_participant in participant) {
-                    participant_supervisor.push({
-                      id: participant[iterate_participant].id,
-                      name: participant[iterate_participant].name,
-                      supervisor: data_supervisor,
-                      company: data_company,
-                    })
-                  }
-                }
-              }
-
-              getParticipantSupervisor(res.data.data)
-              setDataPeserta(participant_supervisor)
-            } else {
-              setIsNotNullSupervisorParticipant(false)
-            }
-
-            axios
-              .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/dashboard`)
-              .then((response) => {
-                setTotalCountingDocument(response.data.data)
-                setIsLoading(false)
-              })
-          })
-          .catch(function (error) {
-            if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-              history.push({
-                pathname: '/login',
-                state: {
-                  session: true,
-                },
-              })
-            } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-              history.push('/404')
-            } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-              history.push('/500')
-            }
-          })
-      }
-      return () => contoller_abort.abort()
     }
 
- 
-    getAllListPeserta()
-    return () => contoller_abort.abort()
+    getAllRekap()
   }, [history])
 
   const columnsRpp = [
@@ -277,15 +191,21 @@ const ListDokumenPeserta = () => {
     },
     {
       title: 'NIM',
-      dataIndex: 'id',
+      dataIndex: 'nim',
       width: '10%',
-      ...getColumnSearchProps('id', 'NIM'),
+      ...getColumnSearchProps('nim', 'NIM'),
     },
     {
       title: 'NAMA PESERTA',
       dataIndex: 'name',
       width: '30%',
       ...getColumnSearchProps('name', 'Nama'),
+    },
+    {
+      title: 'STATUS PROGRES RPP',
+      dataIndex: 'status',
+      width: '10%',
+      ...getColumnSearchProps('status', 'Status Progres'),
     },
     {
       title: 'PERUSAHAAN',
@@ -305,7 +225,7 @@ const ListDokumenPeserta = () => {
                 <Button
                   type="primary"
                   style={{ borderColor: 'white' }}
-                  onClick={() => actionSeeListRPPParticipant(record.id)}
+                  onClick={() => actionSeeListRPPParticipant(record.nim)}
                   size="small"
                 >
                   <Text style={{ fontSize: '3', color: 'white' }}>Lihat Detail</Text>
@@ -330,9 +250,9 @@ const ListDokumenPeserta = () => {
     },
     {
       title: 'NIM',
-      dataIndex: 'id',
+      dataIndex: 'nim',
       width: '10%',
-      ...getColumnSearchProps('id', 'NIM'),
+      ...getColumnSearchProps('nim', 'NIM'),
     },
     {
       title: 'NAMA PESERTA',
@@ -342,9 +262,9 @@ const ListDokumenPeserta = () => {
     },
     {
       title: 'PROGRESS DALAM 2 MINGGU',
-      dataIndex: '',
+      dataIndex: 'status',
       width: '24%',
-      ...getColumnSearchProps('id', 'NIM'),
+      ...getColumnSearchProps('status', 'Progress'),
     },
     {
       title: 'PERUSAHAAN',
@@ -366,8 +286,8 @@ const ListDokumenPeserta = () => {
                   type="primary"
                   style={{ borderColor: 'white' }}
                   onClick={() => {
-                    console.log('logbook dari peserta : ', record)
-                    actionSeeListLogbookParticipant(record.id)
+                   
+                    actionSeeListLogbookParticipant(record.nim)
                   }}
                   size="small"
                 >
@@ -393,9 +313,9 @@ const ListDokumenPeserta = () => {
     },
     {
       title: 'NIM',
-      dataIndex: 'id',
+      dataIndex: 'nim',
       width: '10%',
-      ...getColumnSearchProps('id', 'NIM'),
+      ...getColumnSearchProps('nim', 'NIM'),
     },
     {
       title: 'NAMA PESERTA',
@@ -405,9 +325,9 @@ const ListDokumenPeserta = () => {
     },
     {
       title: 'PROGRESS MINGGU SEKARANG',
-      dataIndex: '',
+      dataIndex: 'status',
       width: '23%',
-      ...getColumnSearchProps('id', 'NIM'),
+      ...getColumnSearchProps('status', 'Progress'),
     },
     {
       title: 'PERUSAHAAN',
@@ -431,7 +351,7 @@ const ListDokumenPeserta = () => {
                   type="primary"
                   style={{ borderColor: 'white' }}
                   size="small"
-                  onClick={() => actionSeeListSelfAssessmentPeserta(record.id)}
+                  onClick={() => actionSeeListSelfAssessmentPeserta(record.nim)}
                 >
                   <Text style={{ fontSize: '3', color: 'white' }}>Lihat Detail</Text>
                 </Button>
@@ -455,9 +375,9 @@ const ListDokumenPeserta = () => {
     },
     {
       title: 'NIM',
-      dataIndex: 'id',
+      dataIndex: 'nim',
       width: '10%',
-      ...getColumnSearchProps('id', 'NIM'),
+      ...getColumnSearchProps('nim', 'NIM'),
     },
     {
       title: 'NAMA PESERTA',
@@ -467,9 +387,9 @@ const ListDokumenPeserta = () => {
     },
     {
       title: 'PROGRESS FASE SEKARANG',
-      dataIndex: '',
+      dataIndex: 'status',
       width: '20%',
-      ...getColumnSearchProps('id', 'NIM'),
+      ...getColumnSearchProps('status', 'Progress'),
     },
     {
       title: 'PERUSAHAAN',
@@ -492,7 +412,7 @@ const ListDokumenPeserta = () => {
                     <div>(form penilaian pembimbing)</div>
                   </>
                 }
-                onClick={() => actionSeeListLaporan(record.id)}
+                onClick={() => actionSeeListLaporan(record.nim)}
               >
                 <Button type="primary" style={{ borderColor: 'white' }} size="small">
                   <Text style={{ fontSize: '3', color: 'white' }}>Lihat Detail</Text>
@@ -526,7 +446,7 @@ const ListDokumenPeserta = () => {
     )
   }
 
-  return isLoading ? (
+  return  isLoading ? (
     <Spin tip="Loading" size="large">
       <div className="content" />
     </Spin>
@@ -539,328 +459,40 @@ const ListDokumenPeserta = () => {
             <CCol sm={12}>
               <Tabs type="card" onChange={onChange}>
                 <TabPane tab="RPP" key="2.1">
-                  <CCard className="mb-4" style={{ padding: '20px' }}>
-                    <CRow>
-                      <CCol sm={6}>
-                        <CCard className="mb-4" id="card-filter">
-                          <CCardBody>
-                            <Row justify="space-around" align="middle">
-                              <Col span={6}>
-                                <Button
-                                  type="primary"
-                                  shape="circle"
-                                  style={{
-                                    backgroundColor: '#339900',
-                                    borderColor: '#339900',
-                                    color: 'white',
-                                    width: '60px',
-                                    height: '60px',
-                                    fontSize: '30px',
-                                  }}
-                                >
-                                  <FontAwesomeIcon style={{ paddingTop: '10px' }} icon={faCheck} />
-                                </Button>
-                              </Col>
-                              <Col span={18} style={{ paddingTop: '10px' }}>
-                                <h6>RPP Sudah Dikumpulkan</h6>
-                                <h5 style={{ color: '#339900' }}>
-                                  {totalCountingDocument.rpp_submitted} Dokumen
-                                </h5>
-                              </Col>
-                            </Row>
-                          </CCardBody>
-                        </CCard>
-                      </CCol>
-                      <CCol sm={6}>
-                        <CCard className="mb-4" id="card-filter">
-                          <CCardBody>
-                            <Row justify="space-around" align="middle">
-                              <Col span={6}>
-                                <Button
-                                  type="primary"
-                                  shape="circle"
-                                  style={{
-                                    backgroundColor: '#CC0033',
-                                    borderColor: '#CC0033',
-                                    color: 'white',
-                                    width: '60px',
-                                    height: '60px',
-                                    fontSize: '30px',
-                                  }}
-                                >
-                                  !
-                                </Button>
-                              </Col>
-                              <Col span={18} style={{ paddingTop: '10px' }}>
-                                <h6>RPP Belum Dikumpulkan</h6>
-                                <h5 style={{ color: '#CC0033' }}>
-                                  {totalCountingDocument.rpp_missing} Dokumen
-                                </h5>
-                              </Col>
-                            </Row>
-                          </CCardBody>
-                        </CCard>
-                      </CCol>
-                    </CRow>
-                    <CCard className="mb-4">
-                      <CCardBody>
-                        <CRow>
-                          <CCol sm={12}>
-                            <Table
-                              scroll={{ x: 'max-content' }}
-                              columns={columnsRpp}
-                              dataSource={dataPeserta}
-                              rowKey="id"
-                              bordered
-                            />
-                          </CCol>
-                        </CRow>
-                      </CCardBody>
-                    </CCard>
-                  </CCard>
+                  <Table
+                    scroll={{ x: 'max-content' }}
+                    columns={columnsRpp}
+                    dataSource={rekapRpp}
+                    rowKey="id"
+                    bordered
+                  />
                 </TabPane>
                 <TabPane tab="Logbook" key="2.2">
-                  <CCard className="mb-4" style={{ padding: '20px' }}>
-                    <CRow>
-                      <CCol sm={6}>
-                        <CCard className="mb-4" id="card-filter">
-                          <CCardBody>
-                            <Row justify="space-around" align="middle">
-                              <Col span={6}>
-                                <Button
-                                  type="primary"
-                                  shape="circle"
-                                  style={{
-                                    backgroundColor: '#339900',
-                                    borderColor: '#339900',
-                                    color: 'white',
-                                    width: '60px',
-                                    height: '60px',
-                                    fontSize: '30px',
-                                  }}
-                                >
-                                  <FontAwesomeIcon style={{ paddingTop: '10px' }} icon={faCheck} />
-                                </Button>
-                              </Col>
-                              <Col span={18} style={{ paddingTop: '10px' }}>
-                                <h6>Logbook Dikumpulkan</h6>
-                                <h5 style={{ color: '#339900' }}>
-                                  {totalCountingDocument.logbook_submitted} Dokumen
-                                </h5>
-                              </Col>
-                            </Row>
-                          </CCardBody>
-                        </CCard>
-                      </CCol>
-                      <CCol sm={6}>
-                        <CCard className="mb-4" id="card-filter">
-                          <CCardBody>
-                            <Row justify="space-around" align="middle">
-                              <Col span={6}>
-                                <Button
-                                  type="primary"
-                                  shape="circle"
-                                  style={{
-                                    backgroundColor: '#CC0033',
-                                    borderColor: '#CC0033',
-                                    color: 'white',
-                                    width: '60px',
-                                    height: '60px',
-                                    fontSize: '30px',
-                                  }}
-                                >
-                                  !
-                                </Button>
-                              </Col>
-                              <Col span={18} style={{ paddingTop: '10px' }}>
-                                <h6>Logbook Belum Dikumpulkan</h6>
-                                <h5 style={{ color: '#CC0033' }}>
-                                  {totalCountingDocument.logbook_missing} Dokumen
-                                </h5>
-                              </Col>
-                            </Row>
-                          </CCardBody>
-                        </CCard>
-                      </CCol>
-                    </CRow>
-                    <CCard className="mb-4">
-                      <CCardBody>
-                        <CRow>
-                          <CCol sm={12}>
-                            <Table
-                              scroll={{ x: 'max-content' }}
-                              columns={columnsLogbook}
-                              dataSource={dataPeserta}
-                              rowKey="id"
-                              bordered
-                            />
-                          </CCol>
-                        </CRow>
-                      </CCardBody>
-                    </CCard>
-                  </CCard>
+                  <Table
+                    scroll={{ x: 'max-content' }}
+                    columns={columnsLogbook}
+                    dataSource={rekapLogbook}
+                    rowKey="id"
+                    bordered
+                  />
                 </TabPane>
                 <TabPane tab="Self Assessment" key="2.3">
-                  <CCard className="mb-4" style={{ padding: '20px' }}>
-                    <CRow>
-                      <CCol sm={6}>
-                        <CCard className="mb-4" id="card-filter">
-                          <CCardBody>
-                            <Row justify="space-around" align="middle">
-                              <Col span={6}>
-                                <Button
-                                  type="primary"
-                                  shape="circle"
-                                  style={{
-                                    backgroundColor: '#339900',
-                                    borderColor: '#339900',
-                                    color: 'white',
-                                    width: '60px',
-                                    height: '60px',
-                                    fontSize: '30px',
-                                  }}
-                                >
-                                  <FontAwesomeIcon style={{ paddingTop: '10px' }} icon={faCheck} />
-                                </Button>
-                              </Col>
-                              <Col span={18} style={{ paddingTop: '10px' }}>
-                                <h6>Self Assessment Dikumpulkan</h6>
-                                <h5 style={{ color: '#339900' }}>
-                                  {totalCountingDocument.self_assessment_submitted} Dokumen{' '}
-                                </h5>
-                              </Col>
-                            </Row>
-                          </CCardBody>
-                        </CCard>
-                      </CCol>
-                      <CCol sm={6}>
-                        <CCard className="mb-4" id="card-filter">
-                          <CCardBody>
-                            <Row justify="space-around" align="middle">
-                              <Col span={6}>
-                                <Button
-                                  type="primary"
-                                  shape="circle"
-                                  style={{
-                                    backgroundColor: '#CC0033',
-                                    borderColor: '#CC0033',
-                                    color: 'white',
-                                    width: '60px',
-                                    height: '60px',
-                                    fontSize: '30px',
-                                  }}
-                                >
-                                  !
-                                </Button>
-                              </Col>
-                              <Col span={18} style={{ paddingTop: '10px' }}>
-                                <h6>Self Assessment Belum Dikumpulkan</h6>
-                                <h5 style={{ color: '#CC0033' }}>
-                                  {totalCountingDocument.self_assessment_missing} Dokumen
-                                </h5>
-                              </Col>
-                            </Row>
-                          </CCardBody>
-                        </CCard>
-                      </CCol>
-                    </CRow>
-                    <CCard className="mb-4">
-                      <CCardBody>
-                        <CRow>
-                          <CCol sm={12}>
-                            <Table
-                              scroll={{ x: 'max-content' }}
-                              columns={columnsSelfAssessment}
-                              dataSource={dataPeserta}
-                              rowKey="id"
-                              bordered
-                            />
-                          </CCol>
-                        </CRow>
-                      </CCardBody>
-                    </CCard>
-                  </CCard>
+                  <Table
+                    scroll={{ x: 'max-content' }}
+                    columns={columnsSelfAssessment}
+                    dataSource={rekapSelfAssessment}
+                    rowKey="id"
+                    bordered
+                  />
                 </TabPane>
                 <TabPane tab="Laporan" key="2.4">
-                  <CCard className="mb-4" style={{ padding: '20px' }}>
-                    <CRow>
-                      <CCol sm={6}>
-                        <CCard className="mb-4" id="card-filter">
-                          <CCardBody>
-                            <Row justify="space-around" align="middle">
-                              <Col span={6}>
-                                <Button
-                                  type="primary"
-                                  shape="circle"
-                                  style={{
-                                    backgroundColor: '#339900',
-                                    borderColor: '#339900',
-                                    color: 'white',
-                                    width: '60px',
-                                    height: '60px',
-                                    fontSize: '30px',
-                                  }}
-                                >
-                                  <FontAwesomeIcon style={{ paddingTop: '10px' }} icon={faCheck} />
-                                </Button>
-                              </Col>
-                              <Col span={18} style={{ paddingTop: '10px' }}>
-                                <h6>Laporan Dikumpulkan</h6>
-                                <h5 style={{ color: '#339900' }}>
-                                  {totalCountingDocument.laporan_submitted} Dokumen
-                                </h5>
-                              </Col>
-                            </Row>
-                          </CCardBody>
-                        </CCard>
-                      </CCol>
-                      <CCol sm={6}>
-                        <CCard className="mb-4" id="card-filter">
-                          <CCardBody>
-                            <Row justify="space-around" align="middle">
-                              <Col span={6}>
-                                <Button
-                                  type="primary"
-                                  shape="circle"
-                                  style={{
-                                    backgroundColor: '#CC0033',
-                                    borderColor: '#CC0033',
-                                    color: 'white',
-                                    width: '60px',
-                                    height: '60px',
-                                    fontSize: '30px',
-                                  }}
-                                >
-                                  !
-                                </Button>
-                              </Col>
-                              <Col span={18} style={{ paddingTop: '10px' }}>
-                                <h6>Laporan Belum Dikumpulkan</h6>
-                                <h5 style={{ color: '#CC0033' }}>
-                                  {totalCountingDocument.laporan_missing} Dokumen
-                                </h5>
-                              </Col>
-                            </Row>
-                          </CCardBody>
-                        </CCard>
-                      </CCol>
-                    </CRow>
-                    <CCard className="mb-4">
-                      <CCardBody>
-                        <CRow>
-                          <CCol sm={12}>
-                            <Table
-                              scroll={{ x: 'max-content' }}
-                              columns={columnsLaporan}
-                              dataSource={dataPeserta}
-                              rowKey="id"
-                              bordered
-                            />
-                          </CCol>
-                        </CRow>
-                      </CCardBody>
-                    </CCard>
-                  </CCard>
+                  <Table
+                    scroll={{ x: 'max-content' }}
+                    columns={columnsLaporan}
+                    dataSource={rekapLaporan}
+                    rowKey="id"
+                    bordered
+                  />
                 </TabPane>
               </Tabs>
             </CCol>
