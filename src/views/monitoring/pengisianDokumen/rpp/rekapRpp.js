@@ -202,7 +202,7 @@ const RekapRPP = () => {
 
     async function GetDataDeadlineAndPageOpened(){
       
-      await axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=6`).then((response)=>{
+      await axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/deadline/get-all?id_deadline=3`).then((response)=>{
         function formatDate(date) {
           var d = new Date(date),
             month = '' + (d.getMonth() + 1),

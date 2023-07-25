@@ -1,6 +1,6 @@
 import React from 'react'
-import { Button, Card, Col, Progress, Row, Space } from 'antd'
-import { ClockCircleOutlined } from '@ant-design/icons'
+import { Button, Card, Col, Popover, Progress, Row, Space } from 'antd'
+import { ClockCircleOutlined, UserOutlined } from '@ant-design/icons'
 import { Timeline } from 'antd'
 import '../pengisianDokumen/rpp/rpp.css'
 import Title from 'antd/es/typography/Title'
@@ -11,26 +11,28 @@ import { useEffect } from 'react'
 import { useLayoutEffect } from 'react'
 
 const DashboardPanitia = () => {
-    const [totalParticipantMappingDone, setTotalParticipantMappingDone] = useState()
-    const [totalParticipantMappingUndone, setTotalParticipantMappingUndone] = useState()
-    const history = useHistory()
- 
-  
-    const [dataDashboard, setDataDashboard] = useState([])
-    axios.defaults.withCredentials = true
-  
-  
-  useEffect(()=>{
+  const [totalParticipantMappingDone, setTotalParticipantMappingDone] = useState()
+  const [totalParticipantMappingUndone, setTotalParticipantMappingUndone] = useState()
+  const [totalProgresPesertaKeseluruhan, setTotalProgressPesertaKeseluruhan] = useState([])
+  const [totalPesertaProgresMingguan, setTotalPesertaProgresMingguan] = useState([])
+  const history = useHistory()
+
+  const [dataDashboard, setDataDashboard] = useState([])
+  axios.defaults.withCredentials = true
+
+  useEffect(() => {
     const getDataDashboard = async (index) => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/dashboard`)
         .then((result) => {
-     
           let data = result.data.data
           setTotalParticipantMappingDone(data.supervisor_mapping_done)
           setTotalParticipantMappingUndone(data.supervisor_mapping_undone)
-  
+
           setDataDashboard(result.data.data)
+          setTotalProgressPesertaKeseluruhan(result.data.data.all)
+          setTotalPesertaProgresMingguan(result.data.data.weekly)
+          console.log(result.data.data)
         })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
@@ -48,10 +50,7 @@ const DashboardPanitia = () => {
         })
     }
     getDataDashboard()
-  
-  },[history])
-
-
+  }, [history])
 
   const title = (judul) => {
     return (
@@ -70,42 +69,253 @@ const DashboardPanitia = () => {
   }
   return (
     <>
+      {title('INFORMASI PENGATURAN PEMBIMBING JURUSAN')}
+      <div className="container2">
+        <Row gutter={16}>
+          <Col span={12}>
+            <Card bordered={false}>
+              <b style={{ textAlign: 'center', fontSize: 20 }}>TOTAL PESERTA</b>
+              <hr style={{ paddingTop: 5, color: '#001d66' }} />
+              <Row style={{ padding: 10 }}>
+                <Col span={12}>
+                  <b style={{ fontSize: 55 }}>{totalParticipantMappingDone}</b>
+                </Col>
+                <Col span={12}>
+                  <Progress type="circle" size={80} percent={100} />
+                </Col>
+                <Col>Sudah memiliki pembimbing jurusan</Col>
+              </Row>
+            </Card>
+          </Col>
 
-      {title('INFORMASI PEMETAAN PEMBIMBING JURUSAN')}
-      <div className='container2'>
-      <Row gutter={16}>
-            <Col span={12}>
+          <Col span={12}>
+            <Card bordered={false}>
+              <b style={{ textAlign: 'center', fontSize: 20 }}>TOTAL PESERTA</b>
+              <hr style={{ paddingTop: 5, color: '#520339' }} />
+              <Row style={{ padding: 10 }}>
+                <Col span={12}>
+                  <b style={{ fontSize: 55 }}>{totalParticipantMappingUndone}</b>
+                </Col>
+                <Col span={12}>
+                  <Progress type="circle" status="exception" size={80} percent={100} />
+                </Col>
+                <Col>Belum memiliki pembimbing jurusan</Col>
+              </Row>
+            </Card>
+          </Col>
+        </Row>
+      </div>
+
+      {title('INFORMASI PROGRES PENGUMPULAN DOKUMEN PESERTA ( MINGGU INI )')}
+      <div className="container2">
+        <div className="spacebottom spacetop">
+          <Row gutter={16}>
+            <Col span={6}>
               <Card bordered={false}>
-                <b style={{ textAlign: 'center', fontSize: 20 }}>TOTAL PESERTA</b>
+                <b style={{ textAlign: 'center', fontSize: 20 }}>RPP</b>
                 <hr style={{ paddingTop: 5, color: '#001d66' }} />
                 <Row style={{ padding: 10 }}>
                   <Col span={12}>
-                    <b style={{ fontSize: 55 }}>{totalParticipantMappingDone}</b>
+                    <b style={{ fontSize: 25 }}>{totalPesertaProgresMingguan.rpp_submitted}</b>
                   </Col>
                   <Col span={12}>
-                    <Progress type="circle" size={80} percent={100} />
+                    {' '}
+                    <UserOutlined style={{ fontSize: 30, color: 'green' }} />
                   </Col>
-                  <Col>Sudah memiliki pembimbing jurusan</Col>
+                </Row>
+                <Row>
+                  <Col> Peserta Telah Melengkapi Dokumen</Col>
                 </Row>
               </Card>
             </Col>
 
-            <Col span={12}>
+         
+              <Col span={6}>
+                <Card bordered={false}>
+                  <b style={{ textAlign: 'center', fontSize: 20 }}>LOGBOOK</b>
+                  <hr style={{ paddingTop: 5, color: '#001d66' }} />
+                  <Row style={{ padding: 10 }}>
+                    <Col span={12}>
+                      <b style={{ fontSize: 25 }}>
+                        {totalPesertaProgresMingguan.logbook_submitted} /{' '}
+                        {totalPesertaProgresMingguan.logbook_total}
+                      </b>
+                    </Col>
+                    {/* <Col span={12}>
+                    <Progress type="circle" size={80} percent={100} />
+                  </Col> */}
+                    <Col span={12}>
+                      {' '}
+                      <UserOutlined style={{ fontSize: 30, color: 'green', marginLeft: 20 }} />
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col> Peserta Telah Melengkapi Dokumen</Col>
+                  </Row>
+                </Card>
+              </Col>
+      
+
+            <Col span={6}>
               <Card bordered={false}>
-                <b style={{ textAlign: 'center', fontSize: 20 }}>TOTAL PESERTA</b>
-                <hr style={{ paddingTop: 5, color: '#520339' }} />
+                <b style={{ textAlign: 'center', fontSize: 20 }}>SELF ASSESSMENT</b>
+                <hr style={{ paddingTop: 5, color: '#001d66' }} />
                 <Row style={{ padding: 10 }}>
                   <Col span={12}>
-                    <b style={{ fontSize: 55 }}>{totalParticipantMappingUndone}</b>
+                    {/* <b style={{ fontSize: 25 }}>{totalPesertaProgresMingguan.self_assessment_submitted}</b> */}
+                    <b style={{ fontSize: 25 }}>
+                      {totalPesertaProgresMingguan.self_assessment_submitted} /{' '}
+                      {totalPesertaProgresMingguan.self_assessment_total}
+                    </b>
                   </Col>
+                  {/* <Col span={12}>
+                    <Progress type="circle" size={80} percent={100} />
+                  </Col> */}
                   <Col span={12}>
-                    <Progress type="circle" status="exception" size={80} percent={100} />
+                    {' '}
+                    <UserOutlined style={{ fontSize: 30, color: 'green' }} />
                   </Col>
-                  <Col>Belum memiliki pembimbing jurusan</Col>
+                </Row>
+                <Row>
+                  <Col> Peserta Telah Melengkapi Dokumen</Col>
                 </Row>
               </Card>
             </Col>
-            </Row>	
+
+            <Col span={6}>
+              <Card bordered={false}>
+                <b style={{ textAlign: 'center', fontSize: 20 }}>LAPORAN</b>
+                <hr style={{ paddingTop: 5, color: '#001d66' }} />
+                <Row style={{ padding: 10 }}>
+                  <Col span={12}>
+                    <b style={{ fontSize: 25 }}>
+                      {totalPesertaProgresMingguan.laporan_submitted} /{' '}
+                      {totalPesertaProgresMingguan.laporan_total}
+                    </b>
+                  </Col>
+                  {/* <Col span={12}>
+                    <Progress type="circle" size={80} percent={100} />
+                  </Col> */}
+                  <Col span={12}>
+                    {' '}
+                    <UserOutlined style={{ fontSize: 30, color: 'green' }} />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col> Peserta Telah Melengkapi Dokumen</Col>
+                </Row>
+              </Card>
+            </Col>
+          </Row>
+        </div>
+      </div>
+
+      {title('INFORMASI PROGRES PENGUMPULAN DOKUMEN PESERTA ( KESELURUHAN )')}
+      <div className="container2">
+        <div className="spacebottom spacetop">
+          <Row gutter={16}>
+            <Col span={6}>
+              <Card bordered={false}>
+                <b style={{ textAlign: 'center', fontSize: 20 }}>RPP</b>
+                <hr style={{ paddingTop: 5, color: '#001d66' }} />
+                <Row style={{ padding: 10 }}>
+                  <Col span={12}>
+                    <b style={{ fontSize: 25 }}>{totalProgresPesertaKeseluruhan.rpp_submitted}</b>
+                  </Col>
+                  {/* <Col span={12}>
+                    <Progress type="circle" size={80} pe
+                    rcent={100} />
+                  </Col> */}
+                  <Col span={12}>
+                    {' '}
+                    <UserOutlined style={{ fontSize: 30, color: 'green' }} />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col> Peserta Telah Melengkapi Dokumen</Col>
+                </Row>
+              </Card>
+            </Col>
+
+        
+              <Col span={6}>
+                <Card bordered={false}>
+                  <b style={{ textAlign: 'center', fontSize: 20 }}>LOGBOOK</b>
+                  <hr style={{ paddingTop: 5, color: '#001d66' }} />
+                  <Row style={{ padding: 10 }}>
+                    <Col span={12}>
+                      <b style={{ fontSize: 25 }}>
+                        {totalProgresPesertaKeseluruhan.logbook_submitted} /{' '}
+                        {totalProgresPesertaKeseluruhan.logbook_total}
+                      </b>
+                    </Col>
+                    {/* <Col span={12}>
+                    <Progress type="circle" size={80} percent={100} />
+                  </Col> */}
+                    <Col span={12}>
+                      {' '}
+                      <UserOutlined style={{ fontSize: 30, color: 'green', marginLeft: 20 }} />
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col> Peserta Telah Melengkapi Dokumen</Col>
+                  </Row>
+                </Card>
+              </Col>
+   
+
+            <Col span={6}>
+              <Card bordered={false}>
+                <b style={{ textAlign: 'center', fontSize: 20 }}>SELF ASSESSMENT</b>
+                <hr style={{ paddingTop: 5, color: '#001d66' }} />
+                <Row style={{ padding: 10 }}>
+                  <Col span={12}>
+                    {/* <b style={{ fontSize: 25 }}>{totalProgresPesertaKeseluruhan.self_assessment_submitted}</b> */}
+                    <b style={{ fontSize: 25 }}>
+                      {totalProgresPesertaKeseluruhan.self_assessment_submitted} /{' '}
+                      {totalProgresPesertaKeseluruhan.self_assessment_total}
+                    </b>
+                  </Col>
+                  {/* <Col span={12}>
+                    <Progress type="circle" size={80} percent={100} />
+                  </Col> */}
+                  <Col span={12}>
+                    {' '}
+                    <UserOutlined style={{ fontSize: 30, color: 'green' }} />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col> Peserta Telah Melengkapi Dokumen</Col>
+                </Row>
+              </Card>
+            </Col>
+
+            <Col span={6}>
+              <Card bordered={false}>
+                <b style={{ textAlign: 'center', fontSize: 20 }}>LAPORAN</b>
+                <hr style={{ paddingTop: 5, color: '#001d66' }} />
+                <Row style={{ padding: 10 }}>
+                  <Col span={12}>
+                    <b style={{ fontSize: 25 }}>
+                      {totalProgresPesertaKeseluruhan.laporan_submitted} /{' '}
+                      {totalProgresPesertaKeseluruhan.laporan_total}
+                    </b>
+                  </Col>
+                  {/* <Col span={12}>
+                    <Progress type="circle" size={80} percent={100} />
+                  </Col> */}
+                  <Col span={12}>
+                    {' '}
+                    <UserOutlined style={{ fontSize: 30, color: 'green' }} />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col> Peserta Telah Melengkapi Dokumen</Col>
+                </Row>
+              </Card>
+            </Col>
+          </Row>
+        </div>
       </div>
     </>
   )

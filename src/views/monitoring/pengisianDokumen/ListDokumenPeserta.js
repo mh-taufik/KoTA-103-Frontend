@@ -341,6 +341,12 @@ const ListDokumenPeserta = () => {
       ...getColumnSearchProps('name', 'Nama'),
     },
     {
+      title: 'PROGRESS DALAM 2 MINGGU',
+      dataIndex: '',
+      width: '24%',
+      ...getColumnSearchProps('id', 'NIM'),
+    },
+    {
       title: 'PERUSAHAAN',
       dataIndex: 'company',
       width: '25%',
@@ -398,6 +404,12 @@ const ListDokumenPeserta = () => {
       ...getColumnSearchProps('name', 'Nama'),
     },
     {
+      title: 'PROGRESS MINGGU SEKARANG',
+      dataIndex: '',
+      width: '23%',
+      ...getColumnSearchProps('id', 'NIM'),
+    },
+    {
       title: 'PERUSAHAAN',
       dataIndex: 'company',
       width: '25%',
@@ -452,6 +464,12 @@ const ListDokumenPeserta = () => {
       dataIndex: 'name',
       width: '30%',
       ...getColumnSearchProps('name', 'Nama'),
+    },
+    {
+      title: 'PROGRESS FASE SEKARANG',
+      dataIndex: '',
+      width: '20%',
+      ...getColumnSearchProps('id', 'NIM'),
     },
     {
       title: 'PERUSAHAAN',

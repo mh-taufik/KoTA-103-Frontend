@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Card, Col, FloatButton, Progress, Row, Space } from 'antd'
+import { Button, Card, Col, FloatButton, Popover, Progress, Row, Space } from 'antd'
 import { ClockCircleOutlined,ArrowLeftOutlined , FileDoneOutlined } from '@ant-design/icons'
 import { Timeline } from 'antd'
 import '../pengisianDokumen/rpp/rpp.css'
 import Title from 'antd/es/typography/Title'
 import { useHistory, useParams } from 'react-router-dom/cjs/react-router-dom.min'
 import axios from 'axios'
+import { set } from 'lodash'
 const DashboardPeserta = () => {
   const params = useParams()
   const NIM_PESERTA = params.nim
@@ -14,14 +15,34 @@ const DashboardPeserta = () => {
   const history = useHistory()
   const [namaPembimbing, setNamaPembimbing] = useState()
   const [namaPerusahaan, setNamaPerusahaan] = useState()
-  const [totalLogbookDinilai,setTotalLogbookDinilai] = useState()
-  const [totalLogbookBelumDinilai,setTotalLogbookBelumDinilai] = useState()
-  const [totalLaporanDinilai,setTotalLaporanDinilai] = useState()
-  const [totalLaporanBelumDinilai,setTotalLaporanBelumDinilai] = useState()
+  const [logbookMissing, setLogbookMissing] = useState()
   const [isHaveSupervisor, setIsHaveSupervisor] = useState(true)
   const [dataDashboardPeserta, setDataDashboardPeserta] = useState([])
   const [informasiPenilaianDokumenPeserta, setInformasiPenilaianDokumenPeserta] = useState()
   axios.defaults.withCredentials = true
+
+  
+  const convertDate = (date) => {
+    let temp_date_split = date.split('-')
+    const month = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ]
+    let date_month = temp_date_split[1]
+    let month_of_date = month[parseInt(date_month) - 1]
+    console.log(month_of_date, 'isi date monts', month_of_date)
+    return `${temp_date_split[2]} - ${month_of_date} - ${temp_date_split[0]}`
+  }
 
   useEffect(() => {
     const getDataDashboard = async (index) => {
@@ -34,11 +55,19 @@ const DashboardPeserta = () => {
       await axios
         .get(api_get_dashboard)
         .then((result) => {
-    
           
-
          if(rolePengguna === '1'){
           setDataDashboardPeserta(result.data.data)
+          let dataLogbookMissing = result.data.data.logbook_missing
+          let dataLogbookMissingWithIndoDate = []
+          let getDataLogbookMissingWithDateIndoVer = function (data){
+            for(let iteration in data){
+              dataLogbookMissingWithIndoDate.push(convertDate(data[iteration]))
+            }
+          }
+        
+          getDataLogbookMissingWithDateIndoVer(dataLogbookMissing)
+          setLogbookMissing(dataLogbookMissingWithIndoDate)
           axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all`)
           .then((res)=>{
             setNamaPembimbing(res.data.data.lecturer_name)
@@ -63,16 +92,27 @@ const DashboardPeserta = () => {
           })
         
          }else{
-          setDataDashboardPeserta(result.data.data)
-          axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/document-grade?participant_id=${NIM_PESERTA}`)
-          .then((res)=>{
-            setInformasiPenilaianDokumenPeserta(res.data.data)
-            setTotalLogbookDinilai(res.data.data.logbook_graded)
-            setTotalLogbookBelumDinilai(res.data.data.logbook_ungraded)
-            setTotalLaporanDinilai(res.data.data.laporan_graded)
-            setTotalLaporanBelumDinilai(res.data.data.laporan_ungraded)
-            setIsLoading(false)
-          })
+        
+           setDataDashboardPeserta(result.data.data)
+           let dataLogbookMissing = result.data.data.logbook_missing
+           let dataLogbookMissingWithIndoDate = []
+           let getDataLogbookMissingWithDateIndoVer = function (data){
+             for(let iteration in data){
+               dataLogbookMissingWithIndoDate.push(convertDate(data[iteration]))
+             }
+           }
+         
+           getDataLogbookMissingWithDateIndoVer(dataLogbookMissing)
+           setLogbookMissing(dataLogbookMissingWithIndoDate)
+          // axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/document-grade?participant_id=${NIM_PESERTA}`)
+          // .then((res)=>{
+          //   setInformasiPenilaianDokumenPeserta(res.data.data)
+          //   setTotalLogbookDinilai(res.data.data.logbook_graded)
+          //   setTotalLogbookBelumDinilai(res.data.data.logbook_ungraded)
+          //   setTotalLaporanDinilai(res.data.data.laporan_graded)
+          //   setTotalLaporanBelumDinilai(res.data.data.laporan_ungraded)
+          //   setIsLoading(false)
+          // })
           
    
          }
@@ -108,6 +148,25 @@ const DashboardPeserta = () => {
         </div>
       </>
     )
+  }
+
+  const printLogbookMissed = (data) =>{
+    for(let iteration in logbookMissing){
+      <ul>
+        <li>{logbookMissing[iteration]}</li>
+      </ul>
+    }
+  }
+
+  const listLogbookMissed = () =>{
+
+  return (
+  logbookMissing.map((data)=>{
+    return(
+      <li key={data}>{data}</li>
+    )
+  })
+  )
   }
   return (
     <>
@@ -184,82 +243,8 @@ const DashboardPeserta = () => {
           ]}
         />
       </div>
-    {rolePengguna !== '1' && (
-       <>
-        {title('INFORMASI PENILAIAN DOKUMEN PESERTA ')}
-        <div className="container2">
-          <div className="spacebottom spacetop">
-            <Row gutter={16}>
-              <Col span={6}>
-                <Card bordered={false}>
-                  <b style={{ textAlign: 'center', fontSize: 20 }}>PENILAIAN LOGBOOK</b>
-                  <hr style={{ paddingTop: 5, color: '#001d66' }} />
-                  <Row style={{ padding: 10 }}>
-                    <Col span={12}>
-                      <b style={{ fontSize: 55 }}>{totalLogbookDinilai}</b>
-                    </Col>
-                    <Col span={12}>
-                      <Progress type="circle" size={80} percent={100} />
-                    </Col>
-                    <Col>Logbook Telah Dinilai</Col>
-                  </Row>
-                </Card>
-              </Col>
-  
-              <Col span={6}>
-              <Card bordered={false}>
-                  <b style={{ textAlign: 'center', fontSize: 20 }}>PENILAIAN LOGBOOK</b>
-                  <hr style={{ paddingTop: 5, color: '#520339' }} />
-                  <Row style={{ padding: 10 }}>
-                    <Col span={12}>
-                      <b style={{ fontSize: 55 }}>{totalLogbookBelumDinilai}</b>
-                    </Col>
-                    <Col span={12}>
-                      <Progress type="circle" status="exception" size={80} percent={100} />
-                    </Col>
-                    <Col>Logbook Belum Dinilai</Col>
-                  </Row>
-                </Card>
-              </Col>
-  
-              <Col span={6}>
-                <Card bordered={false}>
-                  <b style={{ textAlign: 'center', fontSize: 20 }}>PENILAIAN LAPORAN</b>
-                  <hr style={{ paddingTop: 5, color: '#001d66' }} />
-                  <Row style={{ padding: 10 }}>
-                    <Col span={12}>
-                      <b style={{ fontSize: 55 }}>{totalLaporanDinilai}</b>
-                    </Col>
-                    <Col span={12}>
-                      <Progress type="circle" size={80} percent={100} />
-                    </Col>
-                    <Col>Form Pembimbing Telah Diisi</Col>
-                  </Row>
-                </Card>
-              </Col>
-  
-              <Col span={6}>
-              <Card bordered={false}>
-                  <b style={{ textAlign: 'center', fontSize: 20 }}>PENILAIAN LAPORAN</b>
-                  <hr style={{ paddingTop: 5, color: '#520339' }} />
-                  <Row style={{ padding: 10 }}>
-                    <Col span={12}>
-                      <b style={{ fontSize: 55 }}>{totalLaporanBelumDinilai}</b>
-                    </Col>
-                    <Col span={12}>
-                      <Progress type="circle" status="exception" size={80} percent={100} />
-                    </Col>
-                    <Col>Form Pembimbing Belum Diisi</Col>
-                  </Row>
-                </Card>
-              </Col>
-            </Row>
-          </div>
-       
-        </div>
-       </>
-    )}
-      {title('INFORMASI DOKUMEN PESERTA ')}
+    
+      {title('INFORMASI PROGRES PENGUMPULAN DOKUMEN PESERTA')}
       <div className="container2">
         <div className="spacebottom spacetop">
           <Row gutter={16}>
@@ -281,13 +266,14 @@ const DashboardPeserta = () => {
               </Card>
             </Col>
 
+            <Popover content={listLogbookMissed} title="LOGBOOK YANG TERLEWAT">
             <Col span={6}>
               <Card bordered={false}>
                 <b style={{ textAlign: 'center', fontSize: 20 }}>LOGBOOK</b>
                 <hr style={{ paddingTop: 5, color: '#001d66' }} />
                 <Row style={{ padding: 10 }}>
                   <Col span={12}>
-                    <b style={{ fontSize: 40 }}>{dataDashboardPeserta.logbook_submitted} / 40</b>
+                    <b style={{ fontSize: 40 }}>{dataDashboardPeserta.logbook_submitted} / {dataDashboardPeserta.logbook_total}</b>
                   </Col>
                   {/* <Col span={12}>
                     <Progress type="circle" size={80} percent={100} />
@@ -297,6 +283,7 @@ const DashboardPeserta = () => {
                 </Row>
               </Card>
             </Col>
+            </Popover>
 
             <Col span={6}>
               <Card bordered={false}>
@@ -305,7 +292,7 @@ const DashboardPeserta = () => {
                 <Row style={{ padding: 10 }}>
                   <Col span={12}>
                     {/* <b style={{ fontSize: 40 }}>{dataDashboardPeserta.self_assessment_submitted}</b> */}
-                    <b style={{ fontSize: 40 }}>{dataDashboardPeserta.self_assessment_submitted} / 8</b>
+                    <b style={{ fontSize: 40 }}>{dataDashboardPeserta.self_assessment_submitted} / {dataDashboardPeserta.self_assessment_total}</b>
                   </Col>
                   {/* <Col span={12}>
                     <Progress type="circle" size={80} percent={100} />
@@ -322,7 +309,7 @@ const DashboardPeserta = () => {
                 <hr style={{ paddingTop: 5, color: '#001d66' }} />
                 <Row style={{ padding: 10 }}>
                   <Col span={12}>
-                    <b style={{ fontSize: 40 }}>{dataDashboardPeserta.laporan_submitted} / 3</b>
+                    <b style={{ fontSize: 40 }}>{dataDashboardPeserta.laporan_submitted} / {dataDashboardPeserta.laporan_total}</b>
                   </Col>
                   {/* <Col span={12}>
                     <Progress type="circle" size={80} percent={100} />
@@ -334,57 +321,7 @@ const DashboardPeserta = () => {
             </Col>
           </Row>
         </div>
-        <div>
-          {/* <Row gutter={16}>
-            <Col span={8}>
-              <Card bordered={false}>
-                <b style={{ textAlign: 'center', fontSize: 20 }}>LOGBOOK</b>
-                <hr style={{ paddingTop: 5, color: '#520339' }} />
-                <Row style={{ padding: 10 }}>
-                  <Col span={12}>
-                    <b style={{ fontSize: 55 }}>{dataDashboardPeserta.logbook_missing}</b>
-                  </Col>
-                  <Col span={12}>
-                    <Progress type="circle" status="exception" size={80} percent={100} />
-                  </Col>
-                  <Col>Dokumen Belum Dikumpulkan</Col>
-                </Row>
-              </Card>
-            </Col>
 
-            <Col span={8}>
-              <Card bordered={false}>
-                <b style={{ textAlign: 'center', fontSize: 20 }}>SELF ASSESSMENT</b>
-                <hr style={{ paddingTop: 5, color: '#520339' }} />
-                <Row style={{ padding: 10 }}>
-                  <Col span={12}>
-                    <b style={{ fontSize: 55 }}>{dataDashboardPeserta.self_assessment_missing}</b>
-                  </Col>
-                  <Col span={12}>
-                    <Progress type="circle" status="exception" size={80} percent={100} />
-                  </Col>
-                  <Col>Dokumen Belum Dikumpulkan</Col>
-                </Row>
-              </Card>
-            </Col>
-
-            <Col span={8}>
-              <Card bordered={false}>
-                <b style={{ textAlign: 'center', fontSize: 20 }}>LAPORAN</b>
-                <hr style={{ paddingTop: 5, color: '#520339' }} />
-                <Row style={{ padding: 10 }}>
-                  <Col span={12}>
-                    <b style={{ fontSize: 55 }}>{dataDashboardPeserta.laporan_submitted}</b>
-                  </Col>
-                  <Col span={12}>
-                    <Progress type="circle" status="exception" size={80} percent={100} />
-                  </Col>
-                  <Col>Dokumen Belum Dikumpulkan</Col>
-                </Row>
-              </Card>
-            </Col>
-          </Row> */}
-        </div>
       </div>
    {rolePengguna !== '1' && (
        <FloatButton
