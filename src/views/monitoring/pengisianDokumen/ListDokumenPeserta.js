@@ -3,7 +3,7 @@ import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck } from '@fortawesome/free-solid-svg-icons'
-import { Tabs, Table, Button, Row, Col, Input, Space, Spin, Popover } from 'antd'
+import { Tabs, Table, Button, Row, Col, Input, Space, Spin, Popover, Tag, Alert, Progress } from 'antd'
 import axios from 'axios'
 import { useHistory } from 'react-router-dom'
 import './rpp/rpp.css'
@@ -198,14 +198,24 @@ const ListDokumenPeserta = () => {
     {
       title: 'NAMA PESERTA',
       dataIndex: 'name',
-      width: '30%',
+      width: '28%',
       ...getColumnSearchProps('name', 'Nama'),
     },
     {
-      title: 'STATUS PROGRES RPP',
+      title: 'STATUS RPP',
       dataIndex: 'status',
-      width: '10%',
+      width: '15%',
       ...getColumnSearchProps('status', 'Status Progres'),
+      render : (text,record)=>{
+        let color = ''
+        if(record.status === 'Sudah Mengumpulkan'){
+          color = 'green'
+        }else if(record.status === 'Belum Mengumpulkan'){
+          color = 'volcano'
+        }
+
+        return <Tag color={color}>{record.status}</Tag>
+      }
     },
     {
       title: 'PERUSAHAAN',
@@ -257,19 +267,24 @@ const ListDokumenPeserta = () => {
     {
       title: 'NAMA PESERTA',
       dataIndex: 'name',
-      width: '30%',
+      width: '28%',
       ...getColumnSearchProps('name', 'Nama'),
     },
     {
-      title: 'PROGRESS DALAM 2 MINGGU',
+      title: 'PROGRES',
       dataIndex: 'status',
-      width: '24%',
+      width: '22%',
       ...getColumnSearchProps('status', 'Progress'),
+      render : (text,record)=>{
+        let persentase = text.split("/")
+        let progres = persentase[0] * 10
+        return   <Progress percent={progres} steps={10} format={(percent) => `${text}`}/>
+      }
     },
     {
       title: 'PERUSAHAAN',
       dataIndex: 'company',
-      width: '25%',
+      width: '23%',
       ...getColumnSearchProps('company', 'Perusahaan'),
     },
 
@@ -324,10 +339,20 @@ const ListDokumenPeserta = () => {
       ...getColumnSearchProps('name', 'Nama'),
     },
     {
-      title: 'PROGRESS MINGGU SEKARANG',
+      title: 'PROGRES',
       dataIndex: 'status',
       width: '23%',
       ...getColumnSearchProps('status', 'Progress'),
+      render : (text,record)=>{
+        let color = ''
+        if(text === 'Sudah Mengumpulkan'){
+          color = 'green'
+        }else if(text === 'Belum Mengumpulkan'){
+          color = 'volcano'
+        }
+
+        return <Tag color={color}>{text}</Tag>
+      }
     },
     {
       title: 'PERUSAHAAN',
@@ -386,10 +411,20 @@ const ListDokumenPeserta = () => {
       ...getColumnSearchProps('name', 'Nama'),
     },
     {
-      title: 'PROGRESS FASE SEKARANG',
+      title: 'PROGRES',
       dataIndex: 'status',
-      width: '20%',
+      width: '23%',
       ...getColumnSearchProps('status', 'Progress'),
+      render : (text,record)=>{
+        let color = ''
+        if(text === 'Sudah Mengumpulkan'){
+          color = 'green'
+        }else if(text === 'Belum Mengumpulkan'){
+          color = 'volcano'
+        }
+
+        return <Tag color={color}>{text}</Tag>
+      }
     },
     {
       title: 'PERUSAHAAN',
@@ -459,6 +494,7 @@ const ListDokumenPeserta = () => {
             <CCol sm={12}>
               <Tabs type="card" onChange={onChange}>
                 <TabPane tab="RPP" key="2.1">
+                <Alert  className='spacebottom' showIcon description={<div>Kolom &nbsp;<b>STATUS RPP</b>&nbsp;&nbsp; : menampilkan informasi status pengumpulan RPP peserta saat ini</div>} type="info" />
                   <Table
                     scroll={{ x: 'max-content' }}
                     columns={columnsRpp}
@@ -468,6 +504,7 @@ const ListDokumenPeserta = () => {
                   />
                 </TabPane>
                 <TabPane tab="Logbook" key="2.2">
+                <Alert  className='spacebottom' showIcon description={<div>Kolom &nbsp;<b>PROGRESS</b>&nbsp;&nbsp; : menampilkan informasi progres pengumpulan logbook peserta pada minggu yang sedang berjalan ( tiap dua minggu )</div>} type="info" />
                   <Table
                     scroll={{ x: 'max-content' }}
                     columns={columnsLogbook}
@@ -477,6 +514,7 @@ const ListDokumenPeserta = () => {
                   />
                 </TabPane>
                 <TabPane tab="Self Assessment" key="2.3">
+                <Alert  className='spacebottom' showIcon description={<div>Kolom &nbsp;<b>PROGRES</b>&nbsp;&nbsp; : menampilkan informasi status pengumpulan self assessment peserta pada minggu (saat ini) yang sedang berlangsung</div>} type="info" />
                   <Table
                     scroll={{ x: 'max-content' }}
                     columns={columnsSelfAssessment}
@@ -486,6 +524,7 @@ const ListDokumenPeserta = () => {
                   />
                 </TabPane>
                 <TabPane tab="Laporan" key="2.4">
+                <Alert  className='spacebottom' showIcon description={<div>Kolom &nbsp;<b>PROGRES</b>&nbsp;&nbsp; : menampilkan informasi status pengumpulan dokumen laporan peserta pada fase yang sedang berlangsung</div>} type="info" />
                   <Table
                     scroll={{ x: 'max-content' }}
                     columns={columnsLaporan}
