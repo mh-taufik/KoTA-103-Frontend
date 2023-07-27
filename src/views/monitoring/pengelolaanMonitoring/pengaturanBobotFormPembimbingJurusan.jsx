@@ -31,7 +31,7 @@ const PengaturanBobotFormPembimbingJurusan = () => {
   useEffect(() => {
     const getDataPoinPenilaianFormPembimbing = async (index) => {
       await axios
-        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/aspect/get`)
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-grade/aspect/get`)
         .then((result) => {
           setPoinPenilaianFormPembimbing({
             idNilaiProsesBimbingan: result.data.data[0].id,
@@ -141,24 +141,32 @@ const PengaturanBobotFormPembimbingJurusan = () => {
   }
 
   const putBobotPenilaianDanDeskripsi = async (data) => {
-    for (var i in data) {
+    data = JSON.parse(JSON.stringify(data))
+    for (let i in data) {
       let aspect_id = data[i].id
       let description_new = data[i].description
       let max_grade_new = data[i].max_grade
       let name_new = data[i].name
       await axios
-        .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/aspect/update`, {
+        .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-grade/aspect/update`, {
           "description" : description_new,
           "id" : aspect_id,
           "max_grade" : max_grade_new,
           "name" : name_new
         })
         .then((res) => {
-          setIsSuccessUpdateData(true)
-          refreshData()
+         if((parseInt(i)+1) === (data.length)){
+          notification.success({
+            message: 'Data bobot penilaian berhasil diperbarui',
+          })
+         }
+          // refreshData()
         })
         .catch(function (error) {
-          setIsSuccessUpdateData(false)
+          //setIsSuccessUpdateData(false)
+          notification.warning({
+            message: 'Data bobot penilaian gagal diperbarui',
+          })
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
             history.push({
               pathname: '/login',
@@ -174,20 +182,12 @@ const PengaturanBobotFormPembimbingJurusan = () => {
         })
     }
 
-    if (isSuccessUpdateData) {
-      notification.success({
-        message: 'Data bobot penilaian berhasil diperbarui',
-      })
-    } else {
-      notification.warning({
-        message: 'Data bobot penilaian gagal diperbarui',
-      })
-    }
+  
   }
 
   const refreshData = async (index) => {
     await axios
-    .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/aspect/get`)
+    .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-grade/aspect/get`)
     .then((result) => {
       setPoinPenilaianFormPembimbing({
         idNilaiProsesBimbingan: result.data.data[0].id,
@@ -304,7 +304,7 @@ const PengaturanBobotFormPembimbingJurusan = () => {
           ]}
         >
           <Popover content={<div>Klik tombol untuk menyimpan perubahan</div>}>
-            <Button type="primary" onClick={simpanPoinPenilaian}>
+            <Button type="primary" onClick={()=>{simpanPoinPenilaian()}}>
               Simpan
             </Button>
           </Popover>

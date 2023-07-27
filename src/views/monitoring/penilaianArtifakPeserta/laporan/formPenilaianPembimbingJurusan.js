@@ -140,7 +140,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
   useEffect(() => {
     const getDataPoinPenilaianFormPembimbingJurusan = async (index) => {
       await axios
-        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/aspect/get`)
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-grade/aspect/get`)
         .then((response) => {
           var temp = []
           var temp1 = response.data.data
@@ -204,7 +204,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
     const GetDataStatistik = async (index) => {
   
       await axios
-        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/statistic/${NIM_PESERTA}`)
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-grade/statistic/${NIM_PESERTA}`)
         .then((result) => {
           console.log('STATISTIK',result.data.data.logbook_late)
           setStatistikLogbookSubmitted(JSON.parse(JSON.stringify(result.data.data.logbook_submitted)))
@@ -247,7 +247,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
         setFasePenilaian(response.data.data.phase)
         setIdSupervisorGrade(response.data.data.supervisor_grade)
        let idSupervisorGrade = response.data.data.supervisor_grade
-       axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/aspect/get`).then((result)=>{
+       axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-grade/aspect/get`).then((result)=>{
         
  
         const data_poin_penilaian = result.data.data
@@ -261,7 +261,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
         let id_2 = data_poin_penilaian[1].id
         let id_3 = data_poin_penilaian[2].id
 
-        axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/get/${idSupervisorGrade}`)
+        axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-grade/get/${idSupervisorGrade}`)
         .then((res)=>{
           let dataSupervisorGrade = res.data.data.grade_list
           let dataSupervisorGradeWithNamePoinAspect = []
@@ -351,7 +351,7 @@ const FormPenilaianPembimbingJurusan = (props) => {
   /** SIMPAN EDIT PENILAIAN */
   const putEditPenilaian = async () => {
     await axios
-    .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/update`,{
+    .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-grade/update`,{
         "grade_list": nilaiPembimbingJurusanEdit,
         "id": idSupervisorGrade,
         "phase": fasePenilaian
