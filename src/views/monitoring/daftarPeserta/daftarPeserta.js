@@ -122,22 +122,25 @@ const DaftarPeserta = () => {
         .then((res) => {
           if (res.data.data !== null) {
             let participant_supervisor = []
+            let index_data = 0
 
             let getParticipantSupervisor = function (data) {
-              for (var iterate_data in data) {
+              for (let iterate_data in data) {
                 let data_company = data[iterate_data].company_name
                 let data_supervisor = data[iterate_data].lecturer_name
                 let participant = data[iterate_data].participant
                 
             
                if(participant !== null){
-                  for (var iterate_participant in participant) {
+                  for (let iterate_participant in participant) {
                     participant_supervisor.push({
+                      idx: parseInt(index_data),
                       id: participant[iterate_participant].id,
                       name: participant[iterate_participant].name,
                       supervisor: data_supervisor,
                       company: data_company,
                     })
+                    index_data++
                   }
                   setIsNotNullParticipantSupervisor(true)
                 }else{
@@ -173,20 +176,23 @@ const DaftarPeserta = () => {
         .then((res) => {
           if (res.data.data !== null) {
             let participant_supervisor = []
+            let index_data = 0
 
             let getParticipantSupervisor = function (data) {
-              for (var iterate_data in data) {
+              for (let iterate_data in data) {
                 let data_company = data[iterate_data].company_name
                 let data_supervisor = data[iterate_data].lecturer_name
                 let participant = data[iterate_data].participant
                 if(participant !== null){
-                  for (var iterate_participant in participant) {
+                  for (let iterate_participant in participant) {
                     participant_supervisor.push({
+                      idx: parseInt(index_data),
                       id: participant[iterate_participant].id,
                       name: participant[iterate_participant].name,
                       supervisor: data_supervisor,
                       company: data_company,
                     })
+                    index_data++
                   }
                   setIsNotNullParticipantSupervisor(true)
                 }else{
@@ -230,27 +236,32 @@ const DaftarPeserta = () => {
       if (rolePengguna !== '4') {
         await axios
           .get(
-            `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all?type=comitte`,
+            `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all`,
           )
           .then((res) => {
             if (res.data.data !== null) {
               let participant_supervisor = []
+              let index_data = 0
 
               let getParticipantSupervisor = function (data) {
-                for (var iterate_data in data) {
+                for (let iterate_data in data) {
                   let data_company = data[iterate_data].company_name
                   let data_supervisor = data[iterate_data].lecturer_name
                   let participant = data[iterate_data].participant
+                
                   
               
                  if(participant !== null){
-                    for (var iterate_participant in participant) {
+                    for (let iterate_participant in participant) {
+
                       participant_supervisor.push({
+                        idx: parseInt(index_data),
                         id: participant[iterate_participant].id,
                         name: participant[iterate_participant].name,
                         supervisor: data_supervisor,
                         company: data_company,
                       })
+                    index_data++
                     }
                     setIsNotNullParticipantSupervisor(true)
                   }else{
@@ -286,20 +297,23 @@ const DaftarPeserta = () => {
           .then((res) => {
             if (res.data.data !== null) {
               let participant_supervisor = []
+              let index_data = 0
 
               let getParticipantSupervisor = function (data) {
-                for (var iterate_data in data) {
+                for (let iterate_data in data) {
                   let data_company = data[iterate_data].company_name
                   let data_supervisor = data[iterate_data].lecturer_name
                   let participant = data[iterate_data].participant
                   if(participant !== null){
-                    for (var iterate_participant in participant) {
+                    for (let iterate_participant in participant) {
                       participant_supervisor.push({
+                        idx: parseInt(index_data),
                         id: participant[iterate_participant].id,
                         name: participant[iterate_participant].name,
                         supervisor: data_supervisor,
                         company: data_company,
                       })
+                      index_data++
                     }
                     setIsNotNullParticipantSupervisor(true)
                   }else{
@@ -337,11 +351,11 @@ const DaftarPeserta = () => {
   const columns = [
     {
       title: 'NO',
-      dataIndex: 'no',
+      dataIndex: 'idx',
       width: '5%',
       align: 'center',
       render: (value, item, index) => {
-        return index + 1
+        return value+1
       },
     },
     {

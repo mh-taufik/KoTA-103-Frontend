@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPencil} from '@fortawesome/free-solid-svg-icons'
+import { faPencil } from '@fortawesome/free-solid-svg-icons'
 
 import {
   Tabs,
@@ -26,14 +26,16 @@ import '../pengisianDokumen/rpp/rpp.css'
 import { useHistory } from 'react-router-dom'
 import { SearchOutlined } from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
-
+import Column from 'antd/lib/table/Column'
 
 const PemetaanPembimbingJurusan = () => {
   let searchInput
   const [state, setState] = useState({ searchText: '', searchedColumn: '' })
   const [isLoading, setIsLoading] = useState(true)
   const [key, setKey] = useState('1')
-  const contoller_abort = new AbortController();
+  const contoller_abort = new AbortController()
+  const [page, setPage] = useState(1)
+  const [indexPage, setIndexPage] = useState(0)
   const [isModaleditOpen, setIsModalEditOpen] = useState(false)
   const [dataToEdit, setDataToEdit] = useState([])
   let history = useHistory()
@@ -47,7 +49,6 @@ const PemetaanPembimbingJurusan = () => {
   const USER_ID_PRODI = localStorage.id_prodi
   const [optPembimbing, setOptPembimbing] = useState([])
   const [prodi, setProdi] = useState()
-
 
   const getColumnSearchProps = (dataIndex, name) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -157,69 +158,67 @@ const PemetaanPembimbingJurusan = () => {
   }
 
   const HandleEditPembimbingJurusan = async (idPerusahaan, idPembimbing, index) => {
-
-    if(idPembimbingChoosen !== null){
+    if (idPembimbingChoosen !== null) {
       await axios
-      .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/update`, [{
-        "company_id" : parseInt(idPerusahaan),
-        "lecturer_id" : parseInt(idPembimbing)
-      }])
-      .then((res) => {
-       
-     
-        notification.success({
-          message: 'Data Pembimbing Jurusan Berhasil Diubah',
-        })
-        setIsModalEditOpen(false)
-        refreshData(index)
-        form1.resetFields()
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
+        .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/update`, [
+          {
+            company_id: parseInt(idPerusahaan),
+            lecturer_id: parseInt(idPembimbing),
+          },
+        ])
+        .then((res) => {
+          notification.success({
+            message: 'Data Pembimbing Jurusan Berhasil Diubah',
           })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-          history.push('/500')
-        }
-      })
-    }else{
+          setIsModalEditOpen(false)
+          refreshData(index)
+          form1.resetFields()
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+            history.push('/500')
+          }
+        })
+    } else {
       await axios
-      .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/create`, [{
-        "company_id" : parseInt(idPerusahaan),
-        "lecturer_id" : parseInt(idPembimbing)
-      }])
-      .then((res) => {
-    
-     
-        notification.success({
-          message: 'Data Pembimbing Jurusan Berhasil Diubah',
-        })
-        setIsModalEditOpen(false)
-        refreshData(index)
-        form1.resetFields()
-      })
-      .catch(function (error) {
-        if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-          history.push({
-            pathname: '/login',
-            state: {
-              session: true,
-            },
+        .post(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/create`, [
+          {
+            company_id: parseInt(idPerusahaan),
+            lecturer_id: parseInt(idPembimbing),
+          },
+        ])
+        .then((res) => {
+          notification.success({
+            message: 'Data Pembimbing Jurusan Berhasil Diubah',
           })
-        } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-          history.push('/404')
-        } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-          history.push('/500')
-        }
-      })
+          setIsModalEditOpen(false)
+          refreshData(index)
+          form1.resetFields()
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+            history.push('/500')
+          }
+        })
     }
-  
   }
 
   useEffect(() => {
@@ -234,34 +233,30 @@ const PemetaanPembimbingJurusan = () => {
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all`)
         .then((result) => {
           setDataHasilPemetaan(result.data.data)
-      
+
           let data = result.data.data
-          let data_result =[]
-          function handleAttributeNull(data){
-            
-            return data?data:undefined  
+          let data_result = []
+          function handleAttributeNull(data) {
+            return data ? data : undefined
           }
-          if(data !== null){
-           let get_hasil_pemetaan = function (data){
-            for(var i in data){
-   
-              data_result.push({
-                date:handleAttributeNull(data[i].date),
-                participant : handleAttributeNull(data[i].participant),
-                company_id : data[i].company_id,
-                company_name : data[i].company_name,
-                lecturer_id : data[i].lecturer_id,
-                lecturer_name : handleAttributeNull(data[i].lecturer_name),
-
-              })
+          if (data !== null) {
+            let get_hasil_pemetaan = function (data) {
+              for (var i in data) {
+                data_result.push({
+                  idx : parseInt(i),
+                  date: handleAttributeNull(data[i].date),
+                  participant: handleAttributeNull(data[i].participant),
+                  company_id: data[i].company_id,
+                  company_name: data[i].company_name,
+                  lecturer_id: data[i].lecturer_id,
+                  lecturer_name: handleAttributeNull(data[i].lecturer_name),
+                })
+              }
             }
-           }
 
-           get_hasil_pemetaan(data)
-           setDataHasilPemetaan(data_result)
-       
-
-          }else{
+            get_hasil_pemetaan(data)
+            setDataHasilPemetaan(data_result)
+          } else {
             setDataHasilPemetaan(undefined)
           }
           setIsLoading(false)
@@ -280,7 +275,7 @@ const PemetaanPembimbingJurusan = () => {
             history.push('/500')
           }
         })
-        return () => contoller_abort.abort();
+      return () => contoller_abort.abort()
     }
 
     const getAllPembimbingJurusan = async () => {
@@ -288,7 +283,7 @@ const PemetaanPembimbingJurusan = () => {
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}account/get-supervisor`)
         .then((result) => {
           let temp_data = result.data.data
-      
+
           let data_res = []
           let funcDataRes = function (data) {
             for (var i in data) {
@@ -315,7 +310,7 @@ const PemetaanPembimbingJurusan = () => {
             history.push('/500')
           }
         })
-        return () => contoller_abort.abort();
+      return () => contoller_abort.abort()
     }
 
     getAllPembimbingJurusan()
@@ -325,11 +320,11 @@ const PemetaanPembimbingJurusan = () => {
   const columns = [
     {
       title: 'NO',
-      dataIndex: 'no',
+      dataIndex: 'idx',
       width: '5%',
       align: 'center',
       render: (value, item, index) => {
-        return index + 1
+        return  value+1
       },
     },
     {
@@ -404,8 +399,6 @@ const PemetaanPembimbingJurusan = () => {
     )
   }
 
-
-
   return isLoading ? (
     <Spin tip="Loading" size="large">
       <div className="content" />
@@ -414,34 +407,43 @@ const PemetaanPembimbingJurusan = () => {
     <>
       <CCard className="mb-4">
         {title('PENGATURAN DAFTAR PEMBIMBING JURUSAN')}
-   
+
         <CCardBody>
           <CRow>
             <CCol sm={12}>
-            <Table
-            scroll={{ x: 'max-content' }}
-            columns={columns}
-            dataSource={dataHasilPemetaan}
-            rowKey={dataHasilPemetaan.company_id}
-            bordered
-            pagination={true}
-            expandable={{
-              expandedRowRender: (rec) => (
-                <ul>
-                  {rec.participant.map((data, idx) => {
-                    return (
-                      <Row style={{ padding: 7 }} key={idx}>
-                        <Col span={2}>{idx + 1}</Col>
-                        <Col span={4}>{data.id}</Col>
-                        <Col span={8}>{data.name}</Col>
-                      </Row>
-                    )
-                  })}
-                </ul>
-              ),
-            }}
-           
-          />
+              <Table
+                scroll={{ x: 'max-content' }}
+                columns={columns}
+                dataSource={dataHasilPemetaan}
+                rowKey={dataHasilPemetaan.company_id}
+                bordered
+                pagination={{
+                  onChange(current) {
+                    setPage(current)
+                  },
+                }}
+                expandable={{
+                  expandedRowRender: (rec) => (
+                    <ul>
+                      {rec.participant.map((data, idx) => {
+                        return (
+                          <Row style={{ padding: 7 }} key={idx}>
+                            <Col span={2}>{idx + 1}</Col>
+                            <Col span={4}>{data.id}</Col>
+                            <Col span={8}>{data.name}</Col>
+                          </Row>
+                        )
+                      })}
+                    </ul>
+                  ),
+                }}
+              />
+                {/* <Column
+                  title="Index"
+                  key="index"
+                  render={(value, item, index) => (page - 1) + (index+1)}
+                />
+              </Table> */}
             </CCol>
           </CRow>
         </CCardBody>

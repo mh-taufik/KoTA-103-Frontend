@@ -3,7 +3,20 @@ import 'antd/dist/reset.css'
 import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck } from '@fortawesome/free-solid-svg-icons'
-import { Tabs, Table, Button, Row, Col, Input, Space, Spin, Popover, Tag, Alert, Progress } from 'antd'
+import {
+  Tabs,
+  Table,
+  Button,
+  Row,
+  Col,
+  Input,
+  Space,
+  Spin,
+  Popover,
+  Tag,
+  Alert,
+  Progress,
+} from 'antd'
 import axios from 'axios'
 import { useHistory } from 'react-router-dom'
 import './rpp/rpp.css'
@@ -18,6 +31,7 @@ const { TabPane } = Tabs
 
 const ListDokumenPeserta = () => {
   const [isLoading, setIsLoading] = useState(true)
+  const [state, setState] = useState({ searchText: '', searchedColumn: '' })
   const [key, setKey] = useState('1')
   let history = useHistory()
   const [loadings, setLoadings] = useState([])
@@ -32,7 +46,7 @@ const ListDokumenPeserta = () => {
   const contoller_abort = new AbortController()
   const [totalCountingDocument, setTotalCountingDocument] = useState()
   const [rekapRpp, setRekapRpp] = useState([])
-  const [rekapLogbook,setRekapLogbook] = useState([])
+  const [rekapLogbook, setRekapLogbook] = useState([])
   const [rekapSelfAssessment, setRekapSelfAssessment] = useState([])
   const [rekapLaporan, setRekapLaporan] = useState([])
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -40,9 +54,113 @@ const ListDokumenPeserta = () => {
     setSearchText(selectedKeys[0])
     setSearchedColumn(dataIndex)
   }
-  const handleReset = (clearFilters) => {
+  const handleReset = (clearFilters, selectedKeys, confirm, dataIndex, index) => {
+    enterLoading(index)
     clearFilters()
-    setSearchText('')
+    refreshData(index)
+    setState({ searchText: '' })
+    handleSearch(selectedKeys, confirm, dataIndex, index)
+  }
+
+  const refreshData = async (index) =>{
+    await axios
+    .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/rekap`)
+    .then((result) => {
+      let dataRpp = result.data.data
+      let dataRppIdx = []
+      if (dataRpp != null) {
+        for (let iterateRpp in dataRpp) {
+          dataRppIdx.push({
+            idx: parseInt(iterateRpp),
+            nim: dataRpp[iterateRpp].nim,
+            name: dataRpp[iterateRpp].name,
+            company: dataRpp[iterateRpp].company,
+            status: dataRpp[iterateRpp].status,
+          })
+        }
+
+        setRekapRpp(dataRppIdx)
+      } else {
+        setRekapRpp(result.data.data)
+      }
+      axios
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/rekap`)
+        .then((result) => {
+          let dataLogbook = result.data.data
+          let dataLogbookIdx = []
+          if (dataLogbook != null) {
+            for (let iterateLogbook in dataLogbook) {
+              dataLogbookIdx.push({
+                idx: parseInt(iterateLogbook),
+                nim: dataLogbook[iterateLogbook].nim,
+                name: dataLogbook[iterateLogbook].name,
+                company: dataLogbook[iterateLogbook].company,
+                status: dataLogbook[iterateLogbook].status,
+              })
+            }
+
+            setRekapLogbook(dataLogbookIdx)
+          } else {
+            setRekapLogbook(result.data.data)
+          }
+          axios
+            .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/rekap`)
+            .then((result) => {
+              let dataSelfAssessment = result.data.data
+              let dataSelfAssessmentIdx = []
+              if (dataSelfAssessment != null) {
+                for (let iterateSelfAssessment in dataSelfAssessment) {
+                  dataSelfAssessmentIdx.push({
+                    idx: parseInt(iterateSelfAssessment),
+                    nim: dataSelfAssessment[iterateSelfAssessment].nim,
+                    name: dataSelfAssessment[iterateSelfAssessment].name,
+                    company: dataSelfAssessment[iterateSelfAssessment].company,
+                    status: dataSelfAssessment[iterateSelfAssessment].status,
+                  })
+                }
+    
+                setRekapSelfAssessment(dataSelfAssessmentIdx)
+              } else {
+                setRekapSelfAssessment(result.data.data)
+              }
+              axios
+                .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/rekap`)
+                .then((result) => {
+                  let dataLaporan = result.data.data
+                  let dataLaporanIdx = []
+                  if (dataLaporan != null) {
+                    for (let iterateLaporan in dataLaporan) {
+                      dataLaporanIdx.push({
+                        idx: parseInt(iterateLaporan),
+                        nim: dataLaporan[iterateLaporan].nim,
+                        name: dataLaporan[iterateLaporan].name,
+                        company: dataLaporan[iterateLaporan].company,
+                        status: dataLaporan[iterateLaporan].status,
+                      })
+                    }
+        
+                    setRekapLaporan(dataLaporanIdx)
+                  } else {
+                    setRekapLaporan(result.data.data)
+                  }
+                  setIsLoading(false)
+                })
+            })
+        })
+    }).catch(function (error) {
+      if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+        history.push({
+          pathname: '/login',
+          state: {
+            session: true,
+          },
+        })
+      } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+        history.push('/404')
+      } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+        history.push('/500')
+      }
+    })
   }
 
   const getColumnSearchProps = (dataIndex) => ({
@@ -77,7 +195,7 @@ const ListDokumenPeserta = () => {
             Search
           </Button>
           <Button
-            onClick={() => clearFilters && handleReset(clearFilters)}
+            onClick={() =>  handleReset(clearFilters, '', confirm, dataIndex, 99)}
             size="small"
             style={{
               width: 90,
@@ -144,36 +262,105 @@ const ListDokumenPeserta = () => {
 
   useEffect(() => {
     const getAllRekap = async (record, index) => {
-      await axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/rekap`)
-      .then((result)=>{
-        setRekapRpp(result.data.data)
-        axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/rekap`)
-        .then((result)=>{
-          setRekapLogbook(result.data.data)
-          axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/rekap`)
-          .then((result)=>{
-            setRekapSelfAssessment(result.data.data)
-            axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/rekap`)
-            .then((result)=>{
-              setRekapLaporan(result.data.data)
-              setIsLoading(false)
-            })
-          })
-        })
-      }).catch(function (error) {
-            if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-              history.push({
-                pathname: '/login',
-                state: {
-                  session: true,
-                },
+      await axios
+        .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/rpp/rekap`)
+        .then((result) => {
+          let dataRpp = result.data.data
+          let dataRppIdx = []
+          if (dataRpp != null) {
+            for (let iterateRpp in dataRpp) {
+              dataRppIdx.push({
+                idx: parseInt(iterateRpp),
+                nim: dataRpp[iterateRpp].nim,
+                name: dataRpp[iterateRpp].name,
+                company: dataRpp[iterateRpp].company,
+                status: dataRpp[iterateRpp].status,
               })
-            } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-              history.push('/404')
-            } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-              history.push('/500')
             }
-          })
+
+            setRekapRpp(dataRppIdx)
+          } else {
+            setRekapRpp(result.data.data)
+          }
+          axios
+            .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/rekap`)
+            .then((result) => {
+              let dataLogbook = result.data.data
+              let dataLogbookIdx = []
+              if (dataLogbook != null) {
+                for (let iterateLogbook in dataLogbook) {
+                  dataLogbookIdx.push({
+                    idx: parseInt(iterateLogbook),
+                    nim: dataLogbook[iterateLogbook].nim,
+                    name: dataLogbook[iterateLogbook].name,
+                    company: dataLogbook[iterateLogbook].company,
+                    status: dataLogbook[iterateLogbook].status,
+                  })
+                }
+
+                setRekapLogbook(dataLogbookIdx)
+              } else {
+                setRekapLogbook(result.data.data)
+              }
+              axios
+                .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/rekap`)
+                .then((result) => {
+                  let dataSelfAssessment = result.data.data
+                  let dataSelfAssessmentIdx = []
+                  if (dataSelfAssessment != null) {
+                    for (let iterateSelfAssessment in dataSelfAssessment) {
+                      dataSelfAssessmentIdx.push({
+                        idx: parseInt(iterateSelfAssessment),
+                        nim: dataSelfAssessment[iterateSelfAssessment].nim,
+                        name: dataSelfAssessment[iterateSelfAssessment].name,
+                        company: dataSelfAssessment[iterateSelfAssessment].company,
+                        status: dataSelfAssessment[iterateSelfAssessment].status,
+                      })
+                    }
+        
+                    setRekapSelfAssessment(dataSelfAssessmentIdx)
+                  } else {
+                    setRekapSelfAssessment(result.data.data)
+                  }
+                  axios
+                    .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/rekap`)
+                    .then((result) => {
+                      let dataLaporan = result.data.data
+                      let dataLaporanIdx = []
+                      if (dataLaporan != null) {
+                        for (let iterateLaporan in dataLaporan) {
+                          dataLaporanIdx.push({
+                            idx: parseInt(iterateLaporan),
+                            nim: dataLaporan[iterateLaporan].nim,
+                            name: dataLaporan[iterateLaporan].name,
+                            company: dataLaporan[iterateLaporan].company,
+                            status: dataLaporan[iterateLaporan].status,
+                          })
+                        }
+            
+                        setRekapLaporan(dataLaporanIdx)
+                      } else {
+                        setRekapLaporan(result.data.data)
+                      }
+                      setIsLoading(false)
+                    })
+                })
+            })
+        })
+        .catch(function (error) {
+          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+            history.push({
+              pathname: '/login',
+              state: {
+                session: true,
+              },
+            })
+          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+            history.push('/404')
+          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+            history.push('/500')
+          }
+        })
     }
 
     getAllRekap()
@@ -182,11 +369,11 @@ const ListDokumenPeserta = () => {
   const columnsRpp = [
     {
       title: 'NO',
-      dataIndex: 'no',
+      dataIndex: 'idx',
       width: '5%',
       align: 'center',
       render: (value, item, index) => {
-        return index + 1
+        return value + 1
       },
     },
     {
@@ -206,16 +393,16 @@ const ListDokumenPeserta = () => {
       dataIndex: 'status',
       width: '15%',
       ...getColumnSearchProps('status', 'Status Progres'),
-      render : (text,record)=>{
+      render: (text, record) => {
         let color = ''
-        if(record.status === 'Sudah Mengumpulkan'){
+        if (record.status === 'Sudah Mengumpulkan') {
           color = 'green'
-        }else if(record.status === 'Belum Mengumpulkan'){
+        } else if (record.status === 'Belum Mengumpulkan') {
           color = 'volcano'
         }
 
         return <Tag color={color}>{record.status}</Tag>
-      }
+      },
     },
     {
       title: 'PERUSAHAAN',
@@ -250,12 +437,12 @@ const ListDokumenPeserta = () => {
 
   const columnsLogbook = [
     {
-      title: 'No',
-      dataIndex: 'no',
+      title: 'NO',
+      dataIndex: 'idx',
       width: '5%',
       align: 'center',
       render: (value, item, index) => {
-        return index + 1
+        return value + 1
       },
     },
     {
@@ -274,12 +461,12 @@ const ListDokumenPeserta = () => {
       title: 'PROGRES',
       dataIndex: 'status',
       width: '22%',
-      ...getColumnSearchProps('status', 'Progress'),
-      render : (text,record)=>{
-        let persentase = text.split("/")
+      ...getColumnSearchProps('status', 'Progres'),
+      render: (text, record) => {
+        let persentase = text.split('/')
         let progres = persentase[0] * 10
-        return   <Progress percent={progres} steps={10} format={(percent) => `${text}`}/>
-      }
+        return <Progress percent={progres} steps={10} format={(percent) => `${text}`} />
+      },
     },
     {
       title: 'PERUSAHAAN',
@@ -301,7 +488,6 @@ const ListDokumenPeserta = () => {
                   type="primary"
                   style={{ borderColor: 'white' }}
                   onClick={() => {
-                   
                     actionSeeListLogbookParticipant(record.nim)
                   }}
                   size="small"
@@ -318,12 +504,12 @@ const ListDokumenPeserta = () => {
 
   const columnsSelfAssessment = [
     {
-      title: 'NO',
-      dataIndex: 'no',
+     title: 'NO',
+      dataIndex: 'idx',
       width: '5%',
       align: 'center',
       render: (value, item, index) => {
-        return index + 1
+        return value + 1
       },
     },
     {
@@ -343,16 +529,16 @@ const ListDokumenPeserta = () => {
       dataIndex: 'status',
       width: '23%',
       ...getColumnSearchProps('status', 'Progress'),
-      render : (text,record)=>{
+      render: (text, record) => {
         let color = ''
-        if(text === 'Sudah Mengumpulkan'){
+        if (text === 'Sudah Mengumpulkan') {
           color = 'green'
-        }else if(text === 'Belum Mengumpulkan'){
+        } else if (text === 'Belum Mengumpulkan') {
           color = 'volcano'
         }
 
         return <Tag color={color}>{text}</Tag>
-      }
+      },
     },
     {
       title: 'PERUSAHAAN',
@@ -390,12 +576,12 @@ const ListDokumenPeserta = () => {
 
   const columnsLaporan = [
     {
-      title: 'NO',
-      dataIndex: 'no',
+     title: 'NO',
+      dataIndex: 'idx',
       width: '5%',
       align: 'center',
       render: (value, item, index) => {
-        return index + 1
+        return value + 1
       },
     },
     {
@@ -415,16 +601,16 @@ const ListDokumenPeserta = () => {
       dataIndex: 'status',
       width: '23%',
       ...getColumnSearchProps('status', 'Progress'),
-      render : (text,record)=>{
+      render: (text, record) => {
         let color = ''
-        if(text === 'Sudah Mengumpulkan'){
+        if (text === 'Sudah Mengumpulkan') {
           color = 'green'
-        }else if(text === 'Belum Mengumpulkan'){
+        } else if (text === 'Belum Mengumpulkan') {
           color = 'volcano'
         }
 
         return <Tag color={color}>{text}</Tag>
-      }
+      },
     },
     {
       title: 'PERUSAHAAN',
@@ -481,7 +667,7 @@ const ListDokumenPeserta = () => {
     )
   }
 
-  return  isLoading ? (
+  return isLoading ? (
     <Spin tip="Loading" size="large">
       <div className="content" />
     </Spin>
@@ -494,7 +680,17 @@ const ListDokumenPeserta = () => {
             <CCol sm={12}>
               <Tabs type="card" onChange={onChange}>
                 <TabPane tab="RPP" key="2.1">
-                <Alert  className='spacebottom' showIcon description={<div>Kolom &nbsp;<b>STATUS RPP</b>&nbsp;&nbsp; : menampilkan informasi status pengumpulan RPP peserta saat ini</div>} type="info" />
+                  <Alert
+                    className="spacebottom"
+                    showIcon
+                    description={
+                      <div>
+                        Kolom &nbsp;<b>STATUS RPP</b>&nbsp;&nbsp; : menampilkan informasi status
+                        pengumpulan RPP peserta saat ini
+                      </div>
+                    }
+                    type="info"
+                  />
                   <Table
                     scroll={{ x: 'max-content' }}
                     columns={columnsRpp}
@@ -504,7 +700,18 @@ const ListDokumenPeserta = () => {
                   />
                 </TabPane>
                 <TabPane tab="Logbook" key="2.2">
-                <Alert  className='spacebottom' showIcon description={<div>Kolom &nbsp;<b>PROGRESS</b>&nbsp;&nbsp; : menampilkan informasi progres pengumpulan logbook peserta pada minggu yang sedang berjalan ( tiap dua minggu )</div>} type="info" />
+                  <Alert
+                    className="spacebottom"
+                    showIcon
+                    description={
+                      <div>
+                        Kolom &nbsp;<b>PROGRES</b>&nbsp;&nbsp; : menampilkan informasi progres
+                        pengumpulan logbook peserta pada minggu yang sedang berjalan ( tiap dua
+                        minggu )
+                      </div>
+                    }
+                    type="info"
+                  />
                   <Table
                     scroll={{ x: 'max-content' }}
                     columns={columnsLogbook}
@@ -514,7 +721,18 @@ const ListDokumenPeserta = () => {
                   />
                 </TabPane>
                 <TabPane tab="Self Assessment" key="2.3">
-                <Alert  className='spacebottom' showIcon description={<div>Kolom &nbsp;<b>PROGRES</b>&nbsp;&nbsp; : menampilkan informasi status pengumpulan self assessment peserta pada minggu (saat ini) yang sedang berlangsung</div>} type="info" />
+                  <Alert
+                    className="spacebottom"
+                    showIcon
+                    description={
+                      <div>
+                        Kolom &nbsp;<b>PROGRES</b>&nbsp;&nbsp; : menampilkan informasi status
+                        pengumpulan self assessment peserta pada minggu (saat ini) yang sedang
+                        berlangsung
+                      </div>
+                    }
+                    type="info"
+                  />
                   <Table
                     scroll={{ x: 'max-content' }}
                     columns={columnsSelfAssessment}
@@ -524,7 +742,17 @@ const ListDokumenPeserta = () => {
                   />
                 </TabPane>
                 <TabPane tab="Laporan" key="2.4">
-                <Alert  className='spacebottom' showIcon description={<div>Kolom &nbsp;<b>PROGRES</b>&nbsp;&nbsp; : menampilkan informasi status pengumpulan dokumen laporan peserta pada fase yang sedang berlangsung</div>} type="info" />
+                  <Alert
+                    className="spacebottom"
+                    showIcon
+                    description={
+                      <div>
+                        Kolom &nbsp;<b>PROGRES</b>&nbsp;&nbsp; : menampilkan informasi status
+                        pengumpulan dokumen laporan peserta pada fase yang sedang berlangsung
+                      </div>
+                    }
+                    type="info"
+                  />
                   <Table
                     scroll={{ x: 'max-content' }}
                     columns={columnsLaporan}

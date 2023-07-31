@@ -36,6 +36,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
   const dateFormat = 'YYYY-MM-DD'
   let searchInput
   const [state, setState] = useState({ searchText: '', searchedColumn: '' })
+  const [page, setPage] = useState(1)
   const [isModalcreateVisible, setIsModalCreateVisible] = useState(false)
   const [isModaleditVisible, setIsModalEditVisible] = useState(false)
   const [choose, setChoose] = useState([])
@@ -69,7 +70,26 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
     await axios
       .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/get`)
       .then((result) => {
-        setPoinPenilaian(result.data.data)
+        let dataPoinPenilaian = result.data.data
+        let dataPoinPenilaianIdx = []
+        if (dataPoinPenilaian !== null) {
+          for (let iterateDataPoinPenilaian in dataPoinPenilaian) {
+            dataPoinPenilaianIdx.push({
+              idx: parseInt(iterateDataPoinPenilaian),
+              description: dataPoinPenilaian[iterateDataPoinPenilaian].description,
+              status: dataPoinPenilaian[iterateDataPoinPenilaian].status,
+              aspect_id: dataPoinPenilaian[iterateDataPoinPenilaian].aspect_id,
+              aspect_name: dataPoinPenilaian[iterateDataPoinPenilaian].aspect_name,
+              start_assessment_date:
+                dataPoinPenilaian[iterateDataPoinPenilaian].start_assessment_date,
+              day_range: dataPoinPenilaian[iterateDataPoinPenilaian].day_range,
+            })
+          }
+          setPoinPenilaian(dataPoinPenilaianIdx)
+        } else {
+          setPoinPenilaian(result.data.data)
+        }
+        setIsLoading(false)
         setLoadings((prevLoadings) => {
           const newLoadings = [...prevLoadings]
           newLoadings[index] = false
@@ -108,8 +128,27 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/get`)
         .then((result) => {
-          setPoinPenilaian(result.data.data)
-         // console.log(result.data.data)
+          let dataPoinPenilaian = result.data.data
+          // setPoinPenilaian(result.data.data)
+          let dataPoinPenilaianIdx = []
+          // console.log(result.data.data)
+          if (dataPoinPenilaian !== null) {
+            for (let iterateDataPoinPenilaian in dataPoinPenilaian) {
+              dataPoinPenilaianIdx.push({
+                idx: parseInt(iterateDataPoinPenilaian),
+                description: dataPoinPenilaian[iterateDataPoinPenilaian].description,
+                status: dataPoinPenilaian[iterateDataPoinPenilaian].status,
+                aspect_id: dataPoinPenilaian[iterateDataPoinPenilaian].aspect_id,
+                aspect_name: dataPoinPenilaian[iterateDataPoinPenilaian].aspect_name,
+                start_assessment_date:
+                  dataPoinPenilaian[iterateDataPoinPenilaian].start_assessment_date,
+                day_range: dataPoinPenilaian[iterateDataPoinPenilaian].day_range,
+              })
+            }
+            setPoinPenilaian(dataPoinPenilaianIdx)
+          } else {
+            setPoinPenilaian(result.data.data)
+          }
           setIsLoading(false)
         })
         .catch(function (error) {
@@ -164,13 +203,10 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
           newLoadings[index] = false
           return newLoadings
         })
-     
       })
     // } else {
     //   notification.warning({ message: 'Isi Status Terlebih Dahulu!!!' })
     // }
-
-   
   }
 
   const handleCancelCreate = () => {
@@ -188,7 +224,6 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
     tanggalAksesDibuka,
     index,
   ) => {
-  
     axios
       .put(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/aspect/update`, {
         description: namaPoinPenilaian,
@@ -198,7 +233,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
         status: statusPoinPenilaian,
       })
       .then((response) => {
-       // console.log(response)
+        // console.log(response)
         refreshData(index)
         notification.success({
           message: 'Poin penilaian berhasil diubah',
@@ -206,7 +241,6 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
         setIsModalEditVisible(false)
       })
       .catch((error) => {
-      
         setIsModalEditVisible(false)
         setLoadings((prevLoadings) => {
           const newLoadings = [...prevLoadings]
@@ -316,11 +350,11 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
   const columns = [
     {
       title: 'No',
-      dataIndex: 'no',
+      dataIndex: 'idx',
       width: '5%',
       align: 'center',
       render: (value, item, index) => {
-        return index + 1
+        return value + 1
       },
     },
     {
@@ -353,21 +387,17 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
                 shape="circle"
                 style={{ backgroundColor: '#FCEE21', borderColor: '#FCEE21' }}
                 onClick={() => {
-                
                   setEId(record.aspect_id)
                   setEPoinPenilaian(record.aspect_name)
                   setEStatus(record.status)
                   setEPoinTanggal(record.start_assessment_date)
                   setCoDate(record.start_assessment_date)
-              
-                  if(record.status === 'Active'){
-                    setEStatus(6)
-                  }else if(record.status === 'Inactive'){
-                    setEStatus(7)
-                  }else if(record.status === 'Disabled')(
-                    setEStatus(8)
-                  )
 
+                  if (record.status === 'Active') {
+                    setEStatus(6)
+                  } else if (record.status === 'Inactive') {
+                    setEStatus(7)
+                  } else if (record.status === 'Disabled') setEStatus(8)
 
                   showModalEdit(record)
                 }}
@@ -471,7 +501,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
           >
             <Input onChange={(e) => setPoinName(e.target.value)} />
           </Form.Item>
-{/* 
+          {/* 
           <b>
             Tanggal Poin Dibuka <span style={{ color: 'red' }}> *</span>
           </b> */}
@@ -539,10 +569,7 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
             <Input
               // disabled
               defaultValue={ePoinPenilaian}
-              onChange={
-                (e) => setEPoinPenilaian(e.target.value)
-               
-              }
+              onChange={(e) => setEPoinPenilaian(e.target.value)}
             />
           </Form.Item>
           <Form.Item
@@ -555,7 +582,6 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
               defaultValue={eStatus}
               onChange={(value) => {
                 setEStatus(value)
-              
               }}
             >
               <Option value={6}>Active</Option>
@@ -578,7 +604,6 @@ const PengelolaanPoinPenilaianSelfAssessment = () => {
               }
             />
         */}
-       
         </Form>
       </Modal>
     </>

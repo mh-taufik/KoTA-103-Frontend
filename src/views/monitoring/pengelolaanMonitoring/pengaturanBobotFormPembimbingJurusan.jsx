@@ -33,54 +33,60 @@ const PengaturanBobotFormPembimbingJurusan = () => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-grade/aspect/get`)
         .then((result) => {
-          setPoinPenilaianFormPembimbing({
-            idNilaiProsesBimbingan: result.data.data[0].id,
-            idNilaiLaporan: result.data.data[1].id,
-            idNilaiLainnya: result.data.data[2].id,
-
-            bobotNilaiProsesBimbingan: result.data.data[0].max_grade,
-            bobotNilaiLaporan: result.data.data[1].max_grade,
-            bobotNilaiLainnya: result.data.data[2].max_grade,
-
-            deskripsiNilaiProsesBimbingan: result.data.data[0].description,
-            deskripsiNilaiLaporan: result.data.data[1].description,
-            deskripsiNilaiLainnya: result.data.data[2].description,
-
-            poinNilaiProsesBimbingan: result.data.data[0].name,
-            poinNilaiLaporan: result.data.data[1].name,
-            poinNilaiLainnya: result.data.data[2].name,
-          })
-
-          let temp = result.data.data
-          let temp1 = []
-          let getTempDataPoin = function (obj) {
-            for (var i in obj) {
-              temp1.push({
-                id: obj[i].id,
-                name : obj[i].name,
-                description: obj[i].description,
-                max_grade: obj[i].max_grade,
-              })
+          console.log('rata', result.data.data)
+          let dataresult = result.data.data
+          if(dataresult.length<1){
+            setDataPoinPenilaian(dataresult)
+          }else{
+            setPoinPenilaianFormPembimbing({
+              idNilaiProsesBimbingan: result.data.data[0].id,
+              idNilaiLaporan: result.data.data[1].id,
+              idNilaiLainnya: result.data.data[2].id,
+  
+              bobotNilaiProsesBimbingan: result.data.data[0].max_grade,
+              bobotNilaiLaporan: result.data.data[1].max_grade,
+              bobotNilaiLainnya: result.data.data[2].max_grade,
+  
+              deskripsiNilaiProsesBimbingan: result.data.data[0].description,
+              deskripsiNilaiLaporan: result.data.data[1].description,
+              deskripsiNilaiLainnya: result.data.data[2].description,
+  
+              poinNilaiProsesBimbingan: result.data.data[0].name,
+              poinNilaiLaporan: result.data.data[1].name,
+              poinNilaiLainnya: result.data.data[2].name,
+            })
+  
+            let temp = result.data.data
+            let temp1 = []
+            let getTempDataPoin = function (obj) {
+              for (let i in obj) {
+                temp1.push({
+                  id: obj[i].id,
+                  name : obj[i].name,
+                  description: obj[i].description,
+                  max_grade: obj[i].max_grade,
+                })
+              }
             }
+            getTempDataPoin(temp)
+            setDataPoinPenilaian(temp1)
           }
-          getTempDataPoin(temp)
-          setDataPoinPenilaian(temp1)
           setIsLoading(false)
         })
-        .catch(function (error) {
-          if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
-            history.push({
-              pathname: '/login',
-              state: {
-                session: true,
-              },
-            })
-          } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
-            history.push('/404')
-          } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
-            history.push('/500')
-          }
-        })
+        // .catch(function (error) {
+        //   if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
+        //     history.push({
+        //       pathname: '/login',
+        //       state: {
+        //         session: true,
+        //       },
+        //     })
+        //   } else if (error.toJSON().status >= 400 && error.toJSON().status <= 499) {
+        //     history.push('/404')
+        //   } else if (error.toJSON().status >= 500 && error.toJSON().status <= 500) {
+        //     history.push('/500')
+        //   }
+        // })
     }
 
 
@@ -239,9 +245,7 @@ const PengaturanBobotFormPembimbingJurusan = () => {
       })
   }
 
-  return isLoading?  (<Spin tip="Loading" size="large">
-  <div className="content" />
-</Spin>):(
+  return(
     <>
       <div className="container2">
         <h2 className="justify">Pengelolaan Poin Penilaian Form Pembimbing</h2>
