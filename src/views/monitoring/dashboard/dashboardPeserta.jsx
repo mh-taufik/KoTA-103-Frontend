@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Card, Col, FloatButton, Popover, Progress, Row, Space } from 'antd'
+import { Button, Card, Col, FloatButton, Modal, Popover, Progress, Row, Space, Table } from 'antd'
 import { ClockCircleOutlined,ArrowLeftOutlined , FileDoneOutlined } from '@ant-design/icons'
 import { Timeline } from 'antd'
 import '../pengisianDokumen/rpp/rpp.css'
@@ -12,7 +12,9 @@ const DashboardPeserta = () => {
   const NIM_PESERTA = params.nim
   const rolePengguna = localStorage.id_role
   const [isLoading, setIsLoading] = useState(true)
+  const [isModalLogbookAllOpen, setIsModalLogbookAllOpen] = useState(false)
   const history = useHistory()
+  const [listPesertaLogbookAllMissing, setListPesertaLogbookAllMissing] = useState([])
   const [namaPembimbing, setNamaPembimbing] = useState()
   const [namaPerusahaan, setNamaPerusahaan] = useState()
   const [logbookMissing, setLogbookMissing] = useState()
@@ -22,6 +24,32 @@ const DashboardPeserta = () => {
   axios.defaults.withCredentials = true
 
   
+  const showModalLogbookAllInfo = () => {
+    setIsModalLogbookAllOpen(true)
+  }
+
+  const closeModalLogbookAllInfo = () => {
+    setIsModalLogbookAllOpen(false)
+  }
+
+  const columnListPeserta = [
+    {
+      title: 'NO',
+      dataIndex: 'idx',
+      width: '5%',
+      align: 'center',
+      render: (value, item, index) => {
+        return value + 1
+      },
+    },
+
+    {
+      title: 'Tanggal Logbook',
+      dataIndex: 'logbook_missing',
+      key: 'logbook_missing',
+    },
+
+  ]
   const convertDate = (date) => {
     let temp_date_split = date.split('-')
     const month = [
@@ -98,12 +126,15 @@ const DashboardPeserta = () => {
            let dataLogbookMissingWithIndoDate = []
            let getDataLogbookMissingWithDateIndoVer = function (data){
              for(let iteration in data){
-               dataLogbookMissingWithIndoDate.push(convertDate(data[iteration]))
+               dataLogbookMissingWithIndoDate.push({
+                idx : parseInt(iteration),
+                logbook_missing : convertDate(data[iteration])
+               })
              }
            }
          
            getDataLogbookMissingWithDateIndoVer(dataLogbookMissing)
-           setLogbookMissing(dataLogbookMissingWithIndoDate)
+           setListPesertaLogbookAllMissing(dataLogbookMissingWithIndoDate)
           // axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/document-grade?participant_id=${NIM_PESERTA}`)
           // .then((res)=>{
           //   setInformasiPenilaianDokumenPeserta(res.data.data)
@@ -256,17 +287,14 @@ const DashboardPeserta = () => {
                   <Col span={12}>
                     <b style={{ fontSize: 40 }}>{dataDashboardPeserta.rpp_submitted}</b>
                   </Col>
-                  {/* <Col span={12}>
-                    <Progress type="circle" size={80} pe
-                    rcent={100} />
-                  </Col> */}
                    <Col span={12}> <FileDoneOutlined style={{ fontSize: 50 , color: 'green' }}/></Col>
-                  <Col>Dokumen Sudah Dikumpulkan</Col>
+                
                 </Row>
+               <Row>  <Col>Dokumen Sudah Dikumpulkan</Col></Row>
               </Card>
             </Col>
 
-            <Popover content={listLogbookMissed} title="LOGBOOK YANG TERLEWAT">
+            {/* <Popover content={listLogbookMissed} title="LOGBOOK YANG TERLEWAT"> */}
             <Col span={6}>
               <Card bordered={false}>
                 <b style={{ textAlign: 'center', fontSize: 20 }}>LOGBOOK</b>
@@ -275,15 +303,14 @@ const DashboardPeserta = () => {
                   <Col span={12}>
                     <b style={{ fontSize: 40 }}>{dataDashboardPeserta.logbook_submitted} / {dataDashboardPeserta.logbook_total}</b>
                   </Col>
-                  {/* <Col span={12}>
-                    <Progress type="circle" size={80} percent={100} />
-                  </Col> */}
                    <Col span={12}> <FileDoneOutlined style={{ fontSize: 50 , color: 'green' , marginLeft:20}}/></Col>
-                  <Col>Dokumen Sudah Dikumpulkan</Col>
+              
                 </Row>
+                <Row>  <Col>Dokumen Sudah Dikumpulkan</Col></Row>
+                <Row><Col><Popover content={<div>List Tanggal Logbook Yang Belum Dikumpulkan</div>}><Button type='primary' onClick={showModalLogbookAllInfo}>Lihat Detail</Button></Popover></Col></Row>
               </Card>
             </Col>
-            </Popover>
+            {/* </Popover> */}
 
             <Col span={6}>
               <Card bordered={false}>
@@ -298,8 +325,9 @@ const DashboardPeserta = () => {
                     <Progress type="circle" size={80} percent={100} />
                   </Col> */}
                    <Col span={12}> <FileDoneOutlined style={{ fontSize: 50 , color: 'green' }}/></Col>
-                  <Col>Dokumen Sudah Dikumpulkan</Col>
+                
                 </Row>
+                <Row>  <Col>Dokumen Sudah Dikumpulkan</Col></Row>
               </Card>
             </Col>
 
@@ -315,8 +343,9 @@ const DashboardPeserta = () => {
                     <Progress type="circle" size={80} percent={100} />
                   </Col> */}
                  <Col span={12}> <FileDoneOutlined style={{ fontSize: 50 , color: 'green' }}/></Col>
-                  <Col>Dokumen Sudah Dikumpulkan</Col>
+               
                 </Row>
+                <Row>  <Col>Dokumen Sudah Dikumpulkan</Col></Row>
               </Card>
             </Col>
           </Row>
@@ -331,6 +360,17 @@ const DashboardPeserta = () => {
        tooltip={<div>Kembali ke Rekap Dokumen Peserta</div>}
      />
    )}
+
+   
+<Modal
+        width={800}
+        open={isModalLogbookAllOpen}
+        title="List Tanggal Logbook Yang Belum Dikumpulkan Oleh Peserta"
+        footer={false}
+        onCancel={closeModalLogbookAllInfo}
+      >
+        <Table dataSource={listPesertaLogbookAllMissing} columns={columnListPeserta} />
+      </Modal>
 
     </>
   )

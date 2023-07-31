@@ -152,7 +152,31 @@ const PemetaanPembimbingJurusan = () => {
     await axios
       .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all`)
       .then((result) => {
-        setDataHasilPemetaan(result.data.data)
+        let data = result.data.data
+        let data_result = []
+        function handleAttributeNull(data) {
+          return data ? data : undefined
+        }
+        if (data !== null) {
+          let get_hasil_pemetaan = function (data) {
+            for (var i in data) {
+              data_result.push({
+                idx : parseInt(i),
+                date: handleAttributeNull(data[i].date),
+                participant: handleAttributeNull(data[i].participant),
+                company_id: data[i].company_id,
+                company_name: data[i].company_name,
+                lecturer_id: data[i].lecturer_id,
+                lecturer_name: handleAttributeNull(data[i].lecturer_name),
+              })
+            }
+          }
+
+          get_hasil_pemetaan(data)
+          setDataHasilPemetaan(data_result)
+        } else {
+          setDataHasilPemetaan(undefined)
+        }
         setIsLoading(false)
       })
   }
@@ -232,7 +256,7 @@ const PemetaanPembimbingJurusan = () => {
       await axios
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all`)
         .then((result) => {
-          setDataHasilPemetaan(result.data.data)
+         // setDataHasilPemetaan(result.data.data)
 
           let data = result.data.data
           let data_result = []
@@ -340,14 +364,14 @@ const PemetaanPembimbingJurusan = () => {
       width: '30%',
     },
     Table.EXPAND_COLUMN,
-    // {
-    //   title: 'PESERTA',
-    //   dataIndex: 'peserta',
-    //   render: (text, record) => {
-    //     let count_participant = record.participant.length
-    //     return <b>{count_participant}</b>
-    //   },
-    // },
+    {
+      title: 'PESERTA',
+      dataIndex: 'peserta',
+      render: (text, record) => {
+        let count_participant = record.participant.length
+        return <b>{count_participant}</b>
+      },
+    },
     {
       title: 'AKSI',
       dataIndex: 'action',
@@ -428,9 +452,9 @@ const PemetaanPembimbingJurusan = () => {
                       {rec.participant.map((data, idx) => {
                         return (
                           <Row style={{ padding: 7 }} key={idx}>
-                            <Col span={2}>{idx + 1}</Col>
-                            <Col span={4}>{data.id}</Col>
-                            <Col span={8}>{data.name}</Col>
+                            <Col style={{fontSize:11}} span={2}>{idx + 1}</Col>
+                            <Col style={{fontSize:11}} span={4}>{data.id}</Col>
+                            <Col style={{fontSize:11}} span={8}>{data.name}</Col>
                           </Row>
                         )
                       })}

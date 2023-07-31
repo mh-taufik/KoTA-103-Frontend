@@ -1,5 +1,5 @@
 import React from 'react'
-import { Card, Col, Button, Progress, Row, Space, Modal, Table, Popover } from 'antd'
+import { Card, Col, Button, Progress, Row, Space, Modal, Table, Popover, Spin } from 'antd'
 import { ClockCircleOutlined, UserOutlined } from '@ant-design/icons'
 import { Timeline } from 'antd'
 import '../pengisianDokumen/rpp/rpp.css'
@@ -12,6 +12,7 @@ import { useEffect } from 'react'
 import { useLayoutEffect } from 'react'
 
 const DashboardPembimbing = () => {
+  const [isLoading,setIsLoading] = useState(true)
   const [isOpenCollapseRPPMingguan, setIsOpenCollapseRPPMingguan] = useState(false)
   const [isModalRppMingguanOpen, setIsModalRppMingguanOpen] = useState(false)
   const [isModalLogbookMingguanOpen, setIsModalLogbookMingguanOpen] = useState(false)
@@ -86,11 +87,11 @@ const DashboardPembimbing = () => {
   const columnListPeserta = [
     {
       title: 'NO',
-      dataIndex: 'no',
+      dataIndex: 'idx',
       width: '5%',
       align: 'center',
       render: (value, item, index) => {
-        return index + 1
+        return value + 1
       },
     },
 
@@ -118,17 +119,121 @@ const DashboardPembimbing = () => {
         .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/dashboard`)
         .then((result) => {
           let data = result.data.data
-          setDataDashboard(data)
-          setTotalProgressPesertaKeseluruhan(data.all)
-          setTotalPesertaProgresMingguan(data.weekly)
-          setListPesertaAllRPPMissing(data.all.rpp_missing)
-          setListPesertaLogbookMingguanMissing(data.weekly.logbook_missing)
-          setListPesertaSelfAssessmentMingguanMissing(
-            data.weekly.self_assessment_missing,
-          )
-          setListPesertaLaporanMingguanMissing(data.weekly.laporan_missing)
-          setListPesertaLogbookAllMissing(data.all.logbook_missing)
-          setListPesertaLaporanAllMissing(data.all.laporan_missing)
+          let listPesertaAllRPPMissing = result.data.data.all.rpp_missing
+          let listPesertaAllRPPMissingIdx = []
+          let listPesertaLogbookMingguanMissing = result.data.data.weekly.logbook_missing
+          let listPesertaLogbookMingguanMissingIdx = []
+          let listPesertaSelfAssessmentMingguanMissing = result.data.data.weekly.self_assessment_missing 
+          let listPesertaSelfAssessmentMingguanMissingIdx = []
+          let listPesertaLaporanMingguanMissing = result.data.data.weekly.laporan_missing
+          let listPesertaLaporanMingguanMissingIdx = []
+          let listPesertaLogbookAllMissing = result.data.data.all.logbook_missing
+          let listPesertaLogbookAllMissingIdx = [] 
+          let listPesertaLaporanAllMissing = result.data.data.all.laporan_missing
+          let listPesertaLaporanAllMissingIdx = []
+          setTotalParticipantMappingDone(data.supervisor_mapping_done)
+          setTotalParticipantMappingUndone(data.supervisor_mapping_undone)
+
+          setDataDashboard(result.data.data)
+          setTotalProgressPesertaKeseluruhan(result.data.data.all)
+          setTotalPesertaProgresMingguan(result.data.data.weekly)
+   
+          if(listPesertaAllRPPMissing != null){
+            for(let iterateListPesertaAllRPPMissing in listPesertaAllRPPMissing){
+              listPesertaAllRPPMissingIdx.push({
+                'nim' : listPesertaAllRPPMissing[iterateListPesertaAllRPPMissing].nim,
+                'name' : listPesertaAllRPPMissing[iterateListPesertaAllRPPMissing].name,
+                'company' : listPesertaAllRPPMissing[iterateListPesertaAllRPPMissing].company,
+                'idx' : parseInt(iterateListPesertaAllRPPMissing)
+              })
+              
+            }
+            setListPesertaAllRPPMissing(listPesertaAllRPPMissingIdx)
+          }else{
+            setListPesertaAllRPPMissing(result.data.data.all.rpp_missing)
+          }
+          
+    
+          if(listPesertaLogbookMingguanMissing != null){
+            for(let iterateListPesertaLogbookMingguanMissing in listPesertaLogbookMingguanMissing){
+              listPesertaLogbookMingguanMissingIdx.push({
+                'nim' : listPesertaLogbookMingguanMissing[iterateListPesertaLogbookMingguanMissing].nim,
+                'name' : listPesertaLogbookMingguanMissing[iterateListPesertaLogbookMingguanMissing].name,
+                'company' : listPesertaLogbookMingguanMissing[iterateListPesertaLogbookMingguanMissing].company,
+                'idx' : parseInt(iterateListPesertaLogbookMingguanMissing)
+              })
+              
+            }
+            setListPesertaLogbookMingguanMissing(   listPesertaLogbookMingguanMissingIdx)
+          }else{
+            setListPesertaLogbookMingguanMissing(result.data.data.weekly.logbook_missing)
+          }
+
+          if(listPesertaSelfAssessmentMingguanMissing != null){
+            for(let iterateListPesertaSelfAssessmentMingguanMissing in listPesertaSelfAssessmentMingguanMissing){
+              listPesertaSelfAssessmentMingguanMissingIdx.push({
+                'nim' : listPesertaSelfAssessmentMingguanMissing[iterateListPesertaSelfAssessmentMingguanMissing].nim,
+                'name' : listPesertaSelfAssessmentMingguanMissing[iterateListPesertaSelfAssessmentMingguanMissing].name,
+                'company' : listPesertaSelfAssessmentMingguanMissing[iterateListPesertaSelfAssessmentMingguanMissing].company,
+                'idx' : parseInt(iterateListPesertaSelfAssessmentMingguanMissing)
+              })
+              
+            }
+            setListPesertaSelfAssessmentMingguanMissing(listPesertaSelfAssessmentMingguanMissingIdx)
+          }else{
+            setListPesertaSelfAssessmentMingguanMissing(result.data.data.weekly.self_assessment_missing)
+          }
+          
+
+  
+          if(listPesertaLaporanMingguanMissing != null){
+            for(let iterateListPesertaLaporanMingguanMissing in listPesertaLaporanMingguanMissing){
+              listPesertaLaporanMingguanMissingIdx.push({
+                'nim' : listPesertaLaporanMingguanMissing[iterateListPesertaLaporanMingguanMissing].nim,
+                'name' : listPesertaLaporanMingguanMissing[iterateListPesertaLaporanMingguanMissing].name,
+                'company' : listPesertaLaporanMingguanMissing[iterateListPesertaLaporanMingguanMissing].company,
+                'idx' : parseInt(iterateListPesertaLaporanMingguanMissing)
+              })
+              
+            }
+            setListPesertaLaporanMingguanMissing(listPesertaLaporanMingguanMissingIdx)
+          }else{
+            setListPesertaLaporanMingguanMissing(result.data.data.weekly.laporan_missing)
+          }
+
+
+          if(listPesertaLogbookAllMissing != null){
+            for(let iterateListPesertaLogbookAllMissing in listPesertaLogbookAllMissing){
+              listPesertaLogbookAllMissingIdx.push({
+                'nim' : listPesertaLogbookAllMissing[iterateListPesertaLogbookAllMissing].nim,
+                'name' : listPesertaLogbookAllMissing[iterateListPesertaLogbookAllMissing].name,
+                'company' : listPesertaLogbookAllMissing[iterateListPesertaLogbookAllMissing].company,
+                'idx' : parseInt(iterateListPesertaLogbookAllMissing)
+              })
+              
+            }
+            setListPesertaLogbookAllMissing(listPesertaLogbookAllMissingIdx)
+          }else{
+            setListPesertaLogbookAllMissing(result.data.data.all.logbook_missing)
+          }
+
+      
+          if(listPesertaLaporanAllMissing != null){
+            for(let iterateListPesertaLaporanAllMissing in listPesertaLaporanAllMissing){
+              listPesertaLaporanAllMissingIdx.push({
+                'nim' : listPesertaLaporanAllMissing[iterateListPesertaLaporanAllMissing].nim,
+                'name' : listPesertaLaporanAllMissing[iterateListPesertaLaporanAllMissing].name,
+                'company' : listPesertaLaporanAllMissing[iterateListPesertaLaporanAllMissing].company,
+                'idx' : parseInt(iterateListPesertaLaporanAllMissing)
+              })
+              
+            }
+            setListPesertaLaporanAllMissing(listPesertaLaporanAllMissingIdx)
+          }else{
+            setListPesertaLaporanAllMissing(result.data.data.all.laporan_missing)
+          }
+   
+          setIsLoading(false)
       
         })
         .catch(function (error) {
@@ -165,7 +270,11 @@ const DashboardPembimbing = () => {
     )
   }
 
-  return (
+  return isLoading ? (
+    <Spin tip="Loading" size="large">
+      <div className="content" />
+    </Spin>
+  ): (
     <>
 
       {title('INFORMASI PROGRES PENGUMPULAN DOKUMEN PESERTA ( MINGGU INI )')}
