@@ -127,7 +127,7 @@ const RekapSelfAssessment = () => {
 
                 axios
                   .get(
-                    `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor/grade/statistic/${ID_PARTICIPANT}`,
+                    `${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-grade/statistic/${ID_PARTICIPANT}`,
                   )
                   .then((res) => {
                     setDataStatistikPeserta(res.data.data)
@@ -308,7 +308,7 @@ const RekapSelfAssessment = () => {
       {isNotNullDataSelfAssessment && (
         <>
           <div className="container2">
-            <Box sx={{ color: 'warning.main' }} className="spacebottom">
+            <Box sx={{ color: 'info.main' }} className="spacebottom">
               <ul>
                 {/* <li>Pastikan semua RPP terisi</li> */}
                 <li>
@@ -439,7 +439,7 @@ const RekapSelfAssessment = () => {
         type="primary"
         icon={<ArrowLeftOutlined />}
         onClick={() => {
-          history.push(`/rekapPenilaianPeserta`)
+          history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${ID_PARTICIPANT}`)
         }}
         tooltip={<div>Kembali ke Rekap Penilaian Peserta</div>}
       />

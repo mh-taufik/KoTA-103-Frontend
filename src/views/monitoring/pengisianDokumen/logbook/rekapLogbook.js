@@ -186,9 +186,10 @@ const RekapLogbook = () => {
           }
 
           let getTempRes = function (obj) {
-            for (var i in obj) {
+            for (let i in obj) {
               temp_res.push({
                 id: setKeyIfNull(parseInt(i), obj[i].id),
+                idx : parseInt(i),
                 real_id: obj[i].id,
                 date: convertDate(obj[i].date),
                 real_date : obj[i].date,
@@ -297,9 +298,10 @@ const RekapLogbook = () => {
             }
 
             let getTempRes = function (obj) {
-              for (var i in obj) {
+              for (let i in obj) {
                 temp_res.push({
-                  id: setKeyIfNull(parseInt(i), obj[i].id),
+                  id: setKeyIfNull(parseInt(i), obj[i].id), 
+                  idx : parseInt(i),
                   real_id: obj[i].id,
                   date: convertDate(obj[i].date),
                   grade: obj[i].grade,
@@ -432,11 +434,11 @@ const RekapLogbook = () => {
   const columnsPanitiaPembimbing = [
     {
       title: 'NO',
-      dataIndex: 'no',
+      dataIndex: 'idx',
       width: '5%',
       align: 'center',
       render: (value, item, index) => {
-        return index + 1
+        return value + 1
       },
     },
     {
@@ -542,7 +544,7 @@ const RekapLogbook = () => {
                     onClick={() => actionPenilaianLogbook(record.id)}
                     style={{ backgroundColor: '#ffa940', color: 'white' }}
                   >
-                    &nbsp;&nbsp; &nbsp;&nbsp; Nilai &nbsp;&nbsp;&nbsp;&nbsp;
+                    Pengecekan
                   </Button>
                 </Popover>
               </Col>
@@ -573,11 +575,11 @@ const RekapLogbook = () => {
   const columns = [
     {
       title: 'NO',
-      dataIndex: 'no',
+      dataIndex: 'idx',
       width: '5%',
       align: 'center',
       render: (value, item, index) => {
-        return index + 1
+        return value + 1
       },
     },
     {
@@ -796,8 +798,9 @@ const RekapLogbook = () => {
                 <Table
                   scroll={{ x: 'max-content' }}
                   columns={columns}
+                  pagination={true}
                   dataSource={logbookPeserta}
-                  rowKey="id"
+                  rowKey="real_date"
                   bordered
                 />
               </CCol>
@@ -823,7 +826,8 @@ const RekapLogbook = () => {
                   scroll={{ x: 'max-content' }}
                   columns={columnsPanitiaPembimbing}
                   dataSource={logbookPeserta}
-                  rowKey="id"
+                  rowKey="real_date"
+                  pagination = {true}
                   bordered
                 />
               </CCol>

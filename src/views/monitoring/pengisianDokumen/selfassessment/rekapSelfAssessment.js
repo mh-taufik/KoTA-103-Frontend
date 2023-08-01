@@ -76,7 +76,7 @@ const RekapSelfAssessment = () => {
         )
         .then((result) => {
           let len = result.data.data.length-1
-          console.log('len', len, 'act',result.data.data.length)
+      
 
           let temp = []
          
@@ -92,12 +92,13 @@ const RekapSelfAssessment = () => {
             return id?'Sudah Dikumpulkan' : 'Tidak Dikumpulkan'
           }
           if (result.data.data.length > 1) {
-            console.log('RESY')
-            var getTempSelfAssessment = function (obj) {
-              for (var i in obj) {
-                console.log(i, len)
+            
+            let getTempSelfAssessment = function (obj) {
+              for (let i in obj) {
+           
                 if (parseInt(i)<len) {
                   temp.push({
+                    idx : parseInt(i),
                     start_date: convertDate(obj[i].start_date),
                     finish_date: convertDate(obj[i].finish_date),
                     self_assessment_id: handleIdNull(obj[i].self_assessment_id,parseInt(i)),
@@ -301,7 +302,7 @@ const RekapSelfAssessment = () => {
   }
 
   const refreshData = async (index) => {
-    var PESERTA
+    let PESERTA
     if (rolePengguna === '1') {
       PESERTA = NIM_PESERTA_USER
     } else {
@@ -313,7 +314,7 @@ const RekapSelfAssessment = () => {
         )
         .then((result) => {
           let len = result.data.data.length-1
-          console.log('len', len, 'act',result.data.data.length)
+      
 
           let temp = []
          
@@ -329,12 +330,13 @@ const RekapSelfAssessment = () => {
             return id?'Sudah Dikumpulkan' : 'Tidak Dikumpulkan'
           }
           if (result.data.data.length > 1) {
-            console.log('RESY')
-            var getTempSelfAssessment = function (obj) {
-              for (var i in obj) {
-                console.log(i, len)
+       
+            let getTempSelfAssessment = function (obj) {
+              for (let i in obj) {
+            
                 if (parseInt(i)<len) {
                   temp.push({
+                    idx : parseInt(i),
                     start_date: convertDate(obj[i].start_date),
                     finish_date: convertDate(obj[i].finish_date),
                     self_assessment_id: handleIdNull(obj[i].self_assessment_id,parseInt(i)),
@@ -368,6 +370,12 @@ const RekapSelfAssessment = () => {
     history.push(`/selfAssessment/formSelfAssessment`)
   }
 
+  const handleRekapProgres = () => {
+    history.push(`/rekapDokumenPeserta/selfAssessmentPeserta/${NIM_PESERTA_FROM_PARAMS}/rekapProgres`)
+  }
+
+
+
   const lihatDetailSelfAssessment = (idsa) => {
     rolePengguna !== '1'
       ? history.push(
@@ -385,11 +393,11 @@ const RekapSelfAssessment = () => {
   const columnsPanitiaPembimbing = [
     {
       title: 'NO',
-      dataIndex: 'no',
+      dataIndex: 'idx',
       width: '5%',
       align: 'center',
       render: (value, item, index) => {
-        return index + 1
+        return value +1
       },
     },
     {
@@ -507,11 +515,11 @@ const RekapSelfAssessment = () => {
   const columns = [
     {
       title: 'NO',
-      dataIndex: 'no',
+      dataIndex: 'idx',
       width: '5%',
       align: 'center',
       render: (value, item, index) => {
-        return index + 1
+        return value + 1
       },
     },
     {
@@ -661,6 +669,7 @@ const RekapSelfAssessment = () => {
             <Row>
               <Col span={24} style={{ textAlign: 'right' }}>
                 {(!isFinishDateToAssignSelfAssessment) && (
+                  <>
                   <Button
                   id="create-logbook"
                   size="sm"
@@ -670,6 +679,10 @@ const RekapSelfAssessment = () => {
                 >
                   Tambahkan Self Assessment Baru
                 </Button>
+
+             
+                  </>
+                
                 )}
                 {isFinishDateToAssignSelfAssessment &&( 
                <Popover content={<div>Pengumpulan sudah tidak dizinkan</div>}>
@@ -714,6 +727,23 @@ const RekapSelfAssessment = () => {
           )}
 
           {rolePengguna !== '1' && (
+            <>
+              
+              <CRow>
+              <CCol sm={24}>
+           
+                <Button
+                  id="create-logbook"
+                  size="sm"
+                  shape="round"
+                  style={{ color: 'white', background: '#339900', marginBottom: 16 }}
+                  onClick={handleRekapProgres}
+                >
+                  Rekap Progres Keseluruhan
+                </Button>
+              </CCol>
+            </CRow>
+            
             <CRow>
               <CCol sm={12}>
                 <div className="spacebottom"></div>
@@ -726,6 +756,7 @@ const RekapSelfAssessment = () => {
                 />
               </CCol>
             </CRow>
+            </>
           )}
         </CCardBody>
       </CCard>

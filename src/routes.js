@@ -235,6 +235,7 @@ const routes = [
   { path: '/rekapDokumenPeserta/rppPeserta/:id', name: ':id', component: RekapRPP, exact:true},
   { path: '/rekapDokumenPeserta/rppPeserta/:nim/detail/:id', name: ':id', component: DetailRPP, exact:true},
   { path: '/rekapDokumenPeserta/selfAssessmentPeserta/:id', name: ':id', component: RekapSelfAssessment, exact:true},
+  { path: '/rekapDokumenPeserta/selfAssessmentPeserta/:id/rekapProgres', name: ':id', component: RekapPenilaianSelfAssessment, exact:true},
   { path: '/rekapDokumenPeserta/selfAssessmentPeserta/:nim/rekapPenilaianSelfAssessment', name: ':nim', component: RekapPenilaianSelfAssessment, exact:true},
   { path: '/rekapDokumenPeserta/selfAssessmentPeserta/:nim/detail/:id', name: ':id', component: DetailSelfAssessment, exact:true},
   { path: '/rekapDokumenPeserta/selfAssessmentPeserta/:nim/penilaian/:id', name: ':id', component: PenilaianSelfAssessment, exact:true},
