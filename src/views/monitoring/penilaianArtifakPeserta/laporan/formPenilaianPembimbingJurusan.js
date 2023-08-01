@@ -24,6 +24,7 @@ import {
   spin,
 } from 'antd'
 import { InputNumber } from 'antd'
+import TextArea from 'antd/es/input/TextArea'
 
 const FormPenilaianPembimbingJurusan = (props) => {
   const params = useParams()
@@ -616,7 +617,9 @@ const FormPenilaianPembimbingJurusan = (props) => {
                           <div>
                             <b>{data.poinpenilaian}</b>
                           </div>
-                          <div>{data.deskripsi}</div>
+                          <div>
+                           <TextArea value={data.deskripsi}   style={{ backgroundColor:'white', color:'black', width: 350,height: 500 }} disabled/>
+                          </div>
                         </Col>
                         <Col style={{ textAlign: 'center' }} span={4}>
                           {data.bobot}

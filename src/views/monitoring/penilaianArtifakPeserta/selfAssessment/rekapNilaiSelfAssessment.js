@@ -304,7 +304,7 @@ const RekapSelfAssessment = () => {
           </Card>
         </Space>
       </div>
-      {title('REKAP PENILAIAN SELF ASSESSMENT PESERTA')}
+      {title('REKAP KESELURUHAN SELF ASSESSMENT PESERTA')}
       {isNotNullDataSelfAssessment && (
         <>
           <div className="container2">
