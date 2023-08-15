@@ -426,7 +426,7 @@ const PengisianRpp = () => {
         <h3 align="center" className="title-s">
           FORM PENGISIAN RPP
         </h3>
-        <Box sx={{ color: 'warning.main' }}>
+        <Box sx={{ color: 'info.main' }}>
           <ul>
             {/* <li>Pastikan semua RPP terisi</li> */}
             <li>Isi sesuai dengan perencanaan proyek yang diberikan</li>
@@ -562,7 +562,7 @@ const PengisianRpp = () => {
                       <Form.Item
                         name={`tanggaldeliverables${index}`}
                         key={index}
-                        label="Tanggal"
+                        label="Tanggal"setNamaPer
                         rules={[
                           {
                             required: true,

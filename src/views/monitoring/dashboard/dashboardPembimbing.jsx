@@ -417,8 +417,7 @@ const DashboardPembimbing = () => {
                 <Row style={{ padding: 10 }}>
                   <Col span={12}>
                     <b style={{ fontSize: 25 }}>
-                      {totalPesertaProgresMingguan.rpp_submitted}/
-                      {totalPesertaProgresMingguan.rpp_total}
+                      {totalPesertaProgresMingguan.rpp_submitted} / {totalPesertaProgresMingguan.rpp_total}
                     </b>
                   </Col>
                   <Col span={12}>

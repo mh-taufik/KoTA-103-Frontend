@@ -2,14 +2,13 @@ import React, { useEffect, useState } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../rpp/rpp.css'
 import { ArrowLeftOutlined } from '@ant-design/icons'
-import { Col, Row } from 'react-bootstrap'
-import axios from 'axios'
-import { Route, Router, useHistory, useParams } from 'react-router-dom'
 
-import routes from 'src/routes'
+import axios from 'axios'
+import { useHistory, useParams } from 'react-router-dom'
+
+
 import {
   Box,
-  Button,
   Table,
   TableBody,
   TableCell,
@@ -21,7 +20,7 @@ import Paper from '@mui/material/Paper'
 import { FloatButton } from 'antd'
 
 const DetailSelfAssessment = (props) => {
-  var params = useParams()
+  let params = useParams()
   const NIM = params.nim
   const ID_SELF_ASESSMENT = params.id
   const NIM_PESERTA_AS_USER = localStorage.username
@@ -54,7 +53,7 @@ const DetailSelfAssessment = (props) => {
    
           let data_grade_poin = []
           const convertDate = (date) => {
-            var temp_date_split = date.split('-')
+            let temp_date_split = date.split('-')
             const month = [
               'Januari',
               'Februari',
@@ -69,8 +68,8 @@ const DetailSelfAssessment = (props) => {
               'November',
               'Desember',
             ]
-            var date_month = temp_date_split[1]
-            var month_of_date = month[parseInt(date_month) - 1]
+            let date_month = temp_date_split[1]
+            let month_of_date = month[parseInt(date_month) - 1]
             return date ? `${temp_date_split[2]}  ${month_of_date}  ${temp_date_split[0]}` : null
           }
           setTanggalMulaiSelfAssessment(convertDate(result.data.data.start_date))
@@ -80,7 +79,7 @@ const DetailSelfAssessment = (props) => {
 
        
           let funcGetPoinGrade = function(data){
-            for(var i in data){
+            for(let i in data){
               data_grade_poin.push({
                 grade_id : data[i].grade_id,
                 nilai : data[i].grade,

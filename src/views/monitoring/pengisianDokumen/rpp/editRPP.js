@@ -642,7 +642,7 @@ const EditRPP = () => {
         let temp_del1 = []
         temp_del = response.data.data.deliverables
         let temp_deliverables = function (obj) {
-          for (var i in obj) {
+          for (let i in obj) {
             temp_del1.push({
               id: obj[i].id,
               due_date: obj[i].due_date,
@@ -660,7 +660,7 @@ const EditRPP = () => {
         let temp_mil1 = []
         temp_mil = response.data.data.milestones
         let temp_milestone = function (obj) {
-          for (var i in obj) {
+          for (let i in obj) {
             temp_mil1.push({
               id: obj[i].id,
               description: obj[i].description,
@@ -679,7 +679,7 @@ const EditRPP = () => {
         let temp_rcm1 = []
         temp_rcm = response.data.data.weekly_achievement_plans
         let temp_rencanaCapaianMingguan = function (obj) {
-          for (var i in obj) {
+          for (let i in obj) {
             temp_rcm1.push({
               id: obj[i].id,
               achievement_plan: obj[i].achievement_plan,
@@ -698,7 +698,7 @@ const EditRPP = () => {
         let temp_jadwalKeseluruhan1 = []
         temp_jadwalKeseluruhan = response.data.data.completion_schedules
         let temp_jadwalKeseluruhans = function (obj) {
-          for (var i in obj) {
+          for (let i in obj) {
             temp_jadwalKeseluruhan1.push({
               id: obj[i].id,
               task_type: obj[i].task_type,
@@ -748,8 +748,8 @@ const EditRPP = () => {
 
   /**HANDLE INPUT TANGGAL PEKERJAAN (TANGGAL PERENCANAAN)  */
   const handleInputTanggalPengerjaan = (tanggal) => {
-    var tglmulai = tanggal[0]
-    var tglselesai = tanggal[1]
+    let tglmulai = tanggal[0]
+    let tglselesai = tanggal[1]
     setTanggalMulaiPekerjaan(tglmulai)
     setTanggalBerakhirPekerjaan(tglselesai)
   }
@@ -771,10 +771,10 @@ const EditRPP = () => {
 
   const handleDropRowDeliverables = () => {
 
-    var will_delete = deliverables.length - 1
-    var temp = []
-    var tempDeliverables = function (obj) {
-      for (var i in obj) {
+    let will_delete = deliverables.length - 1
+    let temp = []
+    let tempDeliverables = function (obj) {
+      for (let i in obj) {
 
         if (i === 0) {
           break
@@ -806,10 +806,10 @@ const EditRPP = () => {
 
   const handleDropRowMilestones = () => {
 
-    var will_delete = milestones.length - 1
-    var temp = []
-    var tempMilestones = function (obj) {
-      for (var i in obj) {
+    let will_delete = milestones.length - 1
+    let temp = []
+    let tempMilestones = function (obj) {
+      for (let i in obj) {
 
         if (i === 0) {
           break
@@ -841,10 +841,10 @@ const EditRPP = () => {
 
   const handleDropRowRencanaCapaianPerminggu = () => {
 
-    var will_delete = capaianPerminggu.length - 1
-    var temp = []
-    var tempCapaianPerminggu = function (obj) {
-      for (var i in obj) {
+    let will_delete = capaianPerminggu.length - 1
+    let temp = []
+    let tempCapaianPerminggu = function (obj) {
+      for (let i in obj) {
 
         if (i === 0) {
           break
@@ -878,10 +878,10 @@ const EditRPP = () => {
 
   const handleDropRowJadwalPenyelesaianKeseluruhan = () => {
 
-    var will_delete = jadwalPenyelesaianKeseluruhan.length - 1
-    var temp = []
-    var tempJadwalKeseluruhan = function (obj) {
-      for (var i in obj) {
+    let will_delete = jadwalPenyelesaianKeseluruhan.length - 1
+    let temp = []
+    let tempJadwalKeseluruhan = function (obj) {
+      for (let i in obj) {
 
         if (i === 0) {
           break
@@ -900,7 +900,7 @@ const EditRPP = () => {
 
 
   function formatDate(date) {
-    var d = new Date(date),
+    let d = new Date(date),
       month = '' + (d.getMonth() + 1),
       day = '' + d.getDate(),
       year = d.getFullYear()
@@ -912,9 +912,9 @@ const EditRPP = () => {
   }
 
   function getDateOfISOWeek(w, y) {
-    var simple = new Date(y, 0, 1 + (w - 1) * 7)
-    var dow = simple.getDay()
-    var ISOweekStart = simple
+    let simple = new Date(y, 0, 1 + (w - 1) * 7)
+    let dow = simple.getDay()
+    let ISOweekStart = simple
     if (dow <= 4) {
       ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1)
     } else {
@@ -924,10 +924,10 @@ const EditRPP = () => {
   }
 
   function getEndDateOfWeek(w, y) {
-    var simple = new Date(y, 0, 1 + (w - 1) * 7)
-    var dow = simple.getDay()
+    let simple = new Date(y, 0, 1 + (w - 1) * 7)
+    let dow = simple.getDay()
 
-    var ISOweekStart = simple
+    let ISOweekStart = simple
 
     if (dow <= 4) {
       ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1)
@@ -942,9 +942,9 @@ const EditRPP = () => {
 
 
   const getWeekBasedOnDate = (date) => {
-    var year = new Date(date.getFullYear(), 0, 1)
-    var days = Math.floor((date - year) / (24 * 60 * 60 * 1000))
-    var week = Math.ceil((date.getDay() + 1 + days) / 7)
+    let year = new Date(date.getFullYear(), 0, 1)
+    let days = Math.floor((date - year) / (24 * 60 * 60 * 1000))
+    let week = Math.ceil((date.getDay() + 1 + days) / 7)
 
     return week
   }
@@ -983,7 +983,7 @@ const EditRPP = () => {
           let temp_del1 = []
           temp_del = response.data.data.deliverables
           let temp_deliverables = function (obj) {
-            for (var i in obj) {
+            for (let i in obj) {
               temp_del1.push({
                 id: obj[i].id,
                 due_date: obj[i].due_date,
@@ -1001,7 +1001,7 @@ const EditRPP = () => {
           let temp_mil1 = []
           temp_mil = response.data.data.milestones
           let temp_milestone = function (obj) {
-            for (var i in obj) {
+            for (let i in obj) {
               temp_mil1.push({
                 id: obj[i].id,
                 description: obj[i].description,
@@ -1018,7 +1018,7 @@ const EditRPP = () => {
           let temp_rcm1 = []
           temp_rcm = response.data.data.weekly_achievement_plans
           let temp_rencanaCapaianMingguan = function (obj) {
-            for (var i in obj) {
+            for (let i in obj) {
               temp_rcm1.push({
                 id: obj[i].id,
                 achievement_plan: obj[i].achievement_plan,
@@ -1035,7 +1035,7 @@ const EditRPP = () => {
           let temp_jadwalKeseluruhan1 = []
           temp_jadwalKeseluruhan = response.data.data.completion_schedules
           let temp_jadwalKeseluruhans = function (obj) {
-            for (var i in obj) {
+            for (let i in obj) {
               temp_jadwalKeseluruhan1.push({
                 id: obj[i].id,
                 task_type: obj[i].task_type,
@@ -1437,7 +1437,7 @@ const EditRPP = () => {
         <h3 align="center" className="title-s">
           FORM PENGISIAN RPP - EDIT RPP
         </h3>
-        <Box sx={{ color: 'warning.main' }}>
+        <Box sx={{ color: 'info.main' }}>
           Catatan :
           <ul>
             <li>Isi sesuai dengan perencanaan proyek yang diberikan</li>

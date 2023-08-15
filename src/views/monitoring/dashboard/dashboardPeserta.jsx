@@ -90,12 +90,15 @@ const DashboardPeserta = () => {
           let dataLogbookMissingWithIndoDate = []
           let getDataLogbookMissingWithDateIndoVer = function (data){
             for(let iteration in data){
-              dataLogbookMissingWithIndoDate.push(convertDate(data[iteration]))
+              dataLogbookMissingWithIndoDate.push({
+               idx : parseInt(iteration),
+               logbook_missing : convertDate(data[iteration])
+              })
             }
           }
         
           getDataLogbookMissingWithDateIndoVer(dataLogbookMissing)
-          setLogbookMissing(dataLogbookMissingWithIndoDate)
+          setListPesertaLogbookAllMissing(dataLogbookMissingWithIndoDate)
           axios.get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/supervisor-mapping/get-all`)
           .then((res)=>{
             setNamaPembimbing(res.data.data.lecturer_name)

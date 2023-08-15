@@ -282,71 +282,79 @@ const ListDokumenPeserta = () => {
           } else {
             setRekapRpp(result.data.data)
           }
-          axios
-            .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/rekap`)
-            .then((result) => {
-              let dataLogbook = result.data.data
-              let dataLogbookIdx = []
-              if (dataLogbook != null) {
-                for (let iterateLogbook in dataLogbook) {
-                  dataLogbookIdx.push({
-                    idx: parseInt(iterateLogbook),
-                    nim: dataLogbook[iterateLogbook].nim,
-                    name: dataLogbook[iterateLogbook].name,
-                    company: dataLogbook[iterateLogbook].company,
-                    status: dataLogbook[iterateLogbook].status,
-                  })
-                }
-
-                setRekapLogbook(dataLogbookIdx)
-              } else {
-                setRekapLogbook(result.data.data)
-              }
-              axios
-                .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/rekap`)
-                .then((result) => {
-                  let dataSelfAssessment = result.data.data
-                  let dataSelfAssessmentIdx = []
-                  if (dataSelfAssessment != null) {
-                    for (let iterateSelfAssessment in dataSelfAssessment) {
-                      dataSelfAssessmentIdx.push({
-                        idx: parseInt(iterateSelfAssessment),
-                        nim: dataSelfAssessment[iterateSelfAssessment].nim,
-                        name: dataSelfAssessment[iterateSelfAssessment].name,
-                        company: dataSelfAssessment[iterateSelfAssessment].company,
-                        status: dataSelfAssessment[iterateSelfAssessment].status,
-                      })
-                    }
         
-                    setRekapSelfAssessment(dataSelfAssessmentIdx)
-                  } else {
-                    setRekapSelfAssessment(result.data.data)
-                  }
-                  axios
-                    .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/rekap`)
-                    .then((result) => {
-                      let dataLaporan = result.data.data
-                      let dataLaporanIdx = []
-                      if (dataLaporan != null) {
-                        for (let iterateLaporan in dataLaporan) {
-                          dataLaporanIdx.push({
-                            idx: parseInt(iterateLaporan),
-                            nim: dataLaporan[iterateLaporan].nim,
-                            name: dataLaporan[iterateLaporan].name,
-                            company: dataLaporan[iterateLaporan].company,
-                            status: dataLaporan[iterateLaporan].status,
-                          })
-                        }
-            
-                        setRekapLaporan(dataLaporanIdx)
-                      } else {
-                        setRekapLaporan(result.data.data)
-                      }
-                      setIsLoading(false)
-                    })
+        }).then(()=>{
+          axios
+          .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/logbook/rekap`)
+          .then((result) => {
+            let dataLogbook = result.data.data
+            let dataLogbookIdx = []
+            if (dataLogbook != null) {
+              for (let iterateLogbook in dataLogbook) {
+                dataLogbookIdx.push({
+                  idx: parseInt(iterateLogbook),
+                  nim: dataLogbook[iterateLogbook].nim,
+                  name: dataLogbook[iterateLogbook].name,
+                  company: dataLogbook[iterateLogbook].company,
+                  status: dataLogbook[iterateLogbook].status,
                 })
+              }
+  
+              setRekapLogbook(dataLogbookIdx)
+            } else {
+              setRekapLogbook(result.data.data)
+            }
+          
+          })
+        }).then(()=>{
+          axios
+          .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/self-assessment/rekap`)
+          .then((result) => {
+            let dataSelfAssessment = result.data.data
+            let dataSelfAssessmentIdx = []
+            if (dataSelfAssessment != null) {
+              for (let iterateSelfAssessment in dataSelfAssessment) {
+                dataSelfAssessmentIdx.push({
+                  idx: parseInt(iterateSelfAssessment),
+                  nim: dataSelfAssessment[iterateSelfAssessment].nim,
+                  name: dataSelfAssessment[iterateSelfAssessment].name,
+                  company: dataSelfAssessment[iterateSelfAssessment].company,
+                  status: dataSelfAssessment[iterateSelfAssessment].status,
+                })
+              }
+  
+              setRekapSelfAssessment(dataSelfAssessmentIdx)
+            } else {
+              setRekapSelfAssessment(result.data.data)
+            }
+        
+          })
+        }).then(()=>{
+          axios
+              .get(`${process.env.REACT_APP_API_GATEWAY_URL}monitoring/laporan/rekap`)
+              .then((result) => {
+                let dataLaporan = result.data.data
+                let dataLaporanIdx = []
+                if (dataLaporan != null) {
+                  for (let iterateLaporan in dataLaporan) {
+                    dataLaporanIdx.push({
+                      idx: parseInt(iterateLaporan),
+                      nim: dataLaporan[iterateLaporan].nim,
+                      name: dataLaporan[iterateLaporan].name,
+                      company: dataLaporan[iterateLaporan].company,
+                      status: dataLaporan[iterateLaporan].status,
+                    })
+                  }
+      
+                  setRekapLaporan(dataLaporanIdx)
+                } else {
+                  setRekapLaporan(result.data.data)
+                }
+             
+              })
+          
+            setIsLoading(false)
             })
-        })
         .catch(function (error) {
           if (error.toJSON().status >= 300 && error.toJSON().status <= 399) {
             history.push({
