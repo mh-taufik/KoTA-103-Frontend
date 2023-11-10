@@ -53,6 +53,48 @@ const PengelolaanKompetensi = lazyWithRetry(() => import('./views/pengelolaan/pe
 const PengelolaanAspekPenilaianEvaluasi = lazyWithRetry(() => import('./views/pengelolaan/pengelolaanAspekPenilaianEvaluasi'))
 const pengelolaanPertanyaanFeedback = lazyWithRetry(() => import('./views/pengelolaan/pengelolaanPertanyaanFeedback'))
 
+
+//Monitoring
+const MonitoringPelaksanaan = lazyWithRetry(() => import('./views/monitoring/dashboard/MonitoringPelaksanaan'))
+const DashboardPanitia = lazyWithRetry(() => import('./views/monitoring/dashboard/dashboardPanitia'))
+const DaftarPeserta = lazyWithRetry(() => import('./views/monitoring/daftarPeserta/daftarPeserta')) 
+const SetPembimbingJurusan = lazyWithRetry(() => import('./views/monitoring/pemetaanPembimbing/PemetaanPembimbingJurusan'))
+const DashboardPeserta = lazyWithRetry(() => import('./views/monitoring/dashboard/dashboardPeserta'))
+const DashboardPembimbing = lazyWithRetry(() => import('./views/monitoring/dashboard/dashboardPembimbing'))
+//DOKUMEN PESERTA 
+const RekapDokumenPeserta = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/ListDokumenPeserta')) 
+//RPP
+const ContohPengisianRPP = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/rpp/contohRPP'))
+const RekapRPP = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/rpp/rekapRpp'))
+const FormPengisianRPP = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/rpp/pengisianRpp'))
+const DetailRPP = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/rpp/detailRPP'))
+//LOGBOOK
+const ReviewLogbook = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/logbook/reviewLogbook')) 
+// const FormPengisianRPP = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/rpp/contohRPP'))
+const FormPengisianLogbook = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/logbook/pengisianLogbook'))
+const FormEditLogbook = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/logbook/editLogbook'))
+const FormPengisianSelfAssessment = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/selfassessment/pengisianSelfAssessment'))
+const FormEditRPP =  lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/rpp/editRPP'))
+const RekapSelfAssessment = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/selfassessment/rekapSelfAssessment')) 
+const DetailSelfAssessment = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/selfassessment/detailSelfAssessment')) 
+const UploadLaporan = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/laporan/uploadLaporan'))
+const TambahLaporan= lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/laporan/tambahLaporan'))
+const RekapLogbook = lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/logbook/rekapLogbook'))
+const PenilaianLogbook = lazyWithRetry(() => import('./views/monitoring/penilaianArtifakPeserta/logbook/penilaianLogbook'))
+const PembobotanSelfAssessment = lazyWithRetry(() => import('./views/monitoring/pengelolaanMonitoring/pengaturanPoinPenilaianSelfAssessment')) 
+const PengelolaanBobotFormPembimbing = lazyWithRetry(() => import('./views/monitoring/pengelolaanMonitoring/pengaturanBobotFormPembimbingJurusan')) 
+const PengeloaanDeadline = lazyWithRetry(() => import('./views/monitoring/pengelolaanMonitoring/pengaturanDeadline')) 
+//PENILAIAN
+const RekapPenilaianPembimbingJurusan = lazyWithRetry(() => import('./views/monitoring/penilaianArtifakPeserta/rekapPenilaianPeserta')) 
+const RekapPenilaianSelfAssessment = lazyWithRetry(() => import('./views/monitoring/penilaianArtifakPeserta/selfAssessment/rekapNilaiSelfAssessment')) 
+const RekapLaporan= lazyWithRetry(() => import('./views/monitoring/pengisianDokumen/laporan/rekapLaporanPeserta')) 
+const FormPenilaianPembimbingJurusan= lazyWithRetry(() => import('./views/monitoring/penilaianArtifakPeserta/laporan/formPenilaianPembimbingJurusan')) 
+const RekapPenilaianLogbook= lazyWithRetry(() => import('./views/monitoring/penilaianArtifakPeserta/logbook/rekapNilaiLogbook')) 
+const PenilaianSelfAssessment= lazyWithRetry(() => import('./views/monitoring/penilaianArtifakPeserta/selfAssessment/penilaianSelfAssessment')) 
+const RekapPenilaianLaporan= lazyWithRetry(() => import('./views/monitoring/penilaianArtifakPeserta/laporan/rekapNilaiLaporan')) 
+const PenilaianDetailRPP= lazyWithRetry(() => import('./views/monitoring/penilaianArtifakPeserta/penilaianDokumenDetailRPP')) 
+
+
 const routes = [
   // Page
   { path: '/', exact: true, name: 'Beranda' },
@@ -145,6 +187,85 @@ const routes = [
   { path: '/pengelolaanKompetensi', name: 'Pengelolaan Kompetensi', component: PengelolaanKompetensi, exact: true },
   { path: '/pengelolaanAspekPenilaianEvaluasi', name: 'Pengelolaan Aspek Penilaian Evaluasi', component: PengelolaanAspekPenilaianEvaluasi, exact: true },
   { path: '/pengelolaanPertanyaanFeedback', name: 'Pengelolaan Pertanyaan Feedback', component: pengelolaanPertanyaanFeedback, exact: true },
+
+
+  //MONITORING
+  { path: '/dashboardPeserta', name: 'Dashboard Peserta', component: DashboardPeserta, exact:true },
+  { path: '/monitoringPelaksanaan', name: 'Monitoring Pelaksanaan', component: MonitoringPelaksanaan, exact:true },
+  { path: '/dashboardPanitia', name: 'Monitoring Dashboard', component: DashboardPanitia, exact:true },
+  { path: '/dashboardPembimbing', name: 'Monitoring Dashboard', component: DashboardPembimbing, exact:true },
+  { path: '/daftarPeserta', name: 'Daftar Peserta', component: DaftarPeserta, exact:true },
+  { path: '/daftarPeserta/dashboardPeserta/:nim', name: ':nim', component: DashboardPeserta, exact:true },
+
+  //PEMETAAN PEMBIMBING JURUSAN
+  { path: '/pengaturanDaftarPembimbingJurusan', name: 'Pengaturan Pembimbing Jurusan', component: SetPembimbingJurusan, exact:true },
+
+  /** RPP */
+  { path: '/rencanaPenyelesaianProyek', name: 'Rencana Penyelesaian Proyek', component: RekapRPP, exact:true},
+  // { path: '/rencanaPenyelesaianProyek/:id?', name: 'Rekap Rencana Penye', component: RekapRPP, exact:true},
+  { path: '/rencanaPenyelesaianProyek/:id/formPengisianRPP', name: 'FormPengisianRPP', component: FormPengisianRPP, exact:true},
+  { path: '/rencanaPenyelesaianProyek/:id/formPengisianRPP/contohPengisianRPP', name: 'Contoh RPP', component: ContohPengisianRPP, exact:true},
+  { path: '/rencanaPenyelesaianProyek/detail/:id?', name: ':id', component: DetailRPP, exact:true},
+  { path: '/rencanaPenyelesaianProyek/edit/:id?', name: ':id', component: FormEditRPP, exact:true},
+
+/**LOGBOOK  */
+  { path: '/logbook', name: 'Logbook', component: RekapLogbook, exact:true},
+  { path: '/logbook/detaillogbook/:id', name: ':id', component: ReviewLogbook, exact:true},
+  { path: '/logbook/formlogbook', name: 'Form Logbook', component: FormPengisianLogbook, exact:true},
+  { path: '/logbook/formlogbook/:id', name: ':id', component: FormPengisianLogbook, exact:true},
+  { path: '/logbook/formEditLogbook/:id', name: ':id', component: FormEditLogbook, exact:true},
+  { path: '/logbook/formEditLogbook/reviewEdit/:id', name: ':id', component: ReviewLogbook, exact:true},
+
+  /** SELF ASSESSMENT */
+  { path: '/selfAssessment', name: 'Self Assessment', component: RekapSelfAssessment, exact:true},
+  { path: '/selfAssessment/formSelfAssessment', name: 'Form Self Assessment', component:  FormPengisianSelfAssessment, exact:true},
+  { path: '/selfAssessment/formSelfAssessment/detail/:id', name: ':id', component:  DetailSelfAssessment, exact:true},
+
+  /** LAPORAN */
+  { path: '/laporan', name: 'Laporan', component:  RekapLaporan, exact:true},
+  { path: '/laporan/submissionLaporan', name: 'Pengumpulan Laporan', component:  TambahLaporan, exact:true},
+  { path: '/laporan/submissionLaporan/:id', name: ':id', component:  UploadLaporan, exact:true},
+
+  //DOKUMEN PESERTA (PANITIA DAN PEMBIMBING)
+  { path: '/rekapDokumenPeserta', name: 'Rekap Dokumen Peserta', component: RekapDokumenPeserta, exact:true},
+  { path: '/rekapDokumenPeserta/logbookPeserta/:id', name: ':id', component: RekapLogbook, exact:true},
+  { path: '/rekapDokumenPeserta/logbookPeserta/:nim/detail/:id', name: ':id', component: ReviewLogbook, exact:true},
+  { path: '/rekapDokumenPeserta/logbookPeserta/:nim/nilai/:id', name: 'Penilaian Logbook', component: PenilaianLogbook, exact:true},
+  { path: '/rekapDokumenPeserta/logbookPeserta/:nim/nilai/:idlogbook/detailRPP/:id', name: ':id', component: PenilaianDetailRPP, exact:true},
+  { path: '/rekapDokumenPeserta/rppPeserta/:id', name: ':id', component: RekapRPP, exact:true},
+  { path: '/rekapDokumenPeserta/rppPeserta/:nim/detail/:id', name: ':id', component: DetailRPP, exact:true},
+  { path: '/rekapDokumenPeserta/selfAssessmentPeserta/:id', name: ':id', component: RekapSelfAssessment, exact:true},
+  { path: '/rekapDokumenPeserta/selfAssessmentPeserta/:id/rekapProgres', name: ':id', component: RekapPenilaianSelfAssessment, exact:true},
+  { path: '/rekapDokumenPeserta/selfAssessmentPeserta/:nim/rekapPenilaianSelfAssessment', name: ':nim', component: RekapPenilaianSelfAssessment, exact:true},
+  { path: '/rekapDokumenPeserta/selfAssessmentPeserta/:nim/detail/:id', name: ':id', component: DetailSelfAssessment, exact:true},
+  { path: '/rekapDokumenPeserta/selfAssessmentPeserta/:nim/penilaian/:id', name: ':id', component: PenilaianSelfAssessment, exact:true},
+  { path: '/rekapDokumenPeserta/selfAssessmentPeserta/:nim/penilaian/:idsa/detailRPP/:id', name: ':id', component: PenilaianDetailRPP, exact:true},
+  { path: '/rekapDokumenPeserta/laporan/:id', name: ':id', component: RekapLaporan, exact:true},
+  { path: '/rekapDokumenPeserta/laporan/:nim/nilai/:id', name: ':id', component: FormPenilaianPembimbingJurusan, exact:true},
+  
+  /** REKAP PENILAIAN (PANITIA DAN PEMBIMBING) */
+  { path: '/rekapPenilaianPeserta', name: 'Rekap Penilaian Peserta', component: RekapPenilaianPembimbingJurusan, exact:true},
+  { path: '/rekapPenilaianPeserta/logbook/:id', name: ':id', component: RekapPenilaianLogbook, exact:true},
+  { path: '/rekapPenilaianPeserta/selfassessment/:id', name: ':id', component: RekapPenilaianSelfAssessment, exact:true},
+  { path: '/rekapPenilaianPeserta/laporan/:id', name: ':id', component: RekapPenilaianLaporan, exact:true},
+
+
+  { path: '/rekapFormPenilaianPembimbingJurusan', name: 'Rekap Penilaian Pembimbing Jurusan', component: RekapPenilaianPembimbingJurusan, exact:true},
+  { path: '/uploadLaporan', name: 'Dokumen Laporan KP/PKL', component: UploadLaporan, exact:true},
+  { path: '/rekapLogbook', name: 'Logbook', component: RekapLogbook, exact:true},
+  { path: '/rekapLogbook/detailLogbook/:id', name: ':id', component: ReviewLogbook, exact:true},
+
+  /** PENILAIAN */
+  { path: '/rekapLogbook/penilaianLogbook', name: 'Penilaian Logbook', component: PenilaianLogbook, exact:true},
+
+
+  /** PENGATURAN MONITORING */
+  { path: '/pembobotanSelfAssessment', name: 'Poin Penilaian Self Assessment', component: PembobotanSelfAssessment, exact:true},
+  { path: '/pengelolaanPoinFormPembimbing', name: 'Poin Penilaian Pembimbing Jurusan', component: PengelolaanBobotFormPembimbing, exact:true},
+  { path: '/pengelolaanDeadline', name: 'Pengeloaan Deadline', component: PengeloaanDeadline, exact:true},
+
+
+
 ]
 
 export default routes

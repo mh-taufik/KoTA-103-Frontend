@@ -30,6 +30,14 @@ const _nav = [
     index: 1,
   },
   {
+    component: CNavItem,
+    name: 'Dashboard',
+    to: '/dashboard',
+    icon: <FontAwesomeIcon icon={faHouse} size="lg" />,
+    role: '4',
+    index: 1,
+  },
+  {
     component: CNavTitle,
     name: 'Data Mahasiswa',
     role: '0',
@@ -291,14 +299,14 @@ const _nav = [
     role: '2',
     index: 34,
   },
-  // {
-  //   component: CNavItem,
-  //   name: 'Formulir Feedback Pelaksanaan KP/PKL',
-  //   to: '/dataFeedbackPerusahaan',
-  //   icon: <FontAwesomeIcon icon={faBuildingCircleArrowRight} />,
-  //   role: '2',
-  //   index: 35,
-  // },
+  {
+    component: CNavItem,
+    name: 'Formulir Feedback Pelaksanaan KP/PKL',
+    to: '/dataFeedbackPerusahaan',
+    icon: <FontAwesomeIcon icon={faBuildingCircleArrowRight} />,
+    role: '2',
+    index: 35,
+  },
   {
     component: CNavTitle,
     name: 'Lain - lain',
@@ -404,7 +412,222 @@ const _nav = [
     icon: <FontAwesomeIcon icon={faGears} size="lg" />,
     role: '3',
     index: 44,
-  }
+  },
+  // MONITORING PELAKSANAAN
+  {
+    component: CNavTitle,
+    name: 'Monitoring Pelaksanaan',
+    role: '0',
+    index: 50,
+  },
+  {
+    component: CNavItem,
+    name: 'Monitoring Dashboard',
+    to: '/dashboardPanitia',
+    icon: <FontAwesomeIcon icon={faScaleUnbalancedFlip} size="lg" />,
+    role: '0',
+    index: 51,
+  },
+  {
+    component: CNavTitle,
+    name: 'Pelaksanaan KP/PKL',
+    role: '1',
+    index: 52,
+  },
+  {
+    component: CNavItem,
+    name: 'Pengaturan Pembimbing Jurusan',
+    to: '/pengaturanDaftarPembimbingJurusan',
+    icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
+    role: '0',
+    index: 53,
+  },
+  {
+    component: CNavItem,
+    name: 'Daftar Peserta',
+    to: '/daftarPeserta',
+    icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
+    role: '0',
+    index: 54,
+  },
+  // {
+  //   component: CNavItem,
+  //   name: 'Rekap Monitoring',
+  //   to: '/rekapMonitoring',
+  //   icon: <FontAwesomeIcon icon={faClipboard} size="lg" />,
+  //   role: '0',
+  //   index: 55,
+  // },
+ 
+  //PESERTA
+  {
+    component: CNavItem,
+    name: 'Dashboard Peserta',
+    to: '/dashboardPeserta',
+    icon: <FontAwesomeIcon icon={faScaleUnbalancedFlip} size="lg" />,
+    role: '1',
+    index: 57,
+  },
+  {
+    component: CNavGroup,
+    name: 'Dokumen Peserta',
+    icon: <FontAwesomeIcon icon={faSitemap} size="lg" />,
+    role: '1',
+    index: 59,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Rencana Penyelesaian Proyek',
+        to: '/rencanaPenyelesaianProyek',
+        index: 59.1
+      },
+      {
+        component: CNavItem,
+        name: 'Logbook',
+        to: '/logbook',
+        index: 59.2
+      },
+      {
+        component: CNavItem,
+        name: 'Self Assessment',
+        to: '/selfAssessment',
+        index: 59.3
+      },
+      {
+        component: CNavItem,
+        name: 'Dokumen Laporan',
+        to: '/laporan',
+        index: 59.4
+      }
+    ],
+  },
+  {
+    component: CNavGroup,
+    name: 'Pengelolaan Monitoring',
+    icon: <FontAwesomeIcon icon={faSitemap} size="lg" />,
+    role: '0',
+    index: 56,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Poin Penilaian Self Assessment',
+        to: '/pembobotanSelfAssessment',
+        index: 56.1
+      },
+      {
+        component: CNavItem,
+        name: 'Poin Penilaian Pembimbing Jurusan',
+        to: '/pengelolaanPoinFormPembimbing',
+        index: 56.2
+      },
+      {
+        component: CNavItem,
+        name: 'Pengelolaan Deadline',
+        to: '/pengelolaanDeadline',
+        index: 56.3
+      },
+    
+    ],
+  },
+  //PEMBIMBING JURUSAN
+  // {
+  //   component: CNavItem,
+  //   name: 'Dashboard Pembimbing',
+  //   to: '/dashboardPembimbing',
+  //   icon: <FontAwesomeIcon icon={faHouse} size="lg" />,
+  //   role: '5',
+  //   index: 60,
+  // },
+
+  // {
+  //   component: CNavGroup,
+  //   name: 'FITUR PEMBIMBING JURUSAN',
+  //   icon: <FontAwesomeIcon icon={faSitemap} size="lg" />,
+  //   role: '0',
+  //   index: 61,
+  //   items: [
+  //     {
+  //       component: CNavItem,
+  //       name: 'Daftar Peserta',
+  //       to: '/daftarPeserta',
+  //       index: 61.1
+  //     },
+  //     {
+  //       component: CNavItem,
+  //       name: 'Penilaian Pembimbing Jurusan',
+  //       to: '/logbook',
+  //       index: 61.2
+  //     },
+  //     {
+  //       component: CNavItem,
+  //       name: 'Dokumen Self Assessment',
+  //       to: '/formSelfAssessment',
+  //       index: 61.3
+  //     },
+  //     {
+  //       component: CNavItem,
+  //       name: 'Dokumen Laporan',
+  //       to: '/uploadLaporan',
+  //       index: 61.4
+  //     }
+  //   ],
+  // },
+  {
+    component: CNavItem,
+    name: 'Rekap Dokumen Peserta',
+    to: '/rekapDokumenPeserta',
+    icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
+    role: '0',
+    index: 60,
+  },
+  // {
+  //   component: CNavItem,
+  //   name: 'Rekap Penilaian Peserta',
+  //   to: '/rekapPenilaianPeserta',
+  //   icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
+  //   role: '0',
+  //   index: 62,
+  // },
+  {
+    component: CNavTitle,
+    name: 'Monitoring Pelaksanaan',
+    role: '4',
+    index: 63,
+  },
+  {
+    component: CNavItem,
+    name: 'Monitoring Dashboard',
+    to: '/dashboardPembimbing',
+    icon: <FontAwesomeIcon icon={faScaleUnbalancedFlip} size="lg" />,
+    role: '4',
+    index: 64,
+  },
+  {
+    component: CNavItem,
+    name: 'Daftar Peserta',
+    to: '/daftarPeserta',
+    icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
+    role: '4',
+    index: 65,
+  },
+  {
+    component: CNavItem,
+    name: 'Rekap Dokumen Peserta',
+    to: '/rekapDokumenPeserta',
+    icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
+    role: '4',
+    index: 66,
+  },
+  // {
+  //   component: CNavItem,
+  //   name: 'Rekap Penilaian Peserta',
+  //   to: '/rekapPenilaianPeserta',
+  //   icon: <FontAwesomeIcon icon={faSliders}  size="lg" />,
+  //   role: '4',
+  //   index: 67,
+  // },
+
+
 ]
 
 export default _nav

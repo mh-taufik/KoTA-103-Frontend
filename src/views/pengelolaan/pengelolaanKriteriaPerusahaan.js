@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import 'antd/dist/antd.css';
+import 'antd/dist/reset.css';
 import {
   CCard,
   CCardBody,
@@ -280,6 +280,7 @@ const PengelolaanKriteriaPerusahaan = () => {
                 style={{ backgroundColor: "#FCEE21", borderColor: "#FCEE21" }}
                 onClick={() => {
                   showModalEdit(record);
+                  console.log(record)
                 }}>
                 <FontAwesomeIcon icon={faPencil} style={{ color: "black" }} />
               </Button>

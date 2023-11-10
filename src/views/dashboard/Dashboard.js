@@ -13,6 +13,8 @@ import Chart, {
 } from 'devextreme-react/chart';
 import { LoadingOutlined } from '@ant-design/icons';
 import { Spin, Table } from 'antd'
+
+
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />;
 
 const Dashboard = () => {

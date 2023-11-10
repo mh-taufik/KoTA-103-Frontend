@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import 'antd/dist/antd.css';
+import 'antd/dist/reset.css';
 import {
   CCard,
   CCardBody,
@@ -12,6 +12,7 @@ import axios from 'axios';
 import { LoadingOutlined } from '@ant-design/icons';
 
 const FileDownload = require('js-file-download');
+
 const antIcon = <LoadingOutlined style={{ fontSize: 40 }} spin />;
 const DataMahasiswa = () => {
   const history = useHistory();

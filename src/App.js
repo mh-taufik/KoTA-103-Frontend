@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
 import { Route, Switch, BrowserRouter } from 'react-router-dom'
 import './scss/style.scss'
-import 'antd/dist/antd.css';
+import 'antd/dist/reset.css';
 import lazyWithRetry from './lazyWithRetry'
+import { useSelector, useDispatch } from 'react-redux'
 
 
 const loading = (
@@ -23,6 +24,8 @@ const PengajuanPerusahaan = lazyWithRetry(() => import('./views/pages/pengajuanP
 
 
 class App extends Component {
+ 
+
   render() {
     return (
       <BrowserRouter>

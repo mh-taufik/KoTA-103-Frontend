@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import 'antd/dist/antd.css';
+import 'antd/dist/reset.css';
 import {
     CCard,
     CCardBody,
@@ -322,7 +322,7 @@ const PengelolaanAspekPenilaianEvaluasi = () => {
                                 loading={loadings[`delete-${record.id}`]}
                                 style={{ backgroundColor: "#e9033d", borderColor: "#e9033d" }}
                                 onClick={() => {
-                                    showModalDelete(record, `delete-${record.id}`)
+                                    showModalDelete(record, `delete-${record.id}`) 
                                 }}>
                                 <FontAwesomeIcon icon={faTrashCan} style={{ color: "black" }} />
                             </Button>

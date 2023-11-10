@@ -1,0 +1,16 @@
+{
+  "perusahaan": [
+      {
+          "id": 1,
+          "namaperusahaan": "PT Kazee"
+      },
+      {
+          "id": 2,
+          "namaperusahaan": "CV Bima Inspira Solusindo"
+      },
+      {
+          "id": 3,
+          "namaperusahaan": "PT Kazee"
+      }
+  ]
+}

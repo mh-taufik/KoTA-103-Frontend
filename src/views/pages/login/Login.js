@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Form, Input, Button, notification, Tooltip } from 'antd';
-import 'antd/dist/antd.css';
+import 'antd/dist/reset.css';
 import {
   CCard,
   CCardBody,
@@ -28,6 +28,10 @@ const Login = () => {
     });
   }
 
+  // const getDetailDataParticipant = (nim) => {
+
+  // }
+
   let history = useHistory();
   const location = useLocation();
   useEffect(() => {
@@ -49,6 +53,9 @@ const Login = () => {
       localStorage.setItem("id_prodi", response.data.data.id_prodi)
       localStorage.setItem("id_role", response.data.data.id_role)
       localStorage.setItem("username", response.data.data.username)
+      
+      // console.log(response.data)
+      // prompt("ya")
       setUsername("")
       setPassword("")
       setLoadings(prevLoadings => {
